@@ -35,7 +35,7 @@ export function AddColaboradorDialog({ open, onOpenChange, collaborator }: AddCo
   const [name, setName] = useState("");
   const [cpf, setCpf] = useState("");
   const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
+  
   const [permission, setPermission] = useState("colaborador");
   const [status, setStatus] = useState("ativo");
 
@@ -45,7 +45,6 @@ export function AddColaboradorDialog({ open, onOpenChange, collaborator }: AddCo
       setName(collaborator.name || "");
       setCpf(collaborator.cpf || "");
       setPhone(collaborator.phone || "");
-      setPassword("");
       setPermission(collaborator.permission || "colaborador");
       setStatus(collaborator.status || "ativo");
     } else if (!collaborator && open) {
@@ -58,7 +57,7 @@ export function AddColaboradorDialog({ open, onOpenChange, collaborator }: AddCo
     setName("");
     setCpf("");
     setPhone("");
-    setPassword("");
+    
     setPermission("colaborador");
     setStatus("ativo");
   };
@@ -76,10 +75,6 @@ export function AddColaboradorDialog({ open, onOpenChange, collaborator }: AddCo
       toast({ title: "CPF é obrigatório.", variant: "destructive" });
       return;
     }
-    if (!collaborator && !password) {
-      toast({ title: "Senha é obrigatória.", variant: "destructive" });
-      return;
-    }
 
     const clientName = clients.find((c: any) => c.id === clientId)?.name || "";
 
@@ -93,9 +88,6 @@ export function AddColaboradorDialog({ open, onOpenChange, collaborator }: AddCo
       status,
     };
 
-    if (password) {
-      data.password = password;
-    }
 
     try {
       if (collaborator) {
@@ -148,10 +140,6 @@ export function AddColaboradorDialog({ open, onOpenChange, collaborator }: AddCo
             <div className="space-y-1.5">
               <Label className="text-xs font-medium">Telefone / WhatsApp</Label>
               <Input placeholder="(00) 00000-0000" value={phone} onChange={(e) => setPhone(e.target.value)} className="h-9" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Senha *</Label>
-              <Input type="password" placeholder="Mínimo 6 caracteres" value={password} onChange={(e) => setPassword(e.target.value)} className="h-9" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-medium">Permissão</Label>
