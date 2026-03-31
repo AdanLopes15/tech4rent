@@ -28,7 +28,6 @@ export default function Fornecedores() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<any>(null);
-  const [, setViewingSupplier] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
