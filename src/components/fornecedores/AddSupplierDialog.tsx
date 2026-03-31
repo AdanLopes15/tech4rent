@@ -46,6 +46,7 @@ export function AddSupplierDialog({ open, onOpenChange, supplier }: AddSupplierD
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [notes, setNotes] = useState("");
+  const [loadingCnpj, setLoadingCnpj] = useState(false);
 
   useEffect(() => {
     if (supplier && open) {
