@@ -45,7 +45,6 @@ export function AddColaboradorDialog({ open, onOpenChange, collaborator }: AddCo
       setName(collaborator.name || "");
       setCpf(collaborator.cpf || "");
       setPhone(collaborator.phone || "");
-      setPassword("");
       setPermission(collaborator.permission || "colaborador");
       setStatus(collaborator.status || "ativo");
     } else if (!collaborator && open) {
