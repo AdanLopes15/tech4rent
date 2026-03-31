@@ -27,5 +27,13 @@ export const getWhatsappLink = (record: Record<string, any> | null | undefined) 
   const phone = getContactPhone(record);
   const normalizedPhone = normalizeWhatsappPhone(phone);
 
-  return normalizedPhone ? `https://wa.me/${normalizedPhone}` : "";
+  return normalizedPhone ? `https://api.whatsapp.com/send?phone=${normalizedPhone}` : "";
+};
+
+export const openWhatsappLink = (record: Record<string, any> | null | undefined) => {
+  const link = getWhatsappLink(record);
+
+  if (!link || typeof window === "undefined") return;
+
+  window.open(link, "_blank", "noopener,noreferrer");
 };

@@ -160,14 +160,13 @@ export default function Clientes() {
                           <div className="flex items-center justify-end gap-1">
                             {whatsappLink && (
                               <Button
+                                type="button"
                                 variant="ghost"
                                 size="icon"
                                 className="h-8 w-8 text-green-500 hover:text-green-400"
-                                asChild
+                                onClick={() => openWhatsappLink(client)}
                               >
-                                <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
-                                  <Phone className="h-4 w-4" />
-                                </a>
+                                <Phone className="h-4 w-4" />
                               </Button>
                             )}
 
