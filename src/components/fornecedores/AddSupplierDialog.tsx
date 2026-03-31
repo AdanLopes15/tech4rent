@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { getContactPhone } from "@/lib/contact";
 
 interface AddSupplierDialogProps {
   open: boolean;
@@ -54,7 +55,7 @@ export function AddSupplierDialog({ open, onOpenChange, supplier }: AddSupplierD
       setIe(supplier.ie || "");
       setRg(supplier.rg || "");
       setEmail(supplier.email || "");
-      setPhone(supplier.phone || "");
+      setPhone(getContactPhone(supplier));
       setCep(supplier.cep || "");
       setStreet(supplier.street || "");
       setNumber(supplier.number || "");
@@ -99,12 +100,25 @@ export function AddSupplierDialog({ open, onOpenChange, supplier }: AddSupplierD
     }
 
     const data = {
-      personType, name, contactPerson,
+      personType,
+      name,
+      contactPerson,
       cnpj: personType === "juridica" ? cnpj : "",
       cpf: personType === "fisica" ? cpf : "",
       ie: personType === "juridica" ? ie : "",
       rg: personType === "fisica" ? rg : "",
-      email, phone, cep, street, number, complement, neighborhood, city, state, notes,
+      email,
+      phone,
+      telefone: phone,
+      whatsapp: phone,
+      cep,
+      street,
+      number,
+      complement,
+      neighborhood,
+      city,
+      state,
+      notes,
     };
 
     try {

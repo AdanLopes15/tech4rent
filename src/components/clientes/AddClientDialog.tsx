@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { getContactPhone } from "@/lib/contact";
 
 interface AddClientDialogProps {
   open: boolean;
@@ -56,7 +57,7 @@ export function AddClientDialog({ open, onOpenChange, client }: AddClientDialogP
       setIe(client.ie || "");
       setRg(client.rg || "");
       setEmail(client.email || "");
-      setPhone(client.phone || "");
+      setPhone(getContactPhone(client));
       setCep(client.cep || "");
       setStreet(client.street || "");
       setNumber(client.number || "");
@@ -112,6 +113,8 @@ export function AddClientDialog({ open, onOpenChange, client }: AddClientDialogP
       rg: personType === "fisica" ? rg : "",
       email,
       phone,
+      telefone: phone,
+      whatsapp: phone,
       cep,
       street,
       number,
@@ -152,7 +155,6 @@ export function AddClientDialog({ open, onOpenChange, client }: AddClientDialogP
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto px-1 -mx-1 space-y-6 pb-2">
-          {/* Tipo de Pessoa */}
           <div className="space-y-2">
             <Label className="text-xs font-medium">Tipo de Pessoa</Label>
             <RadioGroup value={personType} onValueChange={setPersonType} className="flex gap-6">
@@ -167,7 +169,6 @@ export function AddClientDialog({ open, onOpenChange, client }: AddClientDialogP
             </RadioGroup>
           </div>
 
-          {/* Dados Principais */}
           <div className="space-y-1.5">
             <h3 className="text-sm font-semibold text-primary uppercase tracking-wider">Dados Principais</h3>
             <div className="h-px bg-border" />
@@ -231,7 +232,6 @@ export function AddClientDialog({ open, onOpenChange, client }: AddClientDialogP
             </div>
           </div>
 
-          {/* Endereço */}
           <div className="space-y-1.5">
             <h3 className="text-sm font-semibold text-primary uppercase tracking-wider">Endereço</h3>
             <div className="h-px bg-border" />
@@ -276,7 +276,6 @@ export function AddClientDialog({ open, onOpenChange, client }: AddClientDialogP
             </div>
           </div>
 
-          {/* Status e Observações */}
           <div className="space-y-1.5">
             <h3 className="text-sm font-semibold text-primary uppercase tracking-wider">Outros</h3>
             <div className="h-px bg-border" />
