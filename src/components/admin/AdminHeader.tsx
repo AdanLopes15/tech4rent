@@ -86,7 +86,7 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
               <p className="text-sm font-semibold text-foreground">Minha Conta</p>
             </div>
             <div className="py-1">
-              <button className="flex items-center gap-3 w-full px-3 py-2 text-sm text-foreground hover:bg-muted/50 transition-colors">
+              <button onClick={() => { navigate("/admin/perfil"); setUserMenuOpen(false); }} className="flex items-center gap-3 w-full px-3 py-2 text-sm text-foreground hover:bg-muted/50 transition-colors">
                 <User className="h-4 w-4 text-muted-foreground" />
                 Meu Perfil
               </button>

@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import AdminLayout from "./components/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import Configuracoes from "./pages/admin/Configuracoes";
+import MeuPerfil from "./pages/admin/MeuPerfil";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="configuracoes" element={<Configuracoes />} />
+            <Route path="perfil" element={<MeuPerfil />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
