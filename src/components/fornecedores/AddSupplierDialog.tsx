@@ -92,6 +92,34 @@ export function AddSupplierDialog({ open, onOpenChange, supplier }: AddSupplierD
     setNotes("");
   };
 
+  const handleCnpjBlur = async () => {
+    const digits = cnpj.replace(/\D/g, "");
+    if (digits.length !== 14 || personType !== "juridica") return;
+    setLoadingCnpj(true);
+    try {
+      const data = await fetchCnpjData(cnpj);
+      if (data) {
+        if (data.name) setName(data.name);
+        if (data.contactPerson) setContactPerson(data.contactPerson);
+        if (data.email) setEmail(data.email);
+        if (data.phone) setPhone(data.phone);
+        if (data.cep) setCep(data.cep);
+        if (data.street) setStreet(data.street);
+        if (data.number) setNumber(data.number);
+        if (data.complement) setComplement(data.complement);
+        if (data.neighborhood) setNeighborhood(data.neighborhood);
+        if (data.city) setCity(data.city);
+        if (data.state) setState(data.state);
+        toast({ title: "Dados do CNPJ carregados!" });
+      } else {
+        toast({ title: "CNPJ não encontrado", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Erro ao consultar CNPJ", variant: "destructive" });
+    }
+    setLoadingCnpj(false);
+  };
+
   const handleSubmit = async () => {
     if (!name) {
       toast({
