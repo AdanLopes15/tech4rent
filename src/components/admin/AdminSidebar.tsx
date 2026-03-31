@@ -143,7 +143,7 @@ const AdminSidebar = () => {
     );
   };
 
-
+  return (
     <aside
       className={cn(
         "fixed left-0 top-0 z-40 h-screen bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-300 flex flex-col",
