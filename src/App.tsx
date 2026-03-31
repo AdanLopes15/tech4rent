@@ -13,6 +13,7 @@ import Configuracoes from "./pages/admin/Configuracoes";
 import MeuPerfil from "./pages/admin/MeuPerfil";
 import Equipamentos from "./pages/admin/Equipamentos";
 import Clientes from "./pages/admin/Clientes";
+import Fornecedores from "./pages/admin/Fornecedores";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="perfil" element={<MeuPerfil />} />
             <Route path="equipamentos" element={<Equipamentos />} />
             <Route path="clientes" element={<Clientes />} />
+            <Route path="fornecedores" element={<Fornecedores />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
