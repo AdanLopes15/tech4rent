@@ -27,6 +27,7 @@ import {
 
 import { PlusCircle, Phone, Mail, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { AddClientDialog } from "@/components/clientes/AddClientDialog";
+import { getContactPhone, getWhatsappLink } from "@/lib/contact";
 
 export default function Clientes() {
   const { clients, deleteClient } = useStore();
@@ -40,12 +41,14 @@ export default function Clientes() {
 
   const filtered = useMemo(() => {
     return clients.filter((c: any) => {
+      const phone = getContactPhone(c);
       const matchesSearch =
         !search ||
         c.name?.toLowerCase().includes(search.toLowerCase()) ||
         c.email?.toLowerCase().includes(search.toLowerCase()) ||
         c.cnpj?.includes(search) ||
         c.cpf?.includes(search) ||
+        phone.includes(search) ||
         c.id?.toLowerCase().includes(search.toLowerCase());
 
       const matchesStatus = statusFilter === "todos" || c.status === statusFilter;
@@ -82,7 +85,6 @@ export default function Clientes() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Filtros */}
       <Card>
         <CardHeader>
           <CardTitle>Filtros de Clientes</CardTitle>
@@ -91,7 +93,7 @@ export default function Clientes() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-4">
             <Input
-              placeholder="Buscar por nome, email ou documento..."
+              placeholder="Buscar por nome, email, documento ou telefone..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -109,7 +111,6 @@ export default function Clientes() {
         </CardContent>
       </Card>
 
-      {/* Lista */}
       <Card>
         <CardHeader className="flex-row items-center justify-between space-y-0">
           <div>
@@ -137,76 +138,74 @@ export default function Clientes() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map((client: any) => (
-                    <TableRow key={client.id}>
-                      <TableCell className="font-mono text-xs text-muted-foreground">{client.id}</TableCell>
-                      <TableCell className="font-medium">{client.name}</TableCell>
-                      <TableCell className="text-muted-foreground">{client.email || "—"}</TableCell>
-                      <TableCell className="text-muted-foreground">{client.phone || "—"}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={client.status === "ativo" ? "default" : "secondary"}
-                          className={client.status === "ativo" ? "bg-green-600 hover:bg-green-700 text-white" : ""}
-                        >
-                          {client.status || "ativo"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          {client.phone && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-green-500 hover:text-green-400"
-                              asChild
-                            >
-                              <a
-                                href={`https://wa.me/55${client.phone.replace(/\D/g, "")}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                  {filtered.map((client: any) => {
+                    const phone = getContactPhone(client);
+                    const whatsappLink = getWhatsappLink(client);
+
+                    return (
+                      <TableRow key={client.id}>
+                        <TableCell className="font-mono text-xs text-muted-foreground">{client.id}</TableCell>
+                        <TableCell className="font-medium">{client.name}</TableCell>
+                        <TableCell className="text-muted-foreground">{client.email || "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">{phone || "—"}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={client.status === "ativo" ? "default" : "secondary"}
+                            className={client.status === "ativo" ? "bg-green-600 hover:bg-green-700 text-white" : ""}
+                          >
+                            {client.status || "ativo"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            {whatsappLink && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-green-500 hover:text-green-400"
+                                asChild
                               >
-                                <Phone className="h-4 w-4" />
-                              </a>
-                            </Button>
-                          )}
-
-                          {client.email && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-blue-400 hover:text-blue-300"
-                              asChild
-                            >
-                              <a href={`mailto:${client.email}`}>
-                                <Mail className="h-4 w-4" />
-                              </a>
-                            </Button>
-                          )}
-
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreHorizontal className="h-4 w-4" />
+                                <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
+                                  <Phone className="h-4 w-4" />
+                                </a>
                               </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleEdit(client)}>
-                                <Pencil className="mr-2 h-4 w-4" />
-                                Editar
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="text-destructive"
-                                onClick={() => setDeleteId(client.id)}
+                            )}
+
+                            {client.email && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-blue-400 hover:text-blue-300"
+                                asChild
                               >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Excluir
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                                <a href={`mailto:${client.email}`}>
+                                  <Mail className="h-4 w-4" />
+                                </a>
+                              </Button>
+                            )}
+
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleEdit(client)}>
+                                  <Pencil className="mr-2 h-4 w-4" />
+                                  Editar
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="text-destructive" onClick={() => setDeleteId(client.id)}>
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Excluir
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
