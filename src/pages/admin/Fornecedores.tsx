@@ -19,7 +19,7 @@ import {
 
 import { PlusCircle, Phone, Eye, Pencil, Trash2 } from "lucide-react";
 import { AddSupplierDialog } from "@/components/fornecedores/AddSupplierDialog";
-import { getContactPhone, getWhatsappLink } from "@/lib/contact";
+import { getContactPhone, getWhatsappLink, openWhatsappLink } from "@/lib/contact";
 
 export default function Fornecedores() {
   const { suppliers, deleteSupplier } = useStore();

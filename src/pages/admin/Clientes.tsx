@@ -27,7 +27,7 @@ import {
 
 import { PlusCircle, Phone, Mail, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { AddClientDialog } from "@/components/clientes/AddClientDialog";
-import { getContactPhone, getWhatsappLink } from "@/lib/contact";
+import { getContactPhone, getWhatsappLink, openWhatsappLink } from "@/lib/contact";
 
 export default function Clientes() {
   const { clients, deleteClient } = useStore();
