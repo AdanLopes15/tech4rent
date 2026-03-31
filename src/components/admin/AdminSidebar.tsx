@@ -2,7 +2,8 @@ import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Package, Users, FileText, ShoppingCart,
   DollarSign, Settings, ChevronLeft, ChevronRight, ChevronDown,
-  Truck, UserCheck, ClipboardList, ListCollapse
+  Truck, UserCheck, ClipboardList, ListCollapse, Eye,
+  Receipt, CreditCard, BarChart3, FileSpreadsheet, ArrowLeftRight, FileCheck
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
