@@ -18,7 +18,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-import { PlusCircle, Phone, Eye, Pencil, Trash2 } from "lucide-react";
+import { PlusCircle, Phone, Pencil, Trash2 } from "lucide-react";
 import { AddSupplierDialog } from "@/components/fornecedores/AddSupplierDialog";
 import { getContactPhone, getWhatsappLink, openWhatsappLink } from "@/lib/contact";
 
