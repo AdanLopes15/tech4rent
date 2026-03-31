@@ -310,22 +310,132 @@ const Configuracoes = () => {
           <Card className="border-border">
             <CardHeader>
               <CardTitle>Conteúdo do Site</CardTitle>
-              <CardDescription>Edite os textos que aparecem no site público.</CardDescription>
+              <CardDescription>Gerencie os textos e imagens do seu site público.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Título do Hero</Label>
-                <Input defaultValue="Locação e Venda de Equipamentos para sua Empresa" />
+            <CardContent className="space-y-8">
+              {/* Seção Hero */}
+              <div className="space-y-4 rounded-lg border border-border p-5">
+                <h3 className="text-lg font-semibold text-foreground">Seção Hero (Início)</h3>
+                <div className="space-y-2">
+                  <Label>Título</Label>
+                  <Input defaultValue="Soluções em Equipamentos para sua Empresa" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Subtítulo</Label>
+                  <Textarea defaultValue="Qualidade, segurança e a tecnologia que você precisa para alcançar os melhores resultados." rows={3} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Imagem de Fundo (Hero)</Label>
+                  <div className="flex items-center gap-4">
+                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">Img</div>
+                    <Button variant="outline" size="sm">Escolher arquivo</Button>
+                    <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label>Subtítulo do Hero</Label>
-                <Textarea defaultValue="Soluções completas em tecnologia para locação e venda." rows={3} />
+
+              {/* Seção de Destaque */}
+              <div className="space-y-4 rounded-lg border border-border p-5">
+                <h3 className="text-lg font-semibold text-foreground">Seção de Destaque</h3>
+                <div className="space-y-2">
+                  <Label>Título</Label>
+                  <Input defaultValue="PDA TC60 - Mais rápido do mercado!" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Tag</Label>
+                  <Input defaultValue="Soluções para grandes empresas" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Descrição</Label>
+                  <Textarea defaultValue="A TECH4RENT oferece soluções de automação personalizadas, colaborando com fabricantes para garantir ofertas competitivas e prazos rápidos." rows={4} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Imagem do Produto em Destaque</Label>
+                  <div className="flex items-center gap-4">
+                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">Img</div>
+                    <Button variant="outline" size="sm">Escolher arquivo</Button>
+                    <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Imagem de Fundo (Destaque)</Label>
+                  <div className="flex items-center gap-4">
+                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">Img</div>
+                    <Button variant="outline" size="sm">Escolher arquivo</Button>
+                    <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label>Sobre Nós</Label>
-                <Textarea rows={5} placeholder="Texto da seção Sobre Nós..." />
+
+              {/* Vitrine de Produtos */}
+              <div className="space-y-4 rounded-lg border border-border p-5">
+                <h3 className="text-lg font-semibold text-foreground">Vitrine de Produtos</h3>
+                <div className="space-y-2">
+                  <Label>Imagem de Fundo (Vitrine)</Label>
+                  <div className="flex items-center gap-4">
+                    <Button variant="outline" size="sm">Escolher arquivo</Button>
+                    <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
+                  </div>
+                </div>
               </div>
-              <Button onClick={handleSave}>Salvar Alterações</Button>
+
+              {/* Seção Diferenciais */}
+              <div className="space-y-4 rounded-lg border border-border p-5">
+                <h3 className="text-lg font-semibold text-foreground">Seção Diferenciais</h3>
+                <div className="space-y-2">
+                  <Label>Título da Seção</Label>
+                  <Input defaultValue="Nossos Diferenciais" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[1, 2, 3].map((n) => (
+                    <div key={n} className="space-y-3 rounded-lg border border-border p-4">
+                      <div className="space-y-2">
+                        <Label>Título {n}</Label>
+                        <Input defaultValue={n === 1 ? "Qualidade Garantida" : n === 2 ? "Atendimento Especializado" : "Suporte Completo"} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Descrição {n}</Label>
+                        <Textarea rows={3} defaultValue={n === 1 ? "Equipamentos modernos e com manutenção em dia para sua segurança." : n === 2 ? "Nossa equipe está pronta para te ajudar a escolher a melhor solução." : "Oferecemos suporte técnico durante todo o período de locação."} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Seção Sobre Nós */}
+              <div className="space-y-4 rounded-lg border border-border p-5">
+                <h3 className="text-lg font-semibold text-foreground">Seção Sobre Nós</h3>
+                <div className="space-y-2">
+                  <Label>Título</Label>
+                  <Input defaultValue="Sobre Nós" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Descrição</Label>
+                  <Textarea rows={4} defaultValue="Com anos de experiência no mercado, somos especialistas em fornecer os melhores equipamentos para construção civil e indústrias." />
+                </div>
+                <div className="space-y-2">
+                  <Label>Imagem de Fundo (Sobre)</Label>
+                  <div className="flex items-center gap-4">
+                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">Img</div>
+                    <Button variant="outline" size="sm">Escolher arquivo</Button>
+                    <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Seção Contato */}
+              <div className="space-y-4 rounded-lg border border-border p-5">
+                <h3 className="text-lg font-semibold text-foreground">Seção Contato</h3>
+                <div className="space-y-2">
+                  <Label>Imagem de Fundo (Contato)</Label>
+                  <div className="flex items-center gap-4">
+                    <Button variant="outline" size="sm">Escolher arquivo</Button>
+                    <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
+                  </div>
+                </div>
+              </div>
+
+              <Button onClick={handleSave}>Salvar Conteúdo do Site</Button>
             </CardContent>
           </Card>
         </TabsContent>
