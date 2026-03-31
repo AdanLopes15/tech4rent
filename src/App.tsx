@@ -13,6 +13,7 @@ import Configuracoes from "./pages/admin/Configuracoes";
 import MeuPerfil from "./pages/admin/MeuPerfil";
 import Equipamentos from "./pages/admin/Equipamentos";
 import Clientes from "./pages/admin/Clientes";
+import Fornecedores from "./pages/admin/Fornecedores";
 
 const queryClient = new QueryClient();
 
