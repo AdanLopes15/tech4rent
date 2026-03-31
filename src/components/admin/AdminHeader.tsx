@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Bell, Moon, Sun, User, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -8,6 +9,7 @@ interface AdminHeaderProps {
 }
 
 const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
+  const navigate = useNavigate();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const userRef = useRef<HTMLDivElement>(null);
@@ -88,7 +90,7 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
                 <User className="h-4 w-4 text-muted-foreground" />
                 Meu Perfil
               </button>
-              <button className="flex items-center gap-3 w-full px-3 py-2 text-sm text-foreground hover:bg-muted/50 transition-colors">
+              <button onClick={() => { navigate("/admin/configuracoes"); setUserMenuOpen(false); }} className="flex items-center gap-3 w-full px-3 py-2 text-sm text-foreground hover:bg-muted/50 transition-colors">
                 <Settings className="h-4 w-4 text-muted-foreground" />
                 Configurações
               </button>
