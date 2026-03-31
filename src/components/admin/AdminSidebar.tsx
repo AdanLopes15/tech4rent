@@ -26,9 +26,16 @@ const menuItems: MenuItem[] = [
       { icon: UserCheck, label: "Colaboradores", path: "/admin/colaboradores" },
     ],
   },
-  { icon: ClipboardList, label: "Orçamentos", path: "/admin/orcamentos" },
-  { icon: FileText, label: "Contratos", path: "/admin/contratos" },
-  { icon: ShoppingCart, label: "Vendas", path: "/admin/vendas" },
+  {
+    icon: ClipboardList,
+    label: "Operacional",
+    children: [
+      { icon: ClipboardList, label: "Orçamentos", path: "/admin/orcamentos" },
+      { icon: FileText, label: "Contratos", path: "/admin/contratos" },
+      { icon: ShoppingCart, label: "Vendas", path: "/admin/vendas" },
+      { icon: ShoppingCart, label: "Ordens de Compra", path: "/admin/ordens-compra" },
+    ],
+  },
   { icon: DollarSign, label: "Financeiro", path: "/admin/financeiro" },
   { icon: Settings, label: "Configurações", path: "/admin/configuracoes" },
 ];
@@ -36,7 +43,7 @@ const menuItems: MenuItem[] = [
 const AdminSidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
-  const [openSections, setOpenSections] = useState<string[]>(["Cadastros"]);
+  const [openSections, setOpenSections] = useState<string[]>(["Cadastros", "Operacional"]);
 
   const toggleSection = (label: string) => {
     setOpenSections((prev) =>
