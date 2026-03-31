@@ -1,13 +1,9 @@
-import {
-  DollarSign, TrendingUp, TrendingDown, FileText,
-  Package, ArrowUpRight, ArrowDownRight
-} from "lucide-react";
+//src/pages/admin/Dashboard.tsx
+
+import { DollarSign, TrendingUp, TrendingDown, FileText, Package, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Legend
-} from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 const chartData = [
   { name: "Jan", receitas: 45000, despesas: 28000 },
@@ -177,7 +173,9 @@ const Dashboard = () => (
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-medium text-foreground">{s.value}</p>
-                  <p className="text-xs text-muted-foreground">{s.items} itens · {s.date}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {s.items} itens · {s.date}
+                  </p>
                 </div>
               </div>
             ))}

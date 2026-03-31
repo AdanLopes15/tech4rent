@@ -1,3 +1,5 @@
+//src/components/admin/AdminHeader.tsx
+
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, Moon, Sun, User, Settings, LogOut } from "lucide-react";
@@ -35,7 +37,10 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
       {/* Notifications */}
       <div ref={notifRef} className="relative">
         <button
-          onClick={() => { setNotifOpen(!notifOpen); setUserMenuOpen(false); }}
+          onClick={() => {
+            setNotifOpen(!notifOpen);
+            setUserMenuOpen(false);
+          }}
           className="relative p-2 rounded-lg hover:bg-muted transition-colors"
         >
           <Bell className="h-5 w-5 text-muted-foreground" />
@@ -50,7 +55,10 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
             </div>
             <div className="max-h-64 overflow-y-auto">
               {notifications.map((n) => (
-                <div key={n.id} className="px-3 py-2.5 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-0">
+                <div
+                  key={n.id}
+                  className="px-3 py-2.5 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-0"
+                >
                   <p className="text-sm text-foreground">{n.text}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">{n.time}</p>
                 </div>
@@ -66,13 +74,20 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
         className="p-2 rounded-lg hover:bg-muted transition-colors"
         title={isDark ? "Modo claro" : "Modo escuro"}
       >
-        {isDark ? <Sun className="h-5 w-5 text-muted-foreground" /> : <Moon className="h-5 w-5 text-muted-foreground" />}
+        {isDark ? (
+          <Sun className="h-5 w-5 text-muted-foreground" />
+        ) : (
+          <Moon className="h-5 w-5 text-muted-foreground" />
+        )}
       </button>
 
       {/* User Menu */}
       <div ref={userRef} className="relative">
         <button
-          onClick={() => { setUserMenuOpen(!userMenuOpen); setNotifOpen(false); }}
+          onClick={() => {
+            setUserMenuOpen(!userMenuOpen);
+            setNotifOpen(false);
+          }}
           className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted transition-colors"
         >
           <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
@@ -86,11 +101,23 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
               <p className="text-sm font-semibold text-foreground">Minha Conta</p>
             </div>
             <div className="py-1">
-              <button onClick={() => { navigate("/admin/perfil"); setUserMenuOpen(false); }} className="flex items-center gap-3 w-full px-3 py-2 text-sm text-foreground hover:bg-muted/50 transition-colors">
+              <button
+                onClick={() => {
+                  navigate("/admin/perfil");
+                  setUserMenuOpen(false);
+                }}
+                className="flex items-center gap-3 w-full px-3 py-2 text-sm text-foreground hover:bg-muted/50 transition-colors"
+              >
                 <User className="h-4 w-4 text-muted-foreground" />
                 Meu Perfil
               </button>
-              <button onClick={() => { navigate("/admin/configuracoes"); setUserMenuOpen(false); }} className="flex items-center gap-3 w-full px-3 py-2 text-sm text-foreground hover:bg-muted/50 transition-colors">
+              <button
+                onClick={() => {
+                  navigate("/admin/configuracoes");
+                  setUserMenuOpen(false);
+                }}
+                className="flex items-center gap-3 w-full px-3 py-2 text-sm text-foreground hover:bg-muted/50 transition-colors"
+              >
                 <Settings className="h-4 w-4 text-muted-foreground" />
                 Configurações
               </button>

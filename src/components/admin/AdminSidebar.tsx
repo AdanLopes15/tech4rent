@@ -1,9 +1,28 @@
+//src/components/admin/AdminSidebar.tsx
+
 import { Link, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, Package, Users, FileText, ShoppingCart,
-  DollarSign, Settings, ChevronLeft, ChevronRight, ChevronDown,
-  Truck, UserCheck, ClipboardList, ListCollapse, Eye,
-  Receipt, CreditCard, BarChart3, FileSpreadsheet, ArrowLeftRight, FileCheck
+  LayoutDashboard,
+  Package,
+  Users,
+  FileText,
+  ShoppingCart,
+  DollarSign,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  Truck,
+  UserCheck,
+  ClipboardList,
+  ListCollapse,
+  Eye,
+  Receipt,
+  CreditCard,
+  BarChart3,
+  FileSpreadsheet,
+  ArrowLeftRight,
+  FileCheck,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -69,9 +88,7 @@ const AdminSidebar = () => {
   const [openSections, setOpenSections] = useState<string[]>([]);
 
   const toggleSection = (label: string) => {
-    setOpenSections((prev) =>
-      prev.includes(label) ? prev.filter((s) => s !== label) : [...prev, label]
-    );
+    setOpenSections((prev) => (prev.includes(label) ? prev.filter((s) => s !== label) : [...prev, label]));
   };
 
   const renderLink = (icon: React.ElementType, label: string, path: string, indent = false) => {
@@ -86,7 +103,7 @@ const AdminSidebar = () => {
           indent && !collapsed && "pl-9",
           isActive
             ? "bg-sidebar-primary text-sidebar-primary-foreground"
-            : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
         )}
         title={collapsed ? label : undefined}
       >
@@ -108,7 +125,7 @@ const AdminSidebar = () => {
       return (children || []).map((child) =>
         "children" in child && !("path" in child)
           ? child.children.map((sub) => renderLink(sub.icon, sub.label, sub.path))
-          : renderLink(child.icon, child.label, (child as MenuChild).path)
+          : renderLink(child.icon, child.label, (child as MenuChild).path),
       );
     }
 
@@ -121,7 +138,7 @@ const AdminSidebar = () => {
             depth > 0 && "pl-9",
             hasActiveChild
               ? "text-sidebar-foreground"
-              : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
           )}
         >
           <div className="flex items-center gap-3">
@@ -135,7 +152,7 @@ const AdminSidebar = () => {
             {(children || []).map((child) =>
               "children" in child && !("path" in child)
                 ? renderSection(child.icon, child.label, child.children, depth + 1)
-                : renderLink(child.icon, child.label, (child as MenuChild).path, true)
+                : renderLink(child.icon, child.label, (child as MenuChild).path, true),
             )}
           </div>
         )}
@@ -147,7 +164,7 @@ const AdminSidebar = () => {
     <aside
       className={cn(
         "fixed left-0 top-0 z-40 h-screen bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-300 flex flex-col",
-        collapsed ? "w-16" : "w-64"
+        collapsed ? "w-16" : "w-64",
       )}
     >
       <div className="flex items-center justify-between h-16 px-4 border-b border-sidebar-border">

@@ -1,3 +1,5 @@
+//src/components/admin/AdminLayout.tsx
+
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
