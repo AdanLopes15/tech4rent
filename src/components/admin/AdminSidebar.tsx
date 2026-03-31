@@ -66,7 +66,7 @@ const menuItems: MenuItem[] = [
 const AdminSidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
-  const [openSections, setOpenSections] = useState<string[]>(["Cadastros", "Operacional", "Financeiro"]);
+  const [openSections, setOpenSections] = useState<string[]>([]);
 
   const toggleSection = (label: string) => {
     setOpenSections((prev) =>
