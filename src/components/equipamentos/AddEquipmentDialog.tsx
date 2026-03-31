@@ -174,7 +174,7 @@ export function AddEquipmentDialog({ open, onOpenChange, equipment }: AddEquipme
           <DialogDescription>Preencha os dados para cadastrar um novo equipamento no sistema.</DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto pr-3 -mr-3 space-y-6 pb-2">
+        <div className="flex-1 overflow-y-auto px-1 -mx-1 space-y-6 pb-2">
           {/* Informações Básicas */}
           <div className="space-y-1.5">
             <h3 className="text-sm font-semibold text-primary uppercase tracking-wider">Informações Básicas</h3>
