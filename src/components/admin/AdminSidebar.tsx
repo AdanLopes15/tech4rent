@@ -95,8 +95,55 @@ const AdminSidebar = () => {
       </Link>
     );
   };
+  const renderSection = (icon: React.ElementType, label: string, children: MenuItem["children"], depth = 0) => {
+    const Icon = icon;
+    const isOpen = openSections.includes(label);
 
-  return (
+    const allPaths = (items: MenuItem["children"]): string[] =>
+      (items || []).flatMap((c) => ("path" in c && c.path ? [c.path] : "children" in c ? allPaths(c.children) : []));
+
+    const hasActiveChild = allPaths(children).some((p) => location.pathname === p);
+
+    if (collapsed) {
+      return (children || []).map((child) =>
+        "children" in child && !("path" in child)
+          ? child.children.map((sub) => renderLink(sub.icon, sub.label, sub.path))
+          : renderLink(child.icon, child.label, (child as MenuChild).path)
+      );
+    }
+
+    return (
+      <div key={label}>
+        <button
+          onClick={() => toggleSection(label)}
+          className={cn(
+            "flex items-center justify-between w-full rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+            depth > 0 && "pl-9",
+            hasActiveChild
+              ? "text-sidebar-foreground"
+              : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          )}
+        >
+          <div className="flex items-center gap-3">
+            <Icon className="h-4.5 w-4.5 shrink-0" />
+            <span>{label}</span>
+          </div>
+          <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", isOpen && "rotate-180")} />
+        </button>
+        {isOpen && (
+          <div className="mt-1 space-y-0.5">
+            {(children || []).map((child) =>
+              "children" in child && !("path" in child)
+                ? renderSection(child.icon, child.label, child.children, depth + 1)
+                : renderLink(child.icon, child.label, (child as MenuChild).path, true)
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+
     <aside
       className={cn(
         "fixed left-0 top-0 z-40 h-screen bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-300 flex flex-col",
