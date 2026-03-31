@@ -142,10 +142,6 @@ export function AddColaboradorDialog({ open, onOpenChange, collaborator }: AddCo
               <Input placeholder="(00) 00000-0000" value={phone} onChange={(e) => setPhone(e.target.value)} className="h-9" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Senha *</Label>
-              <Input type="password" placeholder="Mínimo 6 caracteres" value={password} onChange={(e) => setPassword(e.target.value)} className="h-9" />
-            </div>
-            <div className="space-y-1.5">
               <Label className="text-xs font-medium">Permissão</Label>
               <Select value={permission} onValueChange={setPermission}>
                 <SelectTrigger>
