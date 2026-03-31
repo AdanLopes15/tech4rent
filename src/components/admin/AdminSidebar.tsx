@@ -120,49 +120,8 @@ const AdminSidebar = () => {
       <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
         {menuItems.map((item) => {
           if (item.children) {
-            const Icon = item.icon;
-            const isOpen = openSections.includes(item.label);
-            const hasActiveChild = item.children.some((c) => location.pathname === c.path);
-
-            if (collapsed) {
-              return item.children.map((child) =>
-                renderLink(child.icon, child.label, child.path)
-              );
-            }
-
-            return (
-              <div key={item.label}>
-                <button
-                  onClick={() => toggleSection(item.label)}
-                  className={cn(
-                    "flex items-center justify-between w-full rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    hasActiveChild
-                      ? "text-sidebar-foreground"
-                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  )}
-                >
-                  <div className="flex items-center gap-3">
-                    <Icon className="h-4.5 w-4.5 shrink-0" />
-                    <span>{item.label}</span>
-                  </div>
-                  <ChevronDown
-                    className={cn(
-                      "h-4 w-4 transition-transform duration-200",
-                      isOpen && "rotate-180"
-                    )}
-                  />
-                </button>
-                {isOpen && (
-                  <div className="mt-1 space-y-0.5">
-                    {item.children.map((child) =>
-                      renderLink(child.icon, child.label, child.path, true)
-                    )}
-                  </div>
-                )}
-              </div>
-            );
+            return renderSection(item.icon, item.label, item.children);
           }
-
           return renderLink(item.icon, item.label, item.path!);
         })}
       </nav>
