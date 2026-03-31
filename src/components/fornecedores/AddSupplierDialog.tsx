@@ -207,7 +207,10 @@ export function AddSupplierDialog({ open, onOpenChange, supplier }: AddSupplierD
               <>
                 <div className="space-y-1.5">
                   <Label className="text-xs font-medium">CNPJ</Label>
-                  <Input placeholder="00.000.000/0001-00" value={cnpj} onChange={(e) => setCnpj(e.target.value)} className="h-9" />
+                  <div className="relative">
+                    <Input placeholder="00.000.000/0001-00" value={cnpj} onChange={(e) => setCnpj(e.target.value)} onBlur={handleCnpjBlur} className="h-9" />
+                    {loadingCnpj && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
+                  </div>
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs font-medium">Inscrição Estadual</Label>
