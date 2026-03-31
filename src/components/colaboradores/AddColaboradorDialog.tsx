@@ -75,10 +75,6 @@ export function AddColaboradorDialog({ open, onOpenChange, collaborator }: AddCo
       toast({ title: "CPF é obrigatório.", variant: "destructive" });
       return;
     }
-    if (!collaborator && !password) {
-      toast({ title: "Senha é obrigatória.", variant: "destructive" });
-      return;
-    }
 
     const clientName = clients.find((c: any) => c.id === clientId)?.name || "";
 
