@@ -35,7 +35,7 @@ export function AddColaboradorDialog({ open, onOpenChange, collaborator }: AddCo
   const [name, setName] = useState("");
   const [cpf, setCpf] = useState("");
   const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
+  
   const [permission, setPermission] = useState("colaborador");
   const [status, setStatus] = useState("ativo");
 
