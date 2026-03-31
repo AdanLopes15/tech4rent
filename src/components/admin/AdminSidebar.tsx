@@ -2,7 +2,8 @@ import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Package, Users, FileText, ShoppingCart,
   DollarSign, Settings, ChevronLeft, ChevronRight, ChevronDown,
-  Truck, UserCheck, ClipboardList, ListCollapse
+  Truck, UserCheck, ClipboardList, ListCollapse, Eye,
+  Receipt, CreditCard, BarChart3, FileSpreadsheet, ArrowLeftRight, FileCheck
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -36,14 +37,27 @@ const menuItems: MenuItem[] = [
       { icon: ShoppingCart, label: "Ordens de Compra", path: "/admin/ordens-compra" },
     ],
   },
-  { icon: DollarSign, label: "Financeiro", path: "/admin/financeiro" },
+  {
+    icon: DollarSign,
+    label: "Financeiro",
+    children: [
+      { icon: Eye, label: "Visão Geral", path: "/admin/financeiro" },
+      { icon: Receipt, label: "Contas a Receber", path: "/admin/financeiro/receber" },
+      { icon: CreditCard, label: "Contas a Pagar", path: "/admin/financeiro/pagar" },
+      { icon: FileText, label: "Boletos", path: "/admin/financeiro/boletos" },
+      { icon: BarChart3, label: "Fluxo de Caixa", path: "/admin/financeiro/fluxo-caixa" },
+      { icon: ArrowLeftRight, label: "Extrato", path: "/admin/financeiro/extrato" },
+      { icon: FileSpreadsheet, label: "DRE", path: "/admin/financeiro/dre" },
+      { icon: FileCheck, label: "NFe", path: "/admin/financeiro/nfe" },
+    ],
+  },
   { icon: Settings, label: "Configurações", path: "/admin/configuracoes" },
 ];
 
 const AdminSidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
-  const [openSections, setOpenSections] = useState<string[]>(["Cadastros", "Operacional"]);
+  const [openSections, setOpenSections] = useState<string[]>(["Cadastros", "Operacional", "Financeiro"]);
 
   const toggleSection = (label: string) => {
     setOpenSections((prev) =>
