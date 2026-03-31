@@ -1,21 +1,40 @@
-import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
+import { doc, runTransaction } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 export async function getNextId(collectionName: string): Promise<string> {
-  const colRef = collection(db, collectionName);
-  const q = query(colRef, orderBy("__name__", "desc"), limit(1));
-  const snapshot = await getDocs(q);
+  const prefixes: { [key: string]: string } = {
+    clients: "CLI",
+    suppliers: "FOR",
+    employees: "FUNC",
+    equipments: "EQP",
+    contracts: "CTR",
+    sales: "VND",
+    quotes: "ORC",
+    purchaseOrders: "OC",
+    collaborators: "COL",
+  };
 
-  if (snapshot.empty) {
-    return "0001";
+  const counterRef = doc(db, "counters", collectionName);
+  let newId: string;
+
+  try {
+    await runTransaction(db, async (transaction) => {
+      const counterDoc = await transaction.get(counterRef);
+      let nextNumber = 1;
+
+      if (counterDoc.exists()) {
+        nextNumber = (counterDoc.data().currentNumber || 0) + 1;
+      }
+
+      transaction.set(counterRef, { currentNumber: nextNumber }, { merge: true });
+
+      const prefix = prefixes[collectionName] || "ID";
+      newId = `${prefix}-${String(nextNumber).padStart(3, "0")}`;
+    });
+  } catch (e) {
+    console.error("Transaction failed: ", e);
+    throw e;
   }
 
-  const lastId = snapshot.docs[0].id;
-  const numericId = parseInt(lastId, 10);
-
-  if (isNaN(numericId)) {
-    return "0001";
-  }
-
-  return String(numericId + 1).padStart(4, "0");
+  return newId!;
 }

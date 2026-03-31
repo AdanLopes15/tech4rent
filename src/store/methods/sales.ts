@@ -1,114 +1,263 @@
-import {
-  doc,
-  setDoc,
-  updateDoc,
-  deleteDoc,
-  collection,
-  writeBatch,
-  serverTimestamp,
-  Timestamp,
-} from "firebase/firestore";
+import { doc, collection, writeBatch, serverTimestamp, Timestamp, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { getNextId } from "../utils";
-import { format } from "date-fns";
+import { format, addMonths, setDate as setDayOfMonth, getDate } from "date-fns";
 
-export async function addSale(get: any, set: any, saleData: any) {
-  const newId = await getNextId("sales");
-
-  const competence = format(
-    saleData.saleDate ? new Date(saleData.saleDate) : new Date(),
-    "yyyy-MM"
-  );
-
-  const dataToSave: any = {
-    ...saleData,
-    id: newId,
-    competence,
-    createdAt: serverTimestamp(),
-    saleDate: Timestamp.fromDate(
-      saleData.saleDate ? new Date(saleData.saleDate) : new Date()
-    ),
-  };
-
-  if (saleData.downPaymentDate) {
-    dataToSave.downPaymentDate = Timestamp.fromDate(new Date(saleData.downPaymentDate));
-  }
-
+export const addSale = async (get: any, set: any, saleData: any) => {
+  const { equipments, clients } = get();
+  const newSaleId = await get().getNextId("sales");
   const batch = writeBatch(db);
 
-  const saleRef = doc(db, "sales", newId);
-  batch.set(saleRef, dataToSave);
-
-  // Update equipment stock
-  const { equipments } = get();
-  for (const item of saleData.items || []) {
+  for (const item of saleData.items) {
     const equipment = equipments.find((e: any) => e.id === item.equipmentId);
-    if (equipment) {
-      const newStock = (equipment.stock || 0) - (item.quantity || 0);
-      const equipmentRef = doc(db, "equipments", item.equipmentId);
-      batch.update(equipmentRef, { stock: newStock });
+    if (!equipment || equipment.stock < item.quantity) {
+      throw new Error(`Estoque insuficiente para ${equipment?.name || "equipamento"}.`);
     }
   }
 
-  // Create revenue entry
-  const revenueRef = doc(collection(db, "revenues"));
-  batch.set(revenueRef, {
-    clientId: saleData.clientId,
-    saleId: newId,
-    description: `Venda ${newId}`,
-    valorTotal: saleData.totalValue || 0,
-    valorBruto: saleData.totalValue || 0,
-    dueDate: Timestamp.fromDate(
-      saleData.saleDate ? new Date(saleData.saleDate) : new Date()
-    ),
-    status: "Pendente",
-    competence,
+  const client = clients.find((c: any) => c.id === saleData.clientId);
+  const saleDate = new Date();
+
+  for (const paymentMethod of saleData.paymentMethods) {
+    if (paymentMethod.paymentMethod === "entrada_boleto") {
+      const entryValue =
+        paymentMethod.downPaymentType === "fixed"
+          ? Number(paymentMethod.downPaymentValue || 0)
+          : Number(paymentMethod.value || 0) * (Number(paymentMethod.downPaymentValue || 0) / 100);
+
+      if (entryValue > 0 && paymentMethod.downPaymentDate) {
+        const entryRevenueRef = doc(collection(db, "revenues"));
+        batch.set(entryRevenueRef, {
+          clientId: saleData.clientId,
+          saleId: newSaleId,
+          description: `Entrada da venda ${newSaleId} (${paymentMethod.paymentMethod})`,
+          valorTotal: entryValue,
+          valorBruto: entryValue,
+          dueDate: Timestamp.fromDate(new Date(paymentMethod.downPaymentDate)),
+          competence: format(new Date(paymentMethod.downPaymentDate), "MM/yyyy"),
+          status: "Pendente",
+          createdAt: serverTimestamp(),
+          costCenterId: saleData.costCenterId || "",
+          chartOfAccountId: saleData.chartOfAccountId || "",
+          bankAccountId: saleData.bankAccountId || "",
+        });
+      }
+
+      const remainingValue = Number(paymentMethod.value || 0) - entryValue;
+      const installments = paymentMethod.installments || 1;
+      const baseDateForInstallments = paymentMethod.downPaymentDate
+        ? new Date(paymentMethod.downPaymentDate)
+        : saleDate;
+
+      if (installments > 0 && remainingValue > 0.009) {
+        const installmentValue = remainingValue / installments;
+
+        for (let i = 0; i < installments; i++) {
+          const installmentBaseDate = addMonths(baseDateForInstallments, i);
+          const dueDate = setDayOfMonth(addMonths(installmentBaseDate, 1), getDate(baseDateForInstallments));
+
+          const revenueRef = doc(collection(db, "revenues"));
+          batch.set(revenueRef, {
+            clientId: saleData.clientId,
+            saleId: newSaleId,
+            description: `Parcela ${i + 1}/${installments} da venda ${newSaleId}`,
+            valorTotal: installmentValue,
+            valorBruto: installmentValue,
+            dueDate: Timestamp.fromDate(dueDate),
+            competence: format(dueDate, "MM/yyyy"),
+            status: "Pendente",
+            createdAt: serverTimestamp(),
+            costCenterId: saleData.costCenterId || "",
+            chartOfAccountId: saleData.chartOfAccountId || "",
+            bankAccountId: saleData.bankAccountId || "",
+          });
+        }
+      }
+    } else {
+      const installments = paymentMethod.installments || 1;
+      const installmentValue = Number(paymentMethod.value || 0) / installments;
+      const baseDateForInstallments = saleDate;
+
+      for (let i = 0; i < installments; i++) {
+        const installmentBaseDate = addMonths(baseDateForInstallments, i);
+        const dueDate = setDayOfMonth(addMonths(installmentBaseDate, 1), getDate(baseDateForInstallments));
+
+        const revenueRef = doc(collection(db, "revenues"));
+        batch.set(revenueRef, {
+          clientId: saleData.clientId,
+          saleId: newSaleId,
+          description: `Parcela ${i + 1}/${installments} da venda ${newSaleId} (${paymentMethod.paymentMethod})`,
+          valorTotal: installmentValue,
+          valorBruto: installmentValue,
+          dueDate: Timestamp.fromDate(dueDate),
+          competence: format(dueDate, "MM/yyyy"),
+          status: "Pendente",
+          createdAt: serverTimestamp(),
+          costCenterId: saleData.costCenterId || "",
+          chartOfAccountId: saleData.chartOfAccountId || "",
+          bankAccountId: saleData.bankAccountId || "",
+        });
+      }
+    }
+  }
+
+  for (const item of saleData.items) {
+    const equipmentRef = doc(db, "equipments", item.equipmentId);
+    const equipment = equipments.find((e: any) => e.id === item.equipmentId)!;
+    const newStock = equipment.stock - item.quantity;
+    batch.update(equipmentRef, { stock: newStock });
+  }
+
+  const finalSaleData: any = {
+    ...saleData,
+    id: newSaleId,
+    clientName: client?.razaoSocial || "N/A",
+    status: "Concluída",
+    saleDate: Timestamp.fromDate(saleDate),
     createdAt: serverTimestamp(),
-  });
+    competence: format(saleDate, "MM/yyyy"),
+  };
+
+  const saleRef = doc(db, "sales", newSaleId);
+  batch.set(saleRef, finalSaleData);
 
   await batch.commit();
   await get().fetchAllData();
-  return { id: newId };
-}
 
-export async function updateSale(get: any, set: any, saleData: any) {
-  const { id, ...data } = saleData;
-  if (!id) throw new Error("ID da venda é obrigatório para atualização.");
+  return { id: newSaleId, ...finalSaleData };
+};
 
-  const dataToSave: any = { ...data };
+export const updateSale = async (get: any, set: any, saleData: any) => {
+  const { id, ...dataToUpdate } = saleData;
+  const batch = writeBatch(db);
 
-  if (saleData.saleDate) {
-    dataToSave.saleDate = Timestamp.fromDate(new Date(saleData.saleDate));
-  }
-  if (saleData.downPaymentDate) {
-    dataToSave.downPaymentDate = Timestamp.fromDate(new Date(saleData.downPaymentDate));
+  const q = query(collection(db, "revenues"), where("saleId", "==", id));
+  const querySnapshot = await getDocs(q);
+
+  querySnapshot.forEach((revenueDoc) => {
+    batch.delete(revenueDoc.ref);
+  });
+
+  for (const paymentMethod of dataToUpdate.paymentMethods) {
+    if (paymentMethod.paymentMethod === "entrada_boleto") {
+      const entryValue =
+        paymentMethod.downPaymentType === "fixed"
+          ? Number(paymentMethod.downPaymentValue || 0)
+          : Number(paymentMethod.value || 0) * (Number(paymentMethod.downPaymentValue || 0) / 100);
+
+      if (entryValue > 0 && paymentMethod.downPaymentDate) {
+        const entryRevenueRef = doc(collection(db, "revenues"));
+        batch.set(entryRevenueRef, {
+          clientId: dataToUpdate.clientId,
+          saleId: id,
+          description: `Entrada da venda ${id} (${paymentMethod.paymentMethod})`,
+          valorTotal: entryValue,
+          valorBruto: entryValue,
+          dueDate: Timestamp.fromDate(new Date(paymentMethod.downPaymentDate)),
+          competence: format(new Date(paymentMethod.downPaymentDate), "MM/yyyy"),
+          status: "Pendente",
+          createdAt: serverTimestamp(),
+          costCenterId: dataToUpdate.costCenterId || "",
+          chartOfAccountId: dataToUpdate.chartOfAccountId || "",
+          bankAccountId: dataToUpdate.bankAccountId || "",
+        });
+      }
+
+      const remainingValue = Number(paymentMethod.value || 0) - entryValue;
+      const installments = paymentMethod.installments || 1;
+      const baseDateForInstallments = paymentMethod.downPaymentDate
+        ? new Date(paymentMethod.downPaymentDate)
+        : new Date();
+
+      if (installments > 0 && remainingValue > 0.009) {
+        const installmentValue = remainingValue / installments;
+
+        for (let i = 0; i < installments; i++) {
+          const installmentBaseDate = addMonths(baseDateForInstallments, i);
+          const dueDate = setDayOfMonth(addMonths(installmentBaseDate, 1), getDate(baseDateForInstallments));
+
+          const revenueRef = doc(collection(db, "revenues"));
+          batch.set(revenueRef, {
+            clientId: dataToUpdate.clientId,
+            saleId: id,
+            description: `Parcela ${i + 1}/${installments} da venda ${id}`,
+            valorTotal: installmentValue,
+            valorBruto: installmentValue,
+            dueDate: Timestamp.fromDate(dueDate),
+            competence: format(dueDate, "MM/yyyy"),
+            status: "Pendente",
+            createdAt: serverTimestamp(),
+            costCenterId: dataToUpdate.costCenterId || "",
+            chartOfAccountId: dataToUpdate.chartOfAccountId || "",
+            bankAccountId: dataToUpdate.bankAccountId || "",
+          });
+        }
+      }
+    } else {
+      const installments = paymentMethod.installments || 1;
+      const installmentValue = Number(paymentMethod.value || 0) / installments;
+      const baseDateForInstallments = new Date();
+
+      for (let i = 0; i < installments; i++) {
+        const installmentBaseDate = addMonths(baseDateForInstallments, i);
+        const dueDate = setDayOfMonth(addMonths(installmentBaseDate, 1), getDate(baseDateForInstallments));
+
+        const revenueRef = doc(collection(db, "revenues"));
+        batch.set(revenueRef, {
+          clientId: dataToUpdate.clientId,
+          saleId: id,
+          description: `Parcela ${i + 1}/${installments} da venda ${id} (${paymentMethod.paymentMethod})`,
+          valorTotal: installmentValue,
+          valorBruto: installmentValue,
+          dueDate: Timestamp.fromDate(dueDate),
+          competence: format(dueDate, "MM/yyyy"),
+          status: "Pendente",
+          createdAt: serverTimestamp(),
+          costCenterId: dataToUpdate.costCenterId || "",
+          chartOfAccountId: dataToUpdate.chartOfAccountId || "",
+          bankAccountId: dataToUpdate.bankAccountId || "",
+        });
+      }
+    }
   }
 
   const saleRef = doc(db, "sales", id);
-  await updateDoc(saleRef, dataToSave);
-  await get().fetchAllData();
-}
+  batch.update(saleRef, dataToUpdate);
 
-export async function cancelSale(get: any, set: any, saleId: string) {
-  const { sales, equipments, revenues } = get();
-  const sale = sales.find((s: any) => s.id === saleId);
-  if (!sale) throw new Error("Venda não encontrada.");
+  await batch.commit();
+  await get().fetchAllData();
+};
+
+export const cancelSale = async (get: any, set: any, saleId: string) => {
+  const { sales, equipments, quotes, revenues } = get();
+  const saleToCancel = sales.find((s: any) => s.id === saleId);
+
+  if (!saleToCancel) {
+    throw new Error("Venda não encontrada para cancelamento.");
+  }
 
   const batch = writeBatch(db);
 
-  // Restore equipment stock
-  for (const item of sale.items || []) {
+  for (const item of saleToCancel.items) {
     const equipment = equipments.find((e: any) => e.id === item.equipmentId);
     if (equipment) {
-      const newStock = (equipment.stock || 0) + (item.quantity || 0);
+      const newStock = equipment.stock + item.quantity;
       const equipmentRef = doc(db, "equipments", item.equipmentId);
       batch.update(equipmentRef, { stock: newStock });
     }
   }
 
-  // Cancel related revenues
-  const saleRevenues = revenues.filter((r: any) => r.saleId === saleId && r.status === "Pendente");
-  for (const revenue of saleRevenues) {
+  if (saleToCancel.quoteId) {
+    const quoteRef = doc(db, "quotes", saleToCancel.quoteId);
+    const quoteExists = quotes.some((q: any) => q.id === saleToCancel.quoteId);
+
+    if (quoteExists) {
+      batch.update(quoteRef, { status: "Pendente" });
+    }
+  }
+
+  const revenuesToCancel = revenues.filter((r: any) => r.saleId === saleId && r.status === "Pendente");
+
+  for (const revenue of revenuesToCancel) {
     const revenueRef = doc(db, "revenues", revenue.id);
     batch.update(revenueRef, { status: "Cancelado" });
   }
@@ -118,22 +267,31 @@ export async function cancelSale(get: any, set: any, saleId: string) {
 
   await batch.commit();
   await get().fetchAllData();
-}
+};
 
-export async function deleteSale(get: any, set: any, saleId: string) {
-  const { revenues } = get();
+export const deleteSale = async (get: any, set: any, saleId: string) => {
+  const { sales, revenues } = get();
+  const saleToDelete = sales.find((s: any) => s.id === saleId);
+
+  if (!saleToDelete) {
+    throw new Error("Venda não encontrada para exclusão.");
+  }
+
+  if (saleToDelete.status !== "Cancelada") {
+    throw new Error("Apenas vendas canceladas podem ser excluídas permanentemente.");
+  }
+
   const batch = writeBatch(db);
 
-  // Delete related revenues
-  const saleRevenues = revenues.filter((r: any) => r.saleId === saleId);
-  for (const revenue of saleRevenues) {
+  const revenuesToDelete = revenues.filter((r: any) => r.saleId === saleId);
+  revenuesToDelete.forEach((revenue: any) => {
     const revenueRef = doc(db, "revenues", revenue.id);
     batch.delete(revenueRef);
-  }
+  });
 
   const saleRef = doc(db, "sales", saleId);
   batch.delete(saleRef);
 
   await batch.commit();
   await get().fetchAllData();
-}
+};
