@@ -39,7 +39,7 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
           className="relative p-2 rounded-lg hover:bg-muted transition-colors"
         >
           <Bell className="h-5 w-5 text-muted-foreground" />
-          <span className="absolute -top-0.5 -right-0.5 h-4.5 w-4.5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 min-w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[11px] font-bold flex items-center justify-center px-1">
             {notifications.length}
           </span>
         </button>
