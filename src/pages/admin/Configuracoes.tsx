@@ -444,20 +444,12 @@ const Configuracoes = () => {
         {/* Cláusulas de Locação */}
         <TabsContent value="clausulas-locacao">
           <Card className="border-border">
-            <CardHeader>
-              <CardTitle>Cláusulas de Locação</CardTitle>
-              <CardDescription>Textos padrões para contratos de locação e recibos.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Cláusulas do Contrato de Locação</Label>
-                <Textarea rows={10} placeholder="Digite as cláusulas padrão do contrato de locação..." />
-              </div>
-              <div className="space-y-2">
-                <Label>Termos do Recibo de Entrega</Label>
-                <Textarea rows={6} placeholder="Termos do recibo de entrega dos equipamentos..." />
-              </div>
-              <Button onClick={handleSave}>Salvar Alterações</Button>
+            <CardContent className="p-6">
+              <ClausulasEditor
+                title="Cláusulas do Contrato de Locação"
+                description="Adicione, edite ou remova as cláusulas padrão que aparecerão em todos os contratos de locação gerados."
+                onSave={() => toast.success("Cláusulas de locação salvas com sucesso!")}
+              />
             </CardContent>
           </Card>
         </TabsContent>
