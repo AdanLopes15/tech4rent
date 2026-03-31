@@ -23,6 +23,7 @@ const App = () => (
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="configuracoes" element={<Configuracoes />} />
+            <Route path="perfil" element={<MeuPerfil />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
