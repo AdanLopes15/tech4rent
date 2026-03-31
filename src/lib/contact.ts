@@ -27,7 +27,7 @@ export const getWhatsappLink = (record: Record<string, any> | null | undefined) 
   const phone = getContactPhone(record);
   const normalizedPhone = normalizeWhatsappPhone(phone);
 
-  return normalizedPhone ? `https://api.whatsapp.com/send?phone=${normalizedPhone}` : "";
+  return normalizedPhone ? `https://wa.me/${normalizedPhone}` : "";
 };
 
 export const openWhatsappLink = (record: Record<string, any> | null | undefined) => {
@@ -35,5 +35,19 @@ export const openWhatsappLink = (record: Record<string, any> | null | undefined)
 
   if (!link || typeof window === "undefined") return;
 
-  window.open(link, "_blank", "noopener,noreferrer");
+  const newWindow = window.open("about:blank", "_blank", "noopener,noreferrer");
+
+  if (newWindow) {
+    newWindow.opener = null;
+    newWindow.location.replace(link);
+    return;
+  }
+
+  const anchor = document.createElement("a");
+  anchor.href = link;
+  anchor.target = "_blank";
+  anchor.rel = "noopener noreferrer";
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
 };
