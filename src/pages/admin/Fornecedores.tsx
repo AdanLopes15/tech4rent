@@ -19,6 +19,7 @@ import {
 
 import { PlusCircle, Phone, Eye, Pencil, Trash2 } from "lucide-react";
 import { AddSupplierDialog } from "@/components/fornecedores/AddSupplierDialog";
+import { getContactPhone, getWhatsappLink } from "@/lib/contact";
 
 export default function Fornecedores() {
   const { suppliers, deleteSupplier } = useStore();
@@ -26,12 +27,13 @@ export default function Fornecedores() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<any>(null);
-  const [viewingSupplier, setViewingSupplier] = useState<any>(null);
+  const [, setViewingSupplier] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
   const filtered = useMemo(() => {
     return suppliers.filter((s: any) => {
+      const phone = getContactPhone(s);
       if (!search) return true;
       const q = search.toLowerCase();
       return (
@@ -39,6 +41,7 @@ export default function Fornecedores() {
         s.email?.toLowerCase().includes(q) ||
         s.cnpj?.includes(search) ||
         s.cpf?.includes(search) ||
+        phone.includes(search) ||
         s.id?.toLowerCase().includes(q)
       );
     });
@@ -79,7 +82,7 @@ export default function Fornecedores() {
         </CardHeader>
         <CardContent>
           <Input
-            placeholder="Buscar por nome, email ou documento..."
+            placeholder="Buscar por nome, email, documento ou telefone..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -112,37 +115,42 @@ export default function Fornecedores() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map((supplier: any) => (
-                    <TableRow key={supplier.id}>
-                      <TableCell className="font-mono text-xs text-muted-foreground">{supplier.id}</TableCell>
-                      <TableCell className="font-medium">{supplier.name}</TableCell>
-                      <TableCell className="text-muted-foreground">{supplier.email || "—"}</TableCell>
-                      <TableCell className="text-muted-foreground">{supplier.phone || "—"}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          {supplier.phone && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-green-500 hover:text-green-400" asChild>
-                              <a href={`https://wa.me/55${supplier.phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer">
-                                <Phone className="h-4 w-4" />
-                              </a>
+                  {filtered.map((supplier: any) => {
+                    const phone = getContactPhone(supplier);
+                    const whatsappLink = getWhatsappLink(supplier);
+
+                    return (
+                      <TableRow key={supplier.id}>
+                        <TableCell className="font-mono text-xs text-muted-foreground">{supplier.id}</TableCell>
+                        <TableCell className="font-medium">{supplier.name}</TableCell>
+                        <TableCell className="text-muted-foreground">{supplier.email || "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">{phone || "—"}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            {whatsappLink && (
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-green-500 hover:text-green-400" asChild>
+                                <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
+                                  <Phone className="h-4 w-4" />
+                                </a>
+                              </Button>
+                            )}
+
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => setViewingSupplier(supplier)}>
+                              <Eye className="h-4 w-4" />
                             </Button>
-                          )}
 
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => setViewingSupplier(supplier)}>
-                            <Eye className="h-4 w-4" />
-                          </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => handleEdit(supplier)}>
+                              <Pencil className="h-4 w-4" />
+                            </Button>
 
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => handleEdit(supplier)}>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive/80" onClick={() => setDeleteId(supplier.id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive/80" onClick={() => setDeleteId(supplier.id)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
