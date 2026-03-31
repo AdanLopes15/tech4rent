@@ -12,6 +12,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import Configuracoes from "./pages/admin/Configuracoes";
 import MeuPerfil from "./pages/admin/MeuPerfil";
 import Equipamentos from "./pages/admin/Equipamentos";
+import Clientes from "./pages/admin/Clientes";
 
 const queryClient = new QueryClient();
 
