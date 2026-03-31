@@ -88,9 +88,6 @@ export function AddColaboradorDialog({ open, onOpenChange, collaborator }: AddCo
       status,
     };
 
-    if (password) {
-      data.password = password;
-    }
 
     try {
       if (collaborator) {
