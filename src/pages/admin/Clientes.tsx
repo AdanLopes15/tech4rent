@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -158,30 +159,48 @@ export default function Clientes() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1">
-                            {whatsappLink && (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-green-500 hover:text-green-400"
-                                onClick={() => openWhatsappLink(client)}
-                              >
-                                <Phone className="h-4 w-4" />
-                              </Button>
-                            )}
+                            <TooltipProvider delayDuration={300}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className={`h-8 w-8 ${whatsappLink ? "text-green-500 hover:text-green-400" : "text-muted-foreground/40 cursor-not-allowed"}`}
+                                      disabled={!whatsappLink}
+                                      onClick={() => whatsappLink && openWhatsappLink(client)}
+                                    >
+                                      <Phone className="h-4 w-4" />
+                                    </Button>
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {whatsappLink ? "Abrir WhatsApp" : "Sem telefone cadastrado"}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
 
-                            {client.email && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-blue-400 hover:text-blue-300"
-                                asChild
-                              >
-                                <a href={`mailto:${client.email}`}>
-                                  <Mail className="h-4 w-4" />
-                                </a>
-                              </Button>
-                            )}
+                            <TooltipProvider delayDuration={300}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className={`h-8 w-8 ${client.email ? "text-blue-400 hover:text-blue-300" : "text-muted-foreground/40 cursor-not-allowed"}`}
+                                      disabled={!client.email}
+                                      onClick={() => client.email && window.open(`mailto:${client.email}`)}
+                                    >
+                                      <Mail className="h-4 w-4" />
+                                    </Button>
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {client.email ? "Enviar email" : "Sem email cadastrado"}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
 
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
