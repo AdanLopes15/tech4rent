@@ -151,7 +151,7 @@ export function AddClientDialog({ open, onOpenChange, client }: AddClientDialogP
           <DialogDescription>Preencha os dados do cliente.</DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto pr-3 -mr-3 space-y-6 pb-2">
+        <div className="flex-1 overflow-y-auto px-1 -mx-1 space-y-6 pb-2">
           {/* Tipo de Pessoa */}
           <div className="space-y-2">
             <Label className="text-xs font-medium">Tipo de Pessoa</Label>
