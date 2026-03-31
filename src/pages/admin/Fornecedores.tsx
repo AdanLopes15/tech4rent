@@ -127,21 +127,27 @@ export default function Fornecedores() {
                         <TableCell className="text-muted-foreground">{phone || "—"}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1">
-                            {whatsappLink && (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-green-500 hover:text-green-400"
-                                onClick={() => openWhatsappLink(supplier)}
-                              >
-                                <Phone className="h-4 w-4" />
-                              </Button>
-                            )}
-
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => setViewingSupplier(supplier)}>
-                              <Eye className="h-4 w-4" />
-                            </Button>
+                            <TooltipProvider delayDuration={300}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className={`h-8 w-8 ${whatsappLink ? "text-green-500 hover:text-green-400" : "text-muted-foreground/40 cursor-not-allowed"}`}
+                                      disabled={!whatsappLink}
+                                      onClick={() => whatsappLink && openWhatsappLink(supplier)}
+                                    >
+                                      <Phone className="h-4 w-4" />
+                                    </Button>
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {whatsappLink ? "Abrir WhatsApp" : "Sem telefone cadastrado"}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
 
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => handleEdit(supplier)}>
                               <Pencil className="h-4 w-4" />
