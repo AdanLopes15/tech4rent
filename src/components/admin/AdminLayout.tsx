@@ -1,6 +1,6 @@
 //src/components/admin/AdminLayout.tsx
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
 import AdminHeader from "./AdminHeader";
@@ -12,8 +12,19 @@ const AdminLayout = () => {
     setIsDark((prev) => !prev);
   };
 
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    return () => {
+      document.documentElement.classList.remove("dark");
+    };
+  }, [isDark]);
+
   return (
-    <div className={`${isDark ? "dark" : ""} min-h-screen bg-background`}>
+    <div className="min-h-screen bg-background">
       <AdminSidebar />
       <div className="ml-64 transition-all duration-300 flex flex-col min-h-screen">
         <AdminHeader isDark={isDark} onToggleTheme={toggleTheme} />

@@ -131,17 +131,17 @@ export default function Equipamentos() {
                   : [isValidHttpUrl(equipment.imageUrl) ? equipment.imageUrl : "https://placehold.co/600x400.png"];
 
               return (
-                <Card key={equipment.id} className="flex flex-col">
+                <Card key={equipment.id} className="flex flex-col overflow-hidden group hover:shadow-lg transition-shadow">
                   <div className="relative">
                     <Carousel>
                       <CarouselContent>
                         {imageUrls.map((url: string, index: number) => (
                           <CarouselItem key={index}>
-                            <div className="relative w-full aspect-[3/2]">
+                            <div className="relative w-full aspect-[4/3] bg-muted/30">
                               <img
                                 src={url}
-                                alt={`${equipment.name}`}
-                                className="rounded-t-lg object-contain w-full h-full"
+                                alt={equipment.name}
+                                className="object-contain w-full h-full p-2"
                               />
                             </div>
                           </CarouselItem>
@@ -150,56 +150,56 @@ export default function Equipamentos() {
 
                       {imageUrls.length > 1 && (
                         <>
-                          <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2" />
-                          <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2" />
+                          <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 h-7 w-7" />
+                          <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7" />
                         </>
                       )}
                     </Carousel>
 
-                    <Badge className="absolute top-2 right-2">{equipment.status || "Disponível"}</Badge>
+                    <Badge className="absolute top-2 right-2 text-xs">{equipment.status || "Disponível"}</Badge>
 
-                    <div className="absolute top-2 left-2 space-y-1">
-                      <Badge variant="secondary">
-                        Estoque: {equipment.stock} {equipment.unit}
+                    <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+                      <Badge variant="secondary" className="text-xs">
+                        Est: {equipment.stock} {equipment.unit}
                       </Badge>
-                      <Badge variant="secondary">{equipment.purpose}</Badge>
+                      <Badge variant="secondary" className="text-xs capitalize">{equipment.purpose}</Badge>
                     </div>
                   </div>
 
                   <CardContent className="p-4 flex flex-col flex-grow">
-                    <p className="text-sm text-muted-foreground">{equipment.category}</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">{equipment.category}</p>
 
-                    <h3 className="text-lg font-bold">{equipment.name}</h3>
+                    <h3 className="text-base font-bold mt-0.5 line-clamp-1">{equipment.name}</h3>
 
-                    <p className="text-xs text-muted-foreground">ID: {equipment.id}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">ID: {equipment.id}</p>
 
-                    <div className="mt-4 flex-grow">
+                    <div className="mt-3 flex-grow space-y-1">
                       <div className="flex justify-between text-sm">
-                        <span>Diária:</span>
-                        <span>{formatCurrency(equipment.dailyRate)}</span>
+                        <span className="text-muted-foreground">Diária:</span>
+                        <span className="font-medium">{formatCurrency(equipment.dailyRate)}</span>
                       </div>
 
                       <div className="flex justify-between text-sm">
-                        <span>Semanal:</span>
-                        <span>{formatCurrency(equipment.weeklyRate)}</span>
+                        <span className="text-muted-foreground">Semanal:</span>
+                        <span className="font-medium">{formatCurrency(equipment.weeklyRate)}</span>
                       </div>
 
                       <div className="flex justify-between text-sm">
-                        <span>Mensal:</span>
-                        <span>{formatCurrency(equipment.monthlyRate)}</span>
+                        <span className="text-muted-foreground">Mensal:</span>
+                        <span className="font-medium">{formatCurrency(equipment.monthlyRate)}</span>
                       </div>
                     </div>
 
                     <div className="mt-4 flex gap-2">
-                      <Button variant="outline" className="w-full" onClick={() => handleEdit(equipment)}>
-                        <Pencil className="mr-2 h-4 w-4" />
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEdit(equipment)}>
+                        <Pencil className="mr-1.5 h-3.5 w-3.5" />
                         Editar
                       </Button>
 
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="destructive" className="w-full">
-                            <Trash2 className="mr-2 h-4 w-4" />
+                          <Button variant="destructive" size="sm" className="flex-1">
+                            <Trash2 className="mr-1.5 h-3.5 w-3.5" />
                             Excluir
                           </Button>
                         </AlertDialogTrigger>
@@ -207,13 +207,11 @@ export default function Equipamentos() {
                         <AlertDialogContent>
                           <AlertDialogHeader>
                             <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-
                             <AlertDialogDescription>Essa ação não pode ser desfeita.</AlertDialogDescription>
                           </AlertDialogHeader>
 
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-
                             <AlertDialogAction onClick={() => deleteEquipment(equipment.id)}>
                               Continuar
                             </AlertDialogAction>
