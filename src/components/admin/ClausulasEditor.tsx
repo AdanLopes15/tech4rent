@@ -96,6 +96,39 @@ const defaultLocacaoClauses: Clause[] = [
   },
 ];
 
+const defaultVendaClauses: Clause[] = [
+  {
+    id: "v1", title: "CLÁUSULA PRIMEIRA – ESTADO DOS EQUIPAMENTOS",
+    subClauses: [
+      { id: "v1.1", text: "O COMPRADOR declara ter examinado os equipamentos descritos acima, recebendo-os em perfeitas condições de uso e funcionamento, conforme combinado entre as partes." },
+    ],
+  },
+  {
+    id: "v2", title: "CLÁUSULA SEGUNDA – GARANTIA",
+    subClauses: [
+      { id: "v2.1", text: "O VENDEDOR oferece garantia de 90 dias apenas para defeitos de fabricação, contados a partir da data deste recibo. Não estão cobertos pela garantia danos causados por: mau uso, quedas, variações de tensão elétrica, oxidação, tentativas de reparo por terceiros, desgaste natural ou uso indevido." },
+    ],
+  },
+  {
+    id: "v3", title: "CLÁUSULA TERCEIRA – IRRETRATABILIDADE",
+    subClauses: [
+      { id: "v3.1", text: "Esta venda é considerada irretratável e irrevogável, não cabendo cancelamento ou devolução dos produtos, salvo vício oculto comprovado dentro do prazo de garantia, se houver." },
+    ],
+  },
+  {
+    id: "v4", title: "CLÁUSULA QUARTA – PAGAMENTO",
+    subClauses: [
+      { id: "v4.1", text: "O COMPRADOR reconhece e assume total responsabilidade pelo cumprimento integral do acordo firmado nesta venda, comprometendo-se a efetuar os pagamentos nas condições ajustadas, sejam à vista, parcelados ou por meio de boletos bancários." },
+    ],
+  },
+  {
+    id: "v5", title: "CLÁUSULA QUINTA – ENTREGA",
+    subClauses: [
+      { id: "v5.1", text: "O VENDEDOR se compromete a entregar os equipamentos eletrônicos descritos neste recibo ao COMPRADOR. Após a entrega, o COMPRADOR deverá verificar imediatamente o estado dos equipamentos. Caso constate avarias ou divergências, deverá comunicar o VENDEDOR no prazo de até 24 horas para fins de análise e providências." },
+    ],
+  },
+];
+
 let idCounter = 100;
 const genId = () => String(++idCounter);
 
@@ -216,6 +249,6 @@ const ClausulasEditor = ({ initialClauses, onSave, title, description }: Clausul
   );
 };
 
-export { ClausulasEditor, defaultLocacaoClauses };
+export { ClausulasEditor, defaultLocacaoClauses, defaultVendaClauses };
 export type { Clause };
 export default ClausulasEditor;

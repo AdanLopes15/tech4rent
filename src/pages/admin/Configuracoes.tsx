@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import ClausulasEditor from "@/components/admin/ClausulasEditor";
+import ClausulasEditor, { defaultVendaClauses } from "@/components/admin/ClausulasEditor";
 
 const Configuracoes = () => {
   const [companyData, setCompanyData] = useState({
@@ -457,16 +457,13 @@ const Configuracoes = () => {
         {/* Cláusulas de Venda */}
         <TabsContent value="clausulas-venda">
           <Card className="border-border">
-            <CardHeader>
-              <CardTitle>Cláusulas de Venda</CardTitle>
-              <CardDescription>Textos padrões para documentos de venda.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Cláusulas do Contrato de Venda</Label>
-                <Textarea rows={10} placeholder="Digite as cláusulas padrão do contrato de venda..." />
-              </div>
-              <Button onClick={handleSave}>Salvar Alterações</Button>
+            <CardContent className="p-6">
+              <ClausulasEditor
+                title="Cláusulas do Recibo de Venda"
+                description="Adicione, edite ou remova as cláusulas padrão que aparecerão em todos os recibos de venda gerados."
+                initialClauses={defaultVendaClauses}
+                onSave={() => toast.success("Cláusulas de venda salvas com sucesso!")}
+              />
             </CardContent>
           </Card>
         </TabsContent>
