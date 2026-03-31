@@ -8,11 +8,12 @@ import {
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
+type MenuChild = { icon: React.ElementType; label: string; path: string };
 type MenuItem = {
   icon: React.ElementType;
   label: string;
   path?: string;
-  children?: { icon: React.ElementType; label: string; path: string }[];
+  children?: (MenuChild | { icon: React.ElementType; label: string; children: MenuChild[] })[];
 };
 
 const menuItems: MenuItem[] = [
@@ -49,9 +50,17 @@ const menuItems: MenuItem[] = [
       { icon: ArrowLeftRight, label: "Extrato", path: "/admin/financeiro/extrato" },
       { icon: FileSpreadsheet, label: "DRE", path: "/admin/financeiro/dre" },
       { icon: FileCheck, label: "NFe", path: "/admin/financeiro/nfe" },
+      {
+        icon: ListCollapse,
+        label: "Cadastros",
+        children: [
+          { icon: ClipboardList, label: "Plano de Contas", path: "/admin/financeiro/plano-contas" },
+          { icon: DollarSign, label: "Centro de Custo", path: "/admin/financeiro/centro-custo" },
+          { icon: CreditCard, label: "Bancos", path: "/admin/financeiro/bancos" },
+        ],
+      },
     ],
   },
-  { icon: Settings, label: "Configurações", path: "/admin/configuracoes" },
 ];
 
 const AdminSidebar = () => {
