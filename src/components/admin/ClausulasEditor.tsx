@@ -249,6 +249,6 @@ const ClausulasEditor = ({ initialClauses, onSave, title, description }: Clausul
   );
 };
 
-export { ClausulasEditor, defaultLocacaoClauses };
+export { ClausulasEditor, defaultLocacaoClauses, defaultVendaClauses };
 export type { Clause };
 export default ClausulasEditor;
