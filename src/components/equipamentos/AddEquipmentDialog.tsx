@@ -165,7 +165,7 @@ export function AddEquipmentDialog({ open, onOpenChange, equipment }: AddEquipme
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl bg-card">
+      <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
             {equipment ? "Editar Equipamento" : "Novo Equipamento"}
@@ -174,7 +174,7 @@ export function AddEquipmentDialog({ open, onOpenChange, equipment }: AddEquipme
           <DialogDescription>Preencha os dados para cadastrar um novo equipamento no sistema.</DialogDescription>
         </DialogHeader>
 
-        <div className="max-h-[70vh] overflow-y-auto pr-6">
+        <div className="flex-1 overflow-y-auto pr-2 -mr-2">
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
