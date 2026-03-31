@@ -19,7 +19,7 @@ import {
 
 import { PlusCircle, Phone, Eye, Pencil, Trash2 } from "lucide-react";
 import { AddSupplierDialog } from "@/components/fornecedores/AddSupplierDialog";
-import { getContactPhone, getWhatsappLink } from "@/lib/contact";
+import { getContactPhone, getWhatsappLink, openWhatsappLink } from "@/lib/contact";
 
 export default function Fornecedores() {
   const { suppliers, deleteSupplier } = useStore();
@@ -128,10 +128,14 @@ export default function Fornecedores() {
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1">
                             {whatsappLink && (
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-green-500 hover:text-green-400" asChild>
-                                <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
-                                  <Phone className="h-4 w-4" />
-                                </a>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-green-500 hover:text-green-400"
+                                onClick={() => openWhatsappLink(supplier)}
+                              >
+                                <Phone className="h-4 w-4" />
                               </Button>
                             )}
 

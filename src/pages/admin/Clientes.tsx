@@ -27,7 +27,7 @@ import {
 
 import { PlusCircle, Phone, Mail, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { AddClientDialog } from "@/components/clientes/AddClientDialog";
-import { getContactPhone, getWhatsappLink } from "@/lib/contact";
+import { getContactPhone, getWhatsappLink, openWhatsappLink } from "@/lib/contact";
 
 export default function Clientes() {
   const { clients, deleteClient } = useStore();
@@ -160,14 +160,13 @@ export default function Clientes() {
                           <div className="flex items-center justify-end gap-1">
                             {whatsappLink && (
                               <Button
+                                type="button"
                                 variant="ghost"
                                 size="icon"
                                 className="h-8 w-8 text-green-500 hover:text-green-400"
-                                asChild
+                                onClick={() => openWhatsappLink(client)}
                               >
-                                <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
-                                  <Phone className="h-4 w-4" />
-                                </a>
+                                <Phone className="h-4 w-4" />
                               </Button>
                             )}
 
