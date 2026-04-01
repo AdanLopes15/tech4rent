@@ -350,7 +350,10 @@ export default function Contratos() {
                       return (
                         <TableRow key={contract.id}>
                           <TableCell>
-                            <Checkbox />
+                            <Checkbox
+                              checked={selectedIds.has(contract.id)}
+                              onCheckedChange={() => toggleSelect(contract.id)}
+                            />
                           </TableCell>
                           <TableCell className="font-medium text-primary">{contract.id}</TableCell>
                           <TableCell>{getClientName(contract.clientId)}</TableCell>
