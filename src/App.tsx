@@ -27,6 +27,7 @@ import FluxoCaixa from "./pages/admin/FluxoCaixa";
 import Extrato from "./pages/admin/Extrato";
 import DRE from "./pages/admin/DRE";
 import Relatorios from "./pages/admin/Relatorios";
+import NFe from "./pages/admin/NFe";
 
 const queryClient = new QueryClient();
 
