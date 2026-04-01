@@ -79,6 +79,24 @@ export default function Contratos() {
   const [statusFilter, setStatusFilter] = useState("todos");
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [locacaoOpen, setLocacaoOpen] = useState(true);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map((c: any) => c.id)));
+    }
+  };
 
   const filtered = useMemo(() => {
     return contracts.filter((c: any) => {
@@ -210,9 +228,9 @@ export default function Contratos() {
         <CardHeader className="flex-row items-center justify-between space-y-0">
           <CardTitle>Filtros de Contratos</CardTitle>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" disabled={selectedIds.size === 0}>
               <Download className="mr-2 h-4 w-4" />
-              Gerar faturas (PDF)
+              Gerar faturas (PDF){selectedIds.size > 0 && ` • ${selectedIds.size}`}
             </Button>
             <Button variant="outline" size="sm" onClick={handleAddNew}>
               <PlusCircle className="mr-2 h-4 w-4" />
@@ -293,7 +311,12 @@ export default function Contratos() {
           <CollapsibleTrigger asChild>
             <CardHeader className="cursor-pointer flex-row items-center justify-between space-y-0">
               <CardTitle className="text-base">Contratos de Locação</CardTitle>
-              <ChevronUp className={cn("h-5 w-5 transition-transform", !locacaoOpen && "rotate-180")} />
+              <div className="flex items-center gap-2">
+                {selectedIds.size > 0 && (
+                  <Badge className="bg-primary text-primary-foreground">{selectedIds.size} selecionado(s)</Badge>
+                )}
+                <ChevronUp className={cn("h-5 w-5 transition-transform", !locacaoOpen && "rotate-180")} />
+              </div>
             </CardHeader>
           </CollapsibleTrigger>
           <CollapsibleContent>
@@ -302,7 +325,10 @@ export default function Contratos() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-10">
-                      <Checkbox />
+                      <Checkbox
+                        checked={filtered.length > 0 && selectedIds.size === filtered.length}
+                        onCheckedChange={toggleSelectAll}
+                      />
                     </TableHead>
                     <TableHead className="text-primary">Contrato</TableHead>
                     <TableHead className="text-primary">Cliente</TableHead>
@@ -324,7 +350,10 @@ export default function Contratos() {
                       return (
                         <TableRow key={contract.id}>
                           <TableCell>
-                            <Checkbox />
+                            <Checkbox
+                              checked={selectedIds.has(contract.id)}
+                              onCheckedChange={() => toggleSelect(contract.id)}
+                            />
                           </TableCell>
                           <TableCell className="font-medium text-primary">{contract.id}</TableCell>
                           <TableCell>{getClientName(contract.clientId)}</TableCell>
