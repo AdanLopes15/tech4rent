@@ -228,9 +228,9 @@ export default function Contratos() {
         <CardHeader className="flex-row items-center justify-between space-y-0">
           <CardTitle>Filtros de Contratos</CardTitle>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" disabled={selectedIds.size === 0}>
               <Download className="mr-2 h-4 w-4" />
-              Gerar faturas (PDF)
+              Gerar faturas (PDF){selectedIds.size > 0 && ` • ${selectedIds.size}`}
             </Button>
             <Button variant="outline" size="sm" onClick={handleAddNew}>
               <PlusCircle className="mr-2 h-4 w-4" />
