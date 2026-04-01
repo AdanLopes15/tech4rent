@@ -37,7 +37,7 @@ const FluxoCaixa = () => {
     { value: "fluxo-caixa", label: "Fluxo de Caixa" },
     { value: "extrato", label: "Extrato", path: "/admin/financeiro/extrato" },
     { value: "dre", label: "DRE", path: "/admin/financeiro/dre" },
-    { value: "relatorios", label: "Relatórios" },
+    { value: "relatorios", label: "Relatórios", path: "/admin/financeiro/relatorios" },
   ];
 
   // Filter by account

@@ -27,7 +27,7 @@ const DRE = () => {
     { value: "fluxo-caixa", label: "Fluxo de Caixa", path: "/admin/financeiro/fluxo-caixa" },
     { value: "extrato", label: "Extrato", path: "/admin/financeiro/extrato" },
     { value: "dre", label: "DRE" },
-    { value: "relatorios", label: "Relatórios" },
+    { value: "relatorios", label: "Relatórios", path: "/admin/financeiro/relatorios" },
   ];
 
   const dreData = useMemo(() => {
