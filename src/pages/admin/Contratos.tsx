@@ -325,7 +325,10 @@ export default function Contratos() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-10">
-                      <Checkbox />
+                      <Checkbox
+                        checked={filtered.length > 0 && selectedIds.size === filtered.length}
+                        onCheckedChange={toggleSelectAll}
+                      />
                     </TableHead>
                     <TableHead className="text-primary">Contrato</TableHead>
                     <TableHead className="text-primary">Cliente</TableHead>
