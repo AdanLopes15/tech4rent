@@ -28,6 +28,9 @@ import Extrato from "./pages/admin/Extrato";
 import DRE from "./pages/admin/DRE";
 import Relatorios from "./pages/admin/Relatorios";
 import NFe from "./pages/admin/NFe";
+import PlanoContas from "./pages/admin/PlanoContas";
+import CentroCusto from "./pages/admin/CentroCusto";
+import Bancos from "./pages/admin/Bancos";
 
 const queryClient = new QueryClient();
 
