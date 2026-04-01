@@ -311,7 +311,12 @@ export default function Contratos() {
           <CollapsibleTrigger asChild>
             <CardHeader className="cursor-pointer flex-row items-center justify-between space-y-0">
               <CardTitle className="text-base">Contratos de Locação</CardTitle>
-              <ChevronUp className={cn("h-5 w-5 transition-transform", !locacaoOpen && "rotate-180")} />
+              <div className="flex items-center gap-2">
+                {selectedIds.size > 0 && (
+                  <Badge className="bg-primary text-primary-foreground">{selectedIds.size} selecionado(s)</Badge>
+                )}
+                <ChevronUp className={cn("h-5 w-5 transition-transform", !locacaoOpen && "rotate-180")} />
+              </div>
             </CardHeader>
           </CollapsibleTrigger>
           <CollapsibleContent>
