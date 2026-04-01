@@ -28,6 +28,9 @@ import Extrato from "./pages/admin/Extrato";
 import DRE from "./pages/admin/DRE";
 import Relatorios from "./pages/admin/Relatorios";
 import NFe from "./pages/admin/NFe";
+import PlanoContas from "./pages/admin/PlanoContas";
+import CentroCusto from "./pages/admin/CentroCusto";
+import Bancos from "./pages/admin/Bancos";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +63,9 @@ const App = () => (
             <Route path="financeiro/dre" element={<DRE />} />
             <Route path="financeiro/relatorios" element={<Relatorios />} />
             <Route path="financeiro/nfe" element={<NFe />} />
+            <Route path="financeiro/plano-contas" element={<PlanoContas />} />
+            <Route path="financeiro/centro-custo" element={<CentroCusto />} />
+            <Route path="financeiro/bancos" element={<Bancos />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
