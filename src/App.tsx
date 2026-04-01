@@ -21,6 +21,7 @@ import Vendas from "./pages/admin/Vendas";
 import OrdensCompra from "./pages/admin/OrdensCompra";
 import Financeiro from "./pages/admin/Financeiro";
 import ContasReceber from "./pages/admin/ContasReceber";
+import ContasPagar from "./pages/admin/ContasPagar";
 
 const queryClient = new QueryClient();
 
