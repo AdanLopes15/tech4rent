@@ -26,6 +26,7 @@ import Boletos from "./pages/admin/Boletos";
 import FluxoCaixa from "./pages/admin/FluxoCaixa";
 import Extrato from "./pages/admin/Extrato";
 import DRE from "./pages/admin/DRE";
+import Relatorios from "./pages/admin/Relatorios";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const App = () => (
             <Route path="financeiro/fluxo-caixa" element={<FluxoCaixa />} />
             <Route path="financeiro/extrato" element={<Extrato />} />
             <Route path="financeiro/dre" element={<DRE />} />
+            <Route path="financeiro/relatorios" element={<Relatorios />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

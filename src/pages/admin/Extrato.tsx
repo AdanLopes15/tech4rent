@@ -36,7 +36,7 @@ const Extrato = () => {
     { value: "fluxo-caixa", label: "Fluxo de Caixa", path: "/admin/financeiro/fluxo-caixa" },
     { value: "extrato", label: "Extrato" },
     { value: "dre", label: "DRE", path: "/admin/financeiro/dre" },
-    { value: "relatorios", label: "Relatórios" },
+    { value: "relatorios", label: "Relatórios", path: "/admin/financeiro/relatorios" },
   ];
 
   const filteredRevenues = useMemo(() => {
