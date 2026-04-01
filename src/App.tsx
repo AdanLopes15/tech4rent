@@ -24,6 +24,7 @@ import ContasReceber from "./pages/admin/ContasReceber";
 import ContasPagar from "./pages/admin/ContasPagar";
 import Boletos from "./pages/admin/Boletos";
 import FluxoCaixa from "./pages/admin/FluxoCaixa";
+import Extrato from "./pages/admin/Extrato";
 
 const queryClient = new QueryClient();
 
