@@ -26,6 +26,7 @@ import Boletos from "./pages/admin/Boletos";
 import FluxoCaixa from "./pages/admin/FluxoCaixa";
 import Extrato from "./pages/admin/Extrato";
 import DRE from "./pages/admin/DRE";
+import Relatorios from "./pages/admin/Relatorios";
 
 const queryClient = new QueryClient();
 
