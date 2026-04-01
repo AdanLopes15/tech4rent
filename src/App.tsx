@@ -20,6 +20,7 @@ import Contratos from "./pages/admin/Contratos";
 import Vendas from "./pages/admin/Vendas";
 import OrdensCompra from "./pages/admin/OrdensCompra";
 import Financeiro from "./pages/admin/Financeiro";
+import ContasReceber from "./pages/admin/ContasReceber";
 
 const queryClient = new QueryClient();
 
