@@ -22,6 +22,7 @@ import OrdensCompra from "./pages/admin/OrdensCompra";
 import Financeiro from "./pages/admin/Financeiro";
 import ContasReceber from "./pages/admin/ContasReceber";
 import ContasPagar from "./pages/admin/ContasPagar";
+import Boletos from "./pages/admin/Boletos";
 
 const queryClient = new QueryClient();
 
