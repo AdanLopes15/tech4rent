@@ -79,6 +79,24 @@ export default function Contratos() {
   const [statusFilter, setStatusFilter] = useState("todos");
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [locacaoOpen, setLocacaoOpen] = useState(true);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map((c: any) => c.id)));
+    }
+  };
 
   const filtered = useMemo(() => {
     return contracts.filter((c: any) => {
