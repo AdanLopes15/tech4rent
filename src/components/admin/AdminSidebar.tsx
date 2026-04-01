@@ -68,8 +68,8 @@ const menuItems: MenuItem[] = [
       { icon: BarChart3, label: "Fluxo de Caixa", path: "/admin/financeiro/fluxo-caixa" },
       { icon: ArrowLeftRight, label: "Extrato", path: "/admin/financeiro/extrato" },
       { icon: FileSpreadsheet, label: "DRE", path: "/admin/financeiro/dre" },
-      { icon: FileCheck, label: "NFe", path: "/admin/financeiro/nfe" },
       { icon: FileSpreadsheet, label: "Relatórios", path: "/admin/financeiro/relatorios" },
+      { icon: FileCheck, label: "NFe", path: "/admin/financeiro/nfe" },
       {
         icon: ListCollapse,
         label: "Cadastros",
