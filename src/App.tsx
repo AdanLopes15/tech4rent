@@ -19,6 +19,7 @@ import Orcamentos from "./pages/admin/Orcamentos";
 import Contratos from "./pages/admin/Contratos";
 import Vendas from "./pages/admin/Vendas";
 import OrdensCompra from "./pages/admin/OrdensCompra";
+import Financeiro from "./pages/admin/Financeiro";
 
 const queryClient = new QueryClient();
 
