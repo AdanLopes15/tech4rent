@@ -22,20 +22,24 @@ interface Account {
 }
 
 const initialAccounts: Account[] = [
+  // Receitas
   { id: "1", code: "2.", name: "Aluguel de Equipamentos", type: "receita", parentId: null, description: "" },
   { id: "2", code: "2.1", name: "Aluguel Anual", type: "receita", parentId: "1", description: "" },
   { id: "3", code: "1", name: "Vendas de Equipamento", type: "receita", parentId: null, description: "" },
   { id: "4", code: "1.1", name: "Vendas Avista", type: "receita", parentId: "3", description: "" },
   { id: "5", code: "3.", name: "Aporte", type: "receita", parentId: null, description: "" },
   { id: "6", code: "3.1", name: "Aporte Sócio", type: "receita", parentId: "5", description: "" },
+  // Despesas - Comercial
   { id: "7", code: "4.", name: "Despesas com Comercial", type: "despesa", parentId: null, description: "" },
   { id: "8", code: "4.1", name: "Comissões Clientes Atual", type: "despesa", parentId: "7", description: "" },
   { id: "9", code: "4.2", name: "Comissões Novos Clientes", type: "despesa", parentId: "7", description: "" },
+  // Despesas - Viagens
   { id: "10", code: "3.", name: "Despesas com Viagens", type: "despesa", parentId: null, description: "" },
   { id: "11", code: "3.3", name: "Almoço/Jantar/Lanche", type: "despesa", parentId: "10", description: "" },
   { id: "12", code: "3.1", name: "Hotéis/Pousada", type: "despesa", parentId: "10", description: "" },
   { id: "13", code: "3.4", name: "Locação de Veículos/Estacionamento/Uber", type: "despesa", parentId: "10", description: "" },
   { id: "14", code: "3.2", name: "Combustíveis/Pedágio", type: "despesa", parentId: "10", description: "" },
+  // Despesas - Pessoal
   { id: "15", code: "1.", name: "Despesas com Pessoal", type: "despesa", parentId: null, description: "" },
   { id: "16", code: "1.7", name: "Encargos", type: "despesa", parentId: "15", description: "" },
   { id: "17", code: "1.2", name: "Férias", type: "despesa", parentId: "15", description: "" },
@@ -45,6 +49,43 @@ const initialAccounts: Account[] = [
   { id: "21", code: "1.5", name: "Rescisão/Acordo", type: "despesa", parentId: "15", description: "" },
   { id: "22", code: "1.12-", name: "Vestimento/utensílios", type: "despesa", parentId: "15", description: "" },
   { id: "23", code: "1.6", name: "Encargos", type: "despesa", parentId: "15", description: "" },
+  { id: "24", code: "Alguel", name: "Aluguel", type: "despesa", parentId: "15", description: "" },
+  { id: "25", code: "1.1", name: "Salários", type: "despesa", parentId: "15", description: "" },
+  { id: "26", code: "1.9", name: "Terceirização", type: "despesa", parentId: "15", description: "" },
+  { id: "27", code: "1.11", name: "Prolábore", type: "despesa", parentId: "15", description: "" },
+  { id: "28", code: "1.8", name: "Benefícios/Bonificações", type: "despesa", parentId: "15", description: "" },
+  // Despesas - Administrativas
+  { id: "29", code: "2.", name: "Despesas Administrativas", type: "despesa", parentId: null, description: "" },
+  { id: "30", code: "2.9", name: "Faxineira", type: "despesa", parentId: "29", description: "" },
+  { id: "31", code: "2.3", name: "Luz", type: "despesa", parentId: "29", description: "" },
+  { id: "32", code: "2.14", name: "Honorários Advocatícios", type: "despesa", parentId: "29", description: "" },
+  { id: "33", code: "2.5", name: "Licença de Uso Dados/Sistemas", type: "despesa", parentId: "29", description: "" },
+  { id: "34", code: "2.8", name: "Material de Limpeza/Higiene", type: "despesa", parentId: "29", description: "" },
+  { id: "35", code: "2.17", name: "Equipamentos", type: "despesa", parentId: "29", description: "" },
+  { id: "36", code: "2.4", name: "Telefonia e Internet", type: "despesa", parentId: "29", description: "" },
+  { id: "37", code: "2.6", name: "Manutenção Predial", type: "despesa", parentId: "29", description: "" },
+  { id: "38", code: "2.7", name: "Material de Escritório", type: "despesa", parentId: "29", description: "" },
+  { id: "39", code: "2.16", name: "Honorários de Contabilidade", type: "despesa", parentId: "29", description: "" },
+  { id: "40", code: "2.15", name: "Acordos/Processos", type: "despesa", parentId: "29", description: "" },
+  { id: "41", code: "2.19", name: "Outras despesas ADM", type: "despesa", parentId: "29", description: "" },
+  { id: "42", code: "2.11", name: "Equipamentos e utensílios", type: "despesa", parentId: "29", description: "" },
+  { id: "43", code: "2.1", name: "Aluguel", type: "despesa", parentId: "29", description: "" },
+  { id: "44", code: "2.13", name: "Marketing", type: "despesa", parentId: "29", description: "" },
+  { id: "45", code: "2.12", name: "Eventos e Confraternização", type: "despesa", parentId: "29", description: "" },
+  { id: "46", code: "2.10", name: "Copa e Cozinha", type: "despesa", parentId: "29", description: "" },
+  { id: "47", code: "2.2", name: "Água", type: "despesa", parentId: "29", description: "" },
+  { id: "48", code: "2.18", name: "Taxas/Emolumentos/Guias/Demais tarifas", type: "despesa", parentId: "29", description: "" },
+  // Despesas - Financeiras
+  { id: "49", code: "6.", name: "Despesas Financeiras", type: "despesa", parentId: null, description: "" },
+  { id: "50", code: "6.1", name: "Antecipação", type: "despesa", parentId: "49", description: "" },
+  { id: "51", code: "6.3", name: "Taxas Bancárias", type: "despesa", parentId: "49", description: "" },
+  { id: "52", code: "6.2", name: "Empréstimos", type: "despesa", parentId: "49", description: "" },
+  // Despesas - Gerenciamento de Risco
+  { id: "53", code: "5.", name: "Gerenciamento de Risco", type: "despesa", parentId: null, description: "" },
+  { id: "54", code: "5.2", name: "Extravios", type: "despesa", parentId: "53", description: "" },
+  { id: "55", code: "5.1", name: "Roubo", type: "despesa", parentId: "53", description: "" },
+  { id: "56", code: "5.3", name: "Sinistros", type: "despesa", parentId: "53", description: "" },
+  { id: "57", code: "5.4", name: "Seguros e Monitoramento", type: "despesa", parentId: "53", description: "" },
 ];
 
 const PlanoContas = () => {
