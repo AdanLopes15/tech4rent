@@ -1,136 +1,379 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+//src/pages/admin/ContasPagar.tsx
+
+import { useState, useMemo, useEffect } from "react";
 import { useStore } from "@/store";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn, formatCurrency } from "@/lib/utils";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { TrendingDown, AlertCircle, Plus, ArrowLeftRight, Search, ChevronDown, ChevronUp, MoreHorizontal, Eye, Pencil, Trash2, CheckCircle, Upload, Undo2 } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
-import { format, isToday, isBefore, startOfDay } from "date-fns";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  TrendingDown,
+  AlertCircle,
+  Plus,
+  ArrowLeftRight,
+  Search,
+  ChevronDown,
+  ChevronUp,
+  MoreHorizontal,
+  Eye,
+  Pencil,
+  Trash2,
+  CheckCircle,
+  Upload,
+  Undo2,
+  CalendarIcon,
+  ArrowUp,
+  ArrowDown,
+  Link as LinkIcon,
+} from "lucide-react";
+import {
+  format,
+  isBefore,
+  startOfToday,
+  isSameDay,
+  startOfDay,
+  endOfDay,
+  isWithinInterval,
+  compareAsc,
+} from "date-fns";
+import { ptBR } from "date-fns/locale";
+import type { DateRange } from "react-day-picker";
 import { useNavigate } from "react-router-dom";
 import { AddExpenseDialog } from "@/components/financeiro/AddExpenseDialog";
 import { TransferDialog } from "@/components/financeiro/TransferDialog";
+import { AttachReceiptDialog } from "@/components/financeiro/AttachReceiptDialog";
 import { toast } from "sonner";
+
+type SortableKeys = "dueDate" | "description" | "valorTotal" | "currentStatus";
 
 const ContasPagar = () => {
   const navigate = useNavigate();
-  const { expenses, loading, fetchAllData, markExpenseAsPaid, unmarkExpenseAsPaid, deleteExpense, attachReceiptToExpense } = useStore();
+
+  const {
+    expenses,
+    bankAccounts,
+    loading,
+    fetchAllData,
+    markExpenseAsPaid,
+    unmarkExpenseAsPaid,
+    deleteExpense,
+    deleteReceiptFromExpense,
+  } = useStore();
 
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [showTransfer, setShowTransfer] = useState(false);
+  const [showAttachReceipt, setShowAttachReceipt] = useState(false);
+
   const [editingExpense, setEditingExpense] = useState<any>(null);
+  const [viewingExpense, setViewingExpense] = useState<any>(null);
+  const [expenseToAttach, setExpenseToAttach] = useState<any>(null);
+
   const [showFilters, setShowFilters] = useState(false);
-  const [filterStatus, setFilterStatus] = useState("todos");
-  const [filterSearch, setFilterSearch] = useState("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [attachingId, setAttachingId] = useState<string | null>(null);
+  const [activeFilters, setActiveFilters] = useState<any>({});
 
-  useEffect(() => { fetchAllData(); }, [fetchAllData]);
+  const [idFilter, setIdFilter] = useState("");
+  const [descriptionFilter, setDescriptionFilter] = useState("");
+  const [vencimentoDateFilter, setVencimentoDateFilter] = useState<DateRange | undefined>();
+  const [competenceFilter, setCompetenceFilter] = useState("");
+  const [minValueFilter, setMinValueFilter] = useState("");
+  const [maxValueFilter, setMaxValueFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("todos");
+  const [bankAccountIdFilter, setBankAccountIdFilter] = useState("todos");
 
-  const aPagarHoje = useMemo(() =>
-    expenses.filter((e: any) => e.dueDate && isToday(new Date(e.dueDate)) && e.status !== "pago")
-      .reduce((s: number, e: any) => s + (e.valorTotal || 0), 0),
-    [expenses]
-  );
+  const [sortConfig, setSortConfig] = useState<{
+    key: SortableKeys;
+    direction: "ascending" | "descending";
+  } | null>({ key: "dueDate", direction: "ascending" });
 
-  const contasAtrasadas = useMemo(() =>
-    expenses.filter((e: any) => e.dueDate && isBefore(new Date(e.dueDate), startOfDay(new Date())) && e.status !== "pago")
-      .reduce((s: number, e: any) => s + (e.valorTotal || 0), 0),
-    [expenses]
-  );
+  useEffect(() => {
+    fetchAllData();
+  }, [fetchAllData]);
 
-  const filteredExpenses = useMemo(() => {
-    let filtered = [...expenses];
-    if (filterStatus !== "todos") filtered = filtered.filter((e: any) => e.status === filterStatus);
-    if (filterSearch) {
-      const search = filterSearch.toLowerCase();
-      filtered = filtered.filter((e: any) =>
-        (e.description || "").toLowerCase().includes(search) ||
-        (e.supplierName || "").toLowerCase().includes(search)
+  const handleSort = (key: SortableKeys) => {
+    let direction: "ascending" | "descending" = "ascending";
+
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === "ascending") {
+      direction = "descending";
+    }
+
+    setSortConfig({ key, direction });
+  };
+
+  const handleSearch = () => {
+    setActiveFilters({
+      id: idFilter,
+      description: descriptionFilter,
+      vencimentoDate: vencimentoDateFilter,
+      competence: competenceFilter,
+      minValue: minValueFilter ? parseFloat(minValueFilter) : undefined,
+      maxValue: maxValueFilter ? parseFloat(maxValueFilter) : undefined,
+      status: statusFilter,
+      bankAccountId: bankAccountIdFilter,
+    });
+  };
+
+  const handleClearFilters = () => {
+    setIdFilter("");
+    setDescriptionFilter("");
+    setVencimentoDateFilter(undefined);
+    setCompetenceFilter("");
+    setMinValueFilter("");
+    setMaxValueFilter("");
+    setStatusFilter("todos");
+    setBankAccountIdFilter("todos");
+    setActiveFilters({});
+  };
+
+  const {
+    processedExpenses,
+    totalAtrasado,
+    totalPagarHoje,
+  }: {
+    processedExpenses: any[];
+    totalAtrasado: number;
+    totalPagarHoje: number;
+  } = useMemo(() => {
+    const today = startOfToday();
+
+    const allExpensesWithStatus = expenses.map((expense: any) => {
+      const dueDate = expense.dueDate ? new Date(expense.dueDate) : undefined;
+      const statusNormalized = String(expense.status || "").toLowerCase();
+      const isOverdue = dueDate && statusNormalized === "pendente" && isBefore(dueDate, today);
+
+      return {
+        ...expense,
+        dueDate,
+        currentStatus: isOverdue ? "atrasado" : statusNormalized,
+        competenceMonth: expense.competenceDate
+          ? format(new Date(expense.competenceDate), "MM/yyyy")
+          : expense.competence
+            ? format(new Date(expense.competence), "MM/yyyy")
+            : null,
+      };
+    });
+
+    const filtered = allExpensesWithStatus.filter((expense: any) => {
+      const { id, description, vencimentoDate, competence, minValue, maxValue, status, bankAccountId } = activeFilters;
+
+      if (id && !String(expense.id).toLowerCase().includes(id.toLowerCase())) return false;
+
+      if (
+        description &&
+        !String(expense.description || "")
+          .toLowerCase()
+          .includes(description.toLowerCase())
+      ) {
+        return false;
+      }
+
+      if (
+        vencimentoDate?.from &&
+        expense.dueDate &&
+        !isWithinInterval(expense.dueDate, {
+          start: startOfDay(vencimentoDate.from),
+          end: endOfDay(vencimentoDate.to || vencimentoDate.from),
+        })
+      ) {
+        return false;
+      }
+
+      if (competence && expense.competenceMonth !== competence) return false;
+      if (minValue !== undefined && (expense.valorTotal || 0) < minValue) return false;
+      if (maxValue !== undefined && (expense.valorTotal || 0) > maxValue) return false;
+      if (status && status !== "todos" && expense.currentStatus !== status) return false;
+      if (bankAccountId && bankAccountId !== "todos" && expense.bankAccountId !== bankAccountId) return false;
+
+      return true;
+    });
+
+    if (sortConfig) {
+      filtered.sort((a: any, b: any) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+
+        let comparison = 0;
+
+        if (sortConfig.key === "dueDate" && aValue instanceof Date && bValue instanceof Date) {
+          comparison = compareAsc(aValue, bValue);
+        } else if (typeof aValue === "string" && typeof bValue === "string") {
+          comparison = aValue.localeCompare(bValue);
+        } else if (typeof aValue === "number" && typeof bValue === "number") {
+          comparison = aValue - bValue;
+        }
+
+        return sortConfig.direction === "descending" ? comparison * -1 : comparison;
+      });
+    }
+
+    const totalAtrasado = allExpensesWithStatus
+      .filter((expense: any) => expense.currentStatus === "atrasado")
+      .reduce((sum: number, expense: any) => sum + (expense.valorTotal || 0), 0);
+
+    const totalPagarHoje = allExpensesWithStatus
+      .filter(
+        (expense: any) =>
+          expense.dueDate &&
+          String(expense.status || "").toLowerCase() === "pendente" &&
+          isSameDay(expense.dueDate, today),
+      )
+      .reduce((sum: number, expense: any) => sum + (expense.valorTotal || 0), 0);
+
+    return { processedExpenses: filtered, totalAtrasado, totalPagarHoje };
+  }, [expenses, activeFilters, sortConfig]);
+
+  const renderSortArrow = (key: SortableKeys) => {
+    if (sortConfig?.key === key) {
+      return sortConfig.direction === "ascending" ? (
+        <ArrowUp className="h-4 w-4 ml-1 inline" />
+      ) : (
+        <ArrowDown className="h-4 w-4 ml-1 inline" />
       );
     }
-    return filtered.sort((a: any, b: any) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
-  }, [expenses, filterStatus, filterSearch]);
-
-  const handleMarkPaid = async (id: string) => {
-    try { await markExpenseAsPaid(id); toast.success("Marcado como pago!"); }
-    catch { toast.error("Erro ao marcar."); }
-  };
-
-  const handleUnmarkPaid = async (id: string) => {
-    try { await unmarkExpenseAsPaid(id); toast.success("Desmarcado!"); }
-    catch { toast.error("Erro ao desmarcar."); }
-  };
-
-  const handleDelete = async (id: string) => {
-    try { await deleteExpense(id); toast.success("Despesa excluída!"); }
-    catch { toast.error("Erro ao excluir."); }
-  };
-
-  const handleAttachReceipt = (id: string) => {
-    setAttachingId(id);
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !attachingId) return;
-    try {
-      await attachReceiptToExpense(attachingId, file);
-      toast.success("Comprovante anexado!");
-    } catch { toast.error("Erro ao anexar."); }
-    finally { setAttachingId(null); if (fileInputRef.current) fileInputRef.current.value = ""; }
+    return null;
   };
 
   const getStatusBadge = (status?: string) => {
     switch (status) {
-      case "pago": return <Badge className="bg-success/20 text-success border-0">Pago</Badge>;
-      case "atrasado": return <Badge className="bg-destructive/20 text-destructive border-0">Atrasado</Badge>;
-      default: return <Badge className="bg-warning/20 text-warning border-0">Pendente</Badge>;
+      case "pago":
+        return <Badge className="bg-success/20 text-success border-0 capitalize">Pago</Badge>;
+      case "atrasado":
+        return <Badge className="bg-destructive/20 text-destructive border-0 capitalize">Atrasado</Badge>;
+      case "cancelado":
+        return <Badge className="bg-muted text-muted-foreground border-0 capitalize">Cancelado</Badge>;
+      default:
+        return <Badge className="bg-warning/20 text-warning border-0 capitalize">Pendente</Badge>;
     }
+  };
+
+  const handleMarkPaid = async (id: string) => {
+    try {
+      await markExpenseAsPaid(id);
+      toast.success("Marcado como pago!");
+    } catch {
+      toast.error("Erro ao marcar como pago.");
+    }
+  };
+
+  const handleUnmarkPaid = async (id: string) => {
+    try {
+      await unmarkExpenseAsPaid(id);
+      toast.success("Pagamento desmarcado!");
+    } catch {
+      toast.error("Erro ao desmarcar pagamento.");
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteExpense(id);
+      toast.success("Despesa excluída!");
+    } catch {
+      toast.error("Erro ao excluir.");
+    }
+  };
+
+  const handleDeleteReceipt = async (id: string) => {
+    try {
+      await deleteReceiptFromExpense(id);
+      toast.success("Comprovante excluído!");
+    } catch {
+      toast.error("Erro ao excluir comprovante.");
+    }
+  };
+
+  const handleAddNew = () => {
+    setEditingExpense(null);
+    setViewingExpense(null);
+    setShowAddExpense(true);
+  };
+
+  const handleEdit = (expense: any) => {
+    setEditingExpense(expense);
+    setViewingExpense(null);
+    setShowAddExpense(true);
+  };
+
+  const handleView = (expense: any) => {
+    setEditingExpense(null);
+    setViewingExpense(expense);
+    setShowAddExpense(true);
+  };
+
+  const handleAttachReceipt = (expense: any) => {
+    setExpenseToAttach(expense);
+    setShowAttachReceipt(true);
+  };
+
+  const handleCloseExpenseDialog = (open: boolean) => {
+    if (!open) {
+      setEditingExpense(null);
+      setViewingExpense(null);
+    }
+    setShowAddExpense(open);
   };
 
   return (
     <div className="space-y-6">
-      <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,.png,.jpg,.jpeg" onChange={handleFileChange} />
-
-      {/* Tabs */}
-      <Tabs value="pagar" onValueChange={(val) => { if (val === "receber") navigate("/admin/financeiro/receber"); }}>
+      <Tabs
+        value="pagar"
+        onValueChange={(value) => {
+          if (value === "receber") navigate("/admin/financeiro/receber");
+        }}
+      >
         <TabsList className="bg-transparent border-b border-border rounded-none w-full justify-start gap-0 h-auto p-0">
-          <TabsTrigger value="receber" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2 text-sm">Contas a Receber</TabsTrigger>
-          <TabsTrigger value="pagar" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2 text-sm">Contas a Pagar</TabsTrigger>
+          <TabsTrigger
+            value="receber"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2 text-sm"
+          >
+            Contas a Receber
+          </TabsTrigger>
+          <TabsTrigger
+            value="pagar"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2 text-sm"
+          >
+            Contas a Pagar
+          </TabsTrigger>
         </TabsList>
       </Tabs>
 
-      {/* Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Card className="border-border">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-1">
               <span className="text-sm text-muted-foreground">A Pagar Hoje</span>
-              <TrendingDown className="h-4 w-4 text-muted-foreground" />
+              <TrendingDown className="h-4 w-4 text-amber-500" />
             </div>
-            <p className="text-xl font-bold text-foreground">{loading ? "..." : formatCurrency(aPagarHoje)}</p>
+            <p className="text-xl font-bold text-foreground">{loading ? "..." : formatCurrency(totalPagarHoje)}</p>
             <p className="text-xs text-muted-foreground">Soma das despesas com vencimento hoje.</p>
           </CardContent>
         </Card>
+
         <Card className="border-border">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-1">
               <span className="text-sm text-muted-foreground">Contas Atrasadas</span>
               <AlertCircle className="h-4 w-4 text-destructive" />
             </div>
-            <p className="text-xl font-bold text-destructive">{loading ? "..." : formatCurrency(contasAtrasadas)}</p>
+            <p className="text-xl font-bold text-destructive">{loading ? "..." : formatCurrency(totalAtrasado)}</p>
             <p className="text-xs text-muted-foreground">Total de contas com pagamento vencido.</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Advanced Search */}
       <Card className="border-border">
         <CardContent className="p-5">
           <div className="flex items-center justify-between">
@@ -138,93 +381,281 @@ const ContasPagar = () => {
               <h3 className="text-sm font-semibold text-foreground">Busca Avançada</h3>
               <p className="text-xs text-muted-foreground">Utilize os filtros para refinar sua busca.</p>
             </div>
+
             <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowFilters(!showFilters)}>
-              <Search className="h-4 w-4" /> Mostrar/Ocultar Filtros
+              <Search className="h-4 w-4" />
+              Mostrar/Ocultar Filtros
               {showFilters ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
             </Button>
           </div>
+
           {showFilters && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-              <Input placeholder="Buscar por descrição ou fornecedor..." value={filterSearch} onChange={(e) => setFilterSearch(e.target.value)} />
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos</SelectItem>
-                  <SelectItem value="pendente">Pendente</SelectItem>
-                  <SelectItem value="pago">Pago</SelectItem>
-                  <SelectItem value="atrasado">Atrasado</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="mt-4 border-t pt-4 grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-4">
+              <div className="space-y-2">
+                <Label>Código</Label>
+                <Input
+                  placeholder="ID do lançamento..."
+                  value={idFilter}
+                  onChange={(e) => setIdFilter(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Descrição</Label>
+                <Input
+                  placeholder="Parte da descrição..."
+                  value={descriptionFilter}
+                  onChange={(e) => setDescriptionFilter(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Período de Vencimento</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !vencimentoDateFilter && "text-muted-foreground",
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {vencimentoDateFilter?.from ? (
+                        vencimentoDateFilter.to ? (
+                          <>
+                            {format(vencimentoDateFilter.from, "dd/MM/yyyy")} -{" "}
+                            {format(vencimentoDateFilter.to, "dd/MM/yyyy")}
+                          </>
+                        ) : (
+                          format(vencimentoDateFilter.from, "dd/MM/yyyy")
+                        )
+                      ) : (
+                        <span>Selecione</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      initialFocus
+                      mode="range"
+                      selected={vencimentoDateFilter}
+                      onSelect={setVencimentoDateFilter}
+                      numberOfMonths={2}
+                      locale={ptBR}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Mês de Competência</Label>
+                <Input
+                  placeholder="mm/aaaa"
+                  value={competenceFilter}
+                  onChange={(e) => setCompetenceFilter(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Valor Mín.</Label>
+                <Input
+                  placeholder="0,00"
+                  type="number"
+                  value={minValueFilter}
+                  onChange={(e) => setMinValueFilter(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Valor Máx.</Label>
+                <Input
+                  placeholder="1000,00"
+                  type="number"
+                  value={maxValueFilter}
+                  onChange={(e) => setMaxValueFilter(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Situação</Label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todas</SelectItem>
+                    <SelectItem value="pago">Pago</SelectItem>
+                    <SelectItem value="pendente">Pendente</SelectItem>
+                    <SelectItem value="atrasado">Atrasado</SelectItem>
+                    <SelectItem value="cancelado">Cancelado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Conta Bancária</Label>
+                <Select value={bankAccountIdFilter} onValueChange={setBankAccountIdFilter}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todas</SelectItem>
+                    {bankAccounts.map((account: any) => (
+                      <SelectItem key={account.id} value={account.id}>
+                        {account.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="md:col-span-4 flex items-center gap-2 mt-2">
+                <Button onClick={handleSearch}>
+                  <Search className="mr-2 h-4 w-4" />
+                  Buscar
+                </Button>
+                <Button variant="destructive" onClick={handleClearFilters}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Limpar
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Table */}
       <Card className="border-border">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-lg">Contas a Pagar</CardTitle>
-              <p className="text-xs text-muted-foreground">Gerencie suas despesas e faturas de fornecedores.</p>
+              <CardDescription>Gerencie suas despesas e faturas de fornecedores.</CardDescription>
             </div>
+
             <div className="flex gap-2">
               <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowTransfer(true)}>
-                <ArrowLeftRight className="h-4 w-4" /> Transferência
+                <ArrowLeftRight className="h-4 w-4" />
+                Transferência
               </Button>
-              <Button size="sm" className="gap-2" onClick={() => { setEditingExpense(null); setShowAddExpense(true); }}>
-                <Plus className="h-4 w-4" /> Nova Despesa
+
+              <Button size="sm" className="gap-2" onClick={handleAddNew}>
+                <Plus className="h-4 w-4" />
+                Nova Despesa
               </Button>
             </div>
           </div>
         </CardHeader>
+
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Vencimento</TableHead>
-                <TableHead>Descrição</TableHead>
-                <TableHead>Valor</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead className="cursor-pointer" onClick={() => handleSort("dueDate")}>
+                  Vencimento {renderSortArrow("dueDate")}
+                </TableHead>
+                <TableHead className="cursor-pointer" onClick={() => handleSort("description")}>
+                  Descrição {renderSortArrow("description")}
+                </TableHead>
+                <TableHead className="cursor-pointer" onClick={() => handleSort("valorTotal")}>
+                  Valor {renderSortArrow("valorTotal")}
+                </TableHead>
+                <TableHead className="cursor-pointer" onClick={() => handleSort("currentStatus")}>
+                  Status {renderSortArrow("currentStatus")}
+                </TableHead>
                 <TableHead>Ação de Pagar</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
-              {filteredExpenses.length > 0 ? (
-                filteredExpenses.map((e: any) => (
-                  <TableRow key={e.id}>
-                    <TableCell className="text-sm">{e.dueDate ? format(new Date(e.dueDate), "dd/MM/yyyy") : "-"}</TableCell>
-                    <TableCell className="text-sm">{e.description || "-"}</TableCell>
-                    <TableCell className="text-sm">{formatCurrency(e.valorTotal || 0)}</TableCell>
-                    <TableCell>{getStatusBadge(e.status)}</TableCell>
+              {processedExpenses.length > 0 ? (
+                processedExpenses.map((expense: any) => (
+                  <TableRow key={expense.id}>
+                    <TableCell className="text-sm">
+                      {expense.dueDate ? format(expense.dueDate, "dd/MM/yyyy") : "-"}
+                    </TableCell>
+
+                    <TableCell className="text-sm">
+                      <div className="flex items-center gap-2">
+                        {expense.isTransfer && <ArrowLeftRight className="h-4 w-4 text-muted-foreground" />}
+                        <span>{expense.description || "-"}</span>
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="text-sm">{formatCurrency(expense.valorTotal || 0)}</TableCell>
+
+                    <TableCell>{getStatusBadge(expense.currentStatus)}</TableCell>
+
                     <TableCell>
-                      {e.status !== "pago" && (
-                        <Button variant="outline" size="sm" className="gap-1 text-success border-success/50 hover:bg-success/10" onClick={() => handleMarkPaid(e.id)}>
-                          <CheckCircle className="h-3 w-3" /> Marcar como Pago
+                      {(expense.currentStatus === "pendente" || expense.currentStatus === "atrasado") && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1"
+                          onClick={() => handleMarkPaid(expense.id)}
+                        >
+                          <CheckCircle className="h-3 w-3 text-green-500" />
+                          Marcar como Pago
                         </Button>
                       )}
                     </TableCell>
+
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
                         </DropdownMenuTrigger>
+
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => { setEditingExpense(e); setShowAddExpense(true); }}>
-                            <Pencil className="h-4 w-4 mr-2" /> Editar
+                          <DropdownMenuItem onClick={() => handleView(expense)}>
+                            <Eye className="h-4 w-4 mr-2" />
+                            Visualizar
                           </DropdownMenuItem>
-                          {e.status === "pago" && (
-                            <DropdownMenuItem onClick={() => handleUnmarkPaid(e.id)}>
-                              <Undo2 className="h-4 w-4 mr-2" /> Desmarcar Pago
+
+                          <DropdownMenuItem onClick={() => handleEdit(expense)}>
+                            <Pencil className="h-4 w-4 mr-2" />
+                            Editar
+                          </DropdownMenuItem>
+
+                          {expense.currentStatus === "pago" && (
+                            <DropdownMenuItem onClick={() => handleUnmarkPaid(expense.id)}>
+                              <Undo2 className="h-4 w-4 mr-2" />
+                              Desmarcar Pago
                             </DropdownMenuItem>
                           )}
-                          <DropdownMenuItem onClick={() => handleAttachReceipt(e.id)}>
-                            <Upload className="h-4 w-4 mr-2" /> Anexar Comprovante
-                          </DropdownMenuItem>
+
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(e.id)}>
-                            <Trash2 className="h-4 w-4 mr-2" /> Excluir
+
+                          {expense.receiptUrl ? (
+                            <>
+                              <DropdownMenuItem onClick={() => window.open(expense.receiptUrl, "_blank")}>
+                                <LinkIcon className="h-4 w-4 mr-2" />
+                                Visualizar Comprovante
+                              </DropdownMenuItem>
+
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onClick={() => handleDeleteReceipt(expense.id)}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Excluir Comprovante
+                              </DropdownMenuItem>
+                            </>
+                          ) : (
+                            <DropdownMenuItem onClick={() => handleAttachReceipt(expense)}>
+                              <Upload className="h-4 w-4 mr-2" />
+                              Anexar Comprovante
+                            </DropdownMenuItem>
+                          )}
+
+                          <DropdownMenuSeparator />
+
+                          <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(expense.id)}>
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Excluir
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -233,7 +664,9 @@ const ContasPagar = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-6">Nenhuma despesa encontrada.</TableCell>
+                  <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-6">
+                    Nenhuma despesa encontrada.
+                  </TableCell>
                 </TableRow>
               )}
             </TableBody>
@@ -241,8 +674,16 @@ const ContasPagar = () => {
         </CardContent>
       </Card>
 
-      <AddExpenseDialog open={showAddExpense} onOpenChange={setShowAddExpense} editingExpense={editingExpense} />
+      <AddExpenseDialog
+        open={showAddExpense}
+        onOpenChange={handleCloseExpenseDialog}
+        expense={editingExpense || viewingExpense}
+        viewOnly={!!viewingExpense}
+      />
+
       <TransferDialog open={showTransfer} onOpenChange={setShowTransfer} />
+
+      <AttachReceiptDialog open={showAttachReceipt} onOpenChange={setShowAttachReceipt} expense={expenseToAttach} />
     </div>
   );
 };
