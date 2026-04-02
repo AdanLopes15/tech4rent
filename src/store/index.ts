@@ -484,6 +484,22 @@ const useStore = create<State & Actions>((set, get) => {
       state: supplier.address?.state || supplier.state || "",
     };
 
+    const normalizeCollaboratorData = (collaborator: any) => {
+      const telefone = collaborator.telefone || collaborator.phone || collaborator.whatsapp || "";
+
+      return {
+        ...collaborator,
+
+        telefone,
+        phone: telefone,
+        whatsapp: telefone,
+
+        clientName: collaborator.clientName || "",
+        permission: collaborator.permission || "colaborador",
+        status: collaborator.status || "ativo",
+      };
+    };
+
     const razaoSocial = supplier.razaoSocial || supplier.name || "";
     const contato = supplier.contato || supplier.contactPerson || "";
     const observacoes = supplier.observacoes || supplier.notes || "";
@@ -690,7 +706,7 @@ const useStore = create<State & Actions>((set, get) => {
           newState.expenses = expensesSnap.docs.map((d) =>
             convertTimestampToISO(mapDoc(d), ["dueDate", "createdAt", "paymentDate", "competenceDate"]),
           );
-          newState.collaborators = collaboratorsSnap.docs.map(mapDoc);
+          newState.collaborators = collaboratorsSnap.docs.map((d) => normalizeCollaboratorData(mapDoc(d)));
           newState.systemUsers = systemUsersSnap.docs.map((d) => ({
             uid: d.id,
             ...d.data(),
@@ -1411,23 +1427,31 @@ const useStore = create<State & Actions>((set, get) => {
 
     addCollaborator: async (collaborator) => {
       centralValidateDocument(collaborator.cpf, "employee", null);
+
       const newId = await get().getNextId("collaborators");
+      const normalizedCollaborator = normalizeCollaboratorData(collaborator);
+
       await setDoc(doc(db, "collaborators", newId), {
-        ...collaborator,
+        ...normalizedCollaborator,
         id: newId,
       });
+
       set((state) => ({
-        collaborators: [...state.collaborators, { id: newId, ...collaborator }],
+        collaborators: [...state.collaborators, { id: newId, ...normalizedCollaborator }],
       }));
     },
 
     updateCollaborator: async (collaborator) => {
       centralValidateDocument(collaborator.cpf, "employee", collaborator.id);
-      const { id, ...data } = collaborator;
+
+      const normalizedCollaborator = normalizeCollaboratorData(collaborator);
+      const { id, ...data } = normalizedCollaborator;
+
       const collaboratorRef = doc(db, "collaborators", id);
       await updateDoc(collaboratorRef, data);
+
       set((state) => ({
-        collaborators: state.collaborators.map((c) => (c.id === id ? collaborator : c)),
+        collaborators: state.collaborators.map((c) => (c.id === id ? normalizedCollaborator : c)),
       }));
     },
 
