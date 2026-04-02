@@ -22,6 +22,7 @@ interface Props {
 
 export const TransferDialog = ({ open, onOpenChange }: Props) => {
   const { bankAccounts, addTransfer } = useStore();
+
   const [fromId, setFromId] = useState("");
   const [toId, setToId] = useState("");
   const [amount, setAmount] = useState(0);
@@ -29,24 +30,32 @@ export const TransferDialog = ({ open, onOpenChange }: Props) => {
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const resetForm = () => {
+    setFromId("");
+    setToId("");
+    setAmount(0);
+    setDate(new Date());
+    setDescription("");
+  };
+
   const handleConfirm = async () => {
     if (!fromId || !toId || amount <= 0) {
       toast.error("Preencha todos os campos obrigatórios.");
       return;
     }
+
     if (fromId === toId) {
       toast.error("As contas de origem e destino devem ser diferentes.");
       return;
     }
+
     setSaving(true);
+
     try {
       await addTransfer(fromId, toId, amount, date, description);
       toast.success("Transferência realizada!");
       onOpenChange(false);
-      setFromId("");
-      setToId("");
-      setAmount(0);
-      setDescription("");
+      resetForm();
     } catch (err: any) {
       toast.error(err.message || "Erro na transferência.");
     } finally {
@@ -55,7 +64,13 @@ export const TransferDialog = ({ open, onOpenChange }: Props) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        onOpenChange(nextOpen);
+        if (!nextOpen) resetForm();
+      }}
+    >
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Transferência entre Contas</DialogTitle>
@@ -70,9 +85,9 @@ export const TransferDialog = ({ open, onOpenChange }: Props) => {
                 <SelectValue placeholder="Selecione a conta de origem" />
               </SelectTrigger>
               <SelectContent>
-                {bankAccounts.map((ba: any) => (
-                  <SelectItem key={ba.id} value={ba.id}>
-                    {ba.name}
+                {bankAccounts.map((account: any) => (
+                  <SelectItem key={account.id} value={account.id}>
+                    {account.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -86,9 +101,9 @@ export const TransferDialog = ({ open, onOpenChange }: Props) => {
                 <SelectValue placeholder="Selecione a conta de destino" />
               </SelectTrigger>
               <SelectContent>
-                {bankAccounts.map((ba: any) => (
-                  <SelectItem key={ba.id} value={ba.id}>
-                    {ba.name}
+                {bankAccounts.map((account: any) => (
+                  <SelectItem key={account.id} value={account.id}>
+                    {account.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -106,6 +121,7 @@ export const TransferDialog = ({ open, onOpenChange }: Props) => {
                 onChange={(e) => setAmount(Number(e.target.value))}
               />
             </div>
+
             <div className="space-y-1">
               <Label>Data</Label>
               <Popover>
