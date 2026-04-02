@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import { PlusCircle, Phone, Pencil, Trash2 } from "lucide-react";
-import { AddCollaboratorDialog } from "@/components/colaboradores/AddCollaboratorDialog";
+import { AddColaboradorDialog } from "@/components/colaboradores/AddColaboradorDialog";
 import { getContactPhone, getWhatsappLink, openWhatsappLink } from "@/lib/contact";
 
 export default function Colaboradores() {
@@ -229,7 +229,7 @@ export default function Colaboradores() {
         </CardContent>
       </Card>
 
-      <AddCollaboratorDialog open={isDialogOpen} onOpenChange={handleCloseDialog} collaborator={editingCollab} />
+      <AddColaboradorDialog open={isDialogOpen} onOpenChange={handleCloseDialog} collaborator={editingCollab} />
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
