@@ -1,4 +1,6 @@
-import { useState, useMemo } from "react";
+//src/pages/admin/Clientes.tsx
+
+import { useMemo, useState } from "react";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -41,18 +43,26 @@ export default function Clientes() {
   const [statusFilter, setStatusFilter] = useState("todos");
 
   const filtered = useMemo(() => {
-    return clients.filter((c: any) => {
-      const phone = getContactPhone(c);
-      const matchesSearch =
-        !search ||
-        c.name?.toLowerCase().includes(search.toLowerCase()) ||
-        c.email?.toLowerCase().includes(search.toLowerCase()) ||
-        c.cnpj?.includes(search) ||
-        c.cpf?.includes(search) ||
-        phone.includes(search) ||
-        c.id?.toLowerCase().includes(search.toLowerCase());
+    return clients.filter((client: any) => {
+      const displayName = client.razaoSocial || client.name || "";
+      const contactName = client.contato || client.contactPerson || "";
+      const phone = getContactPhone(client);
+      const email = client.email || "";
+      const document = client.personType === "juridica" ? client.cnpj || "" : client.cpf || "";
 
-      const matchesStatus = statusFilter === "todos" || c.status === statusFilter;
+      const term = search.trim().toLowerCase();
+
+      const matchesSearch =
+        !term ||
+        displayName.toLowerCase().includes(term) ||
+        contactName.toLowerCase().includes(term) ||
+        email.toLowerCase().includes(term) ||
+        document.toLowerCase().includes(term) ||
+        phone.toLowerCase().includes(term) ||
+        (client.id || "").toLowerCase().includes(term);
+
+      const clientStatus = client.status || "ativo";
+      const matchesStatus = statusFilter === "todos" || clientStatus === statusFilter;
 
       return matchesSearch && matchesStatus;
     });
@@ -75,13 +85,19 @@ export default function Clientes() {
 
   const handleDelete = async () => {
     if (!deleteId) return;
+
     try {
       await deleteClient(deleteId);
       toast({ title: "Cliente excluído com sucesso!" });
     } catch {
-      toast({ title: "Erro ao excluir", variant: "destructive" });
+      toast({
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir o cliente.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteId(null);
     }
-    setDeleteId(null);
   };
 
   return (
@@ -94,10 +110,11 @@ export default function Clientes() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-4">
             <Input
-              placeholder="Buscar por nome, email, documento ou telefone..."
+              placeholder="Buscar por nome, contato, email, documento ou telefone..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
+
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger>
                 <SelectValue placeholder="Todos os Status" />
@@ -118,6 +135,7 @@ export default function Clientes() {
             <CardTitle>Clientes</CardTitle>
             <CardDescription>Gerencie seus clientes e contatos.</CardDescription>
           </div>
+
           <Button onClick={handleAddNew}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Novo Cliente
@@ -138,25 +156,33 @@ export default function Clientes() {
                     <TableHead className="w-[120px] text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
+
                 <TableBody>
                   {filtered.map((client: any) => {
+                    const displayName = client.razaoSocial || client.name || "—";
                     const phone = getContactPhone(client);
                     const whatsappLink = getWhatsappLink(client);
+                    const status = client.status || "ativo";
 
                     return (
                       <TableRow key={client.id}>
                         <TableCell className="font-mono text-xs text-muted-foreground">{client.id}</TableCell>
-                        <TableCell className="font-medium">{client.name}</TableCell>
+
+                        <TableCell className="font-medium">{displayName}</TableCell>
+
                         <TableCell className="text-muted-foreground">{client.email || "—"}</TableCell>
+
                         <TableCell className="text-muted-foreground">{phone || "—"}</TableCell>
+
                         <TableCell>
                           <Badge
-                            variant={client.status === "ativo" ? "default" : "secondary"}
-                            className={client.status === "ativo" ? "bg-green-600 hover:bg-green-700 text-white" : ""}
+                            variant={status === "ativo" ? "default" : "secondary"}
+                            className={status === "ativo" ? "bg-green-600 hover:bg-green-700 text-white" : ""}
                           >
-                            {client.status || "ativo"}
+                            {status}
                           </Badge>
                         </TableCell>
+
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1">
                             <TooltipProvider delayDuration={300}>
@@ -167,7 +193,11 @@ export default function Clientes() {
                                       type="button"
                                       variant="ghost"
                                       size="icon"
-                                      className={`h-8 w-8 ${whatsappLink ? "text-green-500 hover:text-green-400" : "text-muted-foreground/40 cursor-not-allowed"}`}
+                                      className={`h-8 w-8 ${
+                                        whatsappLink
+                                          ? "text-green-500 hover:text-green-400"
+                                          : "text-muted-foreground/40 cursor-not-allowed"
+                                      }`}
                                       disabled={!whatsappLink}
                                       onClick={() => whatsappLink && openWhatsappLink(client)}
                                     >
@@ -188,7 +218,11 @@ export default function Clientes() {
                                     <Button
                                       variant="ghost"
                                       size="icon"
-                                      className={`h-8 w-8 ${client.email ? "text-blue-400 hover:text-blue-300" : "text-muted-foreground/40 cursor-not-allowed"}`}
+                                      className={`h-8 w-8 ${
+                                        client.email
+                                          ? "text-blue-400 hover:text-blue-300"
+                                          : "text-muted-foreground/40 cursor-not-allowed"
+                                      }`}
                                       disabled={!client.email}
                                       onClick={() => client.email && window.open(`mailto:${client.email}`)}
                                     >
@@ -208,11 +242,13 @@ export default function Clientes() {
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
+
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem onClick={() => handleEdit(client)}>
                                   <Pencil className="mr-2 h-4 w-4" />
                                   Editar
                                 </DropdownMenuItem>
+
                                 <DropdownMenuItem className="text-destructive" onClick={() => setDeleteId(client.id)}>
                                   <Trash2 className="mr-2 h-4 w-4" />
                                   Excluir
@@ -241,8 +277,11 @@ export default function Clientes() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-            <AlertDialogDescription>Essa ação não pode ser desfeita.</AlertDialogDescription>
+            <AlertDialogDescription>
+              Essa ação não pode ser desfeita. Isso excluirá permanentemente o cliente.
+            </AlertDialogDescription>
           </AlertDialogHeader>
+
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete}>Continuar</AlertDialogAction>
