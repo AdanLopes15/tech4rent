@@ -438,6 +438,45 @@ const useStore = create<State & Actions>((set, get) => {
     return newData;
   };
 
+  const normalizeClientData = (client: any) => {
+    const address = {
+      street: client.address?.street || client.street || "",
+      number: client.address?.number || client.number || "",
+      complement: client.address?.complement || client.complement || "",
+      neighborhood: client.address?.neighborhood || client.neighborhood || "",
+      city: client.address?.city || client.city || "",
+      state: client.address?.state || client.state || "",
+    };
+
+    const razaoSocial = client.razaoSocial || client.name || "";
+    const contato = client.contato || client.contactPerson || "";
+    const observacoes = client.observacoes || client.notes || "";
+    const telefone = client.telefone || client.phone || client.whatsapp || "";
+
+    return {
+      ...client,
+
+      razaoSocial,
+      contato,
+      observacoes,
+      telefone,
+      address,
+
+      name: razaoSocial,
+      contactPerson: contato,
+      notes: observacoes,
+      phone: telefone,
+      whatsapp: telefone,
+
+      street: address.street,
+      number: address.number,
+      complement: address.complement,
+      neighborhood: address.neighborhood,
+      city: address.city,
+      state: address.state,
+    };
+  };
+
   return {
     user: null,
     clients: [],
@@ -595,7 +634,7 @@ const useStore = create<State & Actions>((set, get) => {
             notificationsSnap,
           ] = otherSnaps;
 
-          newState.clients = clientsSnap.docs.map(mapDoc);
+          newState.clients = clientsSnap.docs.map((d) => normalizeClientData(mapDoc(d)));
           newState.contracts = contractsSnap.docs.map((d) =>
             convertTimestampToISO(mapDoc(d), ["startDate", "endDate", "createdAt"]),
           );
@@ -673,9 +712,16 @@ const useStore = create<State & Actions>((set, get) => {
 
     addClient: async (client) => {
       centralValidateDocument(client.personType === "juridica" ? client.cnpj : client.cpf, "client", null);
+
       const newId = await get().getNextId("clients");
-      const { id, ...clientData } = client;
-      await setDoc(doc(db, "clients", newId), { ...clientData, id: newId });
+      const normalizedClient = normalizeClientData(client);
+      const { id, ...clientData } = normalizedClient;
+
+      await setDoc(doc(db, "clients", newId), {
+        ...clientData,
+        id: newId,
+      });
+
       set((state) => ({
         clients: [...state.clients, { id: newId, ...clientData }],
       }));
@@ -687,10 +733,14 @@ const useStore = create<State & Actions>((set, get) => {
         "client",
         updatedClient.id,
       );
+
+      const normalizedClient = normalizeClientData(updatedClient);
       const clientRef = doc(db, "clients", updatedClient.id);
-      await updateDoc(clientRef, updatedClient);
+
+      await updateDoc(clientRef, normalizedClient);
+
       set((state) => ({
-        clients: state.clients.map((client) => (client.id === updatedClient.id ? updatedClient : client)),
+        clients: state.clients.map((client) => (client.id === updatedClient.id ? normalizedClient : client)),
       }));
     },
 
