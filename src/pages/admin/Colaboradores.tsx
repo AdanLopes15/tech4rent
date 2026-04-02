@@ -1,3 +1,5 @@
+//src/pages/admin/Colaboradores.tsx
+
 import { useState, useMemo } from "react";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
@@ -73,9 +75,12 @@ export default function Colaboradores() {
 
   const permissionLabel = (p: string) => {
     switch (p) {
-      case "admin": return "Administrador";
-      case "gestor": return "Gestor";
-      default: return "Colaborador";
+      case "admin":
+        return "Administrador";
+      case "gestor":
+        return "Gestor";
+      default:
+        return "Colaborador";
     }
   };
 
@@ -166,11 +171,21 @@ export default function Colaboradores() {
                               </Tooltip>
                             </TooltipProvider>
 
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => handleEdit(collab)}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                              onClick={() => handleEdit(collab)}
+                            >
                               <Pencil className="h-4 w-4" />
                             </Button>
 
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive/80" onClick={() => setDeleteId(collab.id)}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:text-destructive/80"
+                              onClick={() => setDeleteId(collab.id)}
+                            >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
