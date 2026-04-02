@@ -1,4 +1,7 @@
-import { useState } from "react";
+//src/pages/admin/Bancos.tsx
+
+import { useMemo, useState } from "react";
+import { useStore } from "@/store";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,61 +9,157 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Plus, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
 
-interface BankAccount {
-  id: string;
-  banco: string;
-  agencia: string;
-  conta: string;
-  saldoInicial: number;
-  cor: string;
-  status: "ativa" | "inativa";
-  observacoes: string;
+type BankStatus = "ativo" | "inativo";
+
+interface BankAccountForm {
+  bank: string;
+  agency: string;
+  account: string;
+  initialBalance: string;
+  color: string;
+  status: BankStatus;
+  observations: string;
 }
 
-const initialAccounts: BankAccount[] = [
-  { id: "1", banco: "Banco Sicred Capital", agencia: "0718", conta: "65563-0", saldoInicial: 0, cor: "#22c55e", status: "ativa", observacoes: "" },
-  { id: "2", banco: "Banco Sicred", agencia: "0718", conta: "65563-0", saldoInicial: 0, cor: "#22c55e", status: "ativa", observacoes: "" },
-];
+const emptyForm: BankAccountForm = {
+  bank: "",
+  agency: "",
+  account: "",
+  initialBalance: "0",
+  color: "#6b9eff",
+  status: "ativo",
+  observations: "",
+};
 
 const Bancos = () => {
-  const [accounts, setAccounts] = useState<BankAccount[]>(initialAccounts);
+  const { bankAccounts, addBankAccount, updateBankAccount, deleteBankAccount } = useStore();
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [newAccount, setNewAccount] = useState({
-    banco: "", agencia: "", conta: "", saldoInicial: "0,00", cor: "#6b9eff", status: "ativa" as "ativa" | "inativa", observacoes: "",
-  });
+  const [form, setForm] = useState<BankAccountForm>(emptyForm);
+  const [editingAccount, setEditingAccount] = useState<any>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const filtered = accounts.filter(
-    (a) =>
-      a.banco.toLowerCase().includes(search.toLowerCase()) ||
-      a.agencia.includes(search) ||
-      a.conta.includes(search)
-  );
+  const filtered = useMemo(() => {
+    return bankAccounts.filter((account: any) => {
+      const bank = String(account.bank || "").toLowerCase();
+      const agency = String(account.agency || "").toLowerCase();
+      const acc = String(account.account || "").toLowerCase();
+      const query = search.toLowerCase();
 
-  const handleSave = () => {
-    if (!newAccount.banco) {
-      toast.error("Preencha o nome do banco.");
-      return;
-    }
-    const saldo = parseFloat(newAccount.saldoInicial.replace(",", ".")) || 0;
-    setAccounts((prev) => [
-      ...prev,
-      { id: crypto.randomUUID(), banco: newAccount.banco, agencia: newAccount.agencia, conta: newAccount.conta, saldoInicial: saldo, cor: newAccount.cor, status: newAccount.status, observacoes: newAccount.observacoes },
-    ]);
-    setDialogOpen(false);
-    setNewAccount({ banco: "", agencia: "", conta: "", saldoInicial: "0,00", cor: "#6b9eff", status: "ativa", observacoes: "" });
-    toast.success("Conta bancária cadastrada com sucesso!");
+      return bank.includes(query) || agency.includes(query) || acc.includes(query);
+    });
+  }, [bankAccounts, search]);
+
+  const openNewDialog = () => {
+    setEditingAccount(null);
+    setForm(emptyForm);
+    setDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    setAccounts((prev) => prev.filter((a) => a.id !== id));
-    toast.success("Conta bancária removida com sucesso!");
+  const openEditDialog = (account: any) => {
+    setEditingAccount(account);
+    setForm({
+      bank: account.bank || "",
+      agency: account.agency || "",
+      account: account.account || "",
+      initialBalance: String(account.initialBalance ?? 0),
+      color: account.color || "#6b9eff",
+      status: (account.status || "ativo") as BankStatus,
+      observations: account.observations || "",
+    });
+    setDialogOpen(true);
+  };
+
+  const closeDialog = (open: boolean) => {
+    setDialogOpen(open);
+
+    if (!open) {
+      setEditingAccount(null);
+      setForm(emptyForm);
+      setIsSaving(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!form.bank.trim() || !form.agency.trim() || !form.account.trim()) {
+      toast.error("Preencha banco, agência e conta.");
+      return;
+    }
+
+    const parsedBalance = Number(String(form.initialBalance).replace(",", ".")) || 0;
+
+    const payload = {
+      name: form.bank.trim(),
+      bank: form.bank.trim(),
+      agency: form.agency.trim(),
+      account: form.account.trim(),
+      initialBalance: parsedBalance,
+      color: form.color,
+      status: form.status,
+      observations: form.observations.trim(),
+    };
+
+    try {
+      setIsSaving(true);
+
+      if (editingAccount) {
+        await updateBankAccount({
+          id: editingAccount.id,
+          ...payload,
+        });
+        toast.success("Conta bancária atualizada com sucesso!");
+      } else {
+        await addBankAccount(payload);
+        toast.success("Conta bancária cadastrada com sucesso!");
+      }
+
+      closeDialog(false);
+    } catch (error) {
+      console.error("Erro ao salvar conta bancária:", error);
+      toast.error("Não foi possível salvar a conta bancária.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteBankAccount(id);
+      toast.success("Conta bancária removida com sucesso!");
+    } catch (error) {
+      console.error("Erro ao excluir conta bancária:", error);
+      toast.error("Não foi possível excluir a conta bancária.");
+    }
   };
 
   return (
@@ -71,7 +170,11 @@ const Bancos = () => {
           <CardDescription>Refine sua busca por contas bancárias.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Input placeholder="Buscar por banco, agência ou conta..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input
+            placeholder="Buscar por banco, agência ou conta..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </CardContent>
       </Card>
 
@@ -81,10 +184,13 @@ const Bancos = () => {
             <CardTitle>Contas Bancárias</CardTitle>
             <CardDescription>Gerencie as contas bancárias da sua empresa.</CardDescription>
           </div>
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Nova Conta
+
+          <Button onClick={openNewDialog}>
+            <Plus className="mr-2 h-4 w-4" />
+            Nova Conta
           </Button>
         </CardHeader>
+
         <CardContent>
           <Table>
             <TableHeader>
@@ -97,16 +203,22 @@ const Bancos = () => {
                 <TableHead className="text-right w-[80px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
-              {filtered.map((account) => (
+              {filtered.map((account: any) => (
                 <TableRow key={account.id}>
                   <TableCell>
-                    <div className="h-5 w-5 rounded-full" style={{ backgroundColor: account.cor }} />
+                    <div className="h-5 w-5 rounded-full" style={{ backgroundColor: account.color || "#6b9eff" }} />
                   </TableCell>
-                  <TableCell className="font-semibold text-foreground">{account.banco}</TableCell>
-                  <TableCell className="text-muted-foreground">{account.agencia}</TableCell>
-                  <TableCell className="text-muted-foreground">{account.conta}</TableCell>
-                  <TableCell className="text-muted-foreground">{formatCurrency(account.saldoInicial)}</TableCell>
+
+                  <TableCell className="font-semibold text-foreground">{account.bank}</TableCell>
+
+                  <TableCell className="text-muted-foreground">{account.agency}</TableCell>
+
+                  <TableCell className="text-muted-foreground">{account.account}</TableCell>
+
+                  <TableCell className="text-muted-foreground">{formatCurrency(account.initialBalance)}</TableCell>
+
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -114,19 +226,46 @@ const Bancos = () => {
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
+
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem><Pencil className="mr-2 h-4 w-4" />Editar</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(account.id)}>
-                          <Trash2 className="mr-2 h-4 w-4" />Excluir
+                        <DropdownMenuItem onClick={() => openEditDialog(account)}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Editar
                         </DropdownMenuItem>
+
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Excluir
+                            </DropdownMenuItem>
+                          </AlertDialogTrigger>
+
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Essa ação não pode ser desfeita. Isso excluirá permanentemente a conta bancária.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(account.id)}>Continuar</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))}
+
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">Nenhuma conta bancária encontrada.</TableCell>
+                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                    Nenhuma conta bancária encontrada.
+                  </TableCell>
                 </TableRow>
               )}
             </TableBody>
@@ -134,55 +273,136 @@ const Bancos = () => {
         </CardContent>
       </Card>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={closeDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Cadastrar Nova Conta</DialogTitle>
-            <DialogDescription>Preencha os dados da nova conta bancária.</DialogDescription>
+            <DialogTitle>{editingAccount ? "Editar Conta" : "Cadastrar Nova Conta"}</DialogTitle>
+            <DialogDescription>
+              {editingAccount ? "Atualize os dados da conta bancária." : "Preencha os dados da nova conta bancária."}
+            </DialogDescription>
           </DialogHeader>
+
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Banco</Label>
-              <Input placeholder="Ex: Banco do Brasil" value={newAccount.banco} onChange={(e) => setNewAccount((p) => ({ ...p, banco: e.target.value }))} />
+              <Input
+                placeholder="Ex: Banco do Brasil"
+                value={form.bank}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    bank: e.target.value,
+                  }))
+                }
+              />
             </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Agência (sem dígito)</Label>
-                <Input placeholder="Ex: 1234" value={newAccount.agencia} onChange={(e) => setNewAccount((p) => ({ ...p, agencia: e.target.value }))} />
+                <Input
+                  placeholder="Ex: 1234"
+                  value={form.agency}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      agency: e.target.value,
+                    }))
+                  }
+                />
               </div>
+
               <div className="space-y-2">
                 <Label>Conta (com dígito)</Label>
-                <Input placeholder="Ex: 56789-0" value={newAccount.conta} onChange={(e) => setNewAccount((p) => ({ ...p, conta: e.target.value }))} />
+                <Input
+                  placeholder="Ex: 56789-0"
+                  value={form.account}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      account: e.target.value,
+                    }))
+                  }
+                />
               </div>
             </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Saldo Inicial (R$)</Label>
-                <Input placeholder="0,00" value={newAccount.saldoInicial} onChange={(e) => setNewAccount((p) => ({ ...p, saldoInicial: e.target.value }))} />
+                <Input
+                  placeholder="0,00"
+                  value={form.initialBalance}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      initialBalance: e.target.value,
+                    }))
+                  }
+                />
               </div>
+
               <div className="space-y-2">
                 <Label>Cor para Identificação</Label>
-                <Input type="color" value={newAccount.cor} onChange={(e) => setNewAccount((p) => ({ ...p, cor: e.target.value }))} className="h-10 w-full" />
+                <Input
+                  type="color"
+                  value={form.color}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      color: e.target.value,
+                    }))
+                  }
+                  className="h-10 w-full"
+                />
               </div>
             </div>
+
             <div className="space-y-2">
               <Label>Status</Label>
-              <Select value={newAccount.status} onValueChange={(v) => setNewAccount((p) => ({ ...p, status: v as "ativa" | "inativa" }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={form.status}
+                onValueChange={(value) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    status: value as BankStatus,
+                  }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ativa">Ativa</SelectItem>
-                  <SelectItem value="inativa">Inativa</SelectItem>
+                  <SelectItem value="ativo">Ativa</SelectItem>
+                  <SelectItem value="inativo">Inativa</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
             <div className="space-y-2">
               <Label>Observações</Label>
-              <Textarea placeholder="Informações adicionais sobre a conta" value={newAccount.observacoes} onChange={(e) => setNewAccount((p) => ({ ...p, observacoes: e.target.value }))} rows={3} />
+              <Textarea
+                placeholder="Informações adicionais sobre a conta"
+                value={form.observations}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    observations: e.target.value,
+                  }))
+                }
+                rows={3}
+              />
             </div>
           </div>
+
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSave}>Salvar</Button>
+            <Button variant="outline" onClick={() => closeDialog(false)}>
+              Cancelar
+            </Button>
+
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? "Salvando..." : "Salvar"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
