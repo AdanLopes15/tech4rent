@@ -259,34 +259,40 @@ const ContasReceber = () => {
     const grouped = filtered.reduce((acc: Record<string, RevenueGroup>, revenue: any) => {
       const key = revenue.contractId || `avulso-${revenue.clientId || "sem-cliente"}`;
 
-      if (!acc[key]) {
-        const contract = contracts.find((c: any) => c.id === revenue.contractId);
-        acc[key] = {
-          key,
-          contractId: revenue.contractId,
-          clientName: revenue.clientName,
-          totalValue: contract?.totalValue || 0,
-          status: contract?.status || "Avulso",
-          installments: [],
-        };
-      }
+      const grouped = filtered.reduce<Record<string, RevenueGroup>>((acc, revenue: any) => {
+  const key = revenue.contractId || `avulso-${revenue.clientId || "sem-cliente"}`;
 
-      acc[key].installments.push(revenue);
-      return acc;
-    }, {});
+  if (!acc[key]) {
+    const contract = contracts.find((c: any) => c.id === revenue.contractId);
 
-    const sortedGroups = Object.values(grouped).sort((a, b) => {
-      if (!a.contractId && b.contractId) return -1;
-      if (a.contractId && !b.contractId) return 1;
+    acc[key] = {
+      key,
+      contractId: revenue.contractId,
+      clientName: revenue.clientName,
+      totalValue: contract?.totalValue || 0,
+      status: contract?.status || "Avulso",
+      installments: [],
+    };
+  }
 
-      if (a.contractId && b.contractId) {
-        return String(a.contractId).localeCompare(String(b.contractId), undefined, {
-          numeric: true,
-        });
-      }
+  acc[key].installments.push(revenue);
+  return acc;
+}, {});
 
-      return a.clientName.localeCompare(b.clientName);
-    });
+const sortedGroups: RevenueGroup[] = Object.values(grouped).sort(
+  (a: RevenueGroup, b: RevenueGroup) => {
+    if (!a.contractId && b.contractId) return -1;
+    if (a.contractId && !b.contractId) return 1;
+
+    if (a.contractId && b.contractId) {
+      return String(a.contractId).localeCompare(String(b.contractId), undefined, {
+        numeric: true,
+      });
+    }
+
+    return a.clientName.localeCompare(b.clientName);
+  }
+);
 
     const totalVencido = allRevenuesWithDetails
       .filter((revenue: any) => revenue.currentStatus === "atrasado")
