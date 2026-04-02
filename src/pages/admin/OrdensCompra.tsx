@@ -1,3 +1,5 @@
+//src/pages/admin/OrdensCompra.tsx
+
 import { useState, useMemo } from "react";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
@@ -112,9 +114,7 @@ export default function OrdensCompra() {
                     <TableCell>{formatDate(order.createdAt)}</TableCell>
                     <TableCell>{formatCurrency(order.totalValue)}</TableCell>
                     <TableCell>
-                      <Badge className={statusColors[order.status] || "bg-muted"}>
-                        {order.status || "Pendente"}
-                      </Badge>
+                      <Badge className={statusColors[order.status] || "bg-muted"}>{order.status || "Pendente"}</Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
@@ -132,10 +132,7 @@ export default function OrdensCompra() {
                             <Pencil className="mr-2 h-4 w-4" />
                             Editar
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => setDeleteId(order.id)}
-                          >
+                          <DropdownMenuItem className="text-destructive" onClick={() => setDeleteId(order.id)}>
                             <Trash2 className="mr-2 h-4 w-4" />
                             Excluir
                           </DropdownMenuItem>

@@ -1,3 +1,5 @@
+//src/components/ordens-compra/AddPurchaseOrderDialog.tsx
+
 import { useState, useEffect } from "react";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
@@ -53,7 +55,7 @@ export function AddPurchaseOrderDialog({ open, onOpenChange, order }: AddPurchas
               quantity: i.quantity || 1,
               unitCost: i.unitCost || i.unitPrice || 0,
             }))
-          : [{ equipmentId: "", quantity: 1, unitCost: 0 }]
+          : [{ equipmentId: "", quantity: 1, unitCost: 0 }],
       );
       setObservations(order.observations || "");
     } else {
@@ -241,7 +243,11 @@ export function AddPurchaseOrderDialog({ open, onOpenChange, order }: AddPurchas
         </DialogContent>
       </Dialog>
 
-      <AddSupplierDialog open={isSupplierDialogOpen} onOpenChange={() => setIsSupplierDialogOpen(false)} supplier={null} />
+      <AddSupplierDialog
+        open={isSupplierDialogOpen}
+        onOpenChange={() => setIsSupplierDialogOpen(false)}
+        supplier={null}
+      />
     </>
   );
 }
