@@ -1,12 +1,13 @@
 //src/pages/admin/Vendas.tsx
 
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
+import { format } from "date-fns";
+
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
-import { formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,70 +27,75 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 
-import {
-  PlusCircle,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-  FileText,
-  ChevronUp,
-  CalendarIcon,
-  Search,
-  XCircle,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { AddSaleDialog } from "@/components/vendas/AddSaleDialog";
+import { PlusCircle, MoreHorizontal, Pencil, Trash2, FileText, ChevronUp, CalendarIcon, Search } from "lucide-react";
 
-const statusColors: Record<string, string> = {
-  Concluída: "bg-green-600 hover:bg-green-700 text-white",
-  Cancelada: "bg-red-600 hover:bg-red-700 text-white",
+import { AddSaleDialog } from "@/components/vendas/AddSaleDialog";
+import { SaleReceiptDialog } from "@/components/vendas/SaleReceiptDialog";
+
+const getStatusClasses = (status: string) => {
+  switch ((status || "").toLowerCase()) {
+    case "concluída":
+      return "bg-green-500 hover:bg-green-600 text-white";
+    case "cancelada":
+      return "bg-red-500 hover:bg-red-600 text-white";
+    default:
+      return "bg-gray-500 hover:bg-gray-600 text-white";
+  }
 };
 
 export default function Vendas() {
-  const { sales, clients, cancelSale, deleteSale } = useStore();
+  const { sales, cancelSale, deleteSale } = useStore();
   const { toast } = useToast();
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingSale, setEditingSale] = useState<any>(null);
-  const [cancelId, setCancelId] = useState<string | null>(null);
-  const [clientNameFilter, setClientNameFilter] = useState("");
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState(false);
+  const [editingSale, setEditingSale] = useState<any>(null);
+  const [selectedSale, setSelectedSale] = useState<any>(null);
+
+  const [clientNameFilter, setClientNameFilter] = useState("");
   const [minValue, setMinValue] = useState("");
   const [maxValue, setMaxValue] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(true);
 
-  const filtered = useMemo(() => {
-    return sales.filter((s: any) => {
-      const clientName = (s.clientName || "").toLowerCase();
+  const filteredSales = useMemo(() => {
+    return sales.filter((sale: any) => {
+      const clientName = (sale.clientName || "").toLowerCase();
       const matchesName = !clientNameFilter || clientName.includes(clientNameFilter.toLowerCase());
 
       let matchesDate = true;
       if (dateRange.from || dateRange.to) {
-        const sDate = s.saleDate ? new Date(s.saleDate) : null;
-        if (sDate) {
-          if (dateRange.from && sDate < dateRange.from) matchesDate = false;
+        const saleDate = sale.saleDate ? new Date(sale.saleDate) : null;
+        if (saleDate) {
+          if (dateRange.from && saleDate < dateRange.from) matchesDate = false;
           if (dateRange.to) {
             const end = new Date(dateRange.to);
             end.setHours(23, 59, 59, 999);
-            if (sDate > end) matchesDate = false;
+            if (saleDate > end) matchesDate = false;
           }
         }
       }
 
-      const total = s.totalValue || 0;
-      const matchesMin = !minValue || total >= Number(minValue);
-      const matchesMax = !maxValue || total <= Number(maxValue);
+      const totalValue = Number(sale.totalValue || 0);
+      const matchesMin = !minValue || totalValue >= Number(minValue);
+      const matchesMax = !maxValue || totalValue <= Number(maxValue);
 
       return matchesName && matchesDate && matchesMin && matchesMax;
     });
   }, [sales, clientNameFilter, dateRange, minValue, maxValue]);
 
-  const handleEdit = (sale: any) => {
+  const handleOpenReceipt = (sale: any) => {
+    setSelectedSale(sale);
+    setIsReceiptDialogOpen(true);
+  };
+
+  const handleEditSale = (sale: any) => {
     setEditingSale(sale);
     setIsDialogOpen(true);
   };
@@ -104,15 +110,30 @@ export default function Vendas() {
     setIsDialogOpen(false);
   };
 
-  const handleCancel = async () => {
-    if (!cancelId) return;
+  const handleCancelSale = async (saleId: string) => {
     try {
-      await cancelSale(cancelId);
+      await cancelSale(saleId);
       toast({ title: "Venda cancelada com sucesso!" });
-    } catch (err: any) {
-      toast({ title: err.message || "Erro ao cancelar", variant: "destructive" });
+    } catch (error: any) {
+      toast({
+        title: "Erro ao cancelar",
+        description: error.message,
+        variant: "destructive",
+      });
     }
-    setCancelId(null);
+  };
+
+  const handleDeleteSale = async (saleId: string) => {
+    try {
+      await deleteSale(saleId);
+      toast({ title: "Venda excluída com sucesso!" });
+    } catch (error: any) {
+      toast({
+        title: "Erro ao excluir",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const clearFilters = () => {
@@ -125,8 +146,8 @@ export default function Vendas() {
   const formatDate = (date: any) => {
     if (!date) return "—";
     try {
-      const d = date?.toDate ? date.toDate() : new Date(date);
-      return format(d, "dd/MM/yyyy");
+      const parsed = date?.toDate ? date.toDate() : new Date(date);
+      return format(parsed, "dd/MM/yyyy");
     } catch {
       return "—";
     }
@@ -134,21 +155,19 @@ export default function Vendas() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header */}
       <Card>
         <CardHeader className="flex-row items-center justify-between space-y-0">
           <div>
             <CardTitle>Venda de Equipamentos</CardTitle>
             <CardDescription>Gerencie suas vendas diretas e faturas correspondentes.</CardDescription>
           </div>
-          <Button variant="outline" onClick={handleAddNew}>
+          <Button onClick={handleAddNew}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Nova Venda
           </Button>
         </CardHeader>
       </Card>
 
-      {/* Filters */}
       <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
         <Card>
           <CollapsibleTrigger asChild>
@@ -157,9 +176,10 @@ export default function Vendas() {
               <ChevronUp className={cn("h-5 w-5 transition-transform", !filtersOpen && "rotate-180")} />
             </CardHeader>
           </CollapsibleTrigger>
+
           <CollapsibleContent>
             <CardContent className="pt-0 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium">Nome do Cliente</label>
                   <Input
@@ -168,6 +188,7 @@ export default function Vendas() {
                     onChange={(e) => setClientNameFilter(e.target.value)}
                   />
                 </div>
+
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium">Vencimento</label>
                   <Popover>
@@ -197,6 +218,7 @@ export default function Vendas() {
                     </PopoverContent>
                   </Popover>
                 </div>
+
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium">Valor Mín.</label>
                   <Input
@@ -206,6 +228,7 @@ export default function Vendas() {
                     onChange={(e) => setMinValue(e.target.value)}
                   />
                 </div>
+
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium">Valor Máx.</label>
                   <Input
@@ -216,6 +239,7 @@ export default function Vendas() {
                   />
                 </div>
               </div>
+
               <div className="flex gap-2">
                 <Button variant="outline" size="sm">
                   <Search className="mr-2 h-4 w-4" />
@@ -231,55 +255,110 @@ export default function Vendas() {
         </Card>
       </Collapsible>
 
-      {/* Sales Table */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Histórico de Faturas de Venda</CardTitle>
         </CardHeader>
+
         <CardContent className="pt-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-primary">Fatura</TableHead>
-                <TableHead className="text-primary">Cliente</TableHead>
-                <TableHead className="text-primary">Data</TableHead>
-                <TableHead className="text-primary">Valor</TableHead>
-                <TableHead className="text-primary">Status</TableHead>
-                <TableHead className="text-right text-primary">Ações</TableHead>
+                <TableHead>Fatura</TableHead>
+                <TableHead>Cliente</TableHead>
+                <TableHead>Data</TableHead>
+                <TableHead>Valor</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
-              {filtered.length > 0 ? (
-                filtered.map((sale: any) => (
+              {filteredSales.length > 0 ? (
+                filteredSales.map((sale: any) => (
                   <TableRow key={sale.id}>
-                    <TableCell className="font-medium">{sale.id}</TableCell>
-                    <TableCell>{sale.clientName || "N/A"}</TableCell>
+                    <TableCell>{sale.id}</TableCell>
+                    <TableCell>{sale.clientName}</TableCell>
                     <TableCell>{formatDate(sale.saleDate)}</TableCell>
                     <TableCell>{formatCurrency(sale.totalValue)}</TableCell>
                     <TableCell>
-                      <Badge className={statusColors[sale.status] || "bg-muted"}>{sale.status || "Concluída"}</Badge>
+                      <Badge className={cn(getStatusClasses(sale.status))}>{sale.status}</Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Abrir menu</span>
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
+
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleOpenReceipt(sale)}>
                             <FileText className="mr-2 h-4 w-4" />
                             Visualizar Recibo
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleEdit(sale)}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Editar
-                          </DropdownMenuItem>
+
                           {sale.status !== "Cancelada" && (
-                            <DropdownMenuItem className="text-destructive" onClick={() => setCancelId(sale.id)}>
-                              <XCircle className="mr-2 h-4 w-4" />
-                              Cancelar
+                            <DropdownMenuItem onClick={() => handleEditSale(sale)}>
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Editar
                             </DropdownMenuItem>
+                          )}
+
+                          {sale.status !== "Cancelada" && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Cancelar
+                                </DropdownMenuItem>
+                              </AlertDialogTrigger>
+
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Essa ação não pode ser desfeita. Isso irá cancelar a venda e suas faturas, e
+                                    devolver os itens ao estoque. Se a venda foi gerada por um orçamento, ele voltará ao
+                                    status "Pendente".
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Voltar</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleCancelSale(sale.id)}>
+                                    Confirmar Cancelamento
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
+
+                          {sale.status === "Cancelada" && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Excluir
+                                </DropdownMenuItem>
+                              </AlertDialogTrigger>
+
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Excluir Venda Permanentemente?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Esta ação é irreversível e removerá o registro da venda permanentemente. Apenas use
+                                    se tiver certeza.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDeleteSale(sale.id)}>
+                                    Excluir Venda
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           )}
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -288,8 +367,8 @@ export default function Vendas() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground h-20">
-                    Nenhuma venda encontrada.
+                  <TableCell colSpan={6} className="h-24 text-center">
+                    Nenhuma fatura de venda para exibir.
                   </TableCell>
                 </TableRow>
               )}
@@ -300,20 +379,9 @@ export default function Vendas() {
 
       <AddSaleDialog open={isDialogOpen} onOpenChange={handleCloseDialog} sale={editingSale} />
 
-      <AlertDialog open={!!cancelId} onOpenChange={() => setCancelId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Cancelar venda?</AlertDialogTitle>
-            <AlertDialogDescription>
-              O estoque será devolvido e as parcelas pendentes serão canceladas.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Voltar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleCancel}>Confirmar Cancelamento</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {selectedSale && (
+        <SaleReceiptDialog open={isReceiptDialogOpen} onOpenChange={setIsReceiptDialogOpen} sale={selectedSale} />
+      )}
     </div>
   );
 }

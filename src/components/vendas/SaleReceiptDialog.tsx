@@ -1,7 +1,5 @@
 //src/components/vendas/SaleReceiptDialog.tsx
 
-//src/components/vendas/SaleReceiptDialog.tsx
-
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
