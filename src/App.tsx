@@ -31,6 +31,7 @@ import NFe from "./pages/admin/NFe";
 import PlanoContas from "./pages/admin/PlanoContas";
 import CentroCusto from "./pages/admin/CentroCusto";
 import Bancos from "./pages/admin/Bancos";
+import Usuarios from "./pages/admin/Usuarios";
 
 const queryClient = new QueryClient();
 
