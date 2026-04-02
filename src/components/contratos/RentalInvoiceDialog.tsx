@@ -359,7 +359,7 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
         <AddRevenueDialog
           open={isEditRevenueDialogOpen}
           onOpenChange={setIsEditRevenueDialogOpen}
-          revenue={currentInstallment}
+          editingRevenue={currentInstallment}
         />
       )}
     </>
