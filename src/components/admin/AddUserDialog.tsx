@@ -1,96 +1,174 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+//src/components/admin/AddUserDialog.tsx
+
+import { useEffect, useState } from "react";
+import { useStore } from "@/store";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
-interface AddUserDialogProps {
+interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  editingUser?: {
-    id: number;
-    nome: string;
-    email: string;
-    perfil: string;
-    status: string;
-  } | null;
+  user?: any;
 }
 
-const AddUserDialog = ({ open, onOpenChange, editingUser }: AddUserDialogProps) => {
-  const [nome, setNome] = useState(editingUser?.nome || "");
-  const [email, setEmail] = useState(editingUser?.email || "");
-  const [perfil, setPerfil] = useState(editingUser?.perfil || "");
-  const [senha, setSenha] = useState("");
-  const [confirmarSenha, setConfirmarSenha] = useState("");
+const AddUserDialog = ({ open, onOpenChange, user }: Props) => {
+  const { addSystemUser, updateSystemUser } = useStore();
 
-  const isEditing = !!editingUser;
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [permission, setPermission] = useState("colaborador");
+  const [status, setStatus] = useState("ativo");
+  const [showPassword, setShowPassword] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const handleSubmit = () => {
-    if (!nome || !email || !perfil) {
+  useEffect(() => {
+    if (user && open) {
+      setName(user.name || "");
+      setEmail(user.email || "");
+      setPermission(user.permission || "colaborador");
+      setStatus(user.status || "ativo");
+      setPassword("");
+    } else if (open) {
+      reset();
+    }
+  }, [user, open]);
+
+  const reset = () => {
+    setName("");
+    setEmail("");
+    setPassword("");
+    setPermission("colaborador");
+    setStatus("ativo");
+    setShowPassword(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!name || !email || (!user && !password)) {
       toast.error("Preencha todos os campos obrigatórios.");
       return;
     }
-    if (!isEditing && (!senha || senha !== confirmarSenha)) {
-      toast.error("As senhas não coincidem ou estão vazias.");
-      return;
+
+    try {
+      setSaving(true);
+
+      const payload = {
+        name,
+        email,
+        permission,
+        status,
+        ...(password && { password }),
+      };
+
+      if (user) {
+        await updateSystemUser({ uid: user.uid, ...payload });
+        toast.success("Usuário atualizado!");
+      } else {
+        await addSystemUser(payload);
+        toast.success("Usuário criado!");
+      }
+
+      onOpenChange(false);
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao salvar usuário");
+    } finally {
+      setSaving(false);
     }
-    toast.success(isEditing ? "Usuário atualizado com sucesso!" : "Usuário criado com sucesso!");
-    onOpenChange(false);
-    setNome("");
-    setEmail("");
-    setPerfil("");
-    setSenha("");
-    setConfirmarSenha("");
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{isEditing ? "Editar Usuário" : "Novo Usuário"}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4 py-2">
-          <div className="space-y-2">
-            <Label>Nome *</Label>
-            <Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Nome completo" />
-          </div>
-          <div className="space-y-2">
-            <Label>Email *</Label>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@empresa.com" />
-          </div>
-          <div className="space-y-2">
-            <Label>Perfil *</Label>
-            <Select value={perfil} onValueChange={setPerfil}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o perfil" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Administrador">Administrador</SelectItem>
-                <SelectItem value="Operador">Operador</SelectItem>
-                <SelectItem value="Financeiro">Financeiro</SelectItem>
-                <SelectItem value="Visualizador">Visualizador</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          {!isEditing && (
-            <>
-              <div className="space-y-2">
-                <Label>Senha *</Label>
-                <Input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Mínimo 6 caracteres" />
+      <DialogContent className="sm:max-w-lg">
+        <form onSubmit={handleSubmit}>
+          <DialogHeader>
+            <DialogTitle>{user ? "Editar Usuário" : "Novo Usuário"}</DialogTitle>
+            <DialogDescription>Preencha os dados do usuário.</DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label>Nome</Label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={!!user} />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Senha {user && "(opcional)"}</Label>
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff /> : <Eye />}
+                </Button>
               </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Confirmar Senha *</Label>
-                <Input type="password" value={confirmarSenha} onChange={(e) => setConfirmarSenha(e.target.value)} placeholder="Repita a senha" />
+                <Label>Permissão</Label>
+                <Select value={permission} onValueChange={setPermission}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="colaborador">Colaborador</SelectItem>
+                    <SelectItem value="gestor">Gestor</SelectItem>
+                    <SelectItem value="admin">Administrador</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            </>
-          )}
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button onClick={handleSubmit}>{isEditing ? "Salvar" : "Criar Usuário"}</Button>
-        </DialogFooter>
+
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={status} onValueChange={setStatus}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ativo">Ativo</SelectItem>
+                    <SelectItem value="inativo">Inativo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => onOpenChange(false)} type="button">
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={saving}>
+              {saving ? "Salvando..." : "Salvar"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
