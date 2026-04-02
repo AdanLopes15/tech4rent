@@ -28,7 +28,7 @@ import { AddClientDialog } from "@/components/clientes/AddClientDialog";
 import { AddCollaboratorDialog } from "@/components/colaboradores/AddCollaboratorDialog";
 import AddCostCenterDialog from "@/components/centro-de-custo/AddCostCenterDialog";
 import { AddAccountDialog } from "@/components/plano-de-contas/AddAccountDialog";
-import { AddBankAccountDialog } from "@/components/bancos/AddBankAccountDialog";
+import AddBankAccountDialog from "@/components/bancos/AddBankAccountDialog";
 
 interface Props {
   open: boolean;
