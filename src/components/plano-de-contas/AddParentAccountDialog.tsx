@@ -1,80 +1,139 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+//src/components/plano-de-contas/AddParentAccountDialog.tsx
+
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { useStore } from "@/store";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
 
 interface AddParentAccountDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (account: { code: string; name: string; type: "receita" | "despesa"; description: string }) => void;
 }
 
-export function AddParentAccountDialog({ open, onOpenChange, onSave }: AddParentAccountDialogProps) {
+export function AddParentAccountDialog({ open, onOpenChange }: AddParentAccountDialogProps) {
+  const { addChartOfAccount } = useStore();
+
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
   const [type, setType] = useState<"receita" | "despesa">("receita");
   const [description, setDescription] = useState("");
 
-  const handleSave = () => {
-    if (!code || !name) {
-      toast.error("Preencha o código e o nome da conta.");
-      return;
-    }
-    onSave({ code, name, type, description });
+  const resetForm = () => {
     setCode("");
     setName("");
     setType("receita");
     setDescription("");
-    onOpenChange(false);
-    toast.success("Conta pai cadastrada com sucesso!");
+  };
+
+  useEffect(() => {
+    if (open) {
+      resetForm();
+    }
+  }, [open]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!code.trim() || !name.trim()) {
+      toast.error("Código e nome da conta são obrigatórios.");
+      return;
+    }
+
+    try {
+      await addChartOfAccount({
+        code: code.trim(),
+        name: name.trim(),
+        type,
+        description: description.trim(),
+        parentAccountId: "",
+      });
+
+      toast.success("Conta mãe cadastrada com sucesso!");
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Erro ao salvar conta mãe:", error);
+      toast.error("Não foi possível salvar a conta mãe.");
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Nova Conta Pai</DialogTitle>
-          <DialogDescription>Cadastre uma nova conta pai (grupo) no plano de contas.</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Código</Label>
-              <Input placeholder="Ex: 7." value={code} onChange={(e) => setCode(e.target.value)} />
+      <DialogContent className="sm:max-w-xl">
+        <form onSubmit={handleSubmit}>
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">Cadastrar Nova Conta Mãe</DialogTitle>
+            <DialogDescription>Contas-mãe são contas principais que não dependem de outras.</DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-6 py-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="codigo-rapido">Código</Label>
+                <Input
+                  id="codigo-rapido"
+                  placeholder="Ex: 1.01"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="nome-conta-rapido">Nome da Conta</Label>
+                <Input
+                  id="nome-conta-rapido"
+                  placeholder="Ex: Ativos"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
             </div>
+
             <div className="space-y-2">
-              <Label>Nome</Label>
-              <Input placeholder="Ex: Investimentos" value={name} onChange={(e) => setName(e.target.value)} />
+              <Label htmlFor="tipo-conta-rapido">Tipo da Conta</Label>
+              <Select value={type} onValueChange={(value) => setType(value as "receita" | "despesa")}>
+                <SelectTrigger id="tipo-conta-rapido">
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="receita">Receita</SelectItem>
+                  <SelectItem value="despesa">Despesa</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="descricao-rapida">Descrição</Label>
+              <Textarea
+                id="descricao-rapida"
+                placeholder="Uma breve descrição sobre esta conta contábil"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
             </div>
           </div>
-          <div className="space-y-2">
-            <Label>Tipo</Label>
-            <Select value={type} onValueChange={(v) => setType(v as "receita" | "despesa")}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="receita">Receita</SelectItem>
-                <SelectItem value="despesa">Despesa</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>Descrição (opcional)</Label>
-            <Textarea
-              placeholder="Breve descrição do grupo de contas"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button onClick={handleSave}>Salvar</Button>
-        </DialogFooter>
+
+          <DialogFooter>
+            <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+              Cancelar
+            </Button>
+            <Button type="submit">Salvar Conta</Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
