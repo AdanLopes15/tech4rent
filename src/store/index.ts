@@ -455,19 +455,52 @@ const useStore = create<State & Actions>((set, get) => {
 
     return {
       ...client,
-
       razaoSocial,
       contato,
       observacoes,
       telefone,
       address,
-
       name: razaoSocial,
       contactPerson: contato,
       notes: observacoes,
       phone: telefone,
       whatsapp: telefone,
+      street: address.street,
+      number: address.number,
+      complement: address.complement,
+      neighborhood: address.neighborhood,
+      city: address.city,
+      state: address.state,
+    };
+  };
 
+  const normalizeSupplierData = (supplier: any) => {
+    const address = {
+      street: supplier.address?.street || supplier.street || "",
+      number: supplier.address?.number || supplier.number || "",
+      complement: supplier.address?.complement || supplier.complement || "",
+      neighborhood: supplier.address?.neighborhood || supplier.neighborhood || "",
+      city: supplier.address?.city || supplier.city || "",
+      state: supplier.address?.state || supplier.state || "",
+    };
+
+    const razaoSocial = supplier.razaoSocial || supplier.name || "";
+    const contato = supplier.contato || supplier.contactPerson || "";
+    const observacoes = supplier.observacoes || supplier.notes || "";
+    const telefone = supplier.telefone || supplier.phone || supplier.whatsapp || "";
+
+    return {
+      ...supplier,
+      razaoSocial,
+      contato,
+      observacoes,
+      telefone,
+      address,
+      name: razaoSocial,
+      contactPerson: contato,
+      notes: observacoes,
+      phone: telefone,
+      whatsapp: telefone,
       street: address.street,
       number: address.number,
       complement: address.complement,
@@ -644,7 +677,7 @@ const useStore = create<State & Actions>((set, get) => {
           newState.quotes = quotesSnap.docs.map((d) =>
             convertTimestampToISO(mapDoc(d), ["startDate", "endDate", "createdAt", "downPaymentDate"]),
           );
-          newState.suppliers = suppliersSnap.docs.map(mapDoc);
+          newState.suppliers = suppliersSnap.docs.map((d) => normalizeSupplierData(mapDoc(d)));
           newState.purchaseOrders = purchaseOrdersSnap.docs.map((d) =>
             convertTimestampToISO(mapDoc(d), ["date", "createdAt"]),
           );
@@ -916,7 +949,6 @@ const useStore = create<State & Actions>((set, get) => {
       const client = clients.find((c) => c.id === quote.clientId);
 
       const startDate = quote.startDate?.toDate ? quote.startDate.toDate() : new Date(quote.startDate);
-
       const endDate = quote.endDate?.toDate ? quote.endDate.toDate() : new Date(quote.endDate);
 
       const contractData = {
@@ -1314,9 +1346,16 @@ const useStore = create<State & Actions>((set, get) => {
 
     addSupplier: async (supplier) => {
       centralValidateDocument(supplier.personType === "juridica" ? supplier.cnpj : supplier.cpf, "supplier", null);
+
       const newId = await get().getNextId("suppliers");
-      const { id, ...supplierData } = supplier;
-      await setDoc(doc(db, "suppliers", newId), { ...supplierData, id: newId });
+      const normalizedSupplier = normalizeSupplierData(supplier);
+      const { id, ...supplierData } = normalizedSupplier;
+
+      await setDoc(doc(db, "suppliers", newId), {
+        ...supplierData,
+        id: newId,
+      });
+
       set((state) => ({
         suppliers: [...state.suppliers, { id: newId, ...supplierData }],
       }));
@@ -1328,10 +1367,16 @@ const useStore = create<State & Actions>((set, get) => {
         "supplier",
         updatedSupplier.id,
       );
+
+      const normalizedSupplier = normalizeSupplierData(updatedSupplier);
       const supplierRef = doc(db, "suppliers", updatedSupplier.id);
-      await updateDoc(supplierRef, updatedSupplier);
+
+      await updateDoc(supplierRef, normalizedSupplier);
+
       set((state) => ({
-        suppliers: state.suppliers.map((supplier) => (supplier.id === updatedSupplier.id ? updatedSupplier : supplier)),
+        suppliers: state.suppliers.map((supplier) =>
+          supplier.id === updatedSupplier.id ? normalizedSupplier : supplier,
+        ),
       }));
     },
 
