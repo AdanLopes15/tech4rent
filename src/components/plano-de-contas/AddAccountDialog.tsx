@@ -1,1 +1,3 @@
-// src/components/plano-de-contas/AddAccountDialog.tsx
+export function AddAccountDialog({ open, onOpenChange }: any) {
+  return null;
+}

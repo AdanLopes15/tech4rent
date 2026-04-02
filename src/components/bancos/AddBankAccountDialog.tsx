@@ -1,1 +1,3 @@
-// src/components/bancos/AddBankAccountDialog.tsx
+export function AddBankAccountDialog({ open, onOpenChange }: any) {
+  return null;
+}

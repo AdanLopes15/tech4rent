@@ -1,1 +1,3 @@
-// src/components/colaboradores/AddCollaboratorDialog.tsx
+export function AddCollaboratorDialog({ open, onOpenChange }: any) {
+  return null;
+}

@@ -1,1 +1,3 @@
-// src/components/financeiro/AttachReceiptDialog.tsx
+export function AttachReceiptDialog({ open, onOpenChange, expense }: any) {
+  return null;
+}

@@ -1,1 +1,3 @@
-// src/components/centro-de-custo/AddCostCenterDialog.tsx
+export function AddCostCenterDialog({ open, onOpenChange }: any) {
+  return null;
+}
