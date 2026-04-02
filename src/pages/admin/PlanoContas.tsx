@@ -1,3 +1,5 @@
+//src/pages/admin/PlanoContas.tsx
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,8 +8,20 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Plus, MoreHorizontal, ChevronUp, ChevronDown, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -37,7 +51,14 @@ const initialAccounts: Account[] = [
   { id: "10", code: "3.", name: "Despesas com Viagens", type: "despesa", parentId: null, description: "" },
   { id: "11", code: "3.3", name: "Almoço/Jantar/Lanche", type: "despesa", parentId: "10", description: "" },
   { id: "12", code: "3.1", name: "Hotéis/Pousada", type: "despesa", parentId: "10", description: "" },
-  { id: "13", code: "3.4", name: "Locação de Veículos/Estacionamento/Uber", type: "despesa", parentId: "10", description: "" },
+  {
+    id: "13",
+    code: "3.4",
+    name: "Locação de Veículos/Estacionamento/Uber",
+    type: "despesa",
+    parentId: "10",
+    description: "",
+  },
   { id: "14", code: "3.2", name: "Combustíveis/Pedágio", type: "despesa", parentId: "10", description: "" },
   // Despesas - Pessoal
   { id: "15", code: "1.", name: "Despesas com Pessoal", type: "despesa", parentId: null, description: "" },
@@ -74,7 +95,14 @@ const initialAccounts: Account[] = [
   { id: "45", code: "2.12", name: "Eventos e Confraternização", type: "despesa", parentId: "29", description: "" },
   { id: "46", code: "2.10", name: "Copa e Cozinha", type: "despesa", parentId: "29", description: "" },
   { id: "47", code: "2.2", name: "Água", type: "despesa", parentId: "29", description: "" },
-  { id: "48", code: "2.18", name: "Taxas/Emolumentos/Guias/Demais tarifas", type: "despesa", parentId: "29", description: "" },
+  {
+    id: "48",
+    code: "2.18",
+    name: "Taxas/Emolumentos/Guias/Demais tarifas",
+    type: "despesa",
+    parentId: "29",
+    description: "",
+  },
   // Despesas - Financeiras
   { id: "49", code: "6.", name: "Despesas Financeiras", type: "despesa", parentId: null, description: "" },
   { id: "50", code: "6.1", name: "Antecipação", type: "despesa", parentId: "49", description: "" },
@@ -150,14 +178,18 @@ const PlanoContas = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem><Pencil className="mr-2 h-4 w-4" />Editar</DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Editar
+                </DropdownMenuItem>
                 <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(parent.id)}>
-                  <Trash2 className="mr-2 h-4 w-4" />Excluir
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Excluir
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </TableCell>
-        </TableRow>
+        </TableRow>,
       );
       children.forEach((child) => {
         rows.push(
@@ -173,14 +205,18 @@ const PlanoContas = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem><Pencil className="mr-2 h-4 w-4" />Editar</DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Editar
+                  </DropdownMenuItem>
                   <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(child.id)}>
-                    <Trash2 className="mr-2 h-4 w-4" />Excluir
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Excluir
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </TableCell>
-          </TableRow>
+          </TableRow>,
         );
       });
     });
@@ -287,9 +323,13 @@ const PlanoContas = () => {
                 <Label>Tipo da Conta</Label>
                 <Select
                   value={newAccount.type}
-                  onValueChange={(v) => setNewAccount((p) => ({ ...p, type: v as "receita" | "despesa", parentId: "" }))}
+                  onValueChange={(v) =>
+                    setNewAccount((p) => ({ ...p, type: v as "receita" | "despesa", parentId: "" }))
+                  }
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="receita">Receita</SelectItem>
                     <SelectItem value="despesa">Despesa</SelectItem>
@@ -303,7 +343,9 @@ const PlanoContas = () => {
                     value={newAccount.parentId}
                     onValueChange={(v) => setNewAccount((p) => ({ ...p, parentId: v }))}
                   >
-                    <SelectTrigger className="flex-1"><SelectValue placeholder="Nenhuma (Conta..." /></SelectTrigger>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Nenhuma (Conta..." />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">Nenhuma (Conta Pai)</SelectItem>
                       {parentAccounts.map((pa) => (
@@ -330,7 +372,9 @@ const PlanoContas = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              Cancelar
+            </Button>
             <Button onClick={handleSave}>Salvar</Button>
           </DialogFooter>
         </DialogContent>
