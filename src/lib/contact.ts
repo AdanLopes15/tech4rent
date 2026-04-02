@@ -1,3 +1,5 @@
+//src/lib/contact.ts
+
 const PHONE_FIELDS = ["phone", "telefone", "whatsapp", "celular", "cellphone", "mobile"] as const;
 
 export const getContactPhone = (record: Record<string, any> | null | undefined) => {

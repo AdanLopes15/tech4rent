@@ -1,3 +1,5 @@
+//src/lib/cnpj.ts
+
 export async function fetchCnpjData(cnpj: string) {
   const digits = cnpj.replace(/\D/g, "");
   if (digits.length !== 14) return null;

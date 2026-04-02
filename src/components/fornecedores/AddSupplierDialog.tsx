@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+//src/components/fornecedores/AddSupplierDialog.tsx
+
+import { useCallback, useEffect, useState } from "react";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
-import { fetchCnpjData } from "@/lib/cnpj";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,285 +15,574 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { getContactPhone } from "@/lib/contact";
-import { Loader2 } from "lucide-react";
 
 interface AddSupplierDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   supplier?: any;
+  viewOnly?: boolean;
 }
 
-export function AddSupplierDialog({ open, onOpenChange, supplier }: AddSupplierDialogProps) {
+type AddressState = {
+  street: string;
+  number: string;
+  complement: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+};
+
+const EMPTY_ADDRESS: AddressState = {
+  street: "",
+  number: "",
+  complement: "",
+  neighborhood: "",
+  city: "",
+  state: "",
+};
+
+export function AddSupplierDialog({ open, onOpenChange, supplier, viewOnly = false }: AddSupplierDialogProps) {
   const { addSupplier, updateSupplier } = useStore();
   const { toast } = useToast();
 
   const [personType, setPersonType] = useState("juridica");
-  const [name, setName] = useState("");
-  const [contactPerson, setContactPerson] = useState("");
+  const [razaoSocial, setRazaoSocial] = useState("");
+  const [contato, setContato] = useState("");
   const [cnpj, setCnpj] = useState("");
   const [cpf, setCpf] = useState("");
   const [ie, setIe] = useState("");
-  const [rg, setRg] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [telefone, setTelefone] = useState("");
   const [cep, setCep] = useState("");
-  const [street, setStreet] = useState("");
-  const [number, setNumber] = useState("");
-  const [complement, setComplement] = useState("");
-  const [neighborhood, setNeighborhood] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-  const [notes, setNotes] = useState("");
-  const [loadingCnpj, setLoadingCnpj] = useState(false);
+  const [address, setAddress] = useState<AddressState>(EMPTY_ADDRESS);
+  const [status, setStatus] = useState("ativo");
+  const [observacoes, setObservacoes] = useState("");
 
-  useEffect(() => {
-    if (supplier && open) {
-      setPersonType(supplier.personType || "juridica");
-      setName(supplier.name || "");
-      setContactPerson(supplier.contactPerson || "");
-      setCnpj(supplier.cnpj || "");
-      setCpf(supplier.cpf || "");
-      setIe(supplier.ie || "");
-      setRg(supplier.rg || "");
-      setEmail(supplier.email || "");
-      setPhone(getContactPhone(supplier));
-      setCep(supplier.cep || "");
-      setStreet(supplier.street || "");
-      setNumber(supplier.number || "");
-      setComplement(supplier.complement || "");
-      setNeighborhood(supplier.neighborhood || "");
-      setCity(supplier.city || "");
-      setState(supplier.state || "");
-      setNotes(supplier.notes || "");
-    } else if (!supplier && open) {
-      resetForm();
-    }
-  }, [supplier, open]);
-
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setPersonType("juridica");
-    setName("");
-    setContactPerson("");
+    setRazaoSocial("");
+    setContato("");
     setCnpj("");
     setCpf("");
     setIe("");
-    setRg("");
     setEmail("");
-    setPhone("");
+    setTelefone("");
     setCep("");
-    setStreet("");
-    setNumber("");
-    setComplement("");
-    setNeighborhood("");
-    setCity("");
-    setState("");
-    setNotes("");
-  };
+    setAddress(EMPTY_ADDRESS);
+    setStatus("ativo");
+    setObservacoes("");
+  }, []);
 
-  const handleCnpjBlur = async () => {
-    const digits = cnpj.replace(/\D/g, "");
-    if (digits.length !== 14 || personType !== "juridica") return;
-    setLoadingCnpj(true);
-    try {
-      const data = await fetchCnpjData(cnpj);
-      if (data) {
-        if (data.name) setName(data.name);
-        if (data.contactPerson) setContactPerson(data.contactPerson);
-        if (data.email) setEmail(data.email);
-        if (data.phone) setPhone(data.phone);
-        if (data.cep) setCep(data.cep);
-        if (data.street) setStreet(data.street);
-        if (data.number) setNumber(data.number);
-        if (data.complement) setComplement(data.complement);
-        if (data.neighborhood) setNeighborhood(data.neighborhood);
-        if (data.city) setCity(data.city);
-        if (data.state) setState(data.state);
-        toast({ title: "Dados do CNPJ carregados!" });
-      } else {
-        toast({ title: "CNPJ não encontrado", variant: "destructive" });
-      }
-    } catch {
-      toast({ title: "Erro ao consultar CNPJ", variant: "destructive" });
+  useEffect(() => {
+    if (supplier && open) {
+      const mappedAddress: AddressState = {
+        street: supplier.address?.street || supplier.street || "",
+        number: supplier.address?.number || supplier.number || "",
+        complement: supplier.address?.complement || supplier.complement || "",
+        neighborhood: supplier.address?.neighborhood || supplier.neighborhood || "",
+        city: supplier.address?.city || supplier.city || "",
+        state: supplier.address?.state || supplier.state || "",
+      };
+
+      setPersonType(supplier.personType || "juridica");
+      setRazaoSocial(supplier.razaoSocial || supplier.name || "");
+      setContato(supplier.contato || supplier.contactPerson || "");
+      setCnpj(supplier.cnpj || "");
+      setCpf(supplier.cpf || "");
+      setIe(supplier.ie || supplier.rg || "");
+      setEmail(supplier.email || "");
+      setTelefone(getContactPhone(supplier));
+      setCep(supplier.cep || "");
+      setAddress(mappedAddress);
+      setStatus(supplier.status || "ativo");
+      setObservacoes(supplier.observacoes || supplier.notes || "");
+    } else if (open) {
+      resetForm();
     }
-    setLoadingCnpj(false);
+  }, [supplier, open, resetForm]);
+
+  const handleCnpjChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, "");
+    value = value.replace(/^(\d{2})(\d)/, "$1.$2");
+    value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+    value = value.replace(/\.(\d{3})(\d)/, ".$1/$2");
+    value = value.replace(/(\d{4})(\d)/, "$1-$2");
+    setCnpj(value.substring(0, 18));
   };
 
-  const handleSubmit = async () => {
-    if (!name) {
+  const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, "");
+    value = value.replace(/(\d{3})(\d)/, "$1.$2");
+    value = value.replace(/(\d{3})(\d)/, "$1.$2");
+    value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+    setCpf(value.substring(0, 14));
+  };
+
+  const handleCepChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, "");
+    if (value.length > 5) {
+      value = value.replace(/^(\d{5})(\d)/, "$1-$2");
+    }
+    setCep(value.substring(0, 9));
+  };
+
+  const fetchAddress = useCallback(async (cepToFetch: string) => {
+    const sanitizedCep = cepToFetch.replace(/\D/g, "");
+    if (sanitizedCep.length !== 8) return;
+
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${sanitizedCep}/json/`);
+      if (!response.ok) throw new Error("CEP não encontrado");
+
+      const data = await response.json();
+
+      if (data.erro) {
+        setAddress((prev) => ({
+          ...prev,
+          street: "",
+          neighborhood: "",
+          city: "",
+          state: "",
+        }));
+        return;
+      }
+
+      setAddress((prev) => ({
+        ...prev,
+        street: data.logradouro || "",
+        neighborhood: data.bairro || "",
+        city: data.localidade || "",
+        state: data.uf || "",
+      }));
+    } catch (error) {
+      console.error("Falha ao buscar CEP:", error);
+      setAddress((prev) => ({
+        ...prev,
+        street: "",
+        neighborhood: "",
+        city: "",
+        state: "",
+      }));
+    }
+  }, []);
+
+  const fetchCnpjData = useCallback(
+    async (cnpjToFetch: string) => {
+      const sanitizedCnpj = cnpjToFetch.replace(/\D/g, "");
+      if (sanitizedCnpj.length !== 14) return;
+
+      try {
+        const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${sanitizedCnpj}`);
+        if (!response.ok) throw new Error("CNPJ não encontrado ou inválido.");
+
+        const data = await response.json();
+
+        if (data) {
+          setRazaoSocial((prev) => prev || data.razao_social || "");
+          setEmail((prev) => prev || data.email || "");
+          setCep((prev) => prev || data.cep || "");
+          setAddress((prev) => ({
+            ...prev,
+            street: prev.street || data.logradouro || "",
+            neighborhood: prev.neighborhood || data.bairro || "",
+            city: prev.city || data.municipio || "",
+            state: prev.state || data.uf || "",
+            number: prev.number || data.numero || "",
+            complement: prev.complement || data.complemento || "",
+          }));
+
+          if (data.cep) {
+            fetchAddress(data.cep);
+          }
+        }
+      } catch (error: any) {
+        console.error("Falha ao buscar CNPJ:", error);
+        toast({
+          title: "Erro ao buscar CNPJ",
+          description: error.message || "Não foi possível buscar os dados do CNPJ.",
+          variant: "destructive",
+        });
+      }
+    },
+    [fetchAddress, toast],
+  );
+
+  useEffect(() => {
+    if (viewOnly) return;
+
+    const sanitizedCep = cep.replace(/\D/g, "");
+    if (sanitizedCep.length === 8) {
+      fetchAddress(sanitizedCep);
+    }
+  }, [cep, fetchAddress, viewOnly]);
+
+  useEffect(() => {
+    if (viewOnly) return;
+    if (personType !== "juridica") return;
+
+    const sanitizedCnpj = cnpj.replace(/\D/g, "");
+    if (sanitizedCnpj.length === 14) {
+      fetchCnpjData(sanitizedCnpj);
+    }
+  }, [cnpj, personType, fetchCnpjData, viewOnly]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (viewOnly) {
+      onOpenChange(false);
+      return;
+    }
+
+    if (!razaoSocial.trim()) {
       toast({
         title: "Campo obrigatório",
-        description: personType === "juridica" ? "Razão Social é obrigatória." : "Nome é obrigatório.",
+        description: personType === "juridica" ? "Razão Social é obrigatória." : "Nome completo é obrigatório.",
         variant: "destructive",
       });
       return;
     }
 
-    const data = {
+    const supplierData = {
       personType,
-      name,
-      contactPerson,
-      cnpj: personType === "juridica" ? cnpj : "",
-      cpf: personType === "fisica" ? cpf : "",
-      ie: personType === "juridica" ? ie : "",
-      rg: personType === "fisica" ? rg : "",
-      email,
-      phone,
-      telefone: phone,
-      whatsapp: phone,
-      cep,
-      street,
-      number,
-      complement,
-      neighborhood,
-      city,
-      state,
-      notes,
+
+      // campos originais do Firebase
+      razaoSocial: razaoSocial.trim(),
+      contato: contato.trim(),
+      ie: ie.trim(),
+      telefone: telefone.trim(),
+      observacoes: observacoes.trim(),
+      address: {
+        street: address.street.trim(),
+        number: address.number.trim(),
+        complement: address.complement.trim(),
+        neighborhood: address.neighborhood.trim(),
+        city: address.city.trim(),
+        state: address.state.trim(),
+      },
+
+      // campos já usados no Lovable para compatibilidade
+      name: razaoSocial.trim(),
+      contactPerson: contato.trim(),
+      phone: telefone.trim(),
+      whatsapp: telefone.trim(),
+      notes: observacoes.trim(),
+      street: address.street.trim(),
+      number: address.number.trim(),
+      complement: address.complement.trim(),
+      neighborhood: address.neighborhood.trim(),
+      city: address.city.trim(),
+      state: address.state.trim(),
+
+      // documentos
+      cnpj: personType === "juridica" ? cnpj.trim() : "",
+      cpf: personType === "fisica" ? cpf.trim() : "",
+      rg: personType === "fisica" ? ie.trim() : "",
+
+      // comuns
+      email: email.trim(),
+      cep: cep.trim(),
+      status,
     };
 
     try {
       if (supplier) {
-        await updateSupplier({ id: supplier.id, ...data });
+        await updateSupplier({
+          id: supplier.id,
+          ...supplierData,
+        });
+
         toast({ title: "Fornecedor atualizado com sucesso!" });
       } else {
-        await addSupplier(data);
+        await addSupplier(supplierData);
         toast({ title: "Fornecedor cadastrado com sucesso!" });
       }
+
       onOpenChange(false);
     } catch (error: any) {
-      toast({ title: "Erro ao salvar", description: error.message || "Não foi possível salvar.", variant: "destructive" });
+      toast({
+        title: "Erro ao salvar",
+        description: error.message || "Não foi possível salvar o fornecedor.",
+        variant: "destructive",
+      });
     }
   };
+
+  const dialogTitle = viewOnly ? "Visualizar Fornecedor" : supplier ? "Editar Fornecedor" : "Cadastrar Novo Fornecedor";
+
+  const dialogDescription = viewOnly ? "Detalhes do fornecedor." : "Preencha os dados do fornecedor.";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">{supplier ? "Editar Fornecedor" : "Novo Fornecedor"}</DialogTitle>
-          <DialogDescription>Preencha os dados do fornecedor.</DialogDescription>
-        </DialogHeader>
+        <form onSubmit={handleSubmit}>
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">{dialogTitle}</DialogTitle>
+            <DialogDescription>{dialogDescription}</DialogDescription>
+          </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto px-1 -mx-1 space-y-6 pb-2">
-          <div className="space-y-2">
-            <Label className="text-xs font-medium">Tipo de Pessoa</Label>
-            <RadioGroup value={personType} onValueChange={setPersonType} className="flex gap-6">
-              <div className="flex items-center gap-2">
-                <RadioGroupItem value="juridica" id="spj" />
-                <Label htmlFor="spj" className="cursor-pointer">Pessoa Jurídica</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <RadioGroupItem value="fisica" id="spf" />
-                <Label htmlFor="spf" className="cursor-pointer">Pessoa Física</Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          <div className="space-y-1.5">
-            <h3 className="text-sm font-semibold text-primary uppercase tracking-wider">Dados Principais</h3>
-            <div className="h-px bg-border" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">{personType === "juridica" ? "Razão Social *" : "Nome Completo *"}</Label>
-              <Input placeholder={personType === "juridica" ? "Razão Social" : "Nome completo"} value={name} onChange={(e) => setName(e.target.value)} className="h-9" />
+          <div className="flex-1 overflow-y-auto px-1 -mx-1 space-y-6 pb-2">
+            <div className="space-y-2">
+              <Label className="text-xs font-medium">Tipo de Pessoa</Label>
+              <RadioGroup value={personType} onValueChange={setPersonType} className="flex gap-6" disabled={viewOnly}>
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="juridica" id="spj" />
+                  <Label htmlFor="spj" className="cursor-pointer">
+                    Pessoa Jurídica
+                  </Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="fisica" id="spf" />
+                  <Label htmlFor="spf" className="cursor-pointer">
+                    Pessoa Física
+                  </Label>
+                </div>
+              </RadioGroup>
             </div>
+
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Pessoa de Contato</Label>
-              <Input placeholder="Nome do contato" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} className="h-9" />
+              <h3 className="text-sm font-semibold text-primary uppercase tracking-wider">Dados Principais</h3>
+              <div className="h-px bg-border" />
             </div>
-            {personType === "juridica" ? (
-              <>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium">CNPJ</Label>
-                  <div className="relative">
-                    <Input placeholder="00.000.000/0001-00" value={cnpj} onChange={(e) => setCnpj(e.target.value)} onBlur={handleCnpjBlur} className="h-9" />
-                    {loadingCnpj && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">
+                  {personType === "juridica" ? "Razão Social *" : "Nome Completo *"}
+                </Label>
+                <Input
+                  placeholder={personType === "juridica" ? "Razão Social da Empresa" : "Nome completo"}
+                  value={razaoSocial}
+                  onChange={(e) => setRazaoSocial(e.target.value)}
+                  className="h-9"
+                  disabled={viewOnly}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Pessoa de Contato</Label>
+                <Input
+                  placeholder="Nome do contato principal"
+                  value={contato}
+                  onChange={(e) => setContato(e.target.value)}
+                  className="h-9"
+                  disabled={viewOnly}
+                />
+              </div>
+
+              {personType === "juridica" ? (
+                <>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium">CNPJ</Label>
+                    <Input
+                      placeholder="00.000.000/0001-00"
+                      value={cnpj}
+                      onChange={handleCnpjChange}
+                      maxLength={18}
+                      className="h-9"
+                      disabled={viewOnly}
+                    />
                   </div>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium">Inscrição Estadual</Label>
-                  <Input placeholder="Isento ou número da I.E." value={ie} onChange={(e) => setIe(e.target.value)} className="h-9" />
-                </div>
-              </>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium">Inscrição Estadual</Label>
+                    <Input
+                      placeholder="Isento ou número da I.E."
+                      value={ie}
+                      onChange={(e) => setIe(e.target.value)}
+                      className="h-9"
+                      disabled={viewOnly}
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium">CPF</Label>
+                    <Input
+                      placeholder="000.000.000-00"
+                      value={cpf}
+                      onChange={handleCpfChange}
+                      maxLength={14}
+                      className="h-9"
+                      disabled={viewOnly}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium">RG</Label>
+                    <Input
+                      placeholder="Número do RG"
+                      value={ie}
+                      onChange={(e) => setIe(e.target.value)}
+                      className="h-9"
+                      disabled={viewOnly}
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Email</Label>
+                <Input
+                  placeholder="contato@empresa.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="h-9"
+                  disabled={viewOnly}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Telefone / WhatsApp</Label>
+                <Input
+                  placeholder="DDD + Número"
+                  value={telefone}
+                  onChange={(e) => setTelefone(e.target.value)}
+                  className="h-9"
+                  disabled={viewOnly}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <h3 className="text-sm font-semibold text-primary uppercase tracking-wider">Endereço</h3>
+              <div className="h-px bg-border" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              <div className="space-y-1.5 md:col-span-1">
+                <Label className="text-xs font-medium">CEP</Label>
+                <Input
+                  placeholder="00000-000"
+                  value={cep}
+                  onChange={handleCepChange}
+                  maxLength={9}
+                  className="h-9 md:max-w-[240px]"
+                  disabled={viewOnly}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Rua / Logradouro</Label>
+                <Input
+                  placeholder="Rua das Flores"
+                  value={address.street}
+                  onChange={(e) => setAddress({ ...address, street: e.target.value })}
+                  className="h-9"
+                  disabled={viewOnly}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Número</Label>
+                <Input
+                  placeholder="123"
+                  value={address.number}
+                  onChange={(e) => setAddress({ ...address, number: e.target.value })}
+                  className="h-9"
+                  disabled={viewOnly}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Complemento</Label>
+                <Input
+                  placeholder="Apto, Bloco, Sala"
+                  value={address.complement}
+                  onChange={(e) => setAddress({ ...address, complement: e.target.value })}
+                  className="h-9"
+                  disabled={viewOnly}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Bairro</Label>
+                <Input
+                  placeholder="Centro"
+                  value={address.neighborhood}
+                  onChange={(e) => setAddress({ ...address, neighborhood: e.target.value })}
+                  className="h-9"
+                  disabled={viewOnly}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Cidade</Label>
+                <Input
+                  placeholder="São Paulo"
+                  value={address.city}
+                  onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                  className="h-9"
+                  disabled={viewOnly}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Estado</Label>
+                <Input
+                  placeholder="SP"
+                  value={address.state}
+                  onChange={(e) => setAddress({ ...address, state: e.target.value })}
+                  className="h-9 md:max-w-[100px]"
+                  disabled={viewOnly}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <h3 className="text-sm font-semibold text-primary uppercase tracking-wider">Outros</h3>
+              <div className="h-px bg-border" />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Status</Label>
+              <Select value={status} onValueChange={setStatus} disabled={viewOnly}>
+                <SelectTrigger className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ativo">Ativo</SelectItem>
+                  <SelectItem value="inativo">Inativo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Observações</Label>
+              <Textarea
+                placeholder="Informações adicionais sobre o fornecedor"
+                value={observacoes}
+                onChange={(e) => setObservacoes(e.target.value)}
+                className="min-h-[80px] resize-y"
+                disabled={viewOnly}
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="pt-4 border-t border-border">
+            {viewOnly ? (
+              <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+                Fechar
+              </Button>
             ) : (
               <>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium">CPF</Label>
-                  <Input placeholder="000.000.000-00" value={cpf} onChange={(e) => setCpf(e.target.value)} className="h-9" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium">RG</Label>
-                  <Input placeholder="Número do RG" value={rg} onChange={(e) => setRg(e.target.value)} className="h-9" />
-                </div>
+                <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit" className="bg-primary hover:bg-primary/90">
+                  Salvar
+                </Button>
               </>
             )}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Email</Label>
-              <Input placeholder="contato@empresa.com" value={email} onChange={(e) => setEmail(e.target.value)} className="h-9" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Telefone / WhatsApp</Label>
-              <Input placeholder="DDD + Número" value={phone} onChange={(e) => setPhone(e.target.value)} className="h-9" />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <h3 className="text-sm font-semibold text-primary uppercase tracking-wider">Endereço</h3>
-            <div className="h-px bg-border" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">CEP</Label>
-              <Input placeholder="00000-000" value={cep} onChange={(e) => setCep(e.target.value)} className="h-9 md:max-w-[240px]" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Rua / Logradouro</Label>
-              <Input placeholder="Rua das Flores" value={street} onChange={(e) => setStreet(e.target.value)} className="h-9" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Número</Label>
-              <Input placeholder="123" value={number} onChange={(e) => setNumber(e.target.value)} className="h-9" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Complemento</Label>
-              <Input placeholder="Apto, Bloco, Sala" value={complement} onChange={(e) => setComplement(e.target.value)} className="h-9" />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Bairro</Label>
-              <Input placeholder="Centro" value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className="h-9" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Cidade</Label>
-              <Input placeholder="São Paulo" value={city} onChange={(e) => setCity(e.target.value)} className="h-9" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Estado</Label>
-              <Input placeholder="SP" value={state} onChange={(e) => setState(e.target.value)} className="h-9 md:max-w-[100px]" />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <h3 className="text-sm font-semibold text-primary uppercase tracking-wider">Outros</h3>
-            <div className="h-px bg-border" />
-          </div>
-
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium">Observações</Label>
-            <Textarea placeholder="Informações adicionais" value={notes} onChange={(e) => setNotes(e.target.value)} className="min-h-[80px] resize-y" />
-          </div>
-        </div>
-
-        <DialogFooter className="pt-4 border-t border-border">
-          <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button type="button" onClick={handleSubmit} className="bg-primary hover:bg-primary/90">Salvar</Button>
-        </DialogFooter>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
