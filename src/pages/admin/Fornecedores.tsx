@@ -156,17 +156,7 @@ export default function Fornecedores() {
 
                         <TableCell className="text-muted-foreground">{supplier.email || "—"}</TableCell>
 
-                        <TableCell className="text-muted-foreground">
-                          {phone ? (
-                            <button
-                              type="button"
-                              className="text-green-500 hover:text-green-400 hover:underline cursor-pointer bg-transparent border-none p-0"
-                              onClick={() => openWhatsappLink(supplier)}
-                            >
-                              {phone}
-                            </button>
-                          ) : "—"}
-                        </TableCell>
+                        <TableCell className="text-muted-foreground">{phone || "—"}</TableCell>
 
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1">
