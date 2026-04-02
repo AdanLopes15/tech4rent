@@ -1,4 +1,6 @@
-import { useState } from "react";
+//src/components/financeiro/AttachBoletoDialog.tsx
+
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,7 +13,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useStore } from "@/store";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Paperclip } from "lucide-react";
+import { format } from "date-fns";
+import { formatCurrency } from "@/lib/utils";
 import { toast } from "sonner";
 
 interface AttachBoletoDialogProps {
@@ -21,37 +26,66 @@ interface AttachBoletoDialogProps {
 }
 
 export const AttachBoletoDialog = ({ open, onOpenChange, revenue }: AttachBoletoDialogProps) => {
-  const { attachBoletoToRevenue } = useStore();
+  const { attachBoletoToRevenue, contracts, revenues } = useStore();
+
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const [selectedContractId, setSelectedContractId] = useState("");
+  const [selectedRevenueId, setSelectedRevenueId] = useState("");
+
+  const activeContracts = useMemo(() => {
+    return contracts.filter((contract: any) => contract.status === "Em Andamento");
+  }, [contracts]);
+
+  const availableRevenues = useMemo(() => {
+    if (!selectedContractId) return [];
+
+    return revenues.filter(
+      (item: any) => item.contractId === selectedContractId && String(item.status || "").toLowerCase() === "pendente",
+    );
+  }, [revenues, selectedContractId]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    if (revenue) {
+      setSelectedContractId(revenue.contractId || "");
+      setSelectedRevenueId(revenue.id || "");
+    } else {
+      setSelectedContractId("");
+      setSelectedRevenueId("");
+    }
+
+    setFile(null);
+    setLoading(false);
+  }, [open, revenue]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0]) return;
 
     const selectedFile = e.target.files[0];
-    const allowedTypes = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
 
-    if (allowedTypes.includes(selectedFile.type)) {
+    if (selectedFile.type === "application/pdf") {
       setFile(selectedFile);
     } else {
-      toast.error("Selecione um PDF ou imagem (JPG, PNG, WebP).");
+      toast.error("Selecione um arquivo PDF.");
       e.target.value = "";
     }
   };
 
   const handleUpload = async () => {
-    if (!revenue || !file) {
-      toast.error("Selecione o arquivo para anexar.");
+    if (!selectedRevenueId || !file) {
+      toast.error("Selecione a parcela e o arquivo PDF para anexar.");
       return;
     }
 
     setLoading(true);
 
     try {
-      await attachBoletoToRevenue(revenue.id, file);
+      await attachBoletoToRevenue(selectedRevenueId, file);
       toast.success("O boleto foi anexado à parcela.");
       onOpenChange(false);
-      setFile(null);
     } catch (error: any) {
       toast.error(error?.message || "Não foi possível anexar o arquivo.");
     } finally {
@@ -71,19 +105,60 @@ export const AttachBoletoDialog = ({ open, onOpenChange, revenue }: AttachBoleto
         <DialogHeader>
           <DialogTitle>Anexar Boleto</DialogTitle>
           <DialogDescription>
-            Anexe o boleto para a parcela: <span className="font-semibold">{revenue?.description || "Parcela"}</span>
+            Selecione o contrato, a parcela e faça o upload do arquivo PDF do boleto.
           </DialogDescription>
         </DialogHeader>
 
         <div className="py-4 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="boleto-file">Arquivo (PDF, JPG, PNG, WebP)</Label>
-            <Input
-              id="boleto-file"
-              type="file"
-              accept="application/pdf,image/jpeg,image/png,image/webp"
-              onChange={handleFileChange}
-            />
+            <Label htmlFor="contract-select">Contrato</Label>
+            <Select
+              value={selectedContractId}
+              onValueChange={(value) => {
+                setSelectedContractId(value);
+                if (!revenue) setSelectedRevenueId("");
+              }}
+              disabled={!!revenue}
+            >
+              <SelectTrigger id="contract-select">
+                <SelectValue placeholder="Selecione um contrato ativo" />
+              </SelectTrigger>
+
+              <SelectContent>
+                {activeContracts.map((contract: any) => (
+                  <SelectItem key={contract.id} value={contract.id}>
+                    {contract.id} - {contract.client?.razaoSocial || "N/A"}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="revenue-select">Parcela</Label>
+            <Select
+              value={selectedRevenueId}
+              onValueChange={setSelectedRevenueId}
+              disabled={!selectedContractId || !!revenue}
+            >
+              <SelectTrigger id="revenue-select">
+                <SelectValue placeholder="Selecione a parcela pendente" />
+              </SelectTrigger>
+
+              <SelectContent>
+                {availableRevenues.map((item: any) => (
+                  <SelectItem key={item.id} value={item.id}>
+                    {item.description} (Venc: {format(new Date(item.dueDate), "dd/MM/yy")}) -{" "}
+                    {formatCurrency(item.valorTotal)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="boleto-file">Arquivo PDF</Label>
+            <Input id="boleto-file" type="file" accept="application/pdf" onChange={handleFileChange} />
             {file && <p className="text-sm text-muted-foreground">Arquivo selecionado: {file.name}</p>}
           </div>
         </div>
@@ -92,7 +167,8 @@ export const AttachBoletoDialog = ({ open, onOpenChange, revenue }: AttachBoleto
           <Button variant="outline" type="button" onClick={() => onOpenChange(false)} disabled={loading}>
             Cancelar
           </Button>
-          <Button onClick={handleUpload} disabled={!file || loading}>
+
+          <Button onClick={handleUpload} disabled={!selectedRevenueId || !file || loading}>
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Paperclip className="mr-2 h-4 w-4" />}
             Salvar Anexo
           </Button>

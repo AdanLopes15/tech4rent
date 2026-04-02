@@ -1,133 +1,83 @@
 //src/pages/admin/Boletos.tsx
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useStore } from "@/store";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Plus, Paperclip, MoreHorizontal, Trash2, ExternalLink } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Plus, MoreHorizontal, FileCheck, FileX, Download, Trash2, Paperclip } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { format } from "date-fns";
-import { toast } from "sonner";
+import { AttachBoletoDialog } from "@/components/financeiro/AttachBoletoDialog";
 
 const Boletos = () => {
-  const { revenues, contracts, loading, fetchAllData, attachBoletoToRevenue, deleteBoletoFromRevenue } = useStore();
+  const { revenues, fetchAllData, deleteBoletoFromRevenue } = useStore();
 
   const [showAttachDialog, setShowAttachDialog] = useState(false);
-  const [selectedContractId, setSelectedContractId] = useState("");
-  const [selectedRevenueId, setSelectedRevenueId] = useState("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [saving, setSaving] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const inlineFileRef = useRef<HTMLInputElement>(null);
-  const [inlineAttachId, setInlineAttachId] = useState<string | null>(null);
+  const [selectedRevenue, setSelectedRevenue] = useState<any>(null);
 
   useEffect(() => {
     fetchAllData();
   }, [fetchAllData]);
 
-  // Get all revenues from contracts (installments)
   const contractRevenues = useMemo(() => {
     return revenues
-      .filter((r: any) => r.contractId)
+      .filter((revenue: any) => revenue.contractId)
       .sort((a: any, b: any) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
   }, [revenues]);
 
-  // Active contracts for the dialog
-  const activeContracts = useMemo(() => contracts.filter((c: any) => c.status === "Em Andamento"), [contracts]);
-
-  // Pending revenues for selected contract
-  const pendingRevenues = useMemo(() => {
-    if (!selectedContractId) return [];
-    return revenues.filter((r: any) => r.contractId === selectedContractId && r.status !== "recebido");
-  }, [revenues, selectedContractId]);
-
-  const handleSaveAttach = async () => {
-    if (!selectedRevenueId || !selectedFile) {
-      toast.error("Selecione o contrato, a parcela e o arquivo.");
-      return;
-    }
-    setSaving(true);
-    try {
-      await attachBoletoToRevenue(selectedRevenueId, selectedFile);
-      toast.success("Boleto anexado!");
-      setShowAttachDialog(false);
-      resetDialog();
-    } catch (err: any) {
-      toast.error(err.message || "Erro ao anexar boleto.");
-    } finally {
-      setSaving(false);
-    }
+  const handleAttach = (revenue: any) => {
+    setSelectedRevenue(revenue);
+    setShowAttachDialog(true);
   };
 
-  const handleInlineAttach = (revenueId: string) => {
-    setInlineAttachId(revenueId);
-    inlineFileRef.current?.click();
+  const handleAddNew = () => {
+    setSelectedRevenue(null);
+    setShowAttachDialog(true);
   };
 
-  const handleInlineFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !inlineAttachId) return;
-    try {
-      await attachBoletoToRevenue(inlineAttachId, file);
-      toast.success("Boleto anexado!");
-    } catch {
-      toast.error("Erro ao anexar.");
-    } finally {
-      setInlineAttachId(null);
-      if (inlineFileRef.current) inlineFileRef.current.value = "";
+  const handleCloseDialog = (open: boolean) => {
+    if (!open) {
+      setSelectedRevenue(null);
     }
-  };
-
-  const handleDeleteBoleto = async (revenueId: string) => {
-    try {
-      await deleteBoletoFromRevenue(revenueId);
-      toast.success("Boleto removido!");
-    } catch {
-      toast.error("Erro ao remover.");
-    }
-  };
-
-  const resetDialog = () => {
-    setSelectedContractId("");
-    setSelectedRevenueId("");
-    setSelectedFile(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    setShowAttachDialog(open);
   };
 
   return (
     <div className="space-y-6">
-      <input ref={inlineFileRef} type="file" className="hidden" accept=".pdf" onChange={handleInlineFileChange} />
-
       <Card className="border-border">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-lg">Gestão de Boletos</CardTitle>
-              <p className="text-xs text-muted-foreground">Anexe e gerencie os boletos das parcelas de contratos.</p>
+              <CardDescription>Anexe e gerencie os boletos das parcelas de contratos.</CardDescription>
             </div>
-            <Button
-              size="sm"
-              className="gap-2"
-              onClick={() => {
-                resetDialog();
-                setShowAttachDialog(true);
-              }}
-            >
-              <Plus className="h-4 w-4" /> Anexar Boleto
+
+            <Button size="sm" className="gap-2" onClick={handleAddNew}>
+              <Plus className="h-4 w-4" />
+              Anexar Boleto
             </Button>
           </div>
         </CardHeader>
+
         <CardContent>
           <Table>
             <TableHeader>
@@ -140,29 +90,35 @@ const Boletos = () => {
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
               {contractRevenues.length > 0 ? (
-                contractRevenues.map((r: any) => (
-                  <TableRow key={r.id}>
-                    <TableCell className="text-sm font-medium">{r.contractId}</TableCell>
-                    <TableCell className="text-sm">{r.description || "-"}</TableCell>
+                contractRevenues.map((revenue: any) => (
+                  <TableRow key={revenue.id}>
+                    <TableCell className="text-sm font-medium">{revenue.contractId}</TableCell>
+
+                    <TableCell className="text-sm">{revenue.description || "-"}</TableCell>
+
                     <TableCell className="text-sm">
-                      {r.dueDate ? format(new Date(r.dueDate), "dd/MM/yyyy") : "-"}
+                      {revenue.dueDate ? format(new Date(revenue.dueDate), "dd/MM/yyyy") : "-"}
                     </TableCell>
-                    <TableCell className="text-sm">{formatCurrency(r.valorTotal || 0)}</TableCell>
+
+                    <TableCell className="text-sm">{formatCurrency(revenue.valorTotal || 0)}</TableCell>
+
                     <TableCell>
-                      {r.boletoUrl ? (
-                        <a href={r.boletoUrl} target="_blank" rel="noopener noreferrer">
-                          <Badge className="bg-success/20 text-success border-0 gap-1 cursor-pointer">
-                            <ExternalLink className="h-3 w-3" /> Ver Boleto
-                          </Badge>
-                        </a>
+                      {revenue.boletoUrl ? (
+                        <div className="flex items-center gap-2 text-green-600">
+                          <FileCheck className="h-4 w-4" />
+                          <span>Anexado</span>
+                        </div>
                       ) : (
-                        <Badge className="bg-muted text-muted-foreground border-0 gap-1">
-                          <Paperclip className="h-3 w-3" /> Pendente
-                        </Badge>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <FileX className="h-4 w-4" />
+                          <span>Pendente</span>
+                        </div>
                       )}
                     </TableCell>
+
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -170,14 +126,45 @@ const Boletos = () => {
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
+
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleInlineAttach(r.id)}>
-                            <Paperclip className="h-4 w-4 mr-2" /> Anexar Boleto
-                          </DropdownMenuItem>
-                          {r.boletoUrl && (
-                            <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteBoleto(r.id)}>
-                              <Trash2 className="h-4 w-4 mr-2" /> Remover Boleto
+                          {!revenue.boletoUrl ? (
+                            <DropdownMenuItem onClick={() => handleAttach(revenue)}>
+                              <Paperclip className="h-4 w-4 mr-2" />
+                              Anexar Boleto
                             </DropdownMenuItem>
+                          ) : (
+                            <>
+                              <DropdownMenuItem onClick={() => window.open(revenue.boletoUrl, "_blank")}>
+                                <Download className="h-4 w-4 mr-2" />
+                                Baixar Boleto
+                              </DropdownMenuItem>
+
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Excluir Anexo
+                                  </DropdownMenuItem>
+                                </AlertDialogTrigger>
+
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Excluir Anexo?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Esta ação removerá o anexo do boleto permanentemente.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => deleteBoletoFromRevenue(revenue.id)}>
+                                      Continuar
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </>
                           )}
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -196,76 +183,7 @@ const Boletos = () => {
         </CardContent>
       </Card>
 
-      {/* Attach Dialog */}
-      <Dialog open={showAttachDialog} onOpenChange={setShowAttachDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Anexar Boleto</DialogTitle>
-            <DialogDescription>
-              Selecione o contrato, a parcela e faça o upload do arquivo PDF do boleto.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-1">
-              <Label>Contrato</Label>
-              <Select
-                value={selectedContractId}
-                onValueChange={(v) => {
-                  setSelectedContractId(v);
-                  setSelectedRevenueId("");
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um contrato ativo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {activeContracts.map((c: any) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.id} - {c.client?.razaoSocial || "N/A"}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1">
-              <Label>Parcela</Label>
-              <Select value={selectedRevenueId} onValueChange={setSelectedRevenueId} disabled={!selectedContractId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a parcela pendente" />
-                </SelectTrigger>
-                <SelectContent>
-                  {pendingRevenues.map((r: any) => (
-                    <SelectItem key={r.id} value={r.id}>
-                      {r.description || "Parcela"} - {r.dueDate ? format(new Date(r.dueDate), "dd/MM/yyyy") : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1">
-              <Label>Arquivo PDF</Label>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf"
-                className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border file:border-border file:text-sm file:font-medium file:bg-muted file:text-foreground hover:file:bg-muted/80 cursor-pointer"
-                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-              />
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => setShowAttachDialog(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={handleSaveAttach} disabled={saving} className="gap-2">
-                <Paperclip className="h-4 w-4" /> {saving ? "Salvando..." : "Salvar Anexo"}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <AttachBoletoDialog open={showAttachDialog} onOpenChange={handleCloseDialog} revenue={selectedRevenue} />
     </div>
   );
 };
