@@ -1,3 +1,5 @@
+//src/components/financeiro/TransferDialog.tsx
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -64,10 +66,14 @@ export const TransferDialog = ({ open, onOpenChange }: Props) => {
           <div className="space-y-1">
             <Label>De (Origem)</Label>
             <Select value={fromId} onValueChange={setFromId}>
-              <SelectTrigger><SelectValue placeholder="Selecione a conta de origem" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione a conta de origem" />
+              </SelectTrigger>
               <SelectContent>
                 {bankAccounts.map((ba: any) => (
-                  <SelectItem key={ba.id} value={ba.id}>{ba.name}</SelectItem>
+                  <SelectItem key={ba.id} value={ba.id}>
+                    {ba.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -76,10 +82,14 @@ export const TransferDialog = ({ open, onOpenChange }: Props) => {
           <div className="space-y-1">
             <Label>Para (Destino)</Label>
             <Select value={toId} onValueChange={setToId}>
-              <SelectTrigger><SelectValue placeholder="Selecione a conta de destino" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione a conta de destino" />
+              </SelectTrigger>
               <SelectContent>
                 {bankAccounts.map((ba: any) => (
-                  <SelectItem key={ba.id} value={ba.id}>{ba.name}</SelectItem>
+                  <SelectItem key={ba.id} value={ba.id}>
+                    {ba.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -88,7 +98,13 @@ export const TransferDialog = ({ open, onOpenChange }: Props) => {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label>Valor (R$)</Label>
-              <Input type="number" min={0} step={0.01} value={amount} onChange={(e) => setAmount(Number(e.target.value))} />
+              <Input
+                type="number"
+                min={0}
+                step={0.01}
+                value={amount}
+                onChange={(e) => setAmount(Number(e.target.value))}
+              />
             </div>
             <div className="space-y-1">
               <Label>Data</Label>
@@ -108,11 +124,18 @@ export const TransferDialog = ({ open, onOpenChange }: Props) => {
 
           <div className="space-y-1">
             <Label>Descrição (Opcional)</Label>
-            <Textarea placeholder="Ex: Cobertura de saldo, adiantamento, etc." value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
+            <Textarea
+              placeholder="Ex: Cobertura de saldo, adiantamento, etc."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+            />
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancelar
+            </Button>
             <Button onClick={handleConfirm} disabled={saving} className="gap-2">
               <ArrowLeftRight className="h-4 w-4" />
               {saving ? "Processando..." : "Confirmar Transferência"}

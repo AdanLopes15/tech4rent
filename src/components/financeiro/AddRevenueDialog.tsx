@@ -1,3 +1,5 @@
+//src/components/financeiro/AddRevenueDialog.tsx
+
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -148,7 +150,9 @@ export const AddRevenueDialog = ({ open, onOpenChange, editingRevenue }: Props) 
               <div className="space-y-1">
                 <Label>Entidade</Label>
                 <Select value={entityType} onValueChange={setEntityType}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Cliente">Cliente</SelectItem>
                   </SelectContent>
@@ -157,10 +161,14 @@ export const AddRevenueDialog = ({ open, onOpenChange, editingRevenue }: Props) 
               <div className="space-y-1">
                 <Label>Cliente</Label>
                 <Select value={clientId} onValueChange={setClientId}>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
                   <SelectContent>
                     {clients.map((c: any) => (
-                      <SelectItem key={c.id} value={c.id}>{c.razaoSocial || c.nomeFantasia}</SelectItem>
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.razaoSocial || c.nomeFantasia}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -175,7 +183,12 @@ export const AddRevenueDialog = ({ open, onOpenChange, editingRevenue }: Props) 
             {/* Description */}
             <div className="space-y-1">
               <Label>Informações complementares</Label>
-              <Textarea placeholder="Ex: Fatura de Locação..." value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
+              <Textarea
+                placeholder="Ex: Fatura de Locação..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={2}
+              />
             </div>
 
             {/* Cost Center, Chart of Accounts, Payment Method */}
@@ -183,10 +196,14 @@ export const AddRevenueDialog = ({ open, onOpenChange, editingRevenue }: Props) 
               <div className="space-y-1">
                 <Label>Centro de Custo</Label>
                 <Select value={costCenterId} onValueChange={setCostCenterId}>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
                   <SelectContent>
                     {costCenters.map((cc: any) => (
-                      <SelectItem key={cc.id} value={cc.id}>{cc.name}</SelectItem>
+                      <SelectItem key={cc.id} value={cc.id}>
+                        {cc.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -194,10 +211,14 @@ export const AddRevenueDialog = ({ open, onOpenChange, editingRevenue }: Props) 
               <div className="space-y-1">
                 <Label>Plano de Contas</Label>
                 <Select value={chartOfAccountId} onValueChange={setChartOfAccountId}>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
                   <SelectContent>
                     {chartOfAccounts.map((ca: any) => (
-                      <SelectItem key={ca.id} value={ca.id}>{ca.name}</SelectItem>
+                      <SelectItem key={ca.id} value={ca.id}>
+                        {ca.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -205,10 +226,14 @@ export const AddRevenueDialog = ({ open, onOpenChange, editingRevenue }: Props) 
               <div className="space-y-1">
                 <Label>Forma de Pagamento</Label>
                 <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
                   <SelectContent>
                     {paymentMethods.map((m) => (
-                      <SelectItem key={m} value={m}>{m}</SelectItem>
+                      <SelectItem key={m} value={m}>
+                        {m}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -220,10 +245,14 @@ export const AddRevenueDialog = ({ open, onOpenChange, editingRevenue }: Props) 
               <div className="space-y-1">
                 <Label>Conta Bancária</Label>
                 <Select value={bankAccountId} onValueChange={setBankAccountId}>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
                   <SelectContent>
                     {bankAccounts.map((ba: any) => (
-                      <SelectItem key={ba.id} value={ba.id}>{ba.name}</SelectItem>
+                      <SelectItem key={ba.id} value={ba.id}>
+                        {ba.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -231,7 +260,9 @@ export const AddRevenueDialog = ({ open, onOpenChange, editingRevenue }: Props) 
               <div className="space-y-1">
                 <Label>Status</Label>
                 <Select value={status} onValueChange={setStatus}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="pendente">Pendente</SelectItem>
                     <SelectItem value="recebido">Recebido</SelectItem>
@@ -303,7 +334,11 @@ export const AddRevenueDialog = ({ open, onOpenChange, editingRevenue }: Props) 
             {/* Barcode */}
             <div className="space-y-1">
               <Label>Código de Barras (Opcional)</Label>
-              <Input placeholder="Insira o código de barras do boleto" value={barcode} onChange={(e) => setBarcode(e.target.value)} />
+              <Input
+                placeholder="Insira o código de barras do boleto"
+                value={barcode}
+                onChange={(e) => setBarcode(e.target.value)}
+              />
             </div>
 
             {/* Recurring toggle */}
@@ -318,12 +353,19 @@ export const AddRevenueDialog = ({ open, onOpenChange, editingRevenue }: Props) 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label>Quantidade</Label>
-                  <Input type="number" min={2} value={repetitionQuantity} onChange={(e) => setRepetitionQuantity(Number(e.target.value))} />
+                  <Input
+                    type="number"
+                    min={2}
+                    value={repetitionQuantity}
+                    onChange={(e) => setRepetitionQuantity(Number(e.target.value))}
+                  />
                 </div>
                 <div className="space-y-1">
                   <Label>Frequência</Label>
                   <Select value={repetitionType} onValueChange={setRepetitionType}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="diario">Diário</SelectItem>
                       <SelectItem value="semanal">Semanal</SelectItem>
@@ -336,7 +378,9 @@ export const AddRevenueDialog = ({ open, onOpenChange, editingRevenue }: Props) 
             )}
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                Cancelar
+              </Button>
               <Button onClick={handleSave} disabled={saving}>
                 {saving ? "Salvando..." : "Salvar"}
               </Button>
