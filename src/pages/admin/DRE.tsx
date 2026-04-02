@@ -1,24 +1,47 @@
-import { useState, useMemo, useEffect } from "react";
+//src/pages/admin/DRE.tsx
+
+import { useState, useEffect } from "react";
+import type { ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
+import { Search, Download, TrendingUp, TrendingDown, Equal } from "lucide-react";
+
 import { useStore } from "@/store";
+import { formatCurrency } from "@/lib/utils";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Download } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
-import { format, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { useNavigate } from "react-router-dom";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Separator } from "@/components/ui/separator";
+
+interface DreLine {
+  id: string;
+  code: string;
+  name: string;
+  value: number;
+  subItems?: DreLine[];
+}
+
+interface DreData {
+  receitas: DreLine[];
+  despesas: DreLine[];
+  totalReceitas: number;
+  totalDespesas: number;
+  resultadoLiquido: number;
+}
 
 const DRE = () => {
   const navigate = useNavigate();
-  const { revenues, expenses, chartOfAccounts, loading, fetchAllData } = useStore();
+  const { revenues, expenses, chartOfAccounts, fetchAllData } = useStore();
 
-  const [selectedMonth, setSelectedMonth] = useState(() => format(new Date(), "yyyy-MM"));
-  const [generated, setGenerated] = useState(false);
+  const [competence, setCompetence] = useState<string>(format(new Date(), "yyyy-MM"));
+  const [dreData, setDreData] = useState<DreData | null>(null);
 
-  useEffect(() => { fetchAllData(); }, [fetchAllData]);
+  useEffect(() => {
+    fetchAllData();
+  }, [fetchAllData]);
 
   const tabItems = [
     { value: "visao-geral", label: "Visão Geral", path: "/admin/financeiro" },
@@ -30,177 +53,294 @@ const DRE = () => {
     { value: "relatorios", label: "Relatórios", path: "/admin/financeiro/relatorios" },
   ];
 
-  const dreData = useMemo(() => {
-    if (!generated) return null;
+  const handleGenerateDRE = () => {
+    if (!competence) {
+      return;
+    }
 
-    const [year, month] = selectedMonth.split("-").map(Number);
-    const periodStart = startOfMonth(new Date(year, month - 1));
-    const periodEnd = endOfMonth(new Date(year, month - 1));
-    const interval = { start: periodStart, end: periodEnd };
+    const [year, month] = competence.split("-").map(Number);
 
-    // Receitas by chart of accounts
-    const periodRevenues = revenues.filter((r: any) =>
-      r.dueDate && r.status === "recebido" && isWithinInterval(new Date(r.dueDate), interval)
-    );
-    const periodExpenses = expenses.filter((e: any) =>
-      e.dueDate && e.status === "pago" && isWithinInterval(new Date(e.dueDate), interval)
-    );
+    const periodRevenues = revenues.filter((revenue: any) => {
+      if (String(revenue.status || "").toLowerCase() !== "recebido" || !revenue.paymentDate) {
+        return false;
+      }
 
-    // Group revenues
-    const revenueGroups: Record<string, { name: string; total: number }> = {};
-    periodRevenues.forEach((r: any) => {
-      const key = r.chartOfAccountId || "sem-conta";
-      const account = chartOfAccounts.find((ca: any) => ca.id === key);
-      if (!revenueGroups[key]) revenueGroups[key] = { name: account?.name || "Sem classificação", total: 0 };
-      revenueGroups[key].total += r.valorTotal || 0;
+      const paymentDate = new Date(revenue.paymentDate);
+      return paymentDate.getFullYear() === year && paymentDate.getMonth() + 1 === month;
     });
 
-    // Group expenses
-    const expenseGroups: Record<string, { name: string; total: number }> = {};
-    periodExpenses.forEach((e: any) => {
-      const key = e.chartOfAccountId || "sem-conta";
-      const account = chartOfAccounts.find((ca: any) => ca.id === key);
-      if (!expenseGroups[key]) expenseGroups[key] = { name: account?.name || "Sem classificação", total: 0 };
-      expenseGroups[key].total += e.valorTotal || 0;
+    const periodExpenses = expenses.filter((expense: any) => {
+      if (String(expense.status || "").toLowerCase() !== "pago" || !expense.paymentDate) {
+        return false;
+      }
+
+      const paymentDate = new Date(expense.paymentDate);
+      return paymentDate.getFullYear() === year && paymentDate.getMonth() + 1 === month;
     });
 
-    const totalReceitas = Object.values(revenueGroups).reduce((s, g) => s + g.total, 0);
-    const totalDespesas = Object.values(expenseGroups).reduce((s, g) => s + g.total, 0);
-    const resultado = totalReceitas - totalDespesas;
+    const buildDreLines = (type: "receita" | "despesa"): DreLine[] => {
+      const accounts = (chartOfAccounts || []).filter((account: any) => account.type === type);
+      const transactions = type === "receita" ? periodRevenues : periodExpenses;
 
-    return {
-      revenueGroups: Object.values(revenueGroups),
-      expenseGroups: Object.values(expenseGroups),
+      const groupedTransactions: Record<string, number> = {};
+
+      transactions.forEach((transaction: any) => {
+        if (transaction.chartOfAccountId) {
+          groupedTransactions[transaction.chartOfAccountId] =
+            (groupedTransactions[transaction.chartOfAccountId] || 0) + (transaction.valorTotal || 0);
+        }
+      });
+
+      const accountMap = new Map<string, any>(
+        accounts.map((account: any) => [
+          account.id,
+          {
+            ...account,
+            children: [] as any[],
+            value: groupedTransactions[account.id] || 0,
+          },
+        ]),
+      );
+
+      const rootAccounts: any[] = [];
+
+      accountMap.forEach((account) => {
+        if (account.parentAccountId && accountMap.has(account.parentAccountId)) {
+          const parent = accountMap.get(account.parentAccountId);
+          parent.children.push(account);
+        } else {
+          rootAccounts.push(account);
+        }
+      });
+
+      const formatLines = (accountsToFormat: any[]): DreLine[] => {
+        return accountsToFormat
+          .map((account) => {
+            const subItems = formatLines(account.children || []);
+            const subItemsValue = subItems.reduce((sum, child) => sum + child.value, 0);
+            const totalValue = (account.value || 0) + subItemsValue;
+
+            if (totalValue === 0) {
+              return null;
+            }
+
+            return {
+              id: account.id,
+              code: account.code || "",
+              name: account.name || "Sem nome",
+              value: totalValue,
+              subItems: subItems.filter((item) => item.value > 0),
+            } as DreLine;
+          })
+          .filter((item): item is DreLine => item !== null);
+      };
+
+      return formatLines(rootAccounts);
+    };
+
+    const receitas = buildDreLines("receita");
+    const despesas = buildDreLines("despesa");
+
+    const totalReceitas = receitas.reduce((sum, item) => sum + item.value, 0);
+    const totalDespesas = despesas.reduce((sum, item) => sum + item.value, 0);
+    const resultadoLiquido = totalReceitas - totalDespesas;
+
+    setDreData({
+      receitas,
+      despesas,
       totalReceitas,
       totalDespesas,
-      resultado,
-      period: format(periodStart, "MMMM 'de' yyyy", { locale: ptBR }),
-    };
-  }, [generated, selectedMonth, revenues, expenses, chartOfAccounts]);
-
-  const exportCSV = () => {
-    if (!dreData) return;
-    let csv = "Categoria,Valor\n";
-    csv += "RECEITAS,\n";
-    dreData.revenueGroups.forEach((g) => { csv += `"${g.name}",${g.total}\n`; });
-    csv += `Total Receitas,${dreData.totalReceitas}\n`;
-    csv += "DESPESAS,\n";
-    dreData.expenseGroups.forEach((g) => { csv += `"${g.name}",${g.total}\n`; });
-    csv += `Total Despesas,${dreData.totalDespesas}\n`;
-    csv += `RESULTADO,${dreData.resultado}\n`;
-
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = "dre.csv"; a.click();
-    URL.revokeObjectURL(url);
+      resultadoLiquido,
+    });
   };
+
+  const handleExport = () => {
+    if (!dreData) {
+      return;
+    }
+
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += ["Código", "Descrição", "Valor (R$)"].join(",") + "\r\n";
+
+    const processLines = (lines: DreLine[]) => {
+      lines.forEach((line) => {
+        const row = [`'${line.code}`, `"${line.name}"`, line.value.toFixed(2)];
+        csvContent += row.join(",") + "\r\n";
+
+        if (line.subItems && line.subItems.length > 0) {
+          line.subItems.forEach((subItem) => {
+            const subRow = [`'${subItem.code}`, `"  ${subItem.name}"`, subItem.value.toFixed(2)];
+            csvContent += subRow.join(",") + "\r\n";
+          });
+        }
+      });
+    };
+
+    csvContent += `\r\n"RECEITA OPERACIONAL BRUTA","",""\r\n`;
+    processLines(dreData.receitas);
+    csvContent += `"TOTAL DE RECEITAS","","${dreData.totalReceitas.toFixed(2)}"\r\n`;
+    csvContent += `\r\n"DESPESAS OPERACIONAIS","",""\r\n`;
+    processLines(dreData.despesas);
+    csvContent += `"TOTAL DE DESPESAS","","${dreData.totalDespesas.toFixed(2)}"\r\n`;
+    csvContent += `\r\n"RESULTADO LÍQUIDO","","${dreData.resultadoLiquido.toFixed(2)}"\r\n`;
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `DRE_${competence}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const renderAccordionSection = (
+    title: string,
+    lines: DreLine[],
+    total: number,
+    icon: ReactNode,
+    type: "receita" | "despesa",
+  ) => (
+    <AccordionItem value={type} className="border-none">
+      <AccordionTrigger className="rounded-md bg-muted/50 p-3 hover:no-underline">
+        <div className="flex items-center gap-2">
+          {icon}
+          <span className="text-base font-semibold">{title}</span>
+        </div>
+        <span className={`text-base font-bold ${type === "receita" ? "text-success" : "text-destructive"}`}>
+          {type === "despesa" && total > 0 ? "- " : ""}
+          {formatCurrency(total)}
+        </span>
+      </AccordionTrigger>
+
+      <AccordionContent className="space-y-2 p-4">
+        {lines.length > 0 ? (
+          lines.map((line) => (
+            <div key={line.id}>
+              <div className="flex justify-between py-1">
+                <span className="font-medium">
+                  {line.code} {line.name}
+                </span>
+                <span className="font-medium">{formatCurrency(line.value)}</span>
+              </div>
+
+              {line.subItems?.map((subItem) => (
+                <div key={subItem.id} className="flex justify-between pl-6 text-sm text-muted-foreground">
+                  <span>
+                    {subItem.code} {subItem.name}
+                  </span>
+                  <span>{formatCurrency(subItem.value)}</span>
+                </div>
+              ))}
+            </div>
+          ))
+        ) : (
+          <p className="text-sm text-muted-foreground">Nenhum detalhe de {type} para exibir no período.</p>
+        )}
+      </AccordionContent>
+    </AccordionItem>
+  );
 
   return (
     <div className="space-y-6">
-      <Tabs value="dre" onValueChange={(val) => {
-        const tab = tabItems.find(t => t.value === val);
-        if (tab && "path" in tab && tab.path) navigate(tab.path);
-      }}>
-        <TabsList className="bg-transparent border-b border-border rounded-none w-full justify-start gap-0 h-auto p-0">
+      <Tabs
+        value="dre"
+        onValueChange={(value) => {
+          const tab = tabItems.find((item) => item.value === value);
+          if (tab && "path" in tab && tab.path) {
+            navigate(tab.path);
+          }
+        }}
+      >
+        <TabsList className="h-auto w-full justify-start gap-0 rounded-none border-b border-border bg-transparent p-0">
           {tabItems.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value} className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2 text-sm">
+            <TabsTrigger
+              key={tab.value}
+              value={tab.value}
+              className="rounded-none border-b-2 border-transparent px-4 py-2 text-sm data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            >
               {tab.label}
             </TabsTrigger>
           ))}
         </TabsList>
       </Tabs>
 
-      {/* Filter */}
       <Card className="border-border">
-        <CardContent className="p-5">
-          <h3 className="text-sm font-semibold text-foreground mb-3">Mês de Competência</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input type="month" value={selectedMonth} onChange={(e) => { setSelectedMonth(e.target.value); setGenerated(false); }} />
-            <Button variant="outline" className="gap-2" onClick={() => setGenerated(true)}>
-              <Search className="h-4 w-4" /> Gerar DRE
-            </Button>
+        <CardContent className="grid grid-cols-1 items-end gap-4 p-5 md:grid-cols-3">
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-foreground">Mês de Competência</label>
+            <Input type="month" value={competence} onChange={(e) => setCompetence(e.target.value)} />
           </div>
+
+          <Button variant="outline" className="gap-2" onClick={handleGenerateDRE}>
+            <Search className="h-4 w-4" />
+            Gerar DRE
+          </Button>
         </CardContent>
       </Card>
 
-      {/* DRE Report */}
       <Card className="border-border">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <div>
               <CardTitle className="text-lg">Demonstrativo de Resultado do Exercício (DRE)</CardTitle>
-              <p className="text-xs text-muted-foreground">Análise de receitas e despesas para o período de competência selecionado.</p>
+              <p className="text-xs text-muted-foreground">
+                Análise de receitas e despesas para o período de competência selecionado.
+              </p>
             </div>
-            {dreData && (
-              <Button variant="outline" size="sm" className="gap-2" onClick={exportCSV}>
-                <Download className="h-4 w-4" /> Exportar CSV
-              </Button>
-            )}
+
+            <Button variant="outline" size="sm" className="gap-2" onClick={handleExport} disabled={!dreData}>
+              <Download className="h-4 w-4" />
+              Exportar CSV
+            </Button>
           </div>
         </CardHeader>
+
         <CardContent>
           {dreData ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Conta</TableHead>
-                  <TableHead className="text-right">Valor</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {/* Receitas */}
-                <TableRow className="bg-muted/30">
-                  <TableCell className="text-sm font-bold text-success" colSpan={2}>RECEITAS</TableCell>
-                </TableRow>
-                {dreData.revenueGroups.length > 0 ? dreData.revenueGroups.map((g, i) => (
-                  <TableRow key={`r-${i}`}>
-                    <TableCell className="text-sm pl-6">{g.name}</TableCell>
-                    <TableCell className="text-sm text-right text-success">{formatCurrency(g.total)}</TableCell>
-                  </TableRow>
-                )) : (
-                  <TableRow><TableCell colSpan={2} className="text-sm text-muted-foreground pl-6">Nenhuma receita no período.</TableCell></TableRow>
+            <>
+              <Accordion type="multiple" defaultValue={["receita", "despesa"]} className="w-full space-y-2">
+                {renderAccordionSection(
+                  "(+) Receita Operacional Bruta",
+                  dreData.receitas,
+                  dreData.totalReceitas,
+                  <TrendingUp className="h-5 w-5 text-success" />,
+                  "receita",
                 )}
-                <TableRow className="border-t-2 border-border">
-                  <TableCell className="text-sm font-bold">Total Receitas</TableCell>
-                  <TableCell className="text-sm text-right font-bold text-success">{formatCurrency(dreData.totalReceitas)}</TableCell>
-                </TableRow>
 
-                {/* Despesas */}
-                <TableRow className="bg-muted/30">
-                  <TableCell className="text-sm font-bold text-destructive" colSpan={2}>DESPESAS</TableCell>
-                </TableRow>
-                {dreData.expenseGroups.length > 0 ? dreData.expenseGroups.map((g, i) => (
-                  <TableRow key={`e-${i}`}>
-                    <TableCell className="text-sm pl-6">{g.name}</TableCell>
-                    <TableCell className="text-sm text-right text-destructive">{formatCurrency(g.total)}</TableCell>
-                  </TableRow>
-                )) : (
-                  <TableRow><TableCell colSpan={2} className="text-sm text-muted-foreground pl-6">Nenhuma despesa no período.</TableCell></TableRow>
+                {renderAccordionSection(
+                  "(-) Despesas Operacionais",
+                  dreData.despesas,
+                  dreData.totalDespesas,
+                  <TrendingDown className="h-5 w-5 text-destructive" />,
+                  "despesa",
                 )}
-                <TableRow className="border-t-2 border-border">
-                  <TableCell className="text-sm font-bold">Total Despesas</TableCell>
-                  <TableCell className="text-sm text-right font-bold text-destructive">{formatCurrency(dreData.totalDespesas)}</TableCell>
-                </TableRow>
+              </Accordion>
 
-                {/* Resultado */}
-                <TableRow className="bg-muted/50 border-t-4 border-border">
-                  <TableCell className="text-base font-bold">RESULTADO DO EXERCÍCIO</TableCell>
-                  <TableCell className={`text-base text-right font-bold ${dreData.resultado >= 0 ? "text-success" : "text-destructive"}`}>
-                    {formatCurrency(dreData.resultado)}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+              <Separator className="my-4" />
+
+              <div className="flex items-center justify-between rounded-md p-3">
+                <div className="flex items-center gap-2">
+                  <Equal className="h-5 w-5" />
+                  <span className="text-lg font-bold">= Resultado Líquido do Período</span>
+                </div>
+
+                <span
+                  className={`text-lg font-bold ${dreData.resultadoLiquido >= 0 ? "text-success" : "text-destructive"}`}
+                >
+                  {formatCurrency(dreData.resultadoLiquido)}
+                </span>
+              </div>
+
+              <p className="mt-4 text-xs text-muted-foreground">
+                * Este é um relatório gerencial simplificado, utilizando o regime de caixa. As receitas e despesas são
+                consideradas com base na data de liquidação (pagamento/recebimento) dentro do período selecionado.
+              </p>
+            </>
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-10">
+            <p className="py-10 text-center text-sm text-muted-foreground">
               Selecione um período e clique em "Gerar DRE" para visualizar o relatório.
             </p>
           )}
-
-          <p className="text-xs text-muted-foreground mt-4">
-            * Este é um relatório gerencial simplificado, utilizando o regime de caixa. As receitas e despesas são consideradas com base na data de liquidação (pagamento/recebimento) dentro do período selecionado.
-          </p>
         </CardContent>
       </Card>
     </div>
