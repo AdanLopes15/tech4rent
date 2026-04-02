@@ -1,6 +1,6 @@
 //src/pages/admin/Colaboradores.tsx
 
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -22,11 +22,11 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import { PlusCircle, Phone, Pencil, Trash2 } from "lucide-react";
-import { AddColaboradorDialog } from "@/components/colaboradores/AddColaboradorDialog";
+import { AddCollaboratorDialog } from "@/components/colaboradores/AddCollaboratorDialog";
 import { getContactPhone, getWhatsappLink, openWhatsappLink } from "@/lib/contact";
 
 export default function Colaboradores() {
-  const { collaborators, deleteCollaborator } = useStore();
+  const { collaborators, clients, deleteCollaborator } = useStore();
   const { toast } = useToast();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -34,18 +34,30 @@ export default function Colaboradores() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
+  const getClientName = (collab: any) => {
+    if (collab.clientName) return collab.clientName;
+
+    const client = clients.find((c: any) => c.id === collab.clientId);
+    return client?.razaoSocial || client?.name || "Não encontrado";
+  };
+
   const filtered = useMemo(() => {
     return collaborators.filter((c: any) => {
       if (!search) return true;
+
       const q = search.toLowerCase();
+      const phone = getContactPhone(c);
+      const clientName = getClientName(c);
+
       return (
         c.name?.toLowerCase().includes(q) ||
         c.cpf?.includes(search) ||
-        c.clientName?.toLowerCase().includes(q) ||
+        clientName?.toLowerCase().includes(q) ||
+        phone?.toLowerCase().includes(q) ||
         c.id?.toLowerCase().includes(q)
       );
     });
-  }, [collaborators, search]);
+  }, [collaborators, clients, search]);
 
   const handleEdit = (collab: any) => {
     setEditingCollab(collab);
@@ -64,17 +76,23 @@ export default function Colaboradores() {
 
   const handleDelete = async () => {
     if (!deleteId) return;
+
     try {
       await deleteCollaborator(deleteId);
       toast({ title: "Colaborador excluído com sucesso!" });
     } catch {
-      toast({ title: "Erro ao excluir", variant: "destructive" });
+      toast({
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir o colaborador.",
+        variant: "destructive",
+      });
     }
+
     setDeleteId(null);
   };
 
-  const permissionLabel = (p: string) => {
-    switch (p) {
+  const permissionLabel = (permission: string) => {
+    switch (permission) {
       case "admin":
         return "Administrador";
       case "gestor":
@@ -93,7 +111,7 @@ export default function Colaboradores() {
         </CardHeader>
         <CardContent>
           <Input
-            placeholder="Buscar por nome, CPF ou cliente..."
+            placeholder="Buscar por nome, CPF, telefone ou cliente..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -106,6 +124,7 @@ export default function Colaboradores() {
             <CardTitle>Colaboradores</CardTitle>
             <CardDescription>Gerencie os colaboradores dos seus clientes que utilizam os equipamentos.</CardDescription>
           </div>
+
           <Button onClick={handleAddNew}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Novo Colaborador
@@ -127,17 +146,19 @@ export default function Colaboradores() {
                     <TableHead className="w-[120px] text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
+
                 <TableBody>
                   {filtered.map((collab: any) => {
                     const phone = getContactPhone(collab);
                     const whatsappLink = getWhatsappLink(collab);
+                    const clientName = getClientName(collab);
 
                     return (
                       <TableRow key={collab.id}>
                         <TableCell className="font-medium">{collab.name}</TableCell>
                         <TableCell className="text-muted-foreground">{collab.cpf || "—"}</TableCell>
                         <TableCell className="text-muted-foreground">{phone || "—"}</TableCell>
-                        <TableCell className="text-muted-foreground">{collab.clientName || "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">{clientName}</TableCell>
                         <TableCell className="text-muted-foreground">{permissionLabel(collab.permission)}</TableCell>
                         <TableCell>
                           <Badge
@@ -157,7 +178,11 @@ export default function Colaboradores() {
                                       type="button"
                                       variant="ghost"
                                       size="icon"
-                                      className={`h-8 w-8 ${whatsappLink ? "text-green-500 hover:text-green-400" : "text-muted-foreground/40 cursor-not-allowed"}`}
+                                      className={`h-8 w-8 ${
+                                        whatsappLink
+                                          ? "text-green-500 hover:text-green-400"
+                                          : "text-muted-foreground/40 cursor-not-allowed"
+                                      }`}
                                       disabled={!whatsappLink}
                                       onClick={() => whatsappLink && openWhatsappLink(collab)}
                                     >
@@ -204,13 +229,15 @@ export default function Colaboradores() {
         </CardContent>
       </Card>
 
-      <AddColaboradorDialog open={isDialogOpen} onOpenChange={handleCloseDialog} collaborator={editingCollab} />
+      <AddCollaboratorDialog open={isDialogOpen} onOpenChange={handleCloseDialog} collaborator={editingCollab} />
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-            <AlertDialogDescription>Essa ação não pode ser desfeita.</AlertDialogDescription>
+            <AlertDialogDescription>
+              Essa ação não pode ser desfeita. Isso excluirá permanentemente o colaborador.
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
