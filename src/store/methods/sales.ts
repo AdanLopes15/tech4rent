@@ -1,8 +1,8 @@
-//src/store/methods/sales.ts
+// src/store/methods/sales.ts
 
-import { doc, collection, writeBatch, serverTimestamp, Timestamp, query, where, getDocs } from "firebase/firestore";
+import { collection, doc, getDocs, query, Timestamp, where, writeBatch, serverTimestamp } from "firebase/firestore";
+import { addMonths, format, getDate, setDate as setDayOfMonth } from "date-fns";
 import { db } from "@/lib/firebase";
-import { format, addMonths, setDate as setDayOfMonth, getDate } from "date-fns";
 
 export const addSale = async (get: any, set: any, saleData: any) => {
   const { equipments, clients } = get();
@@ -19,7 +19,7 @@ export const addSale = async (get: any, set: any, saleData: any) => {
   const client = clients.find((c: any) => c.id === saleData.clientId);
   const saleDate = new Date();
 
-  for (const paymentMethod of saleData.paymentMethods) {
+  for (const paymentMethod of saleData.paymentMethods || []) {
     if (paymentMethod.paymentMethod === "entrada_boleto") {
       const entryValue =
         paymentMethod.downPaymentType === "fixed"
@@ -112,7 +112,7 @@ export const addSale = async (get: any, set: any, saleData: any) => {
   const finalSaleData: any = {
     ...saleData,
     id: newSaleId,
-    clientName: client?.razaoSocial || "N/A",
+    clientName: client?.razaoSocial || client?.name || "N/A",
     status: "Concluída",
     saleDate: Timestamp.fromDate(saleDate),
     createdAt: serverTimestamp(),
@@ -139,7 +139,7 @@ export const updateSale = async (get: any, set: any, saleData: any) => {
     batch.delete(revenueDoc.ref);
   });
 
-  for (const paymentMethod of dataToUpdate.paymentMethods) {
+  for (const paymentMethod of dataToUpdate.paymentMethods || []) {
     if (paymentMethod.paymentMethod === "entrada_boleto") {
       const entryValue =
         paymentMethod.downPaymentType === "fixed"
@@ -239,7 +239,7 @@ export const cancelSale = async (get: any, set: any, saleId: string) => {
 
   const batch = writeBatch(db);
 
-  for (const item of saleToCancel.items) {
+  for (const item of saleToCancel.items || []) {
     const equipment = equipments.find((e: any) => e.id === item.equipmentId);
     if (equipment) {
       const newStock = equipment.stock + item.quantity;
