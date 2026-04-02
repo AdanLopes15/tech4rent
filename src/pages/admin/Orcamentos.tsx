@@ -1,3 +1,5 @@
+//src/pages/admin/Orcamentos.tsx
+
 import { useState, useMemo } from "react";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
@@ -28,11 +30,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 
@@ -195,9 +193,7 @@ export default function Orcamentos() {
               <TableCell>{formatDate(quote.createdAt)}</TableCell>
               <TableCell>{formatCurrency(quote.totalValue)}</TableCell>
               <TableCell>
-                <Badge className={statusColors[quote.status] || "bg-muted"}>
-                  {quote.status || "Pendente"}
-                </Badge>
+                <Badge className={statusColors[quote.status] || "bg-muted"}>{quote.status || "Pendente"}</Badge>
               </TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>
@@ -277,7 +273,7 @@ export default function Orcamentos() {
                     variant="outline"
                     className={cn(
                       "w-full justify-start text-left font-normal",
-                      !dateRange.from && "text-muted-foreground"
+                      !dateRange.from && "text-muted-foreground",
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
@@ -353,9 +349,7 @@ export default function Orcamentos() {
             </CardHeader>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <CardContent className="pt-0">
-              {renderQuoteTable(locacaoQuotes, "locacao")}
-            </CardContent>
+            <CardContent className="pt-0">{renderQuoteTable(locacaoQuotes, "locacao")}</CardContent>
           </CollapsibleContent>
         </Card>
       </Collapsible>
@@ -370,9 +364,7 @@ export default function Orcamentos() {
             </CardHeader>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <CardContent className="pt-0">
-              {renderQuoteTable(vendaQuotes, "venda")}
-            </CardContent>
+            <CardContent className="pt-0">{renderQuoteTable(vendaQuotes, "venda")}</CardContent>
           </CollapsibleContent>
         </Card>
       </Collapsible>
