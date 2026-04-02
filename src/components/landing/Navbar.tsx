@@ -24,7 +24,7 @@ const Navbar = () => {
               <Mail className="h-3 w-3" /> contato@tech4rent.com.br
             </a>
           </div>
-          <Link to="/admin" className="hover:opacity-80 font-medium">
+          <Link to="/login" className="hover:opacity-80 font-medium">
             Área Restrita
           </Link>
         </div>
