@@ -5,18 +5,7 @@ import { useStore } from "@/store";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,37 +26,14 @@ import {
 import { Plus, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
-
-type BankStatus = "ativo" | "inativo";
-
-interface BankAccountForm {
-  bank: string;
-  agency: string;
-  account: string;
-  initialBalance: string;
-  color: string;
-  status: BankStatus;
-  observations: string;
-}
-
-const emptyForm: BankAccountForm = {
-  bank: "",
-  agency: "",
-  account: "",
-  initialBalance: "0",
-  color: "#6b9eff",
-  status: "ativo",
-  observations: "",
-};
+import AddBankAccountDialog from "@/components/bancos/AddBankAccountDialog";
 
 const Bancos = () => {
-  const { bankAccounts, addBankAccount, updateBankAccount, deleteBankAccount } = useStore();
+  const { bankAccounts, deleteBankAccount } = useStore();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [form, setForm] = useState<BankAccountForm>(emptyForm);
   const [editingAccount, setEditingAccount] = useState<any>(null);
-  const [isSaving, setIsSaving] = useState(false);
 
   const filtered = useMemo(() => {
     return bankAccounts.filter((account: any) => {
@@ -80,75 +46,20 @@ const Bancos = () => {
     });
   }, [bankAccounts, search]);
 
-  const openNewDialog = () => {
+  const handleAddNew = () => {
     setEditingAccount(null);
-    setForm(emptyForm);
     setDialogOpen(true);
   };
 
-  const openEditDialog = (account: any) => {
+  const handleEdit = (account: any) => {
     setEditingAccount(account);
-    setForm({
-      bank: account.bank || "",
-      agency: account.agency || "",
-      account: account.account || "",
-      initialBalance: String(account.initialBalance ?? 0),
-      color: account.color || "#6b9eff",
-      status: (account.status || "ativo") as BankStatus,
-      observations: account.observations || "",
-    });
     setDialogOpen(true);
   };
 
-  const closeDialog = (open: boolean) => {
+  const handleCloseDialog = (open: boolean) => {
     setDialogOpen(open);
-
     if (!open) {
       setEditingAccount(null);
-      setForm(emptyForm);
-      setIsSaving(false);
-    }
-  };
-
-  const handleSave = async () => {
-    if (!form.bank.trim() || !form.agency.trim() || !form.account.trim()) {
-      toast.error("Preencha banco, agência e conta.");
-      return;
-    }
-
-    const parsedBalance = Number(String(form.initialBalance).replace(",", ".")) || 0;
-
-    const payload = {
-      name: form.bank.trim(),
-      bank: form.bank.trim(),
-      agency: form.agency.trim(),
-      account: form.account.trim(),
-      initialBalance: parsedBalance,
-      color: form.color,
-      status: form.status,
-      observations: form.observations.trim(),
-    };
-
-    try {
-      setIsSaving(true);
-
-      if (editingAccount) {
-        await updateBankAccount({
-          id: editingAccount.id,
-          ...payload,
-        });
-        toast.success("Conta bancária atualizada com sucesso!");
-      } else {
-        await addBankAccount(payload);
-        toast.success("Conta bancária cadastrada com sucesso!");
-      }
-
-      closeDialog(false);
-    } catch (error) {
-      console.error("Erro ao salvar conta bancária:", error);
-      toast.error("Não foi possível salvar a conta bancária.");
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -184,8 +95,7 @@ const Bancos = () => {
             <CardTitle>Contas Bancárias</CardTitle>
             <CardDescription>Gerencie as contas bancárias da sua empresa.</CardDescription>
           </div>
-
-          <Button onClick={openNewDialog}>
+          <Button onClick={handleAddNew}>
             <Plus className="mr-2 h-4 w-4" />
             Nova Conta
           </Button>
@@ -228,7 +138,7 @@ const Bancos = () => {
                       </DropdownMenuTrigger>
 
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openEditDialog(account)}>
+                        <DropdownMenuItem onClick={() => handleEdit(account)}>
                           <Pencil className="mr-2 h-4 w-4" />
                           Editar
                         </DropdownMenuItem>
@@ -273,139 +183,7 @@ const Bancos = () => {
         </CardContent>
       </Card>
 
-      <Dialog open={dialogOpen} onOpenChange={closeDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{editingAccount ? "Editar Conta" : "Cadastrar Nova Conta"}</DialogTitle>
-            <DialogDescription>
-              {editingAccount ? "Atualize os dados da conta bancária." : "Preencha os dados da nova conta bancária."}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Banco</Label>
-              <Input
-                placeholder="Ex: Banco do Brasil"
-                value={form.bank}
-                onChange={(e) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    bank: e.target.value,
-                  }))
-                }
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Agência (sem dígito)</Label>
-                <Input
-                  placeholder="Ex: 1234"
-                  value={form.agency}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      agency: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Conta (com dígito)</Label>
-                <Input
-                  placeholder="Ex: 56789-0"
-                  value={form.account}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      account: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Saldo Inicial (R$)</Label>
-                <Input
-                  placeholder="0,00"
-                  value={form.initialBalance}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      initialBalance: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Cor para Identificação</Label>
-                <Input
-                  type="color"
-                  value={form.color}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      color: e.target.value,
-                    }))
-                  }
-                  className="h-10 w-full"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Status</Label>
-              <Select
-                value={form.status}
-                onValueChange={(value) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    status: value as BankStatus,
-                  }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ativo">Ativa</SelectItem>
-                  <SelectItem value="inativo">Inativa</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Observações</Label>
-              <Textarea
-                placeholder="Informações adicionais sobre a conta"
-                value={form.observations}
-                onChange={(e) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    observations: e.target.value,
-                  }))
-                }
-                rows={3}
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => closeDialog(false)}>
-              Cancelar
-            </Button>
-
-            <Button onClick={handleSave} disabled={isSaving}>
-              {isSaving ? "Salvando..." : "Salvar"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AddBankAccountDialog open={dialogOpen} onOpenChange={handleCloseDialog} bankAccount={editingAccount} />
     </div>
   );
 };
