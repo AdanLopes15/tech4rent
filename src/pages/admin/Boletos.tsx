@@ -1,3 +1,5 @@
+//src/pages/admin/Boletos.tsx
+
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useStore } from "@/store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +9,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Plus, Paperclip, MoreHorizontal, Trash2, ExternalLink } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { format } from "date-fns";
@@ -25,7 +32,9 @@ const Boletos = () => {
   const inlineFileRef = useRef<HTMLInputElement>(null);
   const [inlineAttachId, setInlineAttachId] = useState<string | null>(null);
 
-  useEffect(() => { fetchAllData(); }, [fetchAllData]);
+  useEffect(() => {
+    fetchAllData();
+  }, [fetchAllData]);
 
   // Get all revenues from contracts (installments)
   const contractRevenues = useMemo(() => {
@@ -35,10 +44,7 @@ const Boletos = () => {
   }, [revenues]);
 
   // Active contracts for the dialog
-  const activeContracts = useMemo(() =>
-    contracts.filter((c: any) => c.status === "Em Andamento"),
-    [contracts]
-  );
+  const activeContracts = useMemo(() => contracts.filter((c: any) => c.status === "Em Andamento"), [contracts]);
 
   // Pending revenues for selected contract
   const pendingRevenues = useMemo(() => {
@@ -75,8 +81,9 @@ const Boletos = () => {
     try {
       await attachBoletoToRevenue(inlineAttachId, file);
       toast.success("Boleto anexado!");
-    } catch { toast.error("Erro ao anexar."); }
-    finally {
+    } catch {
+      toast.error("Erro ao anexar.");
+    } finally {
       setInlineAttachId(null);
       if (inlineFileRef.current) inlineFileRef.current.value = "";
     }
@@ -86,7 +93,9 @@ const Boletos = () => {
     try {
       await deleteBoletoFromRevenue(revenueId);
       toast.success("Boleto removido!");
-    } catch { toast.error("Erro ao remover."); }
+    } catch {
+      toast.error("Erro ao remover.");
+    }
   };
 
   const resetDialog = () => {
@@ -107,7 +116,14 @@ const Boletos = () => {
               <CardTitle className="text-lg">Gestão de Boletos</CardTitle>
               <p className="text-xs text-muted-foreground">Anexe e gerencie os boletos das parcelas de contratos.</p>
             </div>
-            <Button size="sm" className="gap-2" onClick={() => { resetDialog(); setShowAttachDialog(true); }}>
+            <Button
+              size="sm"
+              className="gap-2"
+              onClick={() => {
+                resetDialog();
+                setShowAttachDialog(true);
+              }}
+            >
               <Plus className="h-4 w-4" /> Anexar Boleto
             </Button>
           </div>
@@ -130,7 +146,9 @@ const Boletos = () => {
                   <TableRow key={r.id}>
                     <TableCell className="text-sm font-medium">{r.contractId}</TableCell>
                     <TableCell className="text-sm">{r.description || "-"}</TableCell>
-                    <TableCell className="text-sm">{r.dueDate ? format(new Date(r.dueDate), "dd/MM/yyyy") : "-"}</TableCell>
+                    <TableCell className="text-sm">
+                      {r.dueDate ? format(new Date(r.dueDate), "dd/MM/yyyy") : "-"}
+                    </TableCell>
                     <TableCell className="text-sm">{formatCurrency(r.valorTotal || 0)}</TableCell>
                     <TableCell>
                       {r.boletoUrl ? (
@@ -148,7 +166,9 @@ const Boletos = () => {
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => handleInlineAttach(r.id)}>
@@ -181,16 +201,28 @@ const Boletos = () => {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Anexar Boleto</DialogTitle>
-            <DialogDescription>Selecione o contrato, a parcela e faça o upload do arquivo PDF do boleto.</DialogDescription>
+            <DialogDescription>
+              Selecione o contrato, a parcela e faça o upload do arquivo PDF do boleto.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-1">
               <Label>Contrato</Label>
-              <Select value={selectedContractId} onValueChange={(v) => { setSelectedContractId(v); setSelectedRevenueId(""); }}>
-                <SelectTrigger><SelectValue placeholder="Selecione um contrato ativo" /></SelectTrigger>
+              <Select
+                value={selectedContractId}
+                onValueChange={(v) => {
+                  setSelectedContractId(v);
+                  setSelectedRevenueId("");
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um contrato ativo" />
+                </SelectTrigger>
                 <SelectContent>
                   {activeContracts.map((c: any) => (
-                    <SelectItem key={c.id} value={c.id}>{c.id} - {c.client?.razaoSocial || "N/A"}</SelectItem>
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.id} - {c.client?.razaoSocial || "N/A"}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -199,7 +231,9 @@ const Boletos = () => {
             <div className="space-y-1">
               <Label>Parcela</Label>
               <Select value={selectedRevenueId} onValueChange={setSelectedRevenueId} disabled={!selectedContractId}>
-                <SelectTrigger><SelectValue placeholder="Selecione a parcela pendente" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a parcela pendente" />
+                </SelectTrigger>
                 <SelectContent>
                   {pendingRevenues.map((r: any) => (
                     <SelectItem key={r.id} value={r.id}>
@@ -222,7 +256,9 @@ const Boletos = () => {
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => setShowAttachDialog(false)}>Cancelar</Button>
+              <Button variant="outline" onClick={() => setShowAttachDialog(false)}>
+                Cancelar
+              </Button>
               <Button onClick={handleSaveAttach} disabled={saving} className="gap-2">
                 <Paperclip className="h-4 w-4" /> {saving ? "Salvando..." : "Salvar Anexo"}
               </Button>
