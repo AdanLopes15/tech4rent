@@ -26,7 +26,7 @@ import { toast } from "sonner";
 import { AddSupplierDialog } from "@/components/fornecedores/AddSupplierDialog";
 import { AddClientDialog } from "@/components/clientes/AddClientDialog";
 import { AddCollaboratorDialog } from "@/components/colaboradores/AddCollaboratorDialog";
-import { AddCostCenterDialog } from "@/components/centro-de-custo/AddCostCenterDialog";
+import AddCostCenterDialog from "@/components/centro-de-custo/AddCostCenterDialog";
 import { AddAccountDialog } from "@/components/plano-de-contas/AddAccountDialog";
 import { AddBankAccountDialog } from "@/components/bancos/AddBankAccountDialog";
 
