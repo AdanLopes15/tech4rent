@@ -31,6 +31,7 @@ import NFe from "./pages/admin/NFe";
 import PlanoContas from "./pages/admin/PlanoContas";
 import CentroCusto from "./pages/admin/CentroCusto";
 import Bancos from "./pages/admin/Bancos";
+import Usuarios from "./pages/admin/Usuarios";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +67,7 @@ const App = () => (
             <Route path="financeiro/plano-contas" element={<PlanoContas />} />
             <Route path="financeiro/centro-custo" element={<CentroCusto />} />
             <Route path="financeiro/bancos" element={<Bancos />} />
+            <Route path="usuarios" element={<Usuarios />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
