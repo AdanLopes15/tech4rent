@@ -37,5 +37,5 @@ export const openWhatsappLink = (record: Record<string, any> | null | undefined)
 
   if (!link || typeof window === "undefined") return;
 
-  window.location.assign(link);
+  window.open(link, "_blank", "noopener,noreferrer");
 };
