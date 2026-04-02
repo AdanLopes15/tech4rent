@@ -1,10 +1,10 @@
 //src/pages/admin/Orcamentos.tsx
 
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
+import { format } from "date-fns";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, cn } from "@/lib/utils";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,6 +15,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuPortal,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -29,6 +30,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -46,43 +48,87 @@ import {
   ChevronUp,
   CalendarIcon,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+
 import { AddQuoteDialog } from "@/components/orcamentos/AddQuoteDialog";
 
 const statusColors: Record<string, string> = {
-  Pendente: "bg-yellow-500 hover:bg-yellow-600 text-black",
+  Pendente: "bg-amber-400 hover:bg-amber-500 text-white",
   Aprovado: "bg-green-600 hover:bg-green-700 text-white",
+  Reprovado: "bg-red-600 hover:bg-red-700 text-white",
   Recusado: "bg-red-600 hover:bg-red-700 text-white",
   Cancelado: "bg-muted text-muted-foreground",
 };
 
 export default function Orcamentos() {
   const { quotes, clients, deleteQuote, updateQuote, convertQuoteToContract, addSale } = useStore();
+
   const { toast } = useToast();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingQuote, setEditingQuote] = useState<any>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [viewingQuote, setViewingQuote] = useState<any>(null);
+
   const [clientFilter, setClientFilter] = useState("todos");
   const [statusFilter, setStatusFilter] = useState("todos");
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+
   const [locacaoOpen, setLocacaoOpen] = useState(true);
   const [vendaOpen, setVendaOpen] = useState(true);
 
-  const filtered = useMemo(() => {
-    return quotes.filter((q: any) => {
-      const matchesClient = clientFilter === "todos" || q.clientId === clientFilter;
-      const matchesStatus = statusFilter === "todos" || q.status === statusFilter;
+  const normalizeStatus = (status?: string) => {
+    if (!status) return "Pendente";
+    if (status === "Recusado") return "Reprovado";
+    return status;
+  };
+
+  const formatDate = (date: any) => {
+    if (!date) return "—";
+
+    try {
+      const parsed = typeof date?.toDate === "function" ? date.toDate() : new Date(date);
+
+      if (isNaN(parsed.getTime())) return "—";
+
+      return format(parsed, "dd/MM/yyyy");
+    } catch {
+      return "—";
+    }
+  };
+
+  const getClientName = (clientId: string, fallbackName?: string) => {
+    const client = clients.find((c: any) => c.id === clientId);
+    return client?.razaoSocial || client?.name || fallbackName || "N/A";
+  };
+
+  const filteredQuotes = useMemo(() => {
+    return quotes.filter((quote: any) => {
+      const normalizedQuoteStatus = normalizeStatus(quote.status);
+
+      const matchesClient = clientFilter === "todos" || quote.clientId === clientFilter;
+
+      const matchesStatus = statusFilter === "todos" || normalizedQuoteStatus === statusFilter;
 
       let matchesDate = true;
+
       if (dateRange.from || dateRange.to) {
-        const qDate = q.createdAt ? new Date(q.createdAt) : null;
-        if (qDate) {
-          if (dateRange.from && qDate < dateRange.from) matchesDate = false;
+        const quoteDate = quote.createdAt
+          ? typeof quote.createdAt?.toDate === "function"
+            ? quote.createdAt.toDate()
+            : new Date(quote.createdAt)
+          : null;
+
+        if (quoteDate && !isNaN(quoteDate.getTime())) {
+          if (dateRange.from && quoteDate < dateRange.from) {
+            matchesDate = false;
+          }
+
           if (dateRange.to) {
             const endOfDay = new Date(dateRange.to);
             endOfDay.setHours(23, 59, 59, 999);
-            if (qDate > endOfDay) matchesDate = false;
+
+            if (quoteDate > endOfDay) {
+              matchesDate = false;
+            }
           }
         }
       }
@@ -91,41 +137,54 @@ export default function Orcamentos() {
     });
   }, [quotes, clientFilter, statusFilter, dateRange]);
 
-  const locacaoQuotes = filtered.filter((q: any) => q.budgetType === "locacao");
-  const vendaQuotes = filtered.filter((q: any) => q.budgetType === "venda");
+  const locacaoQuotes = filteredQuotes.filter((quote: any) => quote.budgetType === "locacao");
 
-  const handleEdit = (quote: any) => {
-    setEditingQuote(quote);
-    setIsDialogOpen(true);
-  };
+  const vendaQuotes = filteredQuotes.filter((quote: any) => quote.budgetType === "venda");
 
   const handleAddNew = () => {
     setEditingQuote(null);
     setIsDialogOpen(true);
   };
 
-  const handleCloseDialog = () => {
-    setEditingQuote(null);
-    setIsDialogOpen(false);
+  const handleEdit = (quote: any) => {
+    setEditingQuote(quote);
+    setIsDialogOpen(true);
   };
 
-  const handleDelete = async () => {
-    if (!deleteId) return;
-    try {
-      await deleteQuote(deleteId);
-      toast({ title: "Orçamento excluído com sucesso!" });
-    } catch {
-      toast({ title: "Erro ao excluir", variant: "destructive" });
+  const handleCloseDialog = (open: boolean) => {
+    if (!open) {
+      setEditingQuote(null);
     }
-    setDeleteId(null);
+    setIsDialogOpen(open);
+  };
+
+  const handleView = (quote: any) => {
+    setViewingQuote(quote);
+  };
+
+  const handleDelete = async (quoteId: string) => {
+    try {
+      await deleteQuote(quoteId);
+      toast({ title: "Orçamento excluído com sucesso!" });
+    } catch (error: any) {
+      toast({
+        title: "Erro ao excluir orçamento",
+        description: error?.message || "Não foi possível excluir.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleChangeStatus = async (quoteId: string, newStatus: string) => {
     try {
       await updateQuote({ id: quoteId, status: newStatus });
       toast({ title: `Status alterado para ${newStatus}` });
-    } catch {
-      toast({ title: "Erro ao alterar status", variant: "destructive" });
+    } catch (error: any) {
+      toast({
+        title: "Erro ao alterar status",
+        description: error?.message || "Não foi possível alterar o status.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -133,8 +192,12 @@ export default function Orcamentos() {
     try {
       await convertQuoteToContract(quoteId);
       toast({ title: "Contrato gerado com sucesso!" });
-    } catch (err: any) {
-      toast({ title: err.message || "Erro ao gerar contrato", variant: "destructive" });
+    } catch (error: any) {
+      toast({
+        title: "Erro ao gerar contrato",
+        description: error?.message || "Não foi possível converter o orçamento.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -142,34 +205,28 @@ export default function Orcamentos() {
     try {
       const saleData = {
         clientId: quote.clientId,
-        items: quote.items,
+        clientName: quote.clientName || getClientName(quote.clientId),
+        items: quote.items || [],
         paymentMethods: quote.paymentMethods || [],
         quoteId: quote.id,
         costCenterId: quote.costCenterId || "",
         chartOfAccountId: quote.chartOfAccountId || "",
         bankAccountId: quote.bankAccountId || "",
+        totalValue: quote.totalValue || 0,
+        saleDate: quote.saleDate || new Date().toISOString(),
       };
+
       await addSale(saleData);
       await updateQuote({ id: quote.id, status: "Aprovado" });
+
       toast({ title: "Venda criada a partir do orçamento!" });
-    } catch (err: any) {
-      toast({ title: err.message || "Erro ao criar venda", variant: "destructive" });
+    } catch (error: any) {
+      toast({
+        title: "Erro ao criar venda",
+        description: error?.message || "Não foi possível criar a venda.",
+        variant: "destructive",
+      });
     }
-  };
-
-  const formatDate = (date: any) => {
-    if (!date) return "—";
-    try {
-      const d = date?.toDate ? date.toDate() : new Date(date);
-      return format(d, "dd/MM/yyyy");
-    } catch {
-      return "—";
-    }
-  };
-
-  const getClientName = (clientId: string) => {
-    const client = clients.find((c: any) => c.id === clientId);
-    return client?.razaoSocial || client?.name || "N/A";
   };
 
   const renderQuoteTable = (quotesList: any[], type: "locacao" | "venda") => (
@@ -184,67 +241,99 @@ export default function Orcamentos() {
           <TableHead className="text-right text-primary">Ações</TableHead>
         </TableRow>
       </TableHeader>
+
       <TableBody>
         {quotesList.length > 0 ? (
-          quotesList.map((quote: any) => (
-            <TableRow key={quote.id}>
-              <TableCell className="font-medium">{quote.id}</TableCell>
-              <TableCell>{getClientName(quote.clientId)}</TableCell>
-              <TableCell>{formatDate(quote.createdAt)}</TableCell>
-              <TableCell>{formatCurrency(quote.totalValue)}</TableCell>
-              <TableCell>
-                <Badge className={statusColors[quote.status] || "bg-muted"}>{quote.status || "Pendente"}</Badge>
-              </TableCell>
-              <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleEdit(quote)}>
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver Detalhes
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleEdit(quote)}>
-                      <Pencil className="mr-2 h-4 w-4" />
-                      Editar
-                    </DropdownMenuItem>
-                    {type === "locacao" && quote.status === "Pendente" && (
-                      <DropdownMenuItem onClick={() => handleConvertToContract(quote.id)}>
-                        <FileCheck className="mr-2 h-4 w-4" />
-                        Aprovar e Gerar Contrato
+          quotesList.map((quote: any) => {
+            const displayStatus = normalizeStatus(quote.status);
+
+            return (
+              <TableRow key={quote.id}>
+                <TableCell className="font-medium">{quote.id}</TableCell>
+                <TableCell>{getClientName(quote.clientId, quote.clientName)}</TableCell>
+                <TableCell>{formatDate(quote.createdAt)}</TableCell>
+                <TableCell>{formatCurrency(Number(quote.totalValue || 0))}</TableCell>
+                <TableCell>
+                  <Badge className={statusColors[displayStatus] || "bg-muted"}>{displayStatus}</Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleView(quote)}>
+                        <Eye className="mr-2 h-4 w-4" />
+                        Ver Detalhes
                       </DropdownMenuItem>
-                    )}
-                    {type === "venda" && quote.status === "Pendente" && (
-                      <DropdownMenuItem onClick={() => handleConvertToSale(quote)}>
-                        <ShoppingCart className="mr-2 h-4 w-4" />
-                        Criar Venda a Partir do Orçamento
+
+                      <DropdownMenuItem onClick={() => handleEdit(quote)}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Editar
                       </DropdownMenuItem>
-                    )}
-                    <DropdownMenuSub>
-                      <DropdownMenuSubTrigger>
-                        <RefreshCw className="mr-2 h-4 w-4" />
-                        Mudar Status
-                      </DropdownMenuSubTrigger>
-                      <DropdownMenuSubContent>
-                        {["Pendente", "Aprovado", "Recusado", "Cancelado"].map((s) => (
-                          <DropdownMenuItem key={s} onClick={() => handleChangeStatus(quote.id, s)}>
-                            {s}
+
+                      {type === "locacao" && displayStatus === "Pendente" && (
+                        <DropdownMenuItem onClick={() => handleConvertToContract(quote.id)}>
+                          <FileCheck className="mr-2 h-4 w-4" />
+                          Aprovar e Gerar Contrato
+                        </DropdownMenuItem>
+                      )}
+
+                      {type === "venda" && displayStatus === "Pendente" && (
+                        <DropdownMenuItem onClick={() => handleConvertToSale(quote)}>
+                          <ShoppingCart className="mr-2 h-4 w-4" />
+                          Criar Venda a Partir do Orçamento
+                        </DropdownMenuItem>
+                      )}
+
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                          <RefreshCw className="mr-2 h-4 w-4" />
+                          Mudar Status
+                        </DropdownMenuSubTrigger>
+
+                        <DropdownMenuPortal>
+                          <DropdownMenuSubContent>
+                            {["Pendente", "Aprovado", "Reprovado", "Cancelado"].map((status) => (
+                              <DropdownMenuItem key={status} onClick={() => handleChangeStatus(quote.id, status)}>
+                                {status}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuSubContent>
+                        </DropdownMenuPortal>
+                      </DropdownMenuSub>
+
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Excluir
                           </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuSubContent>
-                    </DropdownMenuSub>
-                    <DropdownMenuItem className="text-destructive" onClick={() => setDeleteId(quote.id)}>
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Excluir
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))
+                        </AlertDialogTrigger>
+
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Essa ação não pode ser desfeita. Isso excluirá permanentemente o orçamento.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDelete(quote.id)}>Continuar</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            );
+          })
         ) : (
           <TableRow>
             <TableCell colSpan={6} className="text-center text-muted-foreground h-20">
@@ -258,15 +347,16 @@ export default function Orcamentos() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Filters */}
       <Card>
         <CardHeader>
           <CardTitle>Filtros de Orçamentos</CardTitle>
         </CardHeader>
+
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Período de Criação</label>
+
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -284,11 +374,17 @@ export default function Orcamentos() {
                       : "Selecione"}
                   </Button>
                 </PopoverTrigger>
+
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="range"
                     selected={dateRange.from ? { from: dateRange.from, to: dateRange.to } : undefined}
-                    onSelect={(range) => setDateRange({ from: range?.from, to: range?.to })}
+                    onSelect={(range) =>
+                      setDateRange({
+                        from: range?.from,
+                        to: range?.to,
+                      })
+                    }
                     numberOfMonths={2}
                   />
                 </PopoverContent>
@@ -297,15 +393,17 @@ export default function Orcamentos() {
 
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Cliente</label>
+
               <Select value={clientFilter} onValueChange={setClientFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="Todos os Clientes" />
                 </SelectTrigger>
+
                 <SelectContent>
                   <SelectItem value="todos">Todos os Clientes</SelectItem>
-                  {clients.map((c: any) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.razaoSocial || c.name}
+                  {clients.map((client: any) => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.razaoSocial || client.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -314,15 +412,17 @@ export default function Orcamentos() {
 
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Status</label>
+
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="Todos os Status" />
                 </SelectTrigger>
+
                 <SelectContent>
                   <SelectItem value="todos">Todos os Status</SelectItem>
                   <SelectItem value="Pendente">Pendente</SelectItem>
                   <SelectItem value="Aprovado">Aprovado</SelectItem>
-                  <SelectItem value="Recusado">Recusado</SelectItem>
+                  <SelectItem value="Reprovado">Reprovado</SelectItem>
                   <SelectItem value="Cancelado">Cancelado</SelectItem>
                 </SelectContent>
               </Select>
@@ -331,7 +431,6 @@ export default function Orcamentos() {
         </CardContent>
       </Card>
 
-      {/* New Quote Button */}
       <div className="flex justify-end">
         <Button variant="outline" onClick={handleAddNew}>
           <PlusCircle className="mr-2 h-4 w-4" />
@@ -339,7 +438,6 @@ export default function Orcamentos() {
         </Button>
       </div>
 
-      {/* Locação Table */}
       <Collapsible open={locacaoOpen} onOpenChange={setLocacaoOpen}>
         <Card>
           <CollapsibleTrigger asChild>
@@ -348,13 +446,13 @@ export default function Orcamentos() {
               <ChevronUp className={cn("h-5 w-5 transition-transform", !locacaoOpen && "rotate-180")} />
             </CardHeader>
           </CollapsibleTrigger>
+
           <CollapsibleContent>
             <CardContent className="pt-0">{renderQuoteTable(locacaoQuotes, "locacao")}</CardContent>
           </CollapsibleContent>
         </Card>
       </Collapsible>
 
-      {/* Venda Table */}
       <Collapsible open={vendaOpen} onOpenChange={setVendaOpen}>
         <Card>
           <CollapsibleTrigger asChild>
@@ -363,6 +461,7 @@ export default function Orcamentos() {
               <ChevronUp className={cn("h-5 w-5 transition-transform", !vendaOpen && "rotate-180")} />
             </CardHeader>
           </CollapsibleTrigger>
+
           <CollapsibleContent>
             <CardContent className="pt-0">{renderQuoteTable(vendaQuotes, "venda")}</CardContent>
           </CollapsibleContent>
@@ -371,18 +470,105 @@ export default function Orcamentos() {
 
       <AddQuoteDialog open={isDialogOpen} onOpenChange={handleCloseDialog} quote={editingQuote} />
 
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-            <AlertDialogDescription>Essa ação não pode ser desfeita.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Continuar</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {viewingQuote && (
+        <AlertDialog open={!!viewingQuote} onOpenChange={() => setViewingQuote(null)}>
+          <AlertDialogContent className="max-w-3xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Detalhes do Orçamento {viewingQuote.id}</AlertDialogTitle>
+              <AlertDialogDescription>Visualização rápida do orçamento.</AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <div className="space-y-4 max-h-[70vh] overflow-y-auto text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <span className="font-semibold">Cliente:</span>{" "}
+                  {getClientName(viewingQuote.clientId, viewingQuote.clientName)}
+                </div>
+                <div>
+                  <span className="font-semibold">Tipo:</span>{" "}
+                  {viewingQuote.budgetType === "locacao" ? "Locação" : "Venda"}
+                </div>
+                <div>
+                  <span className="font-semibold">Data:</span> {formatDate(viewingQuote.createdAt)}
+                </div>
+                <div>
+                  <span className="font-semibold">Status:</span> {normalizeStatus(viewingQuote.status)}
+                </div>
+              </div>
+
+              {viewingQuote.budgetType === "locacao" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <span className="font-semibold">Início:</span> {formatDate(viewingQuote.startDate)}
+                  </div>
+                  <div>
+                    <span className="font-semibold">Fim:</span> {formatDate(viewingQuote.endDate)}
+                  </div>
+                </div>
+              )}
+
+              {viewingQuote.budgetType === "venda" && viewingQuote.prazoEntrega && (
+                <div>
+                  <span className="font-semibold">Prazo de Entrega:</span> {viewingQuote.prazoEntrega}
+                </div>
+              )}
+
+              <div>
+                <div className="font-semibold mb-2">Itens</div>
+                <div className="space-y-2">
+                  {(viewingQuote.items || []).map((item: any, index: number) => {
+                    const equipment = (useStore.getState().equipments || []).find(
+                      (eq: any) => eq.id === item.equipmentId,
+                    );
+
+                    return (
+                      <div
+                        key={`${item.equipmentId}-${index}`}
+                        className="border rounded-md p-3 flex items-center justify-between gap-4"
+                      >
+                        <div>
+                          <div className="font-medium">{equipment?.name || "Equipamento"}</div>
+                          <div className="text-muted-foreground text-xs">Qtd: {item.quantity}</div>
+                        </div>
+
+                        <div className="text-right">
+                          <div>{formatCurrency(Number(item.unitPrice || 0))}</div>
+                          <div className="text-xs text-muted-foreground">
+                            Total: {formatCurrency(Number(item.quantity || 0) * Number(item.unitPrice || 0))}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <span className="font-semibold">Informações Fiscais:</span>
+                <div className="mt-1 text-muted-foreground">
+                  {viewingQuote.informacoesFiscais || viewingQuote.fiscalInfo || "Nenhuma informação fiscal fornecida."}
+                </div>
+              </div>
+
+              <div>
+                <span className="font-semibold">Observações:</span>
+                <div className="mt-1 text-muted-foreground">
+                  {viewingQuote.observations || "Nenhuma observação fornecida."}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between bg-primary/10 border border-primary/20 rounded-lg p-4">
+                <span className="font-bold">Valor Total</span>
+                <span className="text-lg font-bold">{formatCurrency(Number(viewingQuote.totalValue || 0))}</span>
+              </div>
+            </div>
+
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setViewingQuote(null)}>Fechar</AlertDialogCancel>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   );
 }
