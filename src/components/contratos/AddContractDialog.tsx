@@ -1,3 +1,5 @@
+//src/components/contratos/AddContractDialog.tsx
+
 import { useState, useEffect } from "react";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
@@ -43,7 +45,9 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [firstInstallmentDate, setFirstInstallmentDate] = useState<Date | undefined>();
-  const [items, setItems] = useState<ContractItem[]>([{ equipmentId: "", quantity: 1, billingType: "Mensal", unitPrice: 0 }]);
+  const [items, setItems] = useState<ContractItem[]>([
+    { equipmentId: "", quantity: 1, billingType: "Mensal", unitPrice: 0 },
+  ]);
   const [costCenterId, setCostCenterId] = useState("");
   const [chartOfAccountId, setChartOfAccountId] = useState("");
   const [bankAccountId, setBankAccountId] = useState("");
@@ -66,7 +70,7 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
               billingType: i.billingType || "Mensal",
               unitPrice: i.unitPrice || 0,
             }))
-          : [{ equipmentId: "", quantity: 1, billingType: "Mensal", unitPrice: 0 }]
+          : [{ equipmentId: "", quantity: 1, billingType: "Mensal", unitPrice: 0 }],
       );
       setCostCenterId(contract.costCenterId || "");
       setChartOfAccountId(contract.chartOfAccountId || "");
@@ -211,7 +215,10 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className={cn("w-full justify-start text-left font-normal", !startDate && "text-muted-foreground")}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !startDate && "text-muted-foreground",
+                      )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {startDate ? format(startDate, "dd/MM/yyyy") : "Escolha uma data"}
@@ -245,7 +252,10 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className={cn("w-full justify-start text-left font-normal", !firstInstallmentDate && "text-muted-foreground")}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !firstInstallmentDate && "text-muted-foreground",
+                      )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {firstInstallmentDate ? format(firstInstallmentDate, "dd/MM/yyyy") : "Escolha uma data"}
@@ -267,7 +277,13 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
                   { label: "6 Meses", months: 6 },
                   { label: "1 Ano", months: 12 },
                 ].map((p) => (
-                  <Button key={p.months} type="button" variant="outline" size="sm" onClick={() => setQuickPeriod(p.months)}>
+                  <Button
+                    key={p.months}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setQuickPeriod(p.months)}
+                  >
                     {p.label}
                   </Button>
                 ))}
@@ -315,9 +331,7 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
                         <SelectItem value="Diário">Diário</SelectItem>
                       </SelectContent>
                     </Select>
-                    <div className="flex items-center text-sm">
-                      {formatCurrency(item.unitPrice)}
-                    </div>
+                    <div className="flex items-center text-sm">{formatCurrency(item.unitPrice)}</div>
                     <Button
                       type="button"
                       variant="destructive"
