@@ -1,3 +1,5 @@
+//src/pages/admin/Vendas.tsx
+
 import { useState, useMemo } from "react";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
@@ -25,11 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 
@@ -48,7 +46,7 @@ import { cn } from "@/lib/utils";
 import { AddSaleDialog } from "@/components/vendas/AddSaleDialog";
 
 const statusColors: Record<string, string> = {
-  "Concluída": "bg-green-600 hover:bg-green-700 text-white",
+  Concluída: "bg-green-600 hover:bg-green-700 text-white",
   Cancelada: "bg-red-600 hover:bg-red-700 text-white",
 };
 
@@ -178,7 +176,7 @@ export default function Vendas() {
                         variant="outline"
                         className={cn(
                           "w-full justify-start text-left font-normal",
-                          !dateRange.from && "text-muted-foreground"
+                          !dateRange.from && "text-muted-foreground",
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
@@ -259,9 +257,7 @@ export default function Vendas() {
                     <TableCell>{formatDate(sale.saleDate)}</TableCell>
                     <TableCell>{formatCurrency(sale.totalValue)}</TableCell>
                     <TableCell>
-                      <Badge className={statusColors[sale.status] || "bg-muted"}>
-                        {sale.status || "Concluída"}
-                      </Badge>
+                      <Badge className={statusColors[sale.status] || "bg-muted"}>{sale.status || "Concluída"}</Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
@@ -280,10 +276,7 @@ export default function Vendas() {
                             Editar
                           </DropdownMenuItem>
                           {sale.status !== "Cancelada" && (
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() => setCancelId(sale.id)}
-                            >
+                            <DropdownMenuItem className="text-destructive" onClick={() => setCancelId(sale.id)}>
                               <XCircle className="mr-2 h-4 w-4" />
                               Cancelar
                             </DropdownMenuItem>

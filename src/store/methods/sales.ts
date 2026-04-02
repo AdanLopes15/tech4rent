@@ -1,3 +1,5 @@
+//src/store/methods/sales.ts
+
 import { doc, collection, writeBatch, serverTimestamp, Timestamp, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { format, addMonths, setDate as setDayOfMonth, getDate } from "date-fns";
