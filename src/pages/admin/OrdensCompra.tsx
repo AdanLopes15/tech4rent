@@ -1,6 +1,6 @@
 //src/pages/admin/OrdensCompra.tsx
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -25,10 +25,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 import { PlusCircle, MoreHorizontal, Pencil, Trash2, FileText } from "lucide-react";
+
 import { AddPurchaseOrderDialog } from "@/components/ordens-compra/AddPurchaseOrderDialog";
+import { PurchaseOrderReceiptDialog } from "@/components/ordens-compra/PurchaseOrderReceiptDialog";
 
 const statusColors: Record<string, string> = {
   Pendente: "bg-blue-600 hover:bg-blue-700 text-white",
@@ -41,7 +44,9 @@ export default function OrdensCompra() {
   const { toast } = useToast();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<any>(null);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const handleEdit = (order: any) => {
@@ -59,14 +64,25 @@ export default function OrdensCompra() {
     setIsDialogOpen(false);
   };
 
+  const handleOpenReceipt = (order: any) => {
+    setSelectedOrder(order);
+    setIsReceiptDialogOpen(true);
+  };
+
   const handleDelete = async () => {
     if (!deleteId) return;
+
     try {
       await deletePurchaseOrder(deleteId);
       toast({ title: "Ordem de compra excluída!" });
-    } catch {
-      toast({ title: "Erro ao excluir", variant: "destructive" });
+    } catch (error: any) {
+      toast({
+        title: "Erro ao excluir",
+        description: error?.message || "Não foi possível excluir a ordem de compra.",
+        variant: "destructive",
+      });
     }
+
     setDeleteId(null);
   };
 
@@ -93,6 +109,7 @@ export default function OrdensCompra() {
             Nova Ordem de Compra
           </Button>
         </CardHeader>
+
         <CardContent>
           <Table>
             <TableHeader>
@@ -105,13 +122,14 @@ export default function OrdensCompra() {
                 <TableHead className="text-right text-primary">Ações</TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
               {purchaseOrders.length > 0 ? (
                 purchaseOrders.map((order: any) => (
                   <TableRow key={order.id}>
                     <TableCell className="font-medium">{order.id}</TableCell>
                     <TableCell>{order.supplierName || "N/A"}</TableCell>
-                    <TableCell>{formatDate(order.createdAt)}</TableCell>
+                    <TableCell>{formatDate(order.date || order.createdAt)}</TableCell>
                     <TableCell>{formatCurrency(order.totalValue)}</TableCell>
                     <TableCell>
                       <Badge className={statusColors[order.status] || "bg-muted"}>{order.status || "Pendente"}</Badge>
@@ -123,19 +141,37 @@ export default function OrdensCompra() {
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
+
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleOpenReceipt(order)}>
                             <FileText className="mr-2 h-4 w-4" />
                             Visualizar Recibo
                           </DropdownMenuItem>
+
                           <DropdownMenuItem onClick={() => handleEdit(order)}>
                             <Pencil className="mr-2 h-4 w-4" />
                             Editar
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive" onClick={() => setDeleteId(order.id)}>
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Excluir
-                          </DropdownMenuItem>
+
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Excluir
+                              </DropdownMenuItem>
+                            </AlertDialogTrigger>
+
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Excluir ordem de compra?</AlertDialogTitle>
+                                <AlertDialogDescription>Essa ação não pode ser desfeita.</AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => setDeleteId(order.id)}>Continuar</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -154,6 +190,14 @@ export default function OrdensCompra() {
       </Card>
 
       <AddPurchaseOrderDialog open={isDialogOpen} onOpenChange={handleCloseDialog} order={editingOrder} />
+
+      {selectedOrder && (
+        <PurchaseOrderReceiptDialog
+          open={isReceiptDialogOpen}
+          onOpenChange={setIsReceiptDialogOpen}
+          order={selectedOrder}
+        />
+      )}
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
