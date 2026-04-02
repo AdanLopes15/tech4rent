@@ -1,33 +1,64 @@
+//src/pages/admin/Extrato.tsx
+
 import { useState, useMemo, useEffect } from "react";
 import { useStore } from "@/store";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn, formatCurrency } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CalendarIcon, Wallet, TrendingUp, TrendingDown, Info, ArrowLeftRight, Download } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
-import { format, startOfMonth, endOfMonth, isBefore, isWithinInterval } from "date-fns";
+import { Label } from "@/components/ui/label";
+import {
+  CalendarIcon,
+  ArrowLeftRight,
+  Download,
+  Landmark,
+  TrendingUp,
+  TrendingDown,
+  CircleDollarSign,
+} from "lucide-react";
+import {
+  format,
+  startOfDay,
+  endOfDay,
+  isWithinInterval,
+  compareAsc,
+  startOfMonth,
+  endOfMonth,
+  isBefore,
+} from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { DateRange } from "react-day-picker";
+import type { DateRange } from "react-day-picker";
 import { useNavigate } from "react-router-dom";
 import { TransferDialog } from "@/components/financeiro/TransferDialog";
+import { toast } from "sonner";
+
+type StatementTransaction = {
+  id: string;
+  date: Date;
+  description: string;
+  type: "entrada" | "saida";
+  value: number;
+  bankAccountId?: string;
+};
 
 const Extrato = () => {
   const navigate = useNavigate();
   const { revenues, expenses, bankAccounts, loading, fetchAllData } = useStore();
-  const now = new Date();
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: startOfMonth(now),
-    to: endOfMonth(now),
+    from: startOfMonth(new Date()),
+    to: endOfMonth(new Date()),
   });
-  const [selectedAccount, setSelectedAccount] = useState("all");
+  const [selectedAccountId, setSelectedAccountId] = useState<string>("all");
   const [showTransfer, setShowTransfer] = useState(false);
 
-  useEffect(() => { fetchAllData(); }, [fetchAllData]);
+  useEffect(() => {
+    fetchAllData();
+  }, [fetchAllData]);
 
   const tabItems = [
     { value: "visao-geral", label: "Visão Geral", path: "/admin/financeiro" },
@@ -39,207 +70,313 @@ const Extrato = () => {
     { value: "relatorios", label: "Relatórios", path: "/admin/financeiro/relatorios" },
   ];
 
-  const filteredRevenues = useMemo(() => {
-    if (selectedAccount === "all") return revenues;
-    return revenues.filter((r: any) => r.bankAccountId === selectedAccount);
-  }, [revenues, selectedAccount]);
+  const allTransactions = useMemo<StatementTransaction[]>(() => {
+    const paidExpenses: StatementTransaction[] = expenses
+      .filter((expense: any) => String(expense.status || "").toLowerCase() === "pago" && expense.paymentDate)
+      .map((expense: any) => ({
+        id: `exp-${expense.id}`,
+        date: new Date(expense.paymentDate),
+        description: expense.description || "Despesa",
+        type: "saida",
+        value: expense.valorTotal || 0,
+        bankAccountId: expense.bankAccountId,
+      }));
 
-  const filteredExpenses = useMemo(() => {
-    if (selectedAccount === "all") return expenses;
-    return expenses.filter((e: any) => e.bankAccountId === selectedAccount);
-  }, [expenses, selectedAccount]);
+    const receivedRevenues: StatementTransaction[] = revenues
+      .filter((revenue: any) => String(revenue.status || "").toLowerCase() === "recebido" && revenue.paymentDate)
+      .map((revenue: any) => ({
+        id: `rev-${revenue.id}`,
+        date: new Date(revenue.paymentDate),
+        description: revenue.description || "Receita",
+        type: "entrada",
+        value: revenue.valorTotal || 0,
+        bankAccountId: revenue.bankAccountId,
+      }));
 
-  const summary = useMemo(() => {
-    if (!dateRange?.from || !dateRange?.to) return { saldoAnterior: 0, entradas: 0, saidas: 0, saldoFinal: 0 };
-    const interval = { start: dateRange.from, end: dateRange.to };
+    return [...paidExpenses, ...receivedRevenues].sort((a, b) => compareAsc(a.date, b.date));
+  }, [expenses, revenues]);
 
-    const recBefore = filteredRevenues
-      .filter((r: any) => r.dueDate && r.status === "recebido" && isBefore(new Date(r.dueDate), dateRange.from!))
-      .reduce((s: number, r: any) => s + (r.valorTotal || 0), 0);
-    const expBefore = filteredExpenses
-      .filter((e: any) => e.dueDate && e.status === "pago" && isBefore(new Date(e.dueDate), dateRange.from!))
-      .reduce((s: number, e: any) => s + (e.valorTotal || 0), 0);
-    const saldoAnterior = recBefore - expBefore;
+  const { filteredTransactions, previousBalance, totalIn, totalOut, finalBalance } = useMemo(() => {
+    const from = dateRange?.from ? startOfDay(dateRange.from) : new Date(0);
+    const to = dateRange?.to ? endOfDay(dateRange.to) : new Date();
 
-    const entradas = filteredRevenues
-      .filter((r: any) => r.dueDate && r.status === "recebido" && isWithinInterval(new Date(r.dueDate), interval))
-      .reduce((s: number, r: any) => s + (r.valorTotal || 0), 0);
-    const saidas = filteredExpenses
-      .filter((e: any) => e.dueDate && e.status === "pago" && isWithinInterval(new Date(e.dueDate), interval))
-      .reduce((s: number, e: any) => s + (e.valorTotal || 0), 0);
+    const accountFilter = (transaction: StatementTransaction) =>
+      selectedAccountId === "all" || transaction.bankAccountId === selectedAccountId;
 
-    return { saldoAnterior, entradas, saidas, saldoFinal: saldoAnterior + entradas - saidas };
-  }, [filteredRevenues, filteredExpenses, dateRange]);
+    const previousTransactions = allTransactions.filter(
+      (transaction) => isBefore(transaction.date, from) && accountFilter(transaction),
+    );
 
-  // Build statement entries
-  const entries = useMemo(() => {
-    if (!dateRange?.from || !dateRange?.to) return [];
-    const interval = { start: dateRange.from, end: dateRange.to };
+    let startingBalance = 0;
 
-    const items: { date: Date; description: string; entrada: number; saida: number }[] = [];
+    if (selectedAccountId === "all") {
+      startingBalance = bankAccounts.reduce(
+        (accumulator: number, account: any) => accumulator + (account.initialBalance || 0),
+        0,
+      );
+    } else {
+      const account = bankAccounts.find((item: any) => item.id === selectedAccountId);
+      startingBalance = account?.initialBalance || 0;
+    }
 
-    filteredRevenues
-      .filter((r: any) => r.dueDate && r.status === "recebido" && isWithinInterval(new Date(r.dueDate), interval))
-      .forEach((r: any) => items.push({ date: new Date(r.dueDate), description: r.description || r.clientName || "Receita", entrada: r.valorTotal || 0, saida: 0 }));
+    const previousBalance = previousTransactions.reduce((accumulator, transaction) => {
+      return accumulator + (transaction.type === "entrada" ? transaction.value : -transaction.value);
+    }, startingBalance);
 
-    filteredExpenses
-      .filter((e: any) => e.dueDate && e.status === "pago" && isWithinInterval(new Date(e.dueDate), interval))
-      .forEach((e: any) => items.push({ date: new Date(e.dueDate), description: e.description || e.supplierName || "Despesa", entrada: 0, saida: e.valorTotal || 0 }));
+    const filteredTransactions = allTransactions.filter(
+      (transaction) => isWithinInterval(transaction.date, { start: from, end: to }) && accountFilter(transaction),
+    );
 
-    items.sort((a, b) => a.date.getTime() - b.date.getTime());
+    const totalIn = filteredTransactions
+      .filter((transaction) => transaction.type === "entrada")
+      .reduce((sum, transaction) => sum + transaction.value, 0);
 
-    let running = summary.saldoAnterior;
-    return items.map((item) => {
-      running += item.entrada - item.saida;
-      return { ...item, saldo: running };
+    const totalOut = filteredTransactions
+      .filter((transaction) => transaction.type === "saida")
+      .reduce((sum, transaction) => sum + transaction.value, 0);
+
+    const finalBalance = previousBalance + totalIn - totalOut;
+
+    return {
+      filteredTransactions,
+      previousBalance,
+      totalIn,
+      totalOut,
+      finalBalance,
+    };
+  }, [allTransactions, dateRange, selectedAccountId, bankAccounts]);
+
+  const handleExport = () => {
+    if (filteredTransactions.length === 0 && previousBalance === 0) {
+      toast.error("Não há lançamentos no período selecionado.");
+      return;
+    }
+
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += ["Data", "Descrição", "Entradas", "Saídas", "Saldo"].join(",") + "\r\n";
+
+    let runningBalance = previousBalance;
+
+    csvContent += `"", "SALDO ANTERIOR", "", "", "${previousBalance.toFixed(2)}"\r\n`;
+
+    filteredTransactions.forEach((transaction) => {
+      runningBalance += transaction.type === "entrada" ? transaction.value : -transaction.value;
+
+      const row = [
+        `"${format(transaction.date, "dd/MM/yyyy")}"`,
+        `"${String(transaction.description || "").replace(/"/g, '""')}"`,
+        `"${transaction.type === "entrada" ? transaction.value.toFixed(2) : "0.00"}"`,
+        `"${transaction.type === "saida" ? transaction.value.toFixed(2) : "0.00"}"`,
+        `"${runningBalance.toFixed(2)}"`,
+      ];
+
+      csvContent += row.join(",") + "\r\n";
     });
-  }, [filteredRevenues, filteredExpenses, dateRange, summary.saldoAnterior]);
 
-  const exportCSV = () => {
-    const header = "Data,Descrição,Entradas,Saídas,Saldo\n";
-    const rows = entries.map((e) =>
-      `${format(e.date, "dd/MM/yyyy")},"${e.description}",${e.entrada},${e.saida},${e.saldo}`
-    ).join("\n");
-    const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "extrato.csv";
-    a.click();
-    URL.revokeObjectURL(url);
+    csvContent += `"", "SALDO FINAL", "", "", "${finalBalance.toFixed(2)}"\r\n`;
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    const fromDate = dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : "inicio";
+    const toDate = dateRange?.to ? format(dateRange.to, "yyyy-MM-dd") : "fim";
+
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Extrato_${fromDate}_a_${toDate}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
+
+  let runningBalance = previousBalance;
 
   return (
     <div className="space-y-6">
-      <Tabs value="extrato" onValueChange={(val) => {
-        const tab = tabItems.find(t => t.value === val);
-        if (tab && "path" in tab && tab.path) navigate(tab.path);
-      }}>
+      <Tabs
+        value="extrato"
+        onValueChange={(value) => {
+          const tab = tabItems.find((item) => item.value === value);
+          if (tab?.path) navigate(tab.path);
+        }}
+      >
         <TabsList className="bg-transparent border-b border-border rounded-none w-full justify-start gap-0 h-auto p-0">
           {tabItems.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value} className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2 text-sm">
+            <TabsTrigger
+              key={tab.value}
+              value={tab.value}
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2 text-sm"
+            >
               {tab.label}
             </TabsTrigger>
           ))}
         </TabsList>
       </Tabs>
 
-      {/* Filters */}
       <Card className="border-border">
         <CardContent className="p-5">
           <h3 className="text-sm font-semibold text-foreground mb-1">Relatório de Extrato Bancário</h3>
-          <p className="text-xs text-muted-foreground mb-3">Visualize o extrato consolidado de suas contas para conciliação.</p>
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div className="space-y-1">
-              <span className="text-xs text-muted-foreground">Período de Análise</span>
+          <p className="text-xs text-muted-foreground mb-3">
+            Visualize o extrato consolidado de suas contas para conciliação.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label>Período de Análise</Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                  <Button
+                    variant="outline"
+                    className={cn("w-full justify-start text-left font-normal", !dateRange && "text-muted-foreground")}
+                  >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateRange?.from ? format(dateRange.from, "dd/MM/yyyy") : ""} - {dateRange?.to ? format(dateRange.to, "dd/MM/yyyy") : ""}
+                    {dateRange?.from ? (
+                      dateRange.to ? (
+                        <>
+                          {format(dateRange.from, "dd/MM/yyyy")} - {format(dateRange.to, "dd/MM/yyyy")}
+                        </>
+                      ) : (
+                        format(dateRange.from, "dd/MM/yyyy")
+                      )
+                    ) : (
+                      <span>Selecione um período</span>
+                    )}
                   </Button>
                 </PopoverTrigger>
+
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="range" selected={dateRange} onSelect={setDateRange} locale={ptBR} numberOfMonths={2} />
+                  <Calendar
+                    initialFocus
+                    mode="range"
+                    defaultMonth={dateRange?.from}
+                    selected={dateRange}
+                    onSelect={setDateRange}
+                    numberOfMonths={2}
+                    locale={ptBR}
+                  />
                 </PopoverContent>
               </Popover>
             </div>
-            <div className="space-y-1">
-              <span className="text-xs text-muted-foreground">Conta Bancária</span>
-              <Select value={selectedAccount} onValueChange={setSelectedAccount}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+
+            <div className="space-y-2">
+              <Label>Conta Bancária</Label>
+              <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas as Contas</SelectItem>
-                  {bankAccounts.map((ba: any) => <SelectItem key={ba.id} value={ba.id}>{ba.name}</SelectItem>)}
+                  {bankAccounts.map((account: any) => (
+                    <SelectItem key={account.id} value={account.id}>
+                      {account.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
+
             <div className="flex items-end">
               <Button variant="outline" className="w-full gap-2" onClick={() => setShowTransfer(true)}>
-                <ArrowLeftRight className="h-4 w-4" /> Transferência
+                <ArrowLeftRight className="h-4 w-4" />
+                Transferência
               </Button>
             </div>
+
             <div className="flex items-end">
-              <Button variant="outline" className="w-full gap-2" onClick={exportCSV}>
-                <Download className="h-4 w-4" /> Exportar CSV
+              <Button variant="outline" className="w-full gap-2" onClick={handleExport}>
+                <Download className="h-4 w-4" />
+                Exportar CSV
               </Button>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="border-border">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-1">
               <span className="text-sm text-muted-foreground">Saldo Anterior</span>
-              <Wallet className="h-4 w-4 text-muted-foreground" />
+              <Landmark className="h-4 w-4 text-muted-foreground" />
             </div>
-            <p className="text-xl font-bold text-foreground">{loading ? "..." : formatCurrency(summary.saldoAnterior)}</p>
+            <p className="text-xl font-bold text-foreground">{loading ? "..." : formatCurrency(previousBalance)}</p>
           </CardContent>
         </Card>
+
         <Card className="border-border">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-1">
               <span className="text-sm text-muted-foreground">Total de Entradas</span>
               <TrendingUp className="h-4 w-4 text-success" />
             </div>
-            <p className="text-xl font-bold text-success">{loading ? "..." : formatCurrency(summary.entradas)}</p>
+            <p className="text-xl font-bold text-success">{loading ? "..." : formatCurrency(totalIn)}</p>
           </CardContent>
         </Card>
+
         <Card className="border-border">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-1">
               <span className="text-sm text-muted-foreground">Total de Saídas</span>
               <TrendingDown className="h-4 w-4 text-destructive" />
             </div>
-            <p className="text-xl font-bold text-destructive">{loading ? "..." : formatCurrency(summary.saidas)}</p>
+            <p className="text-xl font-bold text-destructive">{loading ? "..." : formatCurrency(totalOut)}</p>
           </CardContent>
         </Card>
+
         <Card className="border-border">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-1">
               <span className="text-sm text-muted-foreground">Saldo Final</span>
-              <Info className="h-4 w-4 text-muted-foreground" />
+              <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
             </div>
-            <p className="text-xl font-bold text-foreground">{loading ? "..." : formatCurrency(summary.saldoFinal)}</p>
+            <p className="text-xl font-bold text-foreground">{loading ? "..." : formatCurrency(finalBalance)}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Statement Table */}
       <Card className="border-border">
         <CardHeader>
           <CardTitle className="text-lg">Lançamentos do Período</CardTitle>
+          <CardDescription>Extrato consolidado com saldo anterior e saldo final.</CardDescription>
         </CardHeader>
+
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Data</TableHead>
+                <TableHead className="w-[120px]">Data</TableHead>
                 <TableHead>Descrição</TableHead>
-                <TableHead>Entradas</TableHead>
-                <TableHead>Saídas</TableHead>
+                <TableHead className="text-right">Entradas</TableHead>
+                <TableHead className="text-right">Saídas</TableHead>
                 <TableHead className="text-right">Saldo</TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
-              {/* Saldo Anterior row */}
-              <TableRow className="bg-muted/30 font-semibold">
-                <TableCell colSpan={4} className="text-sm font-bold">SALDO ANTERIOR</TableCell>
-                <TableCell className="text-sm text-right font-bold">{formatCurrency(summary.saldoAnterior)}</TableCell>
+              <TableRow className="bg-muted/30 hover:bg-muted/30">
+                <TableCell colSpan={4} className="text-sm font-bold">
+                  SALDO ANTERIOR
+                </TableCell>
+                <TableCell className="text-sm text-right font-bold">{formatCurrency(previousBalance)}</TableCell>
               </TableRow>
 
-              {entries.length > 0 ? entries.map((e, i) => (
-                <TableRow key={i}>
-                  <TableCell className="text-sm">{format(e.date, "dd/MM/yyyy")}</TableCell>
-                  <TableCell className="text-sm">{e.description}</TableCell>
-                  <TableCell className="text-sm text-success">{e.entrada > 0 ? formatCurrency(e.entrada) : "-"}</TableCell>
-                  <TableCell className="text-sm text-destructive">{e.saida > 0 ? formatCurrency(e.saida) : "-"}</TableCell>
-                  <TableCell className="text-sm text-right">{formatCurrency(e.saldo)}</TableCell>
-                </TableRow>
-              )) : (
+              {filteredTransactions.length > 0 ? (
+                filteredTransactions.map((transaction) => {
+                  runningBalance += transaction.type === "entrada" ? transaction.value : -transaction.value;
+
+                  return (
+                    <TableRow key={transaction.id}>
+                      <TableCell className="text-sm">{format(transaction.date, "dd/MM/yyyy")}</TableCell>
+                      <TableCell className="text-sm">{transaction.description}</TableCell>
+                      <TableCell className="text-sm text-right text-success">
+                        {transaction.type === "entrada" ? formatCurrency(transaction.value) : "-"}
+                      </TableCell>
+                      <TableCell className="text-sm text-right text-destructive">
+                        {transaction.type === "saida" ? formatCurrency(transaction.value) : "-"}
+                      </TableCell>
+                      <TableCell className="text-sm text-right font-medium">{formatCurrency(runningBalance)}</TableCell>
+                    </TableRow>
+                  );
+                })
+              ) : (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center text-sm text-muted-foreground py-6">
                     Nenhum lançamento para exibir.
@@ -247,10 +384,11 @@ const Extrato = () => {
                 </TableRow>
               )}
 
-              {/* Saldo Final row */}
-              <TableRow className="bg-muted/30 font-semibold">
-                <TableCell colSpan={4} className="text-sm font-bold">SALDO FINAL</TableCell>
-                <TableCell className="text-sm text-right font-bold">{formatCurrency(summary.saldoFinal)}</TableCell>
+              <TableRow className="bg-muted/30 hover:bg-muted/30">
+                <TableCell colSpan={4} className="text-sm font-bold">
+                  SALDO FINAL
+                </TableCell>
+                <TableCell className="text-sm text-right font-bold">{formatCurrency(finalBalance)}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
