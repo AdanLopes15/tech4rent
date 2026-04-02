@@ -484,22 +484,6 @@ const useStore = create<State & Actions>((set, get) => {
       state: supplier.address?.state || supplier.state || "",
     };
 
-    const normalizeCollaboratorData = (collaborator: any) => {
-      const telefone = collaborator.telefone || collaborator.phone || collaborator.whatsapp || "";
-
-      return {
-        ...collaborator,
-
-        telefone,
-        phone: telefone,
-        whatsapp: telefone,
-
-        clientName: collaborator.clientName || "",
-        permission: collaborator.permission || "colaborador",
-        status: collaborator.status || "ativo",
-      };
-    };
-
     const razaoSocial = supplier.razaoSocial || supplier.name || "";
     const contato = supplier.contato || supplier.contactPerson || "";
     const observacoes = supplier.observacoes || supplier.notes || "";
@@ -523,6 +507,20 @@ const useStore = create<State & Actions>((set, get) => {
       neighborhood: address.neighborhood,
       city: address.city,
       state: address.state,
+    };
+  };
+
+  const normalizeCollaboratorData = (collaborator: any) => {
+    const telefone = collaborator.telefone || collaborator.phone || collaborator.whatsapp || "";
+
+    return {
+      ...collaborator,
+      telefone,
+      phone: telefone,
+      whatsapp: telefone,
+      clientName: collaborator.clientName || "",
+      permission: collaborator.permission || "colaborador",
+      status: collaborator.status || "ativo",
     };
   };
 
