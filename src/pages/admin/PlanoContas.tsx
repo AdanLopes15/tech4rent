@@ -1,384 +1,225 @@
 //src/pages/admin/PlanoContas.tsx
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import React, { useEffect, useState } from "react";
+import { PlusCircle, Pencil, Trash2, MoreHorizontal } from "lucide-react";
+import { toast } from "sonner";
+
+import { useStore } from "@/store";
+import { AddAccountDialog } from "@/components/plano-de-contas/AddAccountDialog";
+
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Plus, MoreHorizontal, ChevronUp, ChevronDown, Pencil, Trash2 } from "lucide-react";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-
-interface Account {
-  id: string;
-  code: string;
-  name: string;
-  type: "receita" | "despesa";
-  parentId: string | null;
-  description: string;
-}
-
-const initialAccounts: Account[] = [
-  // Receitas
-  { id: "1", code: "2.", name: "Aluguel de Equipamentos", type: "receita", parentId: null, description: "" },
-  { id: "2", code: "2.1", name: "Aluguel Anual", type: "receita", parentId: "1", description: "" },
-  { id: "3", code: "1", name: "Vendas de Equipamento", type: "receita", parentId: null, description: "" },
-  { id: "4", code: "1.1", name: "Vendas Avista", type: "receita", parentId: "3", description: "" },
-  { id: "5", code: "3.", name: "Aporte", type: "receita", parentId: null, description: "" },
-  { id: "6", code: "3.1", name: "Aporte Sócio", type: "receita", parentId: "5", description: "" },
-  // Despesas - Comercial
-  { id: "7", code: "4.", name: "Despesas com Comercial", type: "despesa", parentId: null, description: "" },
-  { id: "8", code: "4.1", name: "Comissões Clientes Atual", type: "despesa", parentId: "7", description: "" },
-  { id: "9", code: "4.2", name: "Comissões Novos Clientes", type: "despesa", parentId: "7", description: "" },
-  // Despesas - Viagens
-  { id: "10", code: "3.", name: "Despesas com Viagens", type: "despesa", parentId: null, description: "" },
-  { id: "11", code: "3.3", name: "Almoço/Jantar/Lanche", type: "despesa", parentId: "10", description: "" },
-  { id: "12", code: "3.1", name: "Hotéis/Pousada", type: "despesa", parentId: "10", description: "" },
-  {
-    id: "13",
-    code: "3.4",
-    name: "Locação de Veículos/Estacionamento/Uber",
-    type: "despesa",
-    parentId: "10",
-    description: "",
-  },
-  { id: "14", code: "3.2", name: "Combustíveis/Pedágio", type: "despesa", parentId: "10", description: "" },
-  // Despesas - Pessoal
-  { id: "15", code: "1.", name: "Despesas com Pessoal", type: "despesa", parentId: null, description: "" },
-  { id: "16", code: "1.7", name: "Encargos", type: "despesa", parentId: "15", description: "" },
-  { id: "17", code: "1.2", name: "Férias", type: "despesa", parentId: "15", description: "" },
-  { id: "18", code: "1.3", name: "Décimo", type: "despesa", parentId: "15", description: "" },
-  { id: "19", code: "1.10", name: "Contratos", type: "despesa", parentId: "15", description: "" },
-  { id: "20", code: "1.4", name: "Adiantamento", type: "despesa", parentId: "15", description: "" },
-  { id: "21", code: "1.5", name: "Rescisão/Acordo", type: "despesa", parentId: "15", description: "" },
-  { id: "22", code: "1.12-", name: "Vestimento/utensílios", type: "despesa", parentId: "15", description: "" },
-  { id: "23", code: "1.6", name: "Encargos", type: "despesa", parentId: "15", description: "" },
-  { id: "24", code: "Alguel", name: "Aluguel", type: "despesa", parentId: "15", description: "" },
-  { id: "25", code: "1.1", name: "Salários", type: "despesa", parentId: "15", description: "" },
-  { id: "26", code: "1.9", name: "Terceirização", type: "despesa", parentId: "15", description: "" },
-  { id: "27", code: "1.11", name: "Prolábore", type: "despesa", parentId: "15", description: "" },
-  { id: "28", code: "1.8", name: "Benefícios/Bonificações", type: "despesa", parentId: "15", description: "" },
-  // Despesas - Administrativas
-  { id: "29", code: "2.", name: "Despesas Administrativas", type: "despesa", parentId: null, description: "" },
-  { id: "30", code: "2.9", name: "Faxineira", type: "despesa", parentId: "29", description: "" },
-  { id: "31", code: "2.3", name: "Luz", type: "despesa", parentId: "29", description: "" },
-  { id: "32", code: "2.14", name: "Honorários Advocatícios", type: "despesa", parentId: "29", description: "" },
-  { id: "33", code: "2.5", name: "Licença de Uso Dados/Sistemas", type: "despesa", parentId: "29", description: "" },
-  { id: "34", code: "2.8", name: "Material de Limpeza/Higiene", type: "despesa", parentId: "29", description: "" },
-  { id: "35", code: "2.17", name: "Equipamentos", type: "despesa", parentId: "29", description: "" },
-  { id: "36", code: "2.4", name: "Telefonia e Internet", type: "despesa", parentId: "29", description: "" },
-  { id: "37", code: "2.6", name: "Manutenção Predial", type: "despesa", parentId: "29", description: "" },
-  { id: "38", code: "2.7", name: "Material de Escritório", type: "despesa", parentId: "29", description: "" },
-  { id: "39", code: "2.16", name: "Honorários de Contabilidade", type: "despesa", parentId: "29", description: "" },
-  { id: "40", code: "2.15", name: "Acordos/Processos", type: "despesa", parentId: "29", description: "" },
-  { id: "41", code: "2.19", name: "Outras despesas ADM", type: "despesa", parentId: "29", description: "" },
-  { id: "42", code: "2.11", name: "Equipamentos e utensílios", type: "despesa", parentId: "29", description: "" },
-  { id: "43", code: "2.1", name: "Aluguel", type: "despesa", parentId: "29", description: "" },
-  { id: "44", code: "2.13", name: "Marketing", type: "despesa", parentId: "29", description: "" },
-  { id: "45", code: "2.12", name: "Eventos e Confraternização", type: "despesa", parentId: "29", description: "" },
-  { id: "46", code: "2.10", name: "Copa e Cozinha", type: "despesa", parentId: "29", description: "" },
-  { id: "47", code: "2.2", name: "Água", type: "despesa", parentId: "29", description: "" },
-  {
-    id: "48",
-    code: "2.18",
-    name: "Taxas/Emolumentos/Guias/Demais tarifas",
-    type: "despesa",
-    parentId: "29",
-    description: "",
-  },
-  // Despesas - Financeiras
-  { id: "49", code: "6.", name: "Despesas Financeiras", type: "despesa", parentId: null, description: "" },
-  { id: "50", code: "6.1", name: "Antecipação", type: "despesa", parentId: "49", description: "" },
-  { id: "51", code: "6.3", name: "Taxas Bancárias", type: "despesa", parentId: "49", description: "" },
-  { id: "52", code: "6.2", name: "Empréstimos", type: "despesa", parentId: "49", description: "" },
-  // Despesas - Gerenciamento de Risco
-  { id: "53", code: "5.", name: "Gerenciamento de Risco", type: "despesa", parentId: null, description: "" },
-  { id: "54", code: "5.2", name: "Extravios", type: "despesa", parentId: "53", description: "" },
-  { id: "55", code: "5.1", name: "Roubo", type: "despesa", parentId: "53", description: "" },
-  { id: "56", code: "5.3", name: "Sinistros", type: "despesa", parentId: "53", description: "" },
-  { id: "57", code: "5.4", name: "Seguros e Monitoramento", type: "despesa", parentId: "53", description: "" },
-];
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const PlanoContas = () => {
-  const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [receitaOpen, setReceitaOpen] = useState(true);
-  const [despesaOpen, setDespesaOpen] = useState(true);
+  const { chartOfAccounts, deleteChartOfAccount, fetchAllData } = useStore();
 
-  const [newAccount, setNewAccount] = useState({
-    code: "",
-    name: "",
-    type: "receita" as "receita" | "despesa",
-    parentId: "" as string,
-    description: "",
-  });
+  const [isAddAccountDialogOpen, setIsAddAccountDialogOpen] = useState(false);
+  const [editingAccount, setEditingAccount] = useState<any>(null);
 
-  const receitaAccounts = accounts.filter((a) => a.type === "receita");
-  const despesaAccounts = accounts.filter((a) => a.type === "despesa");
+  useEffect(() => {
+    fetchAllData?.();
+  }, [fetchAllData]);
 
-  const parentAccounts = accounts.filter((a) => a.parentId === null && a.type === newAccount.type);
+  const handleEdit = (account: any) => {
+    setEditingAccount(account);
+    setIsAddAccountDialogOpen(true);
+  };
 
-  const handleSave = () => {
-    if (!newAccount.code || !newAccount.name) {
-      toast.error("Preencha o código e o nome da conta.");
-      return;
+  const handleAddNew = () => {
+    setEditingAccount(null);
+    setIsAddAccountDialogOpen(true);
+  };
+
+  const handleCloseDialog = (open: boolean) => {
+    if (!open) {
+      setEditingAccount(null);
     }
-    const account: Account = {
-      id: crypto.randomUUID(),
-      code: newAccount.code,
-      name: newAccount.name,
-      type: newAccount.type,
-      parentId: newAccount.parentId || null,
-      description: newAccount.description,
-    };
-    setAccounts((prev) => [...prev, account]);
-    setDialogOpen(false);
-    setNewAccount({ code: "", name: "", type: "receita", parentId: "", description: "" });
-    toast.success("Conta cadastrada com sucesso!");
+    setIsAddAccountDialogOpen(open);
   };
 
-  const handleDelete = (id: string) => {
-    setAccounts((prev) => prev.filter((a) => a.id !== id && a.parentId !== id));
-    toast.success("Conta removida com sucesso!");
+  const handleDelete = async (accountId: string) => {
+    try {
+      await deleteChartOfAccount(accountId);
+      toast.success("Conta excluída com sucesso!");
+    } catch (error) {
+      console.error("Erro ao excluir conta:", error);
+      toast.error("Não foi possível excluir a conta.");
+    }
   };
 
-  const renderAccountRows = (accs: Account[]) => {
-    const parents = accs.filter((a) => a.parentId === null);
-    const rows: React.ReactNode[] = [];
+  const AccountActions = ({ account }: { account: any }) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <span className="sr-only">Abrir menu</span>
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
 
-    parents.forEach((parent) => {
-      const children = accs.filter((a) => a.parentId === parent.id);
-      rows.push(
-        <TableRow key={parent.id} className="bg-muted/30">
-          <TableCell className="font-bold text-foreground">{parent.code}</TableCell>
-          <TableCell className="font-bold text-foreground">{parent.name}</TableCell>
-          <TableCell className="text-muted-foreground">{parent.description}</TableCell>
-          <TableCell className="text-right">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Editar
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(parent.id)}>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Excluir
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => handleEdit(account)}>
+          <Pencil className="mr-2 h-4 w-4" />
+          Editar
+        </DropdownMenuItem>
+
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+              <Trash2 className="mr-2 h-4 w-4" />
+              Excluir
+            </DropdownMenuItem>
+          </AlertDialogTrigger>
+
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Essa ação não pode ser desfeita. Isso excluirá permanentemente a conta.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={() => handleDelete(account.id)}>Continuar</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  const renderRows = (type: "receita" | "despesa") => {
+    const parentAccounts = chartOfAccounts.filter((account: any) => account.type === type && !account.parentAccountId);
+
+    if (parentAccounts.length === 0) {
+      return (
+        <TableRow>
+          <TableCell colSpan={4} className="h-24 text-center">
+            Nenhuma conta de {type === "receita" ? "receita" : "despesa"} para exibir.
           </TableCell>
-        </TableRow>,
+        </TableRow>
       );
-      children.forEach((child) => {
-        rows.push(
-          <TableRow key={child.id}>
-            <TableCell className="pl-10 text-muted-foreground">{child.code}</TableCell>
-            <TableCell className="font-semibold text-foreground">{child.name}</TableCell>
-            <TableCell className="text-muted-foreground">{child.description}</TableCell>
-            <TableCell className="text-right">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Editar
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(child.id)}>
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Excluir
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </TableCell>
-          </TableRow>,
-        );
-      });
-    });
+    }
 
-    return rows;
+    return parentAccounts.map((account: any) => (
+      <React.Fragment key={account.id}>
+        <TableRow className="bg-muted/50 font-semibold">
+          <TableCell>{account.code}</TableCell>
+          <TableCell>{account.name}</TableCell>
+          <TableCell>{account.description}</TableCell>
+          <TableCell className="text-right">
+            <AccountActions account={account} />
+          </TableCell>
+        </TableRow>
+
+        {chartOfAccounts
+          .filter((subAccount: any) => subAccount.parentAccountId === account.id)
+          .map((subAccount: any) => (
+            <TableRow key={subAccount.id}>
+              <TableCell className="pl-8">{subAccount.code}</TableCell>
+              <TableCell>{subAccount.name}</TableCell>
+              <TableCell>{subAccount.description}</TableCell>
+              <TableCell className="text-right">
+                <AccountActions account={subAccount} />
+              </TableCell>
+            </TableRow>
+          ))}
+      </React.Fragment>
+    ));
   };
 
   return (
-    <div className="space-y-6">
-      <Card className="border-border">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="text-2xl">Plano de Contas</CardTitle>
-            <CardDescription>Gerencie as contas contábeis da sua empresa.</CardDescription>
+    <div className="flex flex-col gap-8">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Plano de Contas</CardTitle>
+              <CardDescription>Gerencie as contas contábeis da sua empresa.</CardDescription>
+            </div>
+
+            <div className="flex gap-2">
+              <Button onClick={handleAddNew}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Nova Conta
+              </Button>
+            </div>
           </div>
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Nova Conta
-          </Button>
         </CardHeader>
       </Card>
 
-      {/* Contas de Receita */}
-      <div className="rounded-lg border border-green-800 overflow-hidden">
-        <button
-          onClick={() => setReceitaOpen(!receitaOpen)}
-          className="flex w-full items-center justify-between bg-green-900/60 px-4 py-3 text-sm font-semibold text-green-300"
-        >
-          <span>Contas de Receita</span>
-          <span className="flex items-center gap-2 text-xs text-green-400">
-            Clique para expandir/recolher
-            {receitaOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </span>
-        </button>
-        {receitaOpen && (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[120px]">Código</TableHead>
-                <TableHead>Nome da Conta</TableHead>
-                <TableHead>Descrição</TableHead>
-                <TableHead className="text-right w-[80px]">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>{renderAccountRows(receitaAccounts)}</TableBody>
-          </Table>
-        )}
-      </div>
+      <Accordion type="multiple" defaultValue={["receitas", "despesas"]} className="w-full space-y-4">
+        <AccordionItem value="receitas" className="border-none">
+          <Card className="overflow-hidden">
+            <AccordionTrigger className="p-0 hover:no-underline">
+              <div className="flex items-center justify-between w-full p-4 bg-green-100 dark:bg-green-900/50">
+                <h3 className="font-semibold text-green-800 dark:text-green-200">Contas de Receita</h3>
+                <p className="text-sm text-muted-foreground">Clique para expandir/recolher</p>
+              </div>
+            </AccordionTrigger>
 
-      {/* Contas de Despesa */}
-      <div className="rounded-lg border border-red-800 overflow-hidden">
-        <button
-          onClick={() => setDespesaOpen(!despesaOpen)}
-          className="flex w-full items-center justify-between bg-red-900/60 px-4 py-3 text-sm font-semibold text-red-300"
-        >
-          <span>Contas de Despesa</span>
-          <span className="flex items-center gap-2 text-xs text-red-400">
-            Clique para expandir/recolher
-            {despesaOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </span>
-        </button>
-        {despesaOpen && (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[120px]">Código</TableHead>
-                <TableHead>Nome da Conta</TableHead>
-                <TableHead>Descrição</TableHead>
-                <TableHead className="text-right w-[80px]">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>{renderAccountRows(despesaAccounts)}</TableBody>
-          </Table>
-        )}
-      </div>
+            <AccordionContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[150px]">Código</TableHead>
+                    <TableHead>Nome da Conta</TableHead>
+                    <TableHead>Descrição</TableHead>
+                    <TableHead className="text-right w-[100px]">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>{renderRows("receita")}</TableBody>
+              </Table>
+            </AccordionContent>
+          </Card>
+        </AccordionItem>
 
-      {/* Dialog Nova Conta */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Cadastrar Nova Conta</DialogTitle>
-            <DialogDescription>Preencha os dados da nova conta.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Código</Label>
-                <Input
-                  placeholder="Ex: 1.01.01"
-                  value={newAccount.code}
-                  onChange={(e) => setNewAccount((p) => ({ ...p, code: e.target.value }))}
-                />
+        <AccordionItem value="despesas" className="border-none">
+          <Card className="overflow-hidden">
+            <AccordionTrigger className="p-0 hover:no-underline">
+              <div className="flex items-center justify-between w-full p-4 bg-red-100 dark:bg-red-900/50">
+                <h3 className="font-semibold text-red-800 dark:text-red-200">Contas de Despesa</h3>
+                <p className="text-sm text-muted-foreground">Clique para expandir/recolher</p>
               </div>
-              <div className="space-y-2">
-                <Label>Nome da Conta</Label>
-                <Input
-                  placeholder="Ex: Receita de Locação"
-                  value={newAccount.name}
-                  onChange={(e) => setNewAccount((p) => ({ ...p, name: e.target.value }))}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Tipo da Conta</Label>
-                <Select
-                  value={newAccount.type}
-                  onValueChange={(v) =>
-                    setNewAccount((p) => ({ ...p, type: v as "receita" | "despesa", parentId: "" }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="receita">Receita</SelectItem>
-                    <SelectItem value="despesa">Despesa</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Conta Mãe (Opcional)</Label>
-                <div className="flex gap-2">
-                  <Select
-                    value={newAccount.parentId}
-                    onValueChange={(v) => setNewAccount((p) => ({ ...p, parentId: v }))}
-                  >
-                    <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Nenhuma (Conta..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Nenhuma (Conta Pai)</SelectItem>
-                      {parentAccounts.map((pa) => (
-                        <SelectItem key={pa.id} value={pa.id}>
-                          {pa.code} - {pa.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button variant="outline" size="icon" className="shrink-0">
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Descrição</Label>
-              <Textarea
-                placeholder="Uma breve descrição sobre esta conta contábil"
-                value={newAccount.description}
-                onChange={(e) => setNewAccount((p) => ({ ...p, description: e.target.value }))}
-                rows={3}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSave}>Salvar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </AccordionTrigger>
+
+            <AccordionContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[150px]">Código</TableHead>
+                    <TableHead>Nome da Conta</TableHead>
+                    <TableHead>Descrição</TableHead>
+                    <TableHead className="text-right w-[100px]">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>{renderRows("despesa")}</TableBody>
+              </Table>
+            </AccordionContent>
+          </Card>
+        </AccordionItem>
+      </Accordion>
+
+      <AddAccountDialog open={isAddAccountDialogOpen} onOpenChange={handleCloseDialog} account={editingAccount} />
     </div>
   );
 };
