@@ -1,7 +1,14 @@
 //src/components/financeiro/AddRevenueDialog.tsx
 
-import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useState, useEffect, useMemo } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,177 +17,277 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Plus } from "lucide-react";
+import { CalendarIcon, PlusCircle } from "lucide-react";
 import { useStore } from "@/store";
-import { formatCurrency } from "@/lib/utils";
-import { format } from "date-fns";
+import { cn, formatCurrency } from "@/lib/utils";
+import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
-import { Timestamp } from "firebase/firestore";
 import { AddClientDialog } from "@/components/clientes/AddClientDialog";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  editingRevenue?: any;
+  revenue?: any;
+  viewOnly?: boolean;
 }
 
-const paymentMethods = ["Boleto", "Pix", "Cartão de Crédito", "Cartão de Débito", "Transferência", "Dinheiro"];
+export const AddRevenueDialog = ({ open, onOpenChange, revenue, viewOnly = false }: Props) => {
+  const { clients, suppliers, collaborators, bankAccounts, costCenters, chartOfAccounts, addRevenue, updateRevenue } =
+    useStore();
 
-export const AddRevenueDialog = ({ open, onOpenChange, editingRevenue }: Props) => {
-  const { clients, bankAccounts, costCenters, chartOfAccounts, addRevenue, updateRevenue } = useStore();
-
-  const [entityType, setEntityType] = useState("Cliente");
-  const [clientId, setClientId] = useState("");
+  const [entityType, setEntityType] = useState<"cliente" | "fornecedor" | "colaborador" | "">("cliente");
+  const [entityId, setEntityId] = useState("");
   const [description, setDescription] = useState("");
+
+  const [valorBruto, setValorBruto] = useState<number>(0);
+  const [desconto, setDesconto] = useState<number>(0);
+  const [juros, setJuros] = useState<number>(0);
+
+  const [competenceDate, setCompetenceDate] = useState<Date>();
+  const [dueDate, setDueDate] = useState<Date>();
+  const [paymentDate, setPaymentDate] = useState<Date | undefined>();
+
   const [costCenterId, setCostCenterId] = useState("");
   const [chartOfAccountId, setChartOfAccountId] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("");
   const [bankAccountId, setBankAccountId] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [status, setStatus] = useState("pendente");
-  const [valorBruto, setValorBruto] = useState(0);
-  const [desconto, setDesconto] = useState(0);
-  const [juros, setJuros] = useState(0);
-  const [competenceDate, setCompetenceDate] = useState<Date>(new Date());
-  const [dueDate, setDueDate] = useState<Date>(new Date());
-  const [paymentDate, setPaymentDate] = useState<Date | undefined>();
   const [barcode, setBarcode] = useState("");
+
   const [isRecurring, setIsRecurring] = useState(false);
-  const [repetitionQuantity, setRepetitionQuantity] = useState(2);
-  const [repetitionType, setRepetitionType] = useState("mensal");
+  const [repetitionQuantity, setRepetitionQuantity] = useState(1);
+  const [repetitionType, setRepetitionType] = useState<"diario" | "semanal" | "mensal" | "anual">("mensal");
+
   const [saving, setSaving] = useState(false);
   const [showAddClient, setShowAddClient] = useState(false);
 
-  const valorTotal = valorBruto - desconto + juros;
+  const valorTotal = useMemo(() => valorBruto - desconto + juros, [valorBruto, desconto, juros]);
 
-  useEffect(() => {
-    if (editingRevenue) {
-      setEntityType("Cliente");
-      setClientId(editingRevenue.clientId || "");
-      setDescription(editingRevenue.description || "");
-      setCostCenterId(editingRevenue.costCenterId || "");
-      setChartOfAccountId(editingRevenue.chartOfAccountId || "");
-      setPaymentMethod(editingRevenue.paymentMethod || "");
-      setBankAccountId(editingRevenue.bankAccountId || "");
-      setStatus(editingRevenue.status || "pendente");
-      setValorBruto(editingRevenue.valorBruto || 0);
-      setDesconto(editingRevenue.desconto || 0);
-      setJuros(editingRevenue.juros || 0);
-      setCompetenceDate(editingRevenue.competence ? new Date(editingRevenue.competence) : new Date());
-      setDueDate(editingRevenue.dueDate ? new Date(editingRevenue.dueDate) : new Date());
-      setPaymentDate(editingRevenue.paymentDate ? new Date(editingRevenue.paymentDate) : undefined);
-      setBarcode(editingRevenue.barcode || "");
-    } else {
-      resetForm();
+  const entityList = useMemo(() => {
+    let list: any[] = [];
+
+    switch (entityType) {
+      case "cliente":
+        list = [...clients];
+        break;
+      case "fornecedor":
+        list = [...suppliers];
+        break;
+      case "colaborador":
+        list = [...collaborators];
+        break;
+      default:
+        list = [];
     }
-  }, [editingRevenue, open]);
+
+    return list.sort((a, b) =>
+      String(a.name || a.razaoSocial || "").localeCompare(String(b.name || b.razaoSocial || "")),
+    );
+  }, [entityType, clients, suppliers, collaborators]);
+
+  const sortedCostCenters = useMemo(
+    () => [...costCenters].sort((a: any, b: any) => String(a.name).localeCompare(String(b.name))),
+    [costCenters],
+  );
+
+  const sortedChartOfAccounts = useMemo(
+    () =>
+      [...chartOfAccounts]
+        .filter((account: any) => account.type === "receita")
+        .sort((a: any, b: any) => String(a.name).localeCompare(String(b.name))),
+    [chartOfAccounts],
+  );
+
+  const sortedBankAccounts = useMemo(
+    () => [...bankAccounts].sort((a: any, b: any) => String(a.name).localeCompare(String(b.name))),
+    [bankAccounts],
+  );
 
   const resetForm = () => {
-    setEntityType("Cliente");
-    setClientId("");
+    setEntityType("cliente");
+    setEntityId("");
     setDescription("");
-    setCostCenterId("");
-    setChartOfAccountId("");
-    setPaymentMethod("");
-    setBankAccountId("");
-    setStatus("pendente");
     setValorBruto(0);
     setDesconto(0);
     setJuros(0);
     setCompetenceDate(new Date());
     setDueDate(new Date());
     setPaymentDate(undefined);
+    setCostCenterId("");
+    setChartOfAccountId("");
+    setBankAccountId("");
+    setPaymentMethod("");
+    setStatus("pendente");
     setBarcode("");
     setIsRecurring(false);
-    setRepetitionQuantity(2);
+    setRepetitionQuantity(1);
     setRepetitionType("mensal");
   };
 
+  useEffect(() => {
+    if (!open) return;
+
+    if (revenue) {
+      setEntityType(revenue.entityType || "cliente");
+      setEntityId(revenue.entityId || revenue.clientId || "");
+      setDescription(revenue.description || "");
+      setValorBruto(revenue.valorBruto || revenue.valorTotal || 0);
+      setDesconto(revenue.desconto || 0);
+      setJuros(revenue.juros || 0);
+      setCompetenceDate(
+        revenue.competenceDate
+          ? new Date(revenue.competenceDate)
+          : revenue.competence
+            ? new Date(revenue.competence)
+            : undefined,
+      );
+      setDueDate(revenue.dueDate ? new Date(revenue.dueDate) : undefined);
+      setPaymentDate(revenue.paymentDate ? new Date(revenue.paymentDate) : undefined);
+      setCostCenterId(revenue.costCenterId || "");
+      setChartOfAccountId(revenue.chartOfAccountId || "");
+      setBankAccountId(revenue.bankAccountId || "");
+      setPaymentMethod(revenue.paymentMethod || "");
+      setStatus(String(revenue.status || "pendente").toLowerCase());
+      setBarcode(revenue.barcode || "");
+      setIsRecurring(!!revenue.isRecurring);
+    } else {
+      resetForm();
+    }
+  }, [revenue, open]);
+
+  useEffect(() => {
+    if (status !== "recebido" && !viewOnly) {
+      setPaymentDate(undefined);
+    }
+  }, [status, viewOnly]);
+
+  const handleDateInputChange = (setter: (date: Date | undefined) => void, value: string) => {
+    const parsedDate = parse(value, "dd/MM/yyyy", new Date());
+    if (!Number.isNaN(parsedDate.getTime())) {
+      setter(parsedDate);
+    } else if (value === "") {
+      setter(undefined);
+    }
+  };
+
   const handleSave = async () => {
+    if (!dueDate || !competenceDate || valorTotal <= 0) {
+      toast.error("Preencha os campos obrigatórios.");
+      return;
+    }
+
     setSaving(true);
+
     try {
-      const client = clients.find((c: any) => c.id === clientId);
+      const selectedClient =
+        entityType === "cliente" ? clients.find((client: any) => client.id === entityId) : undefined;
+
       const data: any = {
-        clientId,
-        clientName: client?.razaoSocial || client?.nomeFantasia || "",
+        entityType,
+        entityId: entityId || null,
+        clientId: entityType === "cliente" ? entityId || null : null,
+        clientName: entityType === "cliente" ? selectedClient?.razaoSocial || selectedClient?.name || "" : "",
         description,
-        costCenterId,
-        chartOfAccountId,
-        paymentMethod,
-        bankAccountId,
-        status,
         valorBruto,
         desconto,
         juros,
         valorTotal,
-        competence: Timestamp.fromDate(competenceDate),
-        dueDate: Timestamp.fromDate(dueDate),
+        competenceDate,
+        dueDate,
+        paymentDate: paymentDate || null,
+        costCenterId,
+        chartOfAccountId,
+        bankAccountId,
+        paymentMethod,
+        status,
         barcode,
+        isRecurring,
+        repetitionType,
+        repetitionQuantity,
       };
-      if (paymentDate) data.paymentDate = Timestamp.fromDate(paymentDate);
 
-      if (editingRevenue) {
-        await updateRevenue({ ...data, id: editingRevenue.id });
+      if (revenue) {
+        await updateRevenue({ id: revenue.id, ...data });
         toast.success("Receita atualizada!");
       } else {
-        await addRevenue({ ...data, isRecurring, repetitionQuantity, repetitionType });
+        await addRevenue(data);
         toast.success("Receita adicionada!");
       }
+
       onOpenChange(false);
       resetForm();
     } catch (err: any) {
-      toast.error(err.message || "Erro ao salvar receita.");
+      toast.error(err?.message || "Erro ao salvar receita.");
     } finally {
       setSaving(false);
     }
   };
 
+  const dialogTitle = viewOnly ? "Visualizar Receita" : revenue ? "Editar Receita" : "Adicionar Nova Receita";
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingRevenue ? "Editar Receita" : "Adicionar Nova Receita"}</DialogTitle>
-            <DialogDescription>Preencha os dados da conta a receber.</DialogDescription>
+            <DialogTitle>{dialogTitle}</DialogTitle>
+            <DialogDescription>
+              {viewOnly ? "Detalhes da conta a receber." : "Preencha os dados da conta a receber."}
+            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Entity + Client */}
-            <div className="grid grid-cols-[1fr_1fr_auto] gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-3">
               <div className="space-y-1">
                 <Label>Entidade</Label>
-                <Select value={entityType} onValueChange={setEntityType}>
+                <Select
+                  value={entityType}
+                  onValueChange={(value) => {
+                    setEntityType(value as any);
+                    setEntityId("");
+                  }}
+                  disabled={viewOnly}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Cliente">Cliente</SelectItem>
+                    <SelectItem value="cliente">Cliente</SelectItem>
+                    <SelectItem value="colaborador">Colaborador</SelectItem>
+                    <SelectItem value="fornecedor">Fornecedor</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+
               <div className="space-y-1">
-                <Label>Cliente</Label>
-                <Select value={clientId} onValueChange={setClientId}>
+                <Label className="capitalize">{entityType || "Entidade"}</Label>
+                <Select value={entityId} onValueChange={setEntityId} disabled={!entityType || viewOnly}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
-                    {clients.map((c: any) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.razaoSocial || c.nomeFantasia}
+                    {entityList.map((entity: any) => (
+                      <SelectItem key={entity.id} value={entity.id}>
+                        {entity.name || entity.razaoSocial}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+
               <div className="flex items-end">
-                <Button variant="outline" size="icon" onClick={() => setShowAddClient(true)}>
-                  <Plus className="h-4 w-4" />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setShowAddClient(true)}
+                  disabled={viewOnly || entityType !== "cliente"}
+                >
+                  <PlusCircle className="h-4 w-4" />
                 </Button>
               </div>
             </div>
 
-            {/* Description */}
             <div className="space-y-1">
               <Label>Informações complementares</Label>
               <Textarea
@@ -188,203 +295,297 @@ export const AddRevenueDialog = ({ open, onOpenChange, editingRevenue }: Props) 
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={2}
+                disabled={viewOnly}
               />
             </div>
 
-            {/* Cost Center, Chart of Accounts, Payment Method */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div className="space-y-1">
                 <Label>Centro de Custo</Label>
-                <Select value={costCenterId} onValueChange={setCostCenterId}>
+                <Select value={costCenterId} onValueChange={setCostCenterId} disabled={viewOnly}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
-                    {costCenters.map((cc: any) => (
-                      <SelectItem key={cc.id} value={cc.id}>
-                        {cc.name}
+                    {sortedCostCenters.map((costCenter: any) => (
+                      <SelectItem key={costCenter.id} value={costCenter.id}>
+                        {costCenter.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+
               <div className="space-y-1">
                 <Label>Plano de Contas</Label>
-                <Select value={chartOfAccountId} onValueChange={setChartOfAccountId}>
+                <Select value={chartOfAccountId} onValueChange={setChartOfAccountId} disabled={viewOnly}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
-                    {chartOfAccounts.map((ca: any) => (
-                      <SelectItem key={ca.id} value={ca.id}>
-                        {ca.name}
+                    {sortedChartOfAccounts.map((account: any) => (
+                      <SelectItem key={account.id} value={account.id}>
+                        {account.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+
               <div className="space-y-1">
                 <Label>Forma de Pagamento</Label>
-                <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                <Select value={paymentMethod} onValueChange={setPaymentMethod} disabled={viewOnly}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
-                    {paymentMethods.map((m) => (
-                      <SelectItem key={m} value={m}>
-                        {m}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="boleto">Boleto</SelectItem>
+                    <SelectItem value="cartao_credito">Cartão de Crédito</SelectItem>
+                    <SelectItem value="pix">PIX</SelectItem>
+                    <SelectItem value="transferencia">Transferência</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            {/* Bank Account + Status */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label>Conta Bancária</Label>
-                <Select value={bankAccountId} onValueChange={setBankAccountId}>
+                <Select value={bankAccountId} onValueChange={setBankAccountId} disabled={viewOnly}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
-                    {bankAccounts.map((ba: any) => (
-                      <SelectItem key={ba.id} value={ba.id}>
-                        {ba.name}
+                    {sortedBankAccounts.map((account: any) => (
+                      <SelectItem key={account.id} value={account.id}>
+                        {account.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+
               <div className="space-y-1">
                 <Label>Status</Label>
-                <Select value={status} onValueChange={setStatus}>
+                <Select value={status} onValueChange={setStatus} disabled={viewOnly}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="atrasado">Atrasado</SelectItem>
+                    <SelectItem value="cancelado">Cancelado</SelectItem>
                     <SelectItem value="pendente">Pendente</SelectItem>
                     <SelectItem value="recebido">Recebido</SelectItem>
-                    <SelectItem value="vencido">Vencido</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            {/* Values */}
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div className="space-y-1">
                 <Label>Valor Bruto (R$)</Label>
-                <Input type="number" value={valorBruto} onChange={(e) => setValorBruto(Number(e.target.value))} />
+                <Input
+                  type="number"
+                  value={valorBruto}
+                  onChange={(e) => setValorBruto(Number(e.target.value))}
+                  disabled={viewOnly}
+                />
               </div>
+
               <div className="space-y-1">
                 <Label>Desconto (R$)</Label>
-                <Input type="number" value={desconto} onChange={(e) => setDesconto(Number(e.target.value))} />
+                <Input
+                  type="number"
+                  value={desconto}
+                  onChange={(e) => setDesconto(Number(e.target.value))}
+                  disabled={viewOnly}
+                />
               </div>
+
               <div className="space-y-1">
                 <Label>Juros (R$)</Label>
-                <Input type="number" value={juros} onChange={(e) => setJuros(Number(e.target.value))} />
+                <Input
+                  type="number"
+                  value={juros}
+                  onChange={(e) => setJuros(Number(e.target.value))}
+                  disabled={viewOnly}
+                />
               </div>
+
               <div className="space-y-1">
                 <Label>Valor Total (R$)</Label>
-                <div className="h-10 flex items-center px-3 rounded-md bg-muted text-sm font-medium">
-                  {formatCurrency(valorTotal)}
-                </div>
+                <Input value={formatCurrency(valorTotal)} disabled />
               </div>
             </div>
 
-            {/* Dates */}
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { label: "Data de Competência", value: competenceDate, onChange: setCompetenceDate },
-                { label: "Data de Vencimento", value: dueDate, onChange: setDueDate },
-              ].map(({ label, value, onChange }) => (
-                <div key={label} className="space-y-1">
-                  <Label>{label}</Label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="space-y-1">
+                <Label>Data de Competência</Label>
+                <div className="relative">
+                  <Input
+                    type="text"
+                    placeholder="dd/mm/aaaa"
+                    value={competenceDate ? format(competenceDate, "dd/MM/yyyy") : ""}
+                    onChange={(e) => handleDateInputChange(setCompetenceDate, e.target.value)}
+                    disabled={viewOnly}
+                    className="pr-8"
+                  />
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left font-normal">
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {format(value, "dd/MM/yyyy")}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                        disabled={viewOnly}
+                      >
+                        <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="single" selected={value} onSelect={(d) => d && onChange(d)} locale={ptBR} />
+                      <Calendar
+                        mode="single"
+                        selected={competenceDate}
+                        onSelect={setCompetenceDate}
+                        initialFocus
+                        locale={ptBR}
+                      />
                     </PopoverContent>
                   </Popover>
                 </div>
-              ))}
+              </div>
+
+              <div className="space-y-1">
+                <Label>Data de Vencimento</Label>
+                <div className="relative">
+                  <Input
+                    type="text"
+                    placeholder="dd/mm/aaaa"
+                    value={dueDate ? format(dueDate, "dd/MM/yyyy") : ""}
+                    onChange={(e) => handleDateInputChange(setDueDate, e.target.value)}
+                    disabled={viewOnly || (isRecurring && !!revenue)}
+                    className="pr-8"
+                  />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                        disabled={viewOnly || (isRecurring && !!revenue)}
+                      >
+                        <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={dueDate} onSelect={setDueDate} initialFocus locale={ptBR} />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+
               <div className="space-y-1">
                 <Label>Data de Pagamento</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-start text-left font-normal">
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {paymentDate ? format(paymentDate, "dd/MM/yyyy") : "dd/mm/aaaa"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={paymentDate} onSelect={setPaymentDate} locale={ptBR} />
-                  </PopoverContent>
-                </Popover>
+                <div className="relative">
+                  <Input
+                    type="text"
+                    placeholder="dd/mm/aaaa"
+                    value={paymentDate ? format(paymentDate, "dd/MM/yyyy") : ""}
+                    onChange={(e) => handleDateInputChange(setPaymentDate, e.target.value)}
+                    disabled={viewOnly || status !== "recebido"}
+                    className="pr-8"
+                  />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                        disabled={viewOnly || status !== "recebido"}
+                      >
+                        <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={paymentDate}
+                        onSelect={setPaymentDate}
+                        initialFocus
+                        locale={ptBR}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
             </div>
 
-            {/* Barcode */}
             <div className="space-y-1">
               <Label>Código de Barras (Opcional)</Label>
               <Input
                 placeholder="Insira o código de barras do boleto"
                 value={barcode}
                 onChange={(e) => setBarcode(e.target.value)}
+                disabled={viewOnly}
               />
             </div>
 
-            {/* Recurring toggle */}
-            {!editingRevenue && (
-              <div className="flex items-center justify-between rounded-lg border border-border p-3">
-                <Label>Lançamento Recorrente/Parcelado</Label>
-                <Switch checked={isRecurring} onCheckedChange={setIsRecurring} />
+            <div className="p-4 border rounded-lg space-y-4">
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-semibold">Lançamento Recorrente/Parcelado</Label>
+                <Switch checked={isRecurring} onCheckedChange={setIsRecurring} disabled={viewOnly || !!revenue} />
               </div>
-            )}
 
-            {isRecurring && !editingRevenue && (
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label>Quantidade</Label>
-                  <Input
-                    type="number"
-                    min={2}
-                    value={repetitionQuantity}
-                    onChange={(e) => setRepetitionQuantity(Number(e.target.value))}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label>Frequência</Label>
-                  <Select value={repetitionType} onValueChange={setRepetitionType}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="diario">Diário</SelectItem>
-                      <SelectItem value="semanal">Semanal</SelectItem>
-                      <SelectItem value="mensal">Mensal</SelectItem>
-                      <SelectItem value="anual">Anual</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            )}
+              {isRecurring && !revenue && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-4 border-t">
+                  <div className="space-y-1">
+                    <Label>Repetição</Label>
+                    <Select
+                      value={repetitionType}
+                      onValueChange={(value) => setRepetitionType(value as any)}
+                      disabled={viewOnly}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="diario">Diário</SelectItem>
+                        <SelectItem value="semanal">Semanal</SelectItem>
+                        <SelectItem value="mensal">Mensal</SelectItem>
+                        <SelectItem value="anual">Anual</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-            <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={handleSave} disabled={saving}>
-                {saving ? "Salvando..." : "Salvar"}
-              </Button>
+                  <div className="space-y-1">
+                    <Label>Quantidade</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={repetitionQuantity}
+                      onChange={(e) => setRepetitionQuantity(Number(e.target.value))}
+                      disabled={viewOnly}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
+
+            <DialogFooter>
+              {viewOnly ? (
+                <Button variant="outline" onClick={() => onOpenChange(false)}>
+                  Fechar
+                </Button>
+              ) : (
+                <>
+                  <Button variant="outline" onClick={() => onOpenChange(false)}>
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleSave} disabled={saving}>
+                    {saving ? "Salvando..." : "Salvar"}
+                  </Button>
+                </>
+              )}
+            </DialogFooter>
           </div>
         </DialogContent>
       </Dialog>
