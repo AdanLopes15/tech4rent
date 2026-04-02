@@ -1,3 +1,5 @@
+//src/pages/admin/Usuarios.tsx
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -5,7 +7,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Search, Plus, MoreHorizontal } from "lucide-react";
 import { useState } from "react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const mockUsers = [
   { id: 1, nome: "Admin Principal", email: "admin@tech4rent.com.br", perfil: "Administrador", status: "Ativo" },
@@ -17,9 +24,7 @@ const Usuarios = () => {
   const [search, setSearch] = useState("");
 
   const filtered = mockUsers.filter(
-    (u) =>
-      u.nome.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase())
+    (u) => u.nome.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -68,9 +73,7 @@ const Usuarios = () => {
                     <Badge variant="outline">{user.perfil}</Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={user.status === "Ativo" ? "default" : "secondary"}>
-                      {user.status}
-                    </Badge>
+                    <Badge variant={user.status === "Ativo" ? "default" : "secondary"}>{user.status}</Badge>
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
