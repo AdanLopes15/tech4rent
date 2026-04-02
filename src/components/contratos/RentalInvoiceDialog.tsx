@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { AddRevenueDialog } from "@/components/add-revenue-dialog";
+import { AddRevenueDialog } from "@/components/financeiro/AddRevenueDialog";
 
 interface RentalInvoiceDialogProps {
   open: boolean;
