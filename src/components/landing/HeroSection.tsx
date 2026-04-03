@@ -95,7 +95,15 @@ const HeroSection = () => {
               Solicitar Orçamento <ArrowRight className="h-4 w-4" />
             </Button>
 
-            <Button size="lg" variant="outline" onClick={() => scrollTo("equipamentos")}>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => scrollTo("equipamentos")}
+              style={{
+                borderColor: "rgba(255,255,255,0.6)",
+                color: titleColor || "#ffffff",
+              }}
+            >
               Ver Equipamentos
             </Button>
           </div>
@@ -121,7 +129,7 @@ const HeroSection = () => {
           ].map(({ icon: Icon, title, desc }) => (
             <div
               key={title}
-              className="flex items-start gap-4 rounded-xl border border-border bg-card/60 backdrop-blur-sm p-5"
+              className="flex items-start gap-4 rounded-xl border border-white/20 bg-white/10 backdrop-blur-md p-5"
             >
               <div
                 className="rounded-lg p-2.5"
