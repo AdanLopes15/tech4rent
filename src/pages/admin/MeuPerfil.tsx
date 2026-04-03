@@ -6,12 +6,21 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { User, Camera, Lock, Mail } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useStore } from "@/store";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import { db } from "@/lib/firebase";
 
+const formatPhone = (value: string) => {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length <= 2) return `(${digits}`;
+  if (digits.length <= 7) return `(${digits.slice(0, 2)})${digits.slice(2)}`;
+  return `(${digits.slice(0, 2)})${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+};
+
 const MeuPerfil = () => {
   const { user } = useAuth();
+  const { systemUsers } = useStore();
 
   const [profile, setProfile] = useState({
     nome: "",
@@ -31,24 +40,37 @@ const MeuPerfil = () => {
 
   useEffect(() => {
     if (!user) return;
-    setProfile((prev) => ({ ...prev, email: user.email || "" }));
+    
+    // Get permission/cargo from systemUsers
+    const systemUser = systemUsers.find((u: any) => u.uid === user.uid || u.email === user.email);
+    const cargoMap: Record<string, string> = {
+      admin: "Administrador",
+      colaborador: "Colaborador",
+      financeiro: "Financeiro",
+      operacional: "Operacional",
+    };
+    const cargo = systemUser?.permission ? (cargoMap[systemUser.permission] || systemUser.permission) : "Usuário";
+
+    setProfile((prev) => ({ ...prev, email: user.email || "", cargo }));
 
     const loadProfile = async () => {
       const snap = await getDoc(doc(db, "profiles", user.uid));
       if (snap.exists()) {
         const data = snap.data();
-        setProfile({
-          nome: data.nome || user.displayName || "",
-          email: user.email || "",
-          telefone: data.telefone || "",
-          cargo: data.cargo || "",
-        });
+        setProfile((prev) => ({
+          ...prev,
+          nome: data.nome || systemUser?.name || user.displayName || "",
+          telefone: data.telefone ? formatPhone(data.telefone) : "",
+        }));
+      } else if (systemUser?.name) {
+        setProfile((prev) => ({ ...prev, nome: systemUser.name }));
       }
     };
     loadProfile();
-  }, [user]);
+  }, [user, systemUsers]);
 
   const handleProfileChange = (field: string, value: string) => {
+    if (field === "telefone") value = formatPhone(value);
     setProfile((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -58,8 +80,7 @@ const MeuPerfil = () => {
     try {
       await setDoc(doc(db, "profiles", user.uid), {
         nome: profile.nome,
-        telefone: profile.telefone,
-        cargo: profile.cargo,
+        telefone: profile.telefone.replace(/\D/g, ""),
       }, { merge: true });
       toast.success("Perfil atualizado com sucesso!");
     } catch (error) {
@@ -124,7 +145,7 @@ const MeuPerfil = () => {
             </div>
             <div className="text-center">
               <h3 className="text-lg font-semibold text-foreground">{profile.nome || "Usuário"}</h3>
-              <p className="text-sm text-muted-foreground">{profile.cargo || "—"}</p>
+              <p className="text-sm text-muted-foreground">{profile.cargo}</p>
             </div>
           </CardContent>
         </Card>
@@ -148,10 +169,7 @@ const MeuPerfil = () => {
               </div>
               <div className="space-y-2">
                 <Label>Cargo</Label>
-                <Input
-                  value={profile.cargo}
-                  onChange={(e) => handleProfileChange("cargo", e.target.value)}
-                />
+                <Input value={profile.cargo} disabled className="opacity-60" />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
