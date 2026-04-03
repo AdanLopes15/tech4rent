@@ -1,6 +1,6 @@
 //src/pages/admin/Configuracoes.tsx
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import ClausulasEditor, { defaultVendaClauses } from "@/components/admin/ClausulasEditor";
+import { useStore } from "@/store";
+
+const formatPhone = (value: string) => {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length <= 2) return `(${digits}`;
+  if (digits.length <= 7) return `(${digits.slice(0, 2)})${digits.slice(2)}`;
+  return `(${digits.slice(0, 2)})${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+};
 
 const Configuracoes = () => {
+  const { companySettings, updateCompanySettings } = useStore();
+
   const [companyData, setCompanyData] = useState({
     razaoSocial: "",
     nomeFantasia: "",
@@ -31,12 +41,40 @@ const Configuracoes = () => {
 
   const [systemLogo, setSystemLogo] = useState<string | null>(null);
   const [siteLogo, setSiteLogo] = useState<string | null>(null);
+  const [systemLogoFile, setSystemLogoFile] = useState<File | null>(null);
+  const [siteLogoFile, setSiteLogoFile] = useState<File | null>(null);
   const systemLogoRef = useRef<HTMLInputElement>(null);
   const siteLogoRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (companySettings) {
+      setCompanyData({
+        razaoSocial: companySettings.name || "",
+        nomeFantasia: companySettings.fantasyName || "",
+        cnpj: companySettings.cnpj || "",
+        telefone: companySettings.phone || "",
+        email: companySettings.email || "",
+        cep: companySettings.address?.cep || "",
+        rua: companySettings.address?.logradouro || "",
+        numero: companySettings.address?.numero || "",
+        complemento: companySettings.address?.complemento || "",
+        bairro: companySettings.address?.bairro || "",
+        cidade: companySettings.address?.localidade || "",
+        estado: companySettings.address?.uf || "",
+        instagram: companySettings.instagramUrl || "",
+        youtube: companySettings.youtubeUrl || "",
+        linkedin: companySettings.linkedinUrl || "",
+      });
+      if (companySettings.logoUrl) setSystemLogo(companySettings.logoUrl);
+      if (companySettings.siteLogoUrl) setSiteLogo(companySettings.siteLogoUrl);
+    }
+  }, [companySettings]);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>, type: "system" | "site") => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (type === "system") setSystemLogoFile(file);
+    else setSiteLogoFile(file);
     const reader = new FileReader();
     reader.onloadend = () => {
       const result = reader.result as string;
@@ -47,6 +85,7 @@ const Configuracoes = () => {
   };
 
   const handleCompanyChange = (field: string, value: string) => {
+    if (field === "telefone") value = formatPhone(value);
     setCompanyData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -70,8 +109,43 @@ const Configuracoes = () => {
     }
   };
 
-  const handleSave = () => {
-    toast.success("Alterações salvas com sucesso!");
+  const handleSave = async () => {
+    try {
+      const settings = {
+        ...companySettings!,
+        name: companyData.razaoSocial,
+        fantasyName: companyData.nomeFantasia,
+        cnpj: companyData.cnpj,
+        phone: companyData.telefone,
+        email: companyData.email,
+        instagramUrl: companyData.instagram,
+        youtubeUrl: companyData.youtube,
+        linkedinUrl: companyData.linkedin,
+        address: {
+          cep: companyData.cep,
+          logradouro: companyData.rua,
+          numero: companyData.numero,
+          complemento: companyData.complemento,
+          bairro: companyData.bairro,
+          localidade: companyData.cidade,
+          uf: companyData.estado,
+        },
+      };
+
+      await updateCompanySettings(
+        settings,
+        systemLogoFile,
+        siteLogoFile,
+        companySettings!.siteContent,
+        {},
+        companySettings!.styleSettings,
+      );
+
+      toast.success("Alterações salvas com sucesso!");
+    } catch (error) {
+      console.error("Erro ao salvar:", error);
+      toast.error("Erro ao salvar as alterações.");
+    }
   };
 
   return (
