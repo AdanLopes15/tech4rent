@@ -568,18 +568,10 @@ const Configuracoes = () => {
                     defaultValue="Com anos de experiência no mercado, somos especialistas em fornecer os melhores equipamentos para construção civil e indústrias."
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>Imagem de Fundo (Sobre)</Label>
-                  <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">
-                      Img
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Escolher arquivo
-                    </Button>
-                    <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
-                  </div>
-                </div>
+                <ImageUploadField
+                  label="Imagem de Fundo (Sobre)"
+                  onChange={(url) => console.log("about bg:", url)}
+                />
               </div>
 
               {/* Seção Contato */}
