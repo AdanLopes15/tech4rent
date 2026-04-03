@@ -6,8 +6,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useStore } from "@/store";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { Bell, Moon, Sun, User, Settings, LogOut } from "lucide-react";
+import { Bell, Moon, Sun, User, Settings, LogOut, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const formatTimeAgo = (date: Date) => {
   const now = new Date();
@@ -21,7 +22,7 @@ const formatTimeAgo = (date: Date) => {
   return `${diffD}d atrás`;
 };
 
-const getNotificationLink = (text: string): string => {
+const getNotificationLink = (text: string, entityId?: string): string => {
   const lower = text.toLowerCase();
   if (lower.includes("orçamento")) return "/admin/orcamentos";
   if (lower.includes("contrato")) return "/admin/contratos";
@@ -42,7 +43,7 @@ interface AdminHeaderProps {
 const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const { systemUsers } = useStore();
+  const { systemUsers, deleteNotification, clearAllNotifications } = useStore();
   const [displayName, setDisplayName] = useState("Admin");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -82,25 +83,55 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
     return link;
   };
 
-  const notifications = storeNotifications.length > 0
-    ? storeNotifications.map((n: any) => {
-        const rawLink = n.link || getNotificationLink(n.text || n.message || "");
-        return {
-          id: n.id,
-          text: n.text || n.message || "",
-          time: n.createdAt?.toDate
-            ? formatTimeAgo(n.createdAt.toDate())
-            : n.createdAt
-              ? formatTimeAgo(new Date(n.createdAt))
-              : "",
-          link: ensureAdminPrefix(rawLink),
-        };
-      })
-    : [
-        { id: "1", text: "Novo orçamento recebido do site", time: "5 min atrás", link: "/admin/orcamentos" },
-        { id: "2", text: "Contrato CT-2024-003 vence amanhã", time: "1h atrás", link: "/admin/contratos" },
-        { id: "3", text: "Pagamento recebido - Empresa Alpha", time: "3h atrás", link: "/admin/financeiro/receber" },
-      ];
+  const notifications = storeNotifications.map((n: any) => {
+    const rawLink = n.link || getNotificationLink(n.text || n.message || "", n.entityId);
+    return {
+      id: n.id,
+      text: n.text || n.message || "",
+      entityId: n.entityId || null,
+      type: n.type || null,
+      time: n.createdAt?.toDate
+        ? formatTimeAgo(n.createdAt.toDate())
+        : n.createdAt
+          ? formatTimeAgo(new Date(n.createdAt))
+          : "",
+      link: ensureAdminPrefix(rawLink),
+    };
+  });
+
+  const handleNotificationClick = async (notification: typeof notifications[0]) => {
+    try {
+      await deleteNotification(notification.id);
+    } catch (e) {
+      console.error("Error deleting notification", e);
+    }
+    setNotifOpen(false);
+    
+    // Navigate to specific entity if available
+    if (notification.entityId && notification.type) {
+      const typeToRoute: Record<string, string> = {
+        new_quote: "/admin/orcamentos",
+        new_contract: "/admin/contratos",
+        new_sale: "/admin/vendas",
+        payment_received: "/admin/financeiro/receber",
+      };
+      const basePath = typeToRoute[notification.type] || notification.link;
+      // Navigate with state so the target page can highlight/open the entity
+      navigate(basePath, { state: { highlightId: notification.entityId } });
+    } else {
+      navigate(notification.link);
+    }
+  };
+
+  const handleClearAll = async () => {
+    try {
+      await clearAllNotifications();
+      toast.success("Notificações limpas");
+    } catch (e) {
+      console.error("Error clearing notifications", e);
+      toast.error("Erro ao limpar notificações");
+    }
+  };
 
   return (
     <header className="h-14 border-b border-border bg-card flex items-center justify-end px-6 gap-2">
@@ -114,29 +145,44 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
           className="relative p-2 rounded-lg hover:bg-muted transition-colors"
         >
           <Bell className="h-5 w-5 text-muted-foreground" />
-          <span className="absolute -top-1 -right-1 min-w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[11px] font-bold flex items-center justify-center px-1">
-            {notifications.length}
-          </span>
+          {notifications.length > 0 && (
+            <span className="absolute -top-1 -right-1 min-w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[11px] font-bold flex items-center justify-center px-1">
+              {notifications.length}
+            </span>
+          )}
         </button>
         {notifOpen && (
           <div className="absolute right-0 top-12 w-80 rounded-lg border border-border bg-card shadow-xl z-50">
-            <div className="p-3 border-b border-border">
+            <div className="p-3 border-b border-border flex items-center justify-between">
               <span className="text-sm font-semibold text-foreground">Notificações</span>
+              {notifications.length > 0 && (
+                <button
+                  onClick={handleClearAll}
+                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors"
+                  title="Limpar todas"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Limpar
+                </button>
+              )}
             </div>
             <div className="max-h-64 overflow-y-auto">
-              {notifications.map((n) => (
-                <div
-                  key={n.id}
-                  onClick={() => {
-                    setNotifOpen(false);
-                    navigate(n.link);
-                  }}
-                  className="px-3 py-2.5 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-0"
-                >
-                  <p className="text-sm text-foreground">{n.text}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{n.time}</p>
+              {notifications.length === 0 ? (
+                <div className="px-3 py-6 text-center text-sm text-muted-foreground">
+                  Nenhuma notificação
                 </div>
-              ))}
+              ) : (
+                notifications.map((n) => (
+                  <div
+                    key={n.id}
+                    onClick={() => handleNotificationClick(n)}
+                    className="px-3 py-2.5 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-0"
+                  >
+                    <p className="text-sm text-foreground">{n.text}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{n.time}</p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}

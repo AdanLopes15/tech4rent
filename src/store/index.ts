@@ -231,6 +231,7 @@ type Actions = {
   updateBankAccount: (account: any) => Promise<void>;
   deleteBankAccount: (accountId: string) => Promise<void>;
   deleteNotification: (notificationId: string) => Promise<void>;
+  clearAllNotifications: () => Promise<void>;
   updateCompanySettings: (
     settings: CompanySettings,
     logoFile: File | null,
@@ -903,7 +904,8 @@ const useStore = create<State & Actions>((set, get) => {
       await setDoc(notificationRef, {
         message: `Novo orçamento solicitado por ${quoteData.clientName}.`,
         type: "new_quote",
-        link: "/orcamentos",
+        entityId: newId,
+        link: "/admin/orcamentos",
         createdAt: serverTimestamp(),
         read: false,
       });
@@ -1810,6 +1812,16 @@ const useStore = create<State & Actions>((set, get) => {
       set((state) => ({
         notifications: state.notifications.filter((n) => n.id !== notificationId),
       }));
+    },
+
+    clearAllNotifications: async () => {
+      const { notifications } = get();
+      const batch = writeBatch(db);
+      notifications.forEach((n) => {
+        batch.delete(doc(db, "notifications", n.id));
+      });
+      await batch.commit();
+      set({ notifications: [] });
     },
 
     updateCompanySettings: async (settings, logoFile, siteLogoFile, siteContent, siteFiles, styleSettings) => {
