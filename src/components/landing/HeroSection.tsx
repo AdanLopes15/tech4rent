@@ -95,7 +95,15 @@ const HeroSection = () => {
               Solicitar Orçamento <ArrowRight className="h-4 w-4" />
             </Button>
 
-            <Button size="lg" variant="outline" onClick={() => scrollTo("equipamentos")}>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => scrollTo("equipamentos")}
+              style={{
+                borderColor: "rgba(255,255,255,0.6)",
+                color: titleColor || "#ffffff",
+              }}
+            >
               Ver Equipamentos
             </Button>
           </div>
