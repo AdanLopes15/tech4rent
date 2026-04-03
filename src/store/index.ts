@@ -904,7 +904,8 @@ const useStore = create<State & Actions>((set, get) => {
       await setDoc(notificationRef, {
         message: `Novo orçamento solicitado por ${quoteData.clientName}.`,
         type: "new_quote",
-        link: "/orcamentos",
+        entityId: newId,
+        link: "/admin/orcamentos",
         createdAt: serverTimestamp(),
         read: false,
       });
