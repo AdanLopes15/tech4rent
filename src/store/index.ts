@@ -231,6 +231,7 @@ type Actions = {
   updateBankAccount: (account: any) => Promise<void>;
   deleteBankAccount: (accountId: string) => Promise<void>;
   deleteNotification: (notificationId: string) => Promise<void>;
+  clearAllNotifications: () => Promise<void>;
   updateCompanySettings: (
     settings: CompanySettings,
     logoFile: File | null,
