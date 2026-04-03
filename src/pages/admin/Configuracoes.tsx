@@ -499,30 +499,14 @@ const Configuracoes = () => {
                     rows={4}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>Imagem do Produto em Destaque</Label>
-                  <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">
-                      Img
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Escolher arquivo
-                    </Button>
-                    <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Imagem de Fundo (Destaque)</Label>
-                  <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">
-                      Img
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Escolher arquivo
-                    </Button>
-                    <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
-                  </div>
-                </div>
+                <ImageUploadField
+                  label="Imagem do Produto em Destaque"
+                  onChange={(url) => console.log("featured product:", url)}
+                />
+                <ImageUploadField
+                  label="Imagem de Fundo (Destaque)"
+                  onChange={(url) => console.log("featured bg:", url)}
+                />
               </div>
 
               {/* Vitrine de Produtos */}
