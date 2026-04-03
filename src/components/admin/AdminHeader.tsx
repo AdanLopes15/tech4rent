@@ -13,6 +13,7 @@ interface AdminHeaderProps {
 
 const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const userRef = useRef<HTMLDivElement>(null);
