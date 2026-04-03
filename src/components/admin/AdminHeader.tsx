@@ -125,9 +125,16 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
               </button>
             </div>
             <div className="border-t border-border py-1">
-              <button className="flex items-center gap-3 w-full px-3 py-2 text-sm text-destructive hover:bg-muted/50 transition-colors">
+              <button
+                onClick={async () => {
+                  await signOut();
+                  navigate("/");
+                }}
+                className="flex items-center gap-3 w-full px-3 py-2 text-sm text-destructive hover:bg-muted/50 transition-colors"
+              >
                 <LogOut className="h-4 w-4" />
                 Sair
+              </button>
               </button>
             </div>
           </div>
