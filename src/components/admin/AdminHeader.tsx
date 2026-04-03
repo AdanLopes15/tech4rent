@@ -117,6 +117,10 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
               {notifications.map((n) => (
                 <div
                   key={n.id}
+                  onClick={() => {
+                    setNotifOpen(false);
+                    navigate(n.link);
+                  }}
                   className="px-3 py-2.5 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-0"
                 >
                   <p className="text-sm text-foreground">{n.text}</p>
