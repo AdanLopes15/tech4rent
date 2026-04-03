@@ -74,7 +74,7 @@ const Footer = () => {
               </li>
               <li>
                 <a href="/login" className="hover:opacity-100 transition-opacity">
-                  Área do Cliente
+                  Área Restrita
                 </a>
               </li>
             </ul>

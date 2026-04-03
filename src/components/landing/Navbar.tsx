@@ -173,7 +173,7 @@ const Navbar = () => {
 
             <Button asChild variant="outline" className="w-full">
               <Link to="/login" onClick={() => setIsOpen(false)}>
-                Área do Cliente
+                Área Restrita
               </Link>
             </Button>
           </div>
