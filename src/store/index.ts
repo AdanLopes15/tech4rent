@@ -63,6 +63,8 @@ export type SiteContent = {
     backgroundImageUrl: string;
   };
   contact: {
+    title?: string;
+    description?: string;
     backgroundImageUrl: string;
   };
 };
