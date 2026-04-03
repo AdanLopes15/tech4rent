@@ -75,17 +75,27 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
 
   const storeNotifications = useStore((s) => s.notifications);
 
+  const ensureAdminPrefix = (link: string) => {
+    if (!link.startsWith("/admin")) {
+      return `/admin${link.startsWith("/") ? "" : "/"}${link}`;
+    }
+    return link;
+  };
+
   const notifications = storeNotifications.length > 0
-    ? storeNotifications.map((n: any) => ({
-        id: n.id,
-        text: n.text || n.message || "",
-        time: n.createdAt?.toDate
-          ? formatTimeAgo(n.createdAt.toDate())
-          : n.createdAt
-            ? formatTimeAgo(new Date(n.createdAt))
-            : "",
-        link: n.link || getNotificationLink(n.text || n.message || ""),
-      }))
+    ? storeNotifications.map((n: any) => {
+        const rawLink = n.link || getNotificationLink(n.text || n.message || "");
+        return {
+          id: n.id,
+          text: n.text || n.message || "",
+          time: n.createdAt?.toDate
+            ? formatTimeAgo(n.createdAt.toDate())
+            : n.createdAt
+              ? formatTimeAgo(new Date(n.createdAt))
+              : "",
+          link: ensureAdminPrefix(rawLink),
+        };
+      })
     : [
         { id: "1", text: "Novo orçamento recebido do site", time: "5 min atrás", link: "/admin/orcamentos" },
         { id: "2", text: "Contrato CT-2024-003 vence amanhã", time: "1h atrás", link: "/admin/contratos" },
