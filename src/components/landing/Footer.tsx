@@ -15,7 +15,7 @@ const Footer = () => {
   const shortDescription =
     aboutDescription.length > 160 ? `${aboutDescription.substring(0, 160)}...` : aboutDescription;
 
-  const address = companySettings?.address || {};
+  const address = companySettings?.address;
   const shortAddress = [address?.logradouro, address?.numero].filter(Boolean).join(", ");
 
   const fullAddress = [

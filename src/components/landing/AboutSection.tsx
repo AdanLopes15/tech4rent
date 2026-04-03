@@ -24,8 +24,8 @@ const stats = [
 const AboutSection = () => {
   const { companySettings } = useStore();
 
-  const about = companySettings?.siteContent?.about || {};
-  const sectionStyle = companySettings?.styleSettings?.sections?.about || {};
+  const about = companySettings?.siteContent?.about;
+  const sectionStyle = companySettings?.styleSettings?.sections?.about;
 
   const title = about.title || "Sobre a TECH4RENT";
   const description =
