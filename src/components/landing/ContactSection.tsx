@@ -24,10 +24,10 @@ function isValidHttpUrl(value?: string | null): boolean {
 const ContactSection = () => {
   const { companySettings } = useStore();
 
-  const contact = companySettings?.siteContent?.contact || {};
-  const sectionStyle = companySettings?.styleSettings?.sections?.contact || {};
+  const contact = companySettings?.siteContent?.contact;
+  const sectionStyle = companySettings?.styleSettings?.sections?.contact;
 
-  const address = companySettings?.address || {};
+  const address = companySettings?.address;
   const fullAddress = [
     address?.logradouro,
     address?.numero,

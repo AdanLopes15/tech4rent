@@ -18,7 +18,7 @@ function isValidHttpUrl(value?: string | null): boolean {
 const EquipmentSection = () => {
   const { companySettings, equipments } = useStore();
 
-  const sectionStyle = companySettings?.styleSettings?.sections?.productHighlight || {};
+  const sectionStyle = companySettings?.styleSettings?.sections?.productHighlight;
 
   const titleColor = sectionStyle.titleColor;
   const textColor = sectionStyle.textColor;

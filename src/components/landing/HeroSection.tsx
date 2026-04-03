@@ -18,8 +18,8 @@ function isValidHttpUrl(value?: string | null): boolean {
 const HeroSection = () => {
   const { companySettings } = useStore();
 
-  const hero = companySettings?.siteContent?.hero || {};
-  const heroStyle = companySettings?.styleSettings?.sections?.hero || {};
+  const hero = companySettings?.siteContent?.hero;
+  const heroStyle = companySettings?.styleSettings?.sections?.hero;
 
   const title = hero.title || "Locação e Venda de Equipamentos para sua Empresa";
 

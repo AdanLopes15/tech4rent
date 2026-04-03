@@ -41,8 +41,8 @@ const icons = [TrendingUp, Users, HeadphonesIcon, Truck, ShieldCheck, Settings];
 const DifferentialsSection = () => {
   const { companySettings } = useStore();
 
-  const differentiators = companySettings?.siteContent?.differentiators || {};
-  const sectionStyle = companySettings?.styleSettings?.sections?.differentiators || {};
+  const differentiators = companySettings?.siteContent?.differentiators;
+  const sectionStyle = companySettings?.styleSettings?.sections?.differentiators;
 
   const items =
     Array.isArray(differentiators?.items) && differentiators.items.length > 0 ? differentiators.items : fallbackItems;
