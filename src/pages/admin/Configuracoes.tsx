@@ -535,7 +535,8 @@ const Configuracoes = () => {
                 <h3 className="text-lg font-semibold text-foreground">Vitrine de Produtos</h3>
                 <ImageUploadField
                   label="Imagem de Fundo (Vitrine)"
-                  onChange={(url) => console.log("vitrine bg:", url)}
+                  value={companySettings?.siteContent?.productHighlight?.backgroundImageUrl}
+                  onChange={(_url, file) => setSiteFiles(prev => ({ ...prev, productHighlightBackgroundImage: file }))}
                 />
               </div>
 
