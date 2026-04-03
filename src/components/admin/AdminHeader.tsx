@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { Bell, Moon, Sun, User, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +13,7 @@ interface AdminHeaderProps {
 
 const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const userRef = useRef<HTMLDivElement>(null);
@@ -123,7 +125,13 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
               </button>
             </div>
             <div className="border-t border-border py-1">
-              <button className="flex items-center gap-3 w-full px-3 py-2 text-sm text-destructive hover:bg-muted/50 transition-colors">
+              <button
+                onClick={async () => {
+                  await signOut();
+                  navigate("/");
+                }}
+                className="flex items-center gap-3 w-full px-3 py-2 text-sm text-destructive hover:bg-muted/50 transition-colors"
+              >
                 <LogOut className="h-4 w-4" />
                 Sair
               </button>
