@@ -52,6 +52,9 @@ export type SiteContent = {
     imageUrl: string;
     backgroundImageUrl: string;
   };
+  productHighlight?: {
+    backgroundImageUrl?: string;
+  };
   differentiators: {
     title: string;
     subtitle?: string;
@@ -280,6 +283,9 @@ const initialCompanySettings: CompanySettings = {
       description:
         "A TECH4RENT oferece soluções de automação personalizadas, colaborando com fabricantes para garantir ofertas competitivas e prazos rápidos. A gestão de projetos e a supervisão técnica asseguram a qualidade. Fornecemos suporte especializado na aplicação inicial e realizamos testes completos na instalação para garantir desempenho máximo. Com a Tech4Rent, sua operação é transformada com tecnologia de ponta e suporte dedicado.",
       imageUrl: "https://placehold.co/400x400.png",
+      backgroundImageUrl: "",
+    },
+    productHighlight: {
       backgroundImageUrl: "",
     },
     differentiators: {
@@ -591,6 +597,10 @@ const useStore = create<State & Actions>((set, get) => {
               ...initialCompanySettings.siteContent.featuredProduct,
               ...(existingCompanySettings.siteContent?.featuredProduct || {}),
             },
+            productHighlight: {
+              ...initialCompanySettings.siteContent.productHighlight,
+              ...(existingCompanySettings.siteContent?.productHighlight || {}),
+            },
             differentiators: {
               ...initialCompanySettings.siteContent.differentiators,
               ...(existingCompanySettings.siteContent?.differentiators || {}),
@@ -605,18 +615,6 @@ const useStore = create<State & Actions>((set, get) => {
             contact: {
               ...initialCompanySettings.siteContent.contact,
               ...(existingCompanySettings.siteContent?.contact || {}),
-            },
-          },
-          styleSettings: {
-            ...initialCompanySettings.styleSettings,
-            ...(existingCompanySettings.styleSettings || {}),
-            typography: {
-              ...initialCompanySettings.styleSettings.typography,
-              ...(existingCompanySettings.styleSettings?.typography || {}),
-            },
-            sections: {
-              ...initialCompanySettings.styleSettings.sections,
-              ...(existingCompanySettings.styleSettings?.sections || {}),
             },
           },
         };
@@ -1837,6 +1835,7 @@ const useStore = create<State & Actions>((set, get) => {
         featuredProductBackgroundImage: "featuredProduct",
         aboutBackgroundImage: "about",
         contactBackgroundImage: "contact",
+        productHighlightBackgroundImage: "productHighlight",
       };
 
       for (const key in siteFiles) {
@@ -1846,6 +1845,10 @@ const useStore = create<State & Actions>((set, get) => {
 
           const sectionKey = fileKeys[key];
           if (sectionKey) {
+            if (!updatedSettings.siteContent[sectionKey]) {
+              (updatedSettings.siteContent as any)[sectionKey] = {};
+            }
+
             if (key === "featuredProductImage") {
               (updatedSettings.siteContent[sectionKey] as any).imageUrl = downloadURL;
             } else {
