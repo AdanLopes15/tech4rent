@@ -135,7 +135,6 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
                 <LogOut className="h-4 w-4" />
                 Sair
               </button>
-              </button>
             </div>
           </div>
         )}
