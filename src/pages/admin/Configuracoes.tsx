@@ -520,11 +520,13 @@ const Configuracoes = () => {
                 </div>
                 <ImageUploadField
                   label="Imagem do Produto em Destaque"
-                  onChange={(url) => console.log("featured product:", url)}
+                  value={companySettings?.siteContent?.featuredProduct?.imageUrl}
+                  onChange={(_url, file) => setSiteFiles(prev => ({ ...prev, featuredProductImage: file }))}
                 />
                 <ImageUploadField
                   label="Imagem de Fundo (Destaque)"
-                  onChange={(url) => console.log("featured bg:", url)}
+                  value={companySettings?.siteContent?.featuredProduct?.backgroundImageUrl}
+                  onChange={(_url, file) => setSiteFiles(prev => ({ ...prev, featuredProductBackgroundImage: file }))}
                 />
               </div>
 
