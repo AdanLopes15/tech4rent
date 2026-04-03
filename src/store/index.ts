@@ -255,7 +255,7 @@ const initialCompanySettings: CompanySettings = {
   name: "TECH4RENT LTDA.",
   fantasyName: "TECH4RENT",
   cnpj: "00.111.222/0001-33",
-  phone: "19971076928",
+  phone: "(19) 97107-6928",
   email: "vendas@tech4rent.com.br",
   logoUrl: "",
   siteLogoUrl: "",
