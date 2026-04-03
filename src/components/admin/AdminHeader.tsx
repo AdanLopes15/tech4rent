@@ -19,6 +19,7 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
   const { user, signOut } = useAuth();
   const { systemUsers } = useStore();
   const [displayName, setDisplayName] = useState("Admin");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const userRef = useRef<HTMLDivElement>(null);
@@ -27,13 +28,14 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
   useEffect(() => {
     if (!user) return;
     const systemUser = systemUsers.find((u: any) => u.uid === user.uid || u.email === user.email);
-    if (systemUser?.name) {
-      setDisplayName(systemUser.name);
-      return;
-    }
-    // Fallback to profiles collection
+    if (systemUser?.name) setDisplayName(systemUser.name);
+
     getDoc(doc(db, "profiles", user.uid)).then((snap) => {
-      if (snap.exists() && snap.data().nome) setDisplayName(snap.data().nome);
+      if (snap.exists()) {
+        const data = snap.data();
+        if (data.nome) setDisplayName(data.nome);
+        if (data.photoUrl) setAvatarUrl(data.photoUrl);
+      }
     });
   }, [user, systemUsers]);
 
