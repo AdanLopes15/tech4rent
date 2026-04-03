@@ -178,9 +178,9 @@ const AdminSidebar = () => {
     >
       <div className="flex items-center justify-between h-16 px-4 border-b border-sidebar-border">
         {!collapsed && (
-          <span className="text-lg font-bold tracking-tight">
+          <Link to="/admin" className="text-lg font-bold tracking-tight hover:opacity-80 transition-opacity">
             <span className="text-sidebar-primary">T4R</span> Admin
-          </span>
+          </Link>
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
