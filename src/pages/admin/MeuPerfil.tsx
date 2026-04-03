@@ -66,6 +66,7 @@ const MeuPerfil = () => {
           nome: data.nome || systemUser?.name || user.displayName || "",
           telefone: data.telefone ? formatPhone(data.telefone) : "",
         }));
+        if (data.photoUrl) setPhotoUrl(data.photoUrl);
       } else if (systemUser?.name) {
         setProfile((prev) => ({ ...prev, nome: systemUser.name }));
       }
