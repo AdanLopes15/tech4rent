@@ -577,15 +577,10 @@ const Configuracoes = () => {
               {/* Seção Contato */}
               <div className="space-y-4 rounded-lg border border-border p-5">
                 <h3 className="text-lg font-semibold text-foreground">Seção Contato</h3>
-                <div className="space-y-2">
-                  <Label>Imagem de Fundo (Contato)</Label>
-                  <div className="flex items-center gap-4">
-                    <Button variant="outline" size="sm">
-                      Escolher arquivo
-                    </Button>
-                    <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
-                  </div>
-                </div>
+                <ImageUploadField
+                  label="Imagem de Fundo (Contato)"
+                  onChange={(url) => console.log("contact bg:", url)}
+                />
               </div>
 
               <Button onClick={handleSave}>Salvar Conteúdo do Site</Button>
