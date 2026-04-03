@@ -1814,6 +1814,16 @@ const useStore = create<State & Actions>((set, get) => {
       }));
     },
 
+    clearAllNotifications: async () => {
+      const { notifications } = get();
+      const batch = writeBatch(db);
+      notifications.forEach((n) => {
+        batch.delete(doc(db, "notifications", n.id));
+      });
+      await batch.commit();
+      set({ notifications: [] });
+    },
+
     updateCompanySettings: async (settings, logoFile, siteLogoFile, siteContent, siteFiles, styleSettings) => {
       const uploadAndGetURL = async (file: File, path: string) => {
         const storageRef = ref(storage, path);
