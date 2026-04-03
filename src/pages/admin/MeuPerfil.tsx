@@ -161,10 +161,18 @@ const MeuPerfil = () => {
         <Card className="border-border lg:col-span-1">
           <CardContent className="p-6 flex flex-col items-center gap-4">
             <div className="relative">
-              <div className="h-28 w-28 rounded-full bg-primary/20 flex items-center justify-center border-4 border-border">
-                <User className="h-14 w-14 text-primary" />
+              <div className="h-28 w-28 rounded-full bg-primary/20 flex items-center justify-center border-4 border-border overflow-hidden">
+                {photoUrl ? (
+                  <img src={photoUrl} alt="Avatar" className="h-full w-full object-cover" />
+                ) : (
+                  <User className="h-14 w-14 text-primary" />
+                )}
               </div>
-              <button className="absolute bottom-0 right-0 h-9 w-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors">
+              <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
+              <button
+                onClick={() => photoInputRef.current?.click()}
+                className="absolute bottom-0 right-0 h-9 w-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors"
+              >
                 <Camera className="h-4 w-4" />
               </button>
             </div>
