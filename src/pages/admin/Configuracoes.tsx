@@ -47,6 +47,15 @@ const Configuracoes = () => {
   const systemLogoRef = useRef<HTMLInputElement>(null);
   const siteLogoRef = useRef<HTMLInputElement>(null);
 
+  const [siteFiles, setSiteFiles] = useState<{ [key: string]: File | null }>({
+    heroBackgroundImage: null,
+    featuredProductImage: null,
+    featuredProductBackgroundImage: null,
+    productHighlightBackgroundImage: null,
+    aboutBackgroundImage: null,
+    contactBackgroundImage: null,
+  });
+
   useEffect(() => {
     if (companySettings) {
       setCompanyData({
