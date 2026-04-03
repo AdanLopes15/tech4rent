@@ -54,6 +54,7 @@ export type SiteContent = {
   };
   differentiators: {
     title: string;
+    subtitle?: string;
     items: Differentiator[];
   };
   about: {
