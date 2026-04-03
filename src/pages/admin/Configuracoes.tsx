@@ -1,3 +1,5 @@
+//src/pages/admin/Configuracoes.tsx
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -77,17 +79,25 @@ const Configuracoes = () => {
           <Card className="border-border">
             <CardHeader>
               <CardTitle>Perfil da Empresa</CardTitle>
-              <CardDescription>Atualize as informações da sua empresa. Estes dados aparecerão nos documentos.</CardDescription>
+              <CardDescription>
+                Atualize as informações da sua empresa. Estes dados aparecerão nos documentos.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Nome da Empresa / Razão Social</Label>
-                  <Input value={companyData.razaoSocial} onChange={(e) => handleCompanyChange("razaoSocial", e.target.value)} />
+                  <Input
+                    value={companyData.razaoSocial}
+                    onChange={(e) => handleCompanyChange("razaoSocial", e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Nome Fantasia (para o sistema)</Label>
-                  <Input value={companyData.nomeFantasia} onChange={(e) => handleCompanyChange("nomeFantasia", e.target.value)} />
+                  <Input
+                    value={companyData.nomeFantasia}
+                    onChange={(e) => handleCompanyChange("nomeFantasia", e.target.value)}
+                  />
                 </div>
               </div>
 
@@ -98,13 +108,20 @@ const Configuracoes = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>Telefone</Label>
-                  <Input value={companyData.telefone} onChange={(e) => handleCompanyChange("telefone", e.target.value)} />
+                  <Input
+                    value={companyData.telefone}
+                    onChange={(e) => handleCompanyChange("telefone", e.target.value)}
+                  />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label>Email</Label>
-                <Input type="email" value={companyData.email} onChange={(e) => handleCompanyChange("email", e.target.value)} />
+                <Input
+                  type="email"
+                  value={companyData.email}
+                  onChange={(e) => handleCompanyChange("email", e.target.value)}
+                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -130,7 +147,10 @@ const Configuracoes = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>Complemento</Label>
-                  <Input value={companyData.complemento} onChange={(e) => handleCompanyChange("complemento", e.target.value)} />
+                  <Input
+                    value={companyData.complemento}
+                    onChange={(e) => handleCompanyChange("complemento", e.target.value)}
+                  />
                 </div>
               </div>
 
@@ -152,15 +172,27 @@ const Configuracoes = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label>URL do Instagram</Label>
-                  <Input placeholder="https://instagram.com/seu-usuario" value={companyData.instagram} onChange={(e) => handleCompanyChange("instagram", e.target.value)} />
+                  <Input
+                    placeholder="https://instagram.com/seu-usuario"
+                    value={companyData.instagram}
+                    onChange={(e) => handleCompanyChange("instagram", e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>URL do YouTube</Label>
-                  <Input placeholder="https://youtube.com/seu-canal" value={companyData.youtube} onChange={(e) => handleCompanyChange("youtube", e.target.value)} />
+                  <Input
+                    placeholder="https://youtube.com/seu-canal"
+                    value={companyData.youtube}
+                    onChange={(e) => handleCompanyChange("youtube", e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>URL do LinkedIn</Label>
-                  <Input placeholder="https://linkedin.com/in/seu-perfil" value={companyData.linkedin} onChange={(e) => handleCompanyChange("linkedin", e.target.value)} />
+                  <Input
+                    placeholder="https://linkedin.com/in/seu-perfil"
+                    value={companyData.linkedin}
+                    onChange={(e) => handleCompanyChange("linkedin", e.target.value)}
+                  />
                 </div>
               </div>
 
@@ -171,10 +203,14 @@ const Configuracoes = () => {
                     <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">
                       Logo
                     </div>
-                    <Button variant="outline" size="sm">Escolher arquivo</Button>
+                    <Button variant="outline" size="sm">
+                      Escolher arquivo
+                    </Button>
                     <span className="text-sm text-muted-foreground">Nenhum arquivo</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">Logo que aparecerá nos documentos e no sistema interno.</p>
+                  <p className="text-xs text-muted-foreground">
+                    Logo que aparecerá nos documentos e no sistema interno.
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label>Logotipo do Site (Público)</Label>
@@ -182,7 +218,9 @@ const Configuracoes = () => {
                     <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">
                       Logo
                     </div>
-                    <Button variant="outline" size="sm">Escolher arquivo</Button>
+                    <Button variant="outline" size="sm">
+                      Escolher arquivo
+                    </Button>
                     <span className="text-sm text-muted-foreground">Nenhum arquivo</span>
                   </div>
                   <p className="text-xs text-muted-foreground">Logo que aparecerá no cabeçalho do site público.</p>
@@ -208,8 +246,13 @@ const Configuracoes = () => {
                 <p className="text-sm text-muted-foreground">Personalize as cores de cada seção do seu site público.</p>
                 <div className="space-y-2">
                   {[
-                    "Seção Hero (Início)", "Barra de Contato", "Produto em Destaque",
-                    "Vitrine de Produtos", "Diferenciais", "Sobre Nós", "Formulário de Contato"
+                    "Seção Hero (Início)",
+                    "Barra de Contato",
+                    "Produto em Destaque",
+                    "Vitrine de Produtos",
+                    "Diferenciais",
+                    "Sobre Nós",
+                    "Formulário de Contato",
                   ].map((section) => (
                     <details key={section} className="group rounded-lg border border-border">
                       <summary className="flex items-center justify-between cursor-pointer px-4 py-3 text-sm font-medium text-foreground hover:bg-muted/50 rounded-lg">
@@ -287,13 +330,23 @@ const Configuracoes = () => {
               {/* Ordem das Seções */}
               <div className="space-y-3">
                 <h3 className="text-lg font-semibold text-foreground">Ordem das Seções do Site</h3>
-                <p className="text-sm text-muted-foreground">Arraste para reordenar as seções. Esta funcionalidade está temporariamente desativada.</p>
+                <p className="text-sm text-muted-foreground">
+                  Arraste para reordenar as seções. Esta funcionalidade está temporariamente desativada.
+                </p>
                 <div className="space-y-2 max-w-sm">
                   {[
-                    "Seção Hero (Início)", "Barra de Contato", "Produto em Destaque",
-                    "Vitrine de Produtos", "Diferenciais", "Sobre Nós", "Formulário de Contato"
+                    "Seção Hero (Início)",
+                    "Barra de Contato",
+                    "Produto em Destaque",
+                    "Vitrine de Produtos",
+                    "Diferenciais",
+                    "Sobre Nós",
+                    "Formulário de Contato",
                   ].map((section) => (
-                    <div key={section} className="flex items-center gap-2 rounded-lg bg-muted/50 border border-border px-4 py-2.5 text-sm font-medium text-foreground">
+                    <div
+                      key={section}
+                      className="flex items-center gap-2 rounded-lg bg-muted/50 border border-border px-4 py-2.5 text-sm font-medium text-foreground"
+                    >
                       <span className="text-muted-foreground">⠿</span>
                       {section}
                     </div>
@@ -323,13 +376,20 @@ const Configuracoes = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>Subtítulo</Label>
-                  <Textarea defaultValue="Qualidade, segurança e a tecnologia que você precisa para alcançar os melhores resultados." rows={3} />
+                  <Textarea
+                    defaultValue="Qualidade, segurança e a tecnologia que você precisa para alcançar os melhores resultados."
+                    rows={3}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Imagem de Fundo (Hero)</Label>
                   <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">Img</div>
-                    <Button variant="outline" size="sm">Escolher arquivo</Button>
+                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">
+                      Img
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Escolher arquivo
+                    </Button>
                     <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
                   </div>
                 </div>
@@ -348,21 +408,32 @@ const Configuracoes = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>Descrição</Label>
-                  <Textarea defaultValue="A TECH4RENT oferece soluções de automação personalizadas, colaborando com fabricantes para garantir ofertas competitivas e prazos rápidos." rows={4} />
+                  <Textarea
+                    defaultValue="A TECH4RENT oferece soluções de automação personalizadas, colaborando com fabricantes para garantir ofertas competitivas e prazos rápidos."
+                    rows={4}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Imagem do Produto em Destaque</Label>
                   <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">Img</div>
-                    <Button variant="outline" size="sm">Escolher arquivo</Button>
+                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">
+                      Img
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Escolher arquivo
+                    </Button>
                     <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label>Imagem de Fundo (Destaque)</Label>
                   <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">Img</div>
-                    <Button variant="outline" size="sm">Escolher arquivo</Button>
+                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">
+                      Img
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Escolher arquivo
+                    </Button>
                     <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
                   </div>
                 </div>
@@ -374,7 +445,9 @@ const Configuracoes = () => {
                 <div className="space-y-2">
                   <Label>Imagem de Fundo (Vitrine)</Label>
                   <div className="flex items-center gap-4">
-                    <Button variant="outline" size="sm">Escolher arquivo</Button>
+                    <Button variant="outline" size="sm">
+                      Escolher arquivo
+                    </Button>
                     <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
                   </div>
                 </div>
@@ -392,11 +465,24 @@ const Configuracoes = () => {
                     <div key={n} className="space-y-3 rounded-lg border border-border p-4">
                       <div className="space-y-2">
                         <Label>Título {n}</Label>
-                        <Input defaultValue={n === 1 ? "Qualidade Garantida" : n === 2 ? "Atendimento Especializado" : "Suporte Completo"} />
+                        <Input
+                          defaultValue={
+                            n === 1 ? "Qualidade Garantida" : n === 2 ? "Atendimento Especializado" : "Suporte Completo"
+                          }
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label>Descrição {n}</Label>
-                        <Textarea rows={3} defaultValue={n === 1 ? "Equipamentos modernos e com manutenção em dia para sua segurança." : n === 2 ? "Nossa equipe está pronta para te ajudar a escolher a melhor solução." : "Oferecemos suporte técnico durante todo o período de locação."} />
+                        <Textarea
+                          rows={3}
+                          defaultValue={
+                            n === 1
+                              ? "Equipamentos modernos e com manutenção em dia para sua segurança."
+                              : n === 2
+                                ? "Nossa equipe está pronta para te ajudar a escolher a melhor solução."
+                                : "Oferecemos suporte técnico durante todo o período de locação."
+                          }
+                        />
                       </div>
                     </div>
                   ))}
@@ -412,13 +498,20 @@ const Configuracoes = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>Descrição</Label>
-                  <Textarea rows={4} defaultValue="Com anos de experiência no mercado, somos especialistas em fornecer os melhores equipamentos para construção civil e indústrias." />
+                  <Textarea
+                    rows={4}
+                    defaultValue="Com anos de experiência no mercado, somos especialistas em fornecer os melhores equipamentos para construção civil e indústrias."
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Imagem de Fundo (Sobre)</Label>
                   <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">Img</div>
-                    <Button variant="outline" size="sm">Escolher arquivo</Button>
+                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">
+                      Img
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Escolher arquivo
+                    </Button>
                     <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
                   </div>
                 </div>
@@ -430,7 +523,9 @@ const Configuracoes = () => {
                 <div className="space-y-2">
                   <Label>Imagem de Fundo (Contato)</Label>
                   <div className="flex items-center gap-4">
-                    <Button variant="outline" size="sm">Escolher arquivo</Button>
+                    <Button variant="outline" size="sm">
+                      Escolher arquivo
+                    </Button>
                     <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
                   </div>
                 </div>
