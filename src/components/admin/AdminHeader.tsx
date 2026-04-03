@@ -9,6 +9,31 @@ import { db } from "@/lib/firebase";
 import { Bell, Moon, Sun, User, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const formatTimeAgo = (date: Date) => {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return "agora";
+  if (diffMin < 60) return `${diffMin} min atrás`;
+  const diffH = Math.floor(diffMin / 60);
+  if (diffH < 24) return `${diffH}h atrás`;
+  const diffD = Math.floor(diffH / 24);
+  return `${diffD}d atrás`;
+};
+
+const getNotificationLink = (text: string): string => {
+  const lower = text.toLowerCase();
+  if (lower.includes("orçamento")) return "/admin/orcamentos";
+  if (lower.includes("contrato")) return "/admin/contratos";
+  if (lower.includes("pagamento") || lower.includes("recebido")) return "/admin/financeiro/receber";
+  if (lower.includes("venda")) return "/admin/vendas";
+  if (lower.includes("equipamento")) return "/admin/equipamentos";
+  if (lower.includes("cliente")) return "/admin/clientes";
+  if (lower.includes("despesa") || lower.includes("pagar")) return "/admin/financeiro/pagar";
+  if (lower.includes("boleto")) return "/admin/financeiro/boletos";
+  return "/admin";
+};
+
 interface AdminHeaderProps {
   isDark: boolean;
   onToggleTheme: () => void;
@@ -48,11 +73,24 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const notifications = [
-    { id: 1, text: "Novo orçamento recebido do site", time: "5 min atrás" },
-    { id: 2, text: "Contrato CT-2024-003 vence amanhã", time: "1h atrás" },
-    { id: 3, text: "Pagamento recebido - Empresa Alpha", time: "3h atrás" },
-  ];
+  const storeNotifications = useStore((s) => s.notifications);
+
+  const notifications = storeNotifications.length > 0
+    ? storeNotifications.map((n: any) => ({
+        id: n.id,
+        text: n.text || n.message || "",
+        time: n.createdAt?.toDate
+          ? formatTimeAgo(n.createdAt.toDate())
+          : n.createdAt
+            ? formatTimeAgo(new Date(n.createdAt))
+            : "",
+        link: n.link || getNotificationLink(n.text || n.message || ""),
+      }))
+    : [
+        { id: "1", text: "Novo orçamento recebido do site", time: "5 min atrás", link: "/admin/orcamentos" },
+        { id: "2", text: "Contrato CT-2024-003 vence amanhã", time: "1h atrás", link: "/admin/contratos" },
+        { id: "3", text: "Pagamento recebido - Empresa Alpha", time: "3h atrás", link: "/admin/financeiro/receber" },
+      ];
 
   return (
     <header className="h-14 border-b border-border bg-card flex items-center justify-end px-6 gap-2">
@@ -79,6 +117,10 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
               {notifications.map((n) => (
                 <div
                   key={n.id}
+                  onClick={() => {
+                    setNotifOpen(false);
+                    navigate(n.link);
+                  }}
                   className="px-3 py-2.5 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-0"
                 >
                   <p className="text-sm text-foreground">{n.text}</p>
