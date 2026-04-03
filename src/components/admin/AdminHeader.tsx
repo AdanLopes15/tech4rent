@@ -3,6 +3,9 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useStore } from "@/store";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { Bell, Moon, Sun, User, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -13,11 +16,26 @@ interface AdminHeaderProps {
 
 const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
+  const { systemUsers } = useStore();
+  const [displayName, setDisplayName] = useState("Admin");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const userRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    const systemUser = systemUsers.find((u: any) => u.uid === user.uid || u.email === user.email);
+    if (systemUser?.name) {
+      setDisplayName(systemUser.name);
+      return;
+    }
+    // Fallback to profiles collection
+    getDoc(doc(db, "profiles", user.uid)).then((snap) => {
+      if (snap.exists() && snap.data().nome) setDisplayName(snap.data().nome);
+    });
+  }, [user, systemUsers]);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -95,7 +113,7 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
           <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
             <User className="h-4 w-4 text-primary" />
           </div>
-          <span className="text-sm font-medium text-foreground hidden sm:block">Admin</span>
+          <span className="text-sm font-medium text-foreground hidden sm:block">{displayName}</span>
         </button>
         {userMenuOpen && (
           <div className="absolute right-0 top-12 w-52 rounded-lg border border-border bg-card shadow-xl z-50">
