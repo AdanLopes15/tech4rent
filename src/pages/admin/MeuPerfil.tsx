@@ -79,13 +79,33 @@ const MeuPerfil = () => {
     setProfile((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPhotoFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setPhotoUrl(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
   const handleSaveProfile = async () => {
     if (!user) return;
     setSaving(true);
     try {
+      let uploadedPhotoUrl = photoUrl;
+
+      if (photoFile) {
+        const storageRef = ref(storage, `profiles/${user.uid}/avatar-${photoFile.name}`);
+        const snapshot = await uploadBytes(storageRef, photoFile);
+        uploadedPhotoUrl = await getDownloadURL(snapshot.ref);
+        setPhotoUrl(uploadedPhotoUrl);
+        setPhotoFile(null);
+      }
+
       await setDoc(doc(db, "profiles", user.uid), {
         nome: profile.nome,
         telefone: profile.telefone.replace(/\D/g, ""),
+        ...(uploadedPhotoUrl ? { photoUrl: uploadedPhotoUrl } : {}),
       }, { merge: true });
       toast.success("Perfil atualizado com sucesso!");
     } catch (error) {
