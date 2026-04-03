@@ -29,6 +29,23 @@ const Configuracoes = () => {
     linkedin: "",
   });
 
+  const [systemLogo, setSystemLogo] = useState<string | null>(null);
+  const [siteLogo, setSiteLogo] = useState<string | null>(null);
+  const systemLogoRef = useRef<HTMLInputElement>(null);
+  const siteLogoRef = useRef<HTMLInputElement>(null);
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>, type: "system" | "site") => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      if (type === "system") setSystemLogo(result);
+      else setSiteLogo(result);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleCompanyChange = (field: string, value: string) => {
     setCompanyData((prev) => ({ ...prev, [field]: value }));
   };
