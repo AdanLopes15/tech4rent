@@ -1,54 +1,120 @@
-import { Monitor, Printer, Server, Laptop, Smartphone, HardDrive } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+//src/components/landing/EquipmentSection.tsx
 
-const equipments = [
-  { icon: Monitor, name: "Monitores", desc: "Monitores profissionais de alta resolução", price: "A partir de R$ 150/mês", tag: "Popular" },
-  { icon: Laptop, name: "Notebooks", desc: "Notebooks corporativos de alta performance", price: "A partir de R$ 250/mês", tag: "Destaque" },
-  { icon: Printer, name: "Impressoras", desc: "Impressoras multifuncionais laser e jato de tinta", price: "A partir de R$ 200/mês", tag: null },
-  { icon: Server, name: "Servidores", desc: "Servidores rack e torre para data centers", price: "A partir de R$ 800/mês", tag: null },
-  { icon: Smartphone, name: "Tablets", desc: "Tablets para uso corporativo e eventos", price: "A partir de R$ 120/mês", tag: null },
-  { icon: HardDrive, name: "Storage", desc: "Soluções de armazenamento NAS e SAN", price: "A partir de R$ 500/mês", tag: null },
-];
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useStore } from "@/store";
+
+function isValidHttpUrl(value?: string | null): boolean {
+  if (!value) return false;
+
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
 
 const EquipmentSection = () => {
+  const { companySettings, equipments } = useStore();
+
+  const sectionStyle = companySettings?.styleSettings?.sections?.productHighlight || {};
+
+  const titleColor = sectionStyle.titleColor;
+  const textColor = sectionStyle.textColor;
+  const backgroundColor = sectionStyle.backgroundColor;
+  const accentColor = sectionStyle.accentColor;
+
+  const hasEquipments = Array.isArray(equipments) && equipments.length > 0;
+
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
-    <section id="equipamentos" className="py-20 bg-background">
+    <section
+      id="equipamentos"
+      className="py-20"
+      style={{
+        backgroundColor: backgroundColor || undefined,
+        color: textColor || undefined,
+      }}
+    >
       <div className="container">
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <h2 className="text-3xl font-bold text-foreground mb-3">Nossos Equipamentos</h2>
-          <p className="text-muted-foreground">
-            Catálogo completo de equipamentos disponíveis para locação e venda
+          <h2 className="text-3xl font-bold mb-3" style={{ color: titleColor || undefined }}>
+            Produtos Mais Procurados
+          </h2>
+          <p className="text-muted-foreground" style={{ color: textColor || undefined }}>
+            Confira alguns dos equipamentos disponíveis para locação e venda
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {equipments.map(({ icon: Icon, name, desc, price, tag }) => (
-            <Card key={name} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-border">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="rounded-xl bg-primary/10 p-3">
-                    <Icon className="h-6 w-6 text-primary" />
+        {hasEquipments ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {equipments.map((equipment: any) => {
+              const imageUrls =
+                Array.isArray(equipment?.imageUrls) &&
+                equipment.imageUrls.filter((url: string) => isValidHttpUrl(url)).length > 0
+                  ? equipment.imageUrls.filter((url: string) => isValidHttpUrl(url))
+                  : [isValidHttpUrl(equipment?.imageUrl) ? equipment.imageUrl : "https://placehold.co/600x400.png"];
+
+              const firstValidUrl = imageUrls[0] || "https://placehold.co/600x400.png";
+
+              return (
+                <Card
+                  key={equipment.id || equipment.name}
+                  className="group overflow-hidden border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-card flex flex-col"
+                >
+                  <div className="relative h-52 w-full overflow-hidden bg-muted">
+                    <img
+                      src={firstValidUrl}
+                      alt={equipment?.name || "Equipamento"}
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
                   </div>
-                  {tag && <Badge variant="secondary" className="bg-primary/10 text-primary border-0">{tag}</Badge>}
-                </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">{name}</h3>
-                <p className="text-sm text-muted-foreground mb-4">{desc}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-primary">{price}</span>
-                  <Button variant="ghost" size="sm" onClick={() => scrollTo("contato")} className="text-primary hover:text-primary">
-                    Orçar →
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+
+                  <CardContent className="p-6 flex flex-col flex-1">
+                    <h3
+                      className="text-lg font-semibold mb-2 line-clamp-2 min-h-[3.5rem]"
+                      style={{ color: titleColor || undefined }}
+                    >
+                      {equipment?.name || "Equipamento"}
+                    </h3>
+
+                    {equipment?.description && (
+                      <p className="text-sm mb-4 line-clamp-3" style={{ color: textColor || undefined }}>
+                        {equipment.description}
+                      </p>
+                    )}
+
+                    <div className="mt-auto pt-2">
+                      <Button
+                        onClick={() => scrollTo("contato")}
+                        className="w-full"
+                        style={{
+                          backgroundColor: accentColor || undefined,
+                          color: backgroundColor || undefined,
+                        }}
+                      >
+                        Solicitar Orçamento
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-border p-10 text-center bg-card">
+            <h3 className="text-xl font-semibold mb-2" style={{ color: titleColor || undefined }}>
+              Nenhum equipamento disponível no momento
+            </h3>
+            <p className="text-sm" style={{ color: textColor || undefined }}>
+              Em breve novos equipamentos aparecerão aqui.
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );
