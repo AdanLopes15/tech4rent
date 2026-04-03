@@ -47,6 +47,15 @@ const Configuracoes = () => {
   const systemLogoRef = useRef<HTMLInputElement>(null);
   const siteLogoRef = useRef<HTMLInputElement>(null);
 
+  const [siteFiles, setSiteFiles] = useState<{ [key: string]: File | null }>({
+    heroBackgroundImage: null,
+    featuredProductImage: null,
+    featuredProductBackgroundImage: null,
+    productHighlightBackgroundImage: null,
+    aboutBackgroundImage: null,
+    contactBackgroundImage: null,
+  });
+
   useEffect(() => {
     if (companySettings) {
       setCompanyData({
@@ -138,9 +147,18 @@ const Configuracoes = () => {
         systemLogoFile,
         siteLogoFile,
         companySettings!.siteContent,
-        {},
+        siteFiles,
         companySettings!.styleSettings,
       );
+
+      setSiteFiles({
+        heroBackgroundImage: null,
+        featuredProductImage: null,
+        featuredProductBackgroundImage: null,
+        productHighlightBackgroundImage: null,
+        aboutBackgroundImage: null,
+        contactBackgroundImage: null,
+      });
 
       toast.success("Alterações salvas com sucesso!");
     } catch (error) {
@@ -477,7 +495,8 @@ const Configuracoes = () => {
                 </div>
                 <ImageUploadField
                   label="Imagem de Fundo (Hero)"
-                  onChange={(url) => console.log("hero bg:", url)}
+                  value={companySettings?.siteContent?.hero?.backgroundImageUrl}
+                  onChange={(_url, file) => setSiteFiles(prev => ({ ...prev, heroBackgroundImage: file }))}
                 />
               </div>
 
@@ -501,11 +520,13 @@ const Configuracoes = () => {
                 </div>
                 <ImageUploadField
                   label="Imagem do Produto em Destaque"
-                  onChange={(url) => console.log("featured product:", url)}
+                  value={companySettings?.siteContent?.featuredProduct?.imageUrl}
+                  onChange={(_url, file) => setSiteFiles(prev => ({ ...prev, featuredProductImage: file }))}
                 />
                 <ImageUploadField
                   label="Imagem de Fundo (Destaque)"
-                  onChange={(url) => console.log("featured bg:", url)}
+                  value={companySettings?.siteContent?.featuredProduct?.backgroundImageUrl}
+                  onChange={(_url, file) => setSiteFiles(prev => ({ ...prev, featuredProductBackgroundImage: file }))}
                 />
               </div>
 
@@ -514,7 +535,8 @@ const Configuracoes = () => {
                 <h3 className="text-lg font-semibold text-foreground">Vitrine de Produtos</h3>
                 <ImageUploadField
                   label="Imagem de Fundo (Vitrine)"
-                  onChange={(url) => console.log("vitrine bg:", url)}
+                  value={companySettings?.siteContent?.productHighlight?.backgroundImageUrl}
+                  onChange={(_url, file) => setSiteFiles(prev => ({ ...prev, productHighlightBackgroundImage: file }))}
                 />
               </div>
 
@@ -570,7 +592,8 @@ const Configuracoes = () => {
                 </div>
                 <ImageUploadField
                   label="Imagem de Fundo (Sobre)"
-                  onChange={(url) => console.log("about bg:", url)}
+                  value={companySettings?.siteContent?.about?.backgroundImageUrl}
+                  onChange={(_url, file) => setSiteFiles(prev => ({ ...prev, aboutBackgroundImage: file }))}
                 />
               </div>
 
@@ -579,7 +602,8 @@ const Configuracoes = () => {
                 <h3 className="text-lg font-semibold text-foreground">Seção Contato</h3>
                 <ImageUploadField
                   label="Imagem de Fundo (Contato)"
-                  onChange={(url) => console.log("contact bg:", url)}
+                  value={companySettings?.siteContent?.contact?.backgroundImageUrl}
+                  onChange={(_url, file) => setSiteFiles(prev => ({ ...prev, contactBackgroundImage: file }))}
                 />
               </div>
 
