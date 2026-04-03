@@ -147,9 +147,18 @@ const Configuracoes = () => {
         systemLogoFile,
         siteLogoFile,
         companySettings!.siteContent,
-        {},
+        siteFiles,
         companySettings!.styleSettings,
       );
+
+      setSiteFiles({
+        heroBackgroundImage: null,
+        featuredProductImage: null,
+        featuredProductBackgroundImage: null,
+        productHighlightBackgroundImage: null,
+        aboutBackgroundImage: null,
+        contactBackgroundImage: null,
+      });
 
       toast.success("Alterações salvas com sucesso!");
     } catch (error) {
