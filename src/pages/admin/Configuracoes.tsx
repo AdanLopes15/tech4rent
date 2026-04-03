@@ -1,6 +1,6 @@
 //src/pages/admin/Configuracoes.tsx
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,23 @@ const Configuracoes = () => {
     youtube: "",
     linkedin: "",
   });
+
+  const [systemLogo, setSystemLogo] = useState<string | null>(null);
+  const [siteLogo, setSiteLogo] = useState<string | null>(null);
+  const systemLogoRef = useRef<HTMLInputElement>(null);
+  const siteLogoRef = useRef<HTMLInputElement>(null);
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>, type: "system" | "site") => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      if (type === "system") setSystemLogo(result);
+      else setSiteLogo(result);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleCompanyChange = (field: string, value: string) => {
     setCompanyData((prev) => ({ ...prev, [field]: value }));
@@ -200,13 +217,14 @@ const Configuracoes = () => {
                 <div className="space-y-2">
                   <Label>Logotipo do Sistema</Label>
                   <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">
-                      Logo
+                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground overflow-hidden">
+                      {systemLogo ? <img src={systemLogo} alt="Logo sistema" className="h-full w-full object-contain" /> : "Logo"}
                     </div>
-                    <Button variant="outline" size="sm">
+                    <input ref={systemLogoRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleLogoChange(e, "system")} />
+                    <Button variant="outline" size="sm" onClick={() => systemLogoRef.current?.click()}>
                       Escolher arquivo
                     </Button>
-                    <span className="text-sm text-muted-foreground">Nenhum arquivo</span>
+                    <span className="text-sm text-muted-foreground">{systemLogo ? "Arquivo selecionado" : "Nenhum arquivo"}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Logo que aparecerá nos documentos e no sistema interno.
@@ -215,13 +233,14 @@ const Configuracoes = () => {
                 <div className="space-y-2">
                   <Label>Logotipo do Site (Público)</Label>
                   <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">
-                      Logo
+                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground overflow-hidden">
+                      {siteLogo ? <img src={siteLogo} alt="Logo site" className="h-full w-full object-contain" /> : "Logo"}
                     </div>
-                    <Button variant="outline" size="sm">
+                    <input ref={siteLogoRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleLogoChange(e, "site")} />
+                    <Button variant="outline" size="sm" onClick={() => siteLogoRef.current?.click()}>
                       Escolher arquivo
                     </Button>
-                    <span className="text-sm text-muted-foreground">Nenhum arquivo</span>
+                    <span className="text-sm text-muted-foreground">{siteLogo ? "Arquivo selecionado" : "Nenhum arquivo"}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">Logo que aparecerá no cabeçalho do site público.</p>
                 </div>
