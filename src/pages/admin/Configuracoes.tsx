@@ -602,7 +602,8 @@ const Configuracoes = () => {
                 <h3 className="text-lg font-semibold text-foreground">Seção Contato</h3>
                 <ImageUploadField
                   label="Imagem de Fundo (Contato)"
-                  onChange={(url) => console.log("contact bg:", url)}
+                  value={companySettings?.siteContent?.contact?.backgroundImageUrl}
+                  onChange={(_url, file) => setSiteFiles(prev => ({ ...prev, contactBackgroundImage: file }))}
                 />
               </div>
 
