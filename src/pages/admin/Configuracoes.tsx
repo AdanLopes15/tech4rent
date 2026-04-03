@@ -592,7 +592,8 @@ const Configuracoes = () => {
                 </div>
                 <ImageUploadField
                   label="Imagem de Fundo (Sobre)"
-                  onChange={(url) => console.log("about bg:", url)}
+                  value={companySettings?.siteContent?.about?.backgroundImageUrl}
+                  onChange={(_url, file) => setSiteFiles(prev => ({ ...prev, aboutBackgroundImage: file }))}
                 />
               </div>
 
