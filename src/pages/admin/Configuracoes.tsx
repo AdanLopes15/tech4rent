@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import ClausulasEditor, { defaultVendaClauses } from "@/components/admin/ClausulasEditor";
+import ImageUploadField from "@/components/admin/ImageUploadField";
 import { useStore } from "@/store";
 
 const formatPhone = (value: string) => {
@@ -474,18 +475,10 @@ const Configuracoes = () => {
                     rows={3}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>Imagem de Fundo (Hero)</Label>
-                  <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">
-                      Img
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Escolher arquivo
-                    </Button>
-                    <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
-                  </div>
-                </div>
+                <ImageUploadField
+                  label="Imagem de Fundo (Hero)"
+                  onChange={(url) => console.log("hero bg:", url)}
+                />
               </div>
 
               {/* Seção de Destaque */}
@@ -506,44 +499,23 @@ const Configuracoes = () => {
                     rows={4}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>Imagem do Produto em Destaque</Label>
-                  <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">
-                      Img
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Escolher arquivo
-                    </Button>
-                    <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Imagem de Fundo (Destaque)</Label>
-                  <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">
-                      Img
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Escolher arquivo
-                    </Button>
-                    <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
-                  </div>
-                </div>
+                <ImageUploadField
+                  label="Imagem do Produto em Destaque"
+                  onChange={(url) => console.log("featured product:", url)}
+                />
+                <ImageUploadField
+                  label="Imagem de Fundo (Destaque)"
+                  onChange={(url) => console.log("featured bg:", url)}
+                />
               </div>
 
               {/* Vitrine de Produtos */}
               <div className="space-y-4 rounded-lg border border-border p-5">
                 <h3 className="text-lg font-semibold text-foreground">Vitrine de Produtos</h3>
-                <div className="space-y-2">
-                  <Label>Imagem de Fundo (Vitrine)</Label>
-                  <div className="flex items-center gap-4">
-                    <Button variant="outline" size="sm">
-                      Escolher arquivo
-                    </Button>
-                    <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
-                  </div>
-                </div>
+                <ImageUploadField
+                  label="Imagem de Fundo (Vitrine)"
+                  onChange={(url) => console.log("vitrine bg:", url)}
+                />
               </div>
 
               {/* Seção Diferenciais */}
@@ -596,32 +568,19 @@ const Configuracoes = () => {
                     defaultValue="Com anos de experiência no mercado, somos especialistas em fornecer os melhores equipamentos para construção civil e indústrias."
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>Imagem de Fundo (Sobre)</Label>
-                  <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground">
-                      Img
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Escolher arquivo
-                    </Button>
-                    <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
-                  </div>
-                </div>
+                <ImageUploadField
+                  label="Imagem de Fundo (Sobre)"
+                  onChange={(url) => console.log("about bg:", url)}
+                />
               </div>
 
               {/* Seção Contato */}
               <div className="space-y-4 rounded-lg border border-border p-5">
                 <h3 className="text-lg font-semibold text-foreground">Seção Contato</h3>
-                <div className="space-y-2">
-                  <Label>Imagem de Fundo (Contato)</Label>
-                  <div className="flex items-center gap-4">
-                    <Button variant="outline" size="sm">
-                      Escolher arquivo
-                    </Button>
-                    <span className="text-sm text-muted-foreground">Nenhum arquivo escolhido</span>
-                  </div>
-                </div>
+                <ImageUploadField
+                  label="Imagem de Fundo (Contato)"
+                  onChange={(url) => console.log("contact bg:", url)}
+                />
               </div>
 
               <Button onClick={handleSave}>Salvar Conteúdo do Site</Button>
