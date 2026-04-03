@@ -46,7 +46,7 @@ const Navbar = () => {
           </div>
 
           <Link to="/login" className="hover:opacity-80 font-medium transition-opacity">
-            Área do Cliente
+            Área Restrita
           </Link>
         </div>
       </div>
@@ -173,7 +173,7 @@ const Navbar = () => {
 
             <Button asChild variant="outline" className="w-full">
               <Link to="/login" onClick={() => setIsOpen(false)}>
-                Área do Cliente
+                Área Restrita
               </Link>
             </Button>
           </div>
