@@ -100,7 +100,8 @@ const HeroSection = () => {
               variant="outline"
               onClick={() => scrollTo("equipamentos")}
               style={{
-                borderColor: "rgba(255,255,255,0.6)",
+                borderColor: "#ffffff",
+                backgroundColor: "rgba(255,255,255,0.15)",
                 color: titleColor || "#ffffff",
               }}
             >
