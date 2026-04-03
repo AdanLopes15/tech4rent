@@ -9,6 +9,31 @@ import { db } from "@/lib/firebase";
 import { Bell, Moon, Sun, User, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const formatTimeAgo = (date: Date) => {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return "agora";
+  if (diffMin < 60) return `${diffMin} min atrás`;
+  const diffH = Math.floor(diffMin / 60);
+  if (diffH < 24) return `${diffH}h atrás`;
+  const diffD = Math.floor(diffH / 24);
+  return `${diffD}d atrás`;
+};
+
+const getNotificationLink = (text: string): string => {
+  const lower = text.toLowerCase();
+  if (lower.includes("orçamento")) return "/admin/orcamentos";
+  if (lower.includes("contrato")) return "/admin/contratos";
+  if (lower.includes("pagamento") || lower.includes("recebido")) return "/admin/financeiro/receber";
+  if (lower.includes("venda")) return "/admin/vendas";
+  if (lower.includes("equipamento")) return "/admin/equipamentos";
+  if (lower.includes("cliente")) return "/admin/clientes";
+  if (lower.includes("despesa") || lower.includes("pagar")) return "/admin/financeiro/pagar";
+  if (lower.includes("boleto")) return "/admin/financeiro/boletos";
+  return "/admin";
+};
+
 interface AdminHeaderProps {
   isDark: boolean;
   onToggleTheme: () => void;
