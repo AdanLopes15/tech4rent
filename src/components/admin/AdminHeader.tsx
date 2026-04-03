@@ -16,11 +16,26 @@ interface AdminHeaderProps {
 
 const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
+  const { systemUsers } = useStore();
+  const [displayName, setDisplayName] = useState("Admin");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const userRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    const systemUser = systemUsers.find((u: any) => u.uid === user.uid || u.email === user.email);
+    if (systemUser?.name) {
+      setDisplayName(systemUser.name);
+      return;
+    }
+    // Fallback to profiles collection
+    getDoc(doc(db, "profiles", user.uid)).then((snap) => {
+      if (snap.exists() && snap.data().nome) setDisplayName(snap.data().nome);
+    });
+  }, [user, systemUsers]);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
