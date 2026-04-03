@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,9 @@ import { User, Camera, Lock, Mail } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useStore } from "@/store";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
-import { db } from "@/lib/firebase";
+import { db, storage } from "@/lib/firebase";
 
 const formatPhone = (value: string) => {
   const digits = value.replace(/\D/g, "");
