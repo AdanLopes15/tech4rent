@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import ClausulasEditor, { defaultVendaClauses } from "@/components/admin/ClausulasEditor";
+import ImageUploadField from "@/components/admin/ImageUploadField";
 import { useStore } from "@/store";
 
 const formatPhone = (value: string) => {
