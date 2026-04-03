@@ -113,7 +113,7 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
           <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
             <User className="h-4 w-4 text-primary" />
           </div>
-          <span className="text-sm font-medium text-foreground hidden sm:block">Admin</span>
+          <span className="text-sm font-medium text-foreground hidden sm:block">{displayName}</span>
         </button>
         {userMenuOpen && (
           <div className="absolute right-0 top-12 w-52 rounded-lg border border-border bg-card shadow-xl z-50">
