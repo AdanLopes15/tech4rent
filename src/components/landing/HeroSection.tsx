@@ -129,7 +129,7 @@ const HeroSection = () => {
           ].map(({ icon: Icon, title, desc }) => (
             <div
               key={title}
-              className="flex items-start gap-4 rounded-xl border border-border bg-card/60 backdrop-blur-sm p-5"
+              className="flex items-start gap-4 rounded-xl border border-white/20 bg-white/10 backdrop-blur-md p-5"
             >
               <div
                 className="rounded-lg p-2.5"
