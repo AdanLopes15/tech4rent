@@ -58,15 +58,22 @@ const Login = () => {
     }
     try {
       setResetLoading(true);
-      await sendPasswordResetEmail(auth, resetEmail);
-      toast.success("Email de recuperação enviado! Verifique sua caixa de entrada.");
+      await sendPasswordResetEmail(auth, resetEmail, {
+        url: window.location.origin + "/login",
+      });
+      toast.success("Email de recuperação enviado! Verifique sua caixa de entrada e a pasta de spam.");
       setResetOpen(false);
       setResetEmail("");
     } catch (err: any) {
+      console.error("Reset password error:", err.code, err.message);
       if (err.code === "auth/user-not-found") {
-        toast.error("Email não encontrado.");
+        toast.error("Email não encontrado no sistema.");
+      } else if (err.code === "auth/too-many-requests") {
+        toast.error("Muitas tentativas. Aguarde alguns minutos.");
+      } else if (err.code === "auth/invalid-email") {
+        toast.error("Email inválido.");
       } else {
-        toast.error("Erro ao enviar email de recuperação.");
+        toast.error("Erro ao enviar email de recuperação: " + (err.message || "tente novamente."));
       }
     } finally {
       setResetLoading(false);
