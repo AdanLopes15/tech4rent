@@ -58,9 +58,7 @@ const Login = () => {
     }
     try {
       setResetLoading(true);
-      await sendPasswordResetEmail(auth, resetEmail, {
-        url: window.location.origin + "/login",
-      });
+      await sendPasswordResetEmail(auth, resetEmail);
       toast.success("Email de recuperação enviado! Verifique sua caixa de entrada e a pasta de spam.");
       setResetOpen(false);
       setResetEmail("");
@@ -72,6 +70,8 @@ const Login = () => {
         toast.error("Muitas tentativas. Aguarde alguns minutos.");
       } else if (err.code === "auth/invalid-email") {
         toast.error("Email inválido.");
+      } else if (err.code === "auth/unauthorized-continue-uri") {
+        toast.error("O domínio de retorno não está autorizado no Firebase. Ajustei o envio para usar o link padrão de recuperação.");
       } else {
         toast.error("Erro ao enviar email de recuperação: " + (err.message || "tente novamente."));
       }
