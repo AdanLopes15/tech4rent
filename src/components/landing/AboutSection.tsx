@@ -33,6 +33,7 @@ const AboutSection = () => {
     "A TECH4RENT é referência em locação e venda de equipamentos de tecnologia. Com mais de uma década de experiência, oferecemos soluções completas para empresas que buscam eficiência, economia e tecnologia de ponta.";
 
   const backgroundImageUrl = about?.backgroundImageUrl;
+  const hasBackgroundImage = isValidHttpUrl(backgroundImageUrl);
   const backgroundColor = sectionStyle?.backgroundColor;
   const textColor = sectionStyle?.textColor;
   const titleColor = sectionStyle?.titleColor;
@@ -41,19 +42,19 @@ const AboutSection = () => {
   return (
     <section
       id="sobre"
-      className="relative py-20 overflow-hidden"
+      className="relative overflow-hidden py-20"
       style={{
-        backgroundColor: backgroundColor || undefined,
+        backgroundColor: hasBackgroundImage ? undefined : backgroundColor || undefined,
         color: textColor || undefined,
       }}
     >
-      {isValidHttpUrl(backgroundImageUrl) && (
+      {hasBackgroundImage && (
         <>
           <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${backgroundImageUrl})` }}
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url("${backgroundImageUrl}")` }}
           />
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/72 to-background/50" />
         </>
       )}
 
