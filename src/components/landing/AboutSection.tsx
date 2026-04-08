@@ -27,16 +27,16 @@ const AboutSection = () => {
   const about = companySettings?.siteContent?.about;
   const sectionStyle = companySettings?.styleSettings?.sections?.about;
 
-  const title = about.title || "Sobre a TECH4RENT";
+  const title = about?.title || "Sobre a TECH4RENT";
   const description =
-    about.description ||
+    about?.description ||
     "A TECH4RENT é referência em locação e venda de equipamentos de tecnologia. Com mais de uma década de experiência, oferecemos soluções completas para empresas que buscam eficiência, economia e tecnologia de ponta.";
 
-  const backgroundImageUrl = about.backgroundImageUrl;
-  const backgroundColor = sectionStyle.backgroundColor;
-  const textColor = sectionStyle.textColor;
-  const titleColor = sectionStyle.titleColor;
-  const accentColor = sectionStyle.accentColor;
+  const backgroundImageUrl = about?.backgroundImageUrl;
+  const backgroundColor = sectionStyle?.backgroundColor;
+  const textColor = sectionStyle?.textColor;
+  const titleColor = sectionStyle?.titleColor;
+  const accentColor = sectionStyle?.accentColor;
 
   return (
     <section
