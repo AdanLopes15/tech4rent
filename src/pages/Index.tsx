@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useStore } from "@/store";
 import Navbar from "@/components/landing/Navbar";
 import HeroSection from "@/components/landing/HeroSection";
+import FeaturedProductSection from "@/components/landing/FeaturedProductSection";
 import EquipmentSection from "@/components/landing/EquipmentSection";
 import DifferentialsSection from "@/components/landing/DifferentialsSection";
 import AboutSection from "@/components/landing/AboutSection";
