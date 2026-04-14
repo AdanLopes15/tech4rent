@@ -4,7 +4,8 @@ import { useState } from "react";
 import { format, compareAsc } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Timestamp } from "firebase/firestore";
-import { Printer, X, Pencil } from "lucide-react";
+import { Printer, X, Pencil, CalendarIcon } from "lucide-react";
+
 
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
@@ -15,6 +16,8 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { AddRevenueDialog } from "@/components/add-revenue-dialog";
 
 interface RentalInvoiceDialogProps {
@@ -61,7 +64,7 @@ const findCurrentInstallment = (allInstallments: any[]) => {
 };
 
 export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvoiceDialogProps) {
-  const { companySettings, equipments, revenues } = useStore();
+  const { companySettings, equipments, revenues, updateRevenue } = useStore();
   const { toast } = useToast();
   const [isEditRevenueDialogOpen, setIsEditRevenueDialogOpen] = useState(false);
   const [selectedInstallmentIndex, setSelectedInstallmentIndex] = useState<number | null>(null);
@@ -250,21 +253,27 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
                   </div>
                   <div className="flex items-center justify-end gap-2 text-sm text-gray-500">
                     <span>Vencimento:</span>
-                    <Select
-                      value={String(activeIndex)}
-                      onValueChange={(val) => setSelectedInstallmentIndex(Number(val))}
-                    >
-                      <SelectTrigger className="w-auto h-7 text-sm border-gray-300 bg-white text-black px-2 py-0">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sortedInstallments.map((inst, idx) => (
-                          <SelectItem key={idx} value={String(idx)}>
-                            {formatDate(inst.dueDate)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className="h-7 text-sm border-gray-300 bg-white text-black px-2 py-0 font-normal">
+                          <CalendarIcon className="mr-1 h-3 w-3" />
+                          {formatDate(currentInstallment.dueDate)}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="end">
+                        <Calendar
+                          mode="single"
+                          selected={safeToDate(currentInstallment.dueDate) || undefined}
+                          onSelect={(date) => {
+                            if (date && currentInstallment) {
+                              updateRevenue({ ...currentInstallment, dueDate: date });
+                              toast({ title: "Vencimento atualizado" });
+                            }
+                          }}
+                          locale={ptBR}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div>
               </header>
