@@ -64,7 +64,7 @@ const findCurrentInstallment = (allInstallments: any[]) => {
 };
 
 export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvoiceDialogProps) {
-  const { companySettings, equipments, revenues } = useStore();
+  const { companySettings, equipments, revenues, updateRevenue } = useStore();
   const { toast } = useToast();
   const [isEditRevenueDialogOpen, setIsEditRevenueDialogOpen] = useState(false);
   const [selectedInstallmentIndex, setSelectedInstallmentIndex] = useState<number | null>(null);
