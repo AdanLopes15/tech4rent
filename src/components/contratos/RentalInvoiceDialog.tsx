@@ -160,10 +160,24 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
     printWindow.close();
   };
 
-  if (!contract) return null;
+  const allInstallments = contract ? revenues.filter((r: any) => r.contractId === contract.id) : [];
+  
+  const sortedInstallments = allInstallments
+    .map((inst) => ({ ...inst, dueDateObj: safeToDate(inst.dueDate) }))
+    .filter((inst) => inst.dueDateObj)
+    .sort((a, b) => compareAsc(a.dueDateObj!, b.dueDateObj!));
 
-  const allInstallments = revenues.filter((r: any) => r.contractId === contract.id);
-  const currentInstallment = findCurrentInstallment(allInstallments);
+  const defaultInstallment = findCurrentInstallment(allInstallments);
+  const defaultIndex = defaultInstallment
+    ? sortedInstallments.findIndex((r) => r.id === defaultInstallment.id)
+    : 0;
+
+  const activeIndex = selectedInstallmentIndex !== null ? selectedInstallmentIndex : defaultIndex;
+  const currentInstallment = sortedInstallments[activeIndex] || null;
+  const totalInstallments = sortedInstallments.length;
+  const currentInstallmentNumber = activeIndex + 1;
+
+  if (!contract) return null;
 
   if (!currentInstallment) {
     return (
@@ -184,14 +198,6 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
   const getEquipmentDetails = (equipmentId: string) => {
     return equipments.find((eq: any) => eq.id === equipmentId);
   };
-
-  const sortedInstallments = allInstallments
-    .map((inst) => ({ ...inst, dueDateObj: safeToDate(inst.dueDate) }))
-    .filter((inst) => inst.dueDateObj)
-    .sort((a, b) => compareAsc(a.dueDateObj!, b.dueDateObj!));
-
-  const currentInstallmentNumber = sortedInstallments.findIndex((r) => r.id === currentInstallment.id) + 1;
-  const totalInstallments = sortedInstallments.length;
 
   const handleEditInvoice = () => setIsEditRevenueDialogOpen(true);
 
