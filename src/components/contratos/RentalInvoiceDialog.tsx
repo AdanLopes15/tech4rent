@@ -64,6 +64,7 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
   const { companySettings, equipments, revenues } = useStore();
   const { toast } = useToast();
   const [isEditRevenueDialogOpen, setIsEditRevenueDialogOpen] = useState(false);
+  const [selectedInstallmentIndex, setSelectedInstallmentIndex] = useState<number | null>(null);
 
   const formatDate = (dateInput: any, dateFormat: string = "dd/MM/yyyy") => {
     const date = safeToDate(dateInput);
