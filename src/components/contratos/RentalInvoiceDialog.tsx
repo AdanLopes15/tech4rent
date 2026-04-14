@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AddRevenueDialog } from "@/components/add-revenue-dialog";
 
 interface RentalInvoiceDialogProps {
@@ -63,6 +64,7 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
   const { companySettings, equipments, revenues } = useStore();
   const { toast } = useToast();
   const [isEditRevenueDialogOpen, setIsEditRevenueDialogOpen] = useState(false);
+  const [selectedInstallmentIndex, setSelectedInstallmentIndex] = useState<number | null>(null);
 
   const formatDate = (dateInput: any, dateFormat: string = "dd/MM/yyyy") => {
     const date = safeToDate(dateInput);
@@ -158,10 +160,24 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
     printWindow.close();
   };
 
-  if (!contract) return null;
+  const allInstallments = contract ? revenues.filter((r: any) => r.contractId === contract.id) : [];
+  
+  const sortedInstallments = allInstallments
+    .map((inst) => ({ ...inst, dueDateObj: safeToDate(inst.dueDate) }))
+    .filter((inst) => inst.dueDateObj)
+    .sort((a, b) => compareAsc(a.dueDateObj!, b.dueDateObj!));
 
-  const allInstallments = revenues.filter((r: any) => r.contractId === contract.id);
-  const currentInstallment = findCurrentInstallment(allInstallments);
+  const defaultInstallment = findCurrentInstallment(allInstallments);
+  const defaultIndex = defaultInstallment
+    ? sortedInstallments.findIndex((r) => r.id === defaultInstallment.id)
+    : 0;
+
+  const activeIndex = selectedInstallmentIndex !== null ? selectedInstallmentIndex : defaultIndex;
+  const currentInstallment = sortedInstallments[activeIndex] || null;
+  const totalInstallments = sortedInstallments.length;
+  const currentInstallmentNumber = activeIndex + 1;
+
+  if (!contract) return null;
 
   if (!currentInstallment) {
     return (
@@ -182,14 +198,6 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
   const getEquipmentDetails = (equipmentId: string) => {
     return equipments.find((eq: any) => eq.id === equipmentId);
   };
-
-  const sortedInstallments = allInstallments
-    .map((inst) => ({ ...inst, dueDateObj: safeToDate(inst.dueDate) }))
-    .filter((inst) => inst.dueDateObj)
-    .sort((a, b) => compareAsc(a.dueDateObj!, b.dueDateObj!));
-
-  const currentInstallmentNumber = sortedInstallments.findIndex((r) => r.id === currentInstallment.id) + 1;
-  const totalInstallments = sortedInstallments.length;
 
   const handleEditInvoice = () => setIsEditRevenueDialogOpen(true);
 
@@ -222,9 +230,24 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
                 <div className="text-right">
                   <h2 className="text-xl font-bold">FATURA DE LOCAÇÃO</h2>
                   <p className="text-sm text-gray-500">Contrato: {contract.id}</p>
-                  <p className="text-sm text-gray-500">
-                    Fatura: {currentInstallmentNumber} / {totalInstallments}
-                  </p>
+                  <div className="flex items-center justify-end gap-2 text-sm text-gray-500">
+                    <span>Fatura:</span>
+                    <Select
+                      value={String(activeIndex)}
+                      onValueChange={(val) => setSelectedInstallmentIndex(Number(val))}
+                    >
+                      <SelectTrigger className="w-auto h-7 text-sm border-gray-300 bg-white text-black px-2 py-0">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sortedInstallments.map((_, idx) => (
+                          <SelectItem key={idx} value={String(idx)}>
+                            {idx + 1} / {totalInstallments}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <p className="text-sm text-gray-500">Vencimento: {formatDate(currentInstallment.dueDate)}</p>
                 </div>
               </header>
