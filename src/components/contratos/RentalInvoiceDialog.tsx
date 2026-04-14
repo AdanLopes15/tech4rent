@@ -230,9 +230,24 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
                 <div className="text-right">
                   <h2 className="text-xl font-bold">FATURA DE LOCAÇÃO</h2>
                   <p className="text-sm text-gray-500">Contrato: {contract.id}</p>
-                  <p className="text-sm text-gray-500">
-                    Fatura: {currentInstallmentNumber} / {totalInstallments}
-                  </p>
+                  <div className="flex items-center justify-end gap-2 text-sm text-gray-500">
+                    <span>Fatura:</span>
+                    <Select
+                      value={String(activeIndex)}
+                      onValueChange={(val) => setSelectedInstallmentIndex(Number(val))}
+                    >
+                      <SelectTrigger className="w-auto h-7 text-sm border-gray-300 bg-white text-black px-2 py-0">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sortedInstallments.map((_, idx) => (
+                          <SelectItem key={idx} value={String(idx)}>
+                            {idx + 1} / {totalInstallments}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <p className="text-sm text-gray-500">Vencimento: {formatDate(currentInstallment.dueDate)}</p>
                 </div>
               </header>
