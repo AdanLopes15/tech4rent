@@ -248,7 +248,24 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
                       </SelectContent>
                     </Select>
                   </div>
-                  <p className="text-sm text-gray-500">Vencimento: {formatDate(currentInstallment.dueDate)}</p>
+                  <div className="flex items-center justify-end gap-2 text-sm text-gray-500">
+                    <span>Vencimento:</span>
+                    <Select
+                      value={String(activeIndex)}
+                      onValueChange={(val) => setSelectedInstallmentIndex(Number(val))}
+                    >
+                      <SelectTrigger className="w-auto h-7 text-sm border-gray-300 bg-white text-black px-2 py-0">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sortedInstallments.map((inst, idx) => (
+                          <SelectItem key={idx} value={String(idx)}>
+                            {formatDate(inst.dueDate)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </header>
 
