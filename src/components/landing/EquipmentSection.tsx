@@ -1,6 +1,6 @@
 //src/components/landing/EquipmentSection.tsx
 
-import { ArrowRight, MessageCircle, PackageSearch } from "lucide-react";
+import { MessageCircle, Smartphone, Wifi, Bluetooth, Usb, PackageSearch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useStore } from "@/store";
@@ -21,66 +21,68 @@ const buildWhatsAppUrl = (phone?: string, product?: string) => {
   return digits ? `https://wa.me/55${digits}?text=${encodeURIComponent(message)}` : "#contato";
 };
 
+const fallbackTags = [
+  { icon: Smartphone, label: "Android" },
+  { icon: Wifi, label: "Wi-Fi" },
+  { icon: Bluetooth, label: "Bluetooth" },
+  { icon: Usb, label: "USB" },
+];
+
 const EquipmentSection = () => {
   const { companySettings, equipments } = useStore();
   const hasEquipments = Array.isArray(equipments) && equipments.length > 0;
-  const visibleEquipments = hasEquipments ? equipments.slice(0, 8) : [];
-
-  const scrollToContact = () => document.getElementById("contato")?.scrollIntoView({ behavior: "smooth" });
+  const visibleEquipments = hasEquipments ? equipments.slice(0, 3) : [];
 
   return (
-    <section id="equipamentos" className="bg-background py-20">
-      <div className="container">
-        <div className="mb-12 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-          <div className="max-w-3xl">
-            <span className="text-sm font-bold uppercase tracking-widest text-primary">Produtos mais procurados</span>
-            <h2 className="mt-3 text-3xl font-black leading-tight text-foreground md:text-5xl">
-              Equipamentos para locação e venda
-            </h2>
-            <p className="mt-4 text-muted-foreground">
-              Soluções sob consulta para automação, coleta de dados, mobilidade e produtividade operacional.
-            </p>
-          </div>
-          <Button variant="outline" onClick={scrollToContact} className="gap-2 md:shrink-0">
-            Falar com especialista <ArrowRight className="h-4 w-4" />
-          </Button>
-        </div>
-
+    <section id="equipamentos" className="bg-background py-16 md:py-20">
+      <div className="container max-w-6xl">
         {hasEquipments ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {visibleEquipments.map((equipment: any) => {
               const imageUrls =
                 Array.isArray(equipment?.imageUrls) && equipment.imageUrls.filter((url: string) => isValidHttpUrl(url)).length > 0
                   ? equipment.imageUrls.filter((url: string) => isValidHttpUrl(url))
-                  : [isValidHttpUrl(equipment?.imageUrl) ? equipment.imageUrl : "https://placehold.co/600x440.png"];
-              const firstValidUrl = imageUrls[0] || "https://placehold.co/600x440.png";
+                  : [isValidHttpUrl(equipment?.imageUrl) ? equipment.imageUrl : "https://placehold.co/620x620.png"];
+              const firstValidUrl = imageUrls[0] || "https://placehold.co/620x620.png";
               const productName = equipment?.name || "Equipamento";
-              const code = equipment?.code || equipment?.patrimony || equipment?.id;
+              const code = equipment?.code || equipment?.patrimony || equipment?.model || productName.split(" ").slice(-1).join("");
 
               return (
-                <Card key={equipment.id || productName} className="group overflow-hidden border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-                  <div className="aspect-[4/3] overflow-hidden bg-muted">
-                    <img src={firstValidUrl} alt={productName} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+                <Card key={equipment.id || productName} className="overflow-hidden rounded-lg border-border bg-card shadow-sm">
+                  <div className="m-4 mb-0 aspect-square overflow-hidden bg-muted">
+                    <img src={firstValidUrl} alt={productName} className="h-full w-full object-contain p-5" loading="lazy" />
                   </div>
-                  <CardContent className="flex min-h-[260px] flex-col p-5">
-                    <div className="mb-3 flex items-center justify-between gap-3">
-                      <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase text-primary">
-                        {equipment?.category || "TECH4RENT"}
-                      </span>
-                      {code && <span className="text-xs font-semibold text-muted-foreground">{code}</span>}
+                  <CardContent className="flex min-h-[292px] flex-col p-5 pt-6">
+                    <span className="mb-2 text-sm font-medium uppercase text-muted-foreground">{code}</span>
+                    <h2 className="text-xl font-bold leading-snug text-foreground">{productName}</h2>
+                    <a
+                      href={buildWhatsAppUrl(companySettings?.phone, productName)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-5 inline-flex text-sm font-black text-primary"
+                    >
+                      Sob Consulta →
+                    </a>
+                    <p className="mt-5 line-clamp-2 text-base leading-relaxed text-muted-foreground">
+                      {equipment?.description || "Projetado para ambientes industriais e operações logísticas intensivas."}
+                    </p>
+
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      {fallbackTags.slice(0, 4).map(({ icon: Icon, label }) => (
+                        <span key={label} className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
+                          <Icon className="h-3 w-3" /> {label}
+                        </span>
+                      ))}
+                      <span className="rounded-full border border-border bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">+1</span>
                     </div>
 
-                    <h3 className="line-clamp-2 min-h-[3.5rem] text-lg font-bold leading-snug text-foreground">{productName}</h3>
-                    {equipment?.description && <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{equipment.description}</p>}
-
-                    <div className="mt-auto pt-5">
-                      <div className="mb-4 flex items-center justify-between border-t border-border pt-4">
-                        <span className="text-sm font-bold text-foreground">Sob Consulta</span>
-                        <ArrowRight className="h-4 w-4 text-primary" />
-                      </div>
-                      <Button asChild className="w-full gap-2">
-                        <a href={buildWhatsAppUrl(companySettings?.phone, productName)} target="_blank" rel="noreferrer">
-                          <MessageCircle className="h-4 w-4" /> Ver detalhes
+                    <div className="mt-auto flex gap-2 pt-6">
+                      <Button variant="outline" className="h-10 flex-1" onClick={() => document.getElementById("contato")?.scrollIntoView({ behavior: "smooth" })}>
+                        Ver detalhes
+                      </Button>
+                      <Button size="icon" asChild className="h-10 w-10 shrink-0">
+                        <a href={buildWhatsAppUrl(companySettings?.phone, productName)} target="_blank" rel="noreferrer" aria-label={`Solicitar orçamento para ${productName}`}>
+                          <MessageCircle className="h-4 w-4" />
                         </a>
                       </Button>
                     </div>
