@@ -15,12 +15,14 @@ import {
   Eye,
   GripVertical,
   Layers,
+  LayoutTemplate,
   Monitor,
   MousePointerClick,
   Plus,
   Redo2,
   RotateCcw,
   Save,
+  Search,
   Settings,
   Smartphone,
   Tablet,
@@ -35,11 +37,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useStore } from "@/store";
 import { BLOCK_LIBRARY, BLOCK_META, renderBlock } from "@/lib/site-builder/registry";
-import { newId, type Block, type BlockType, type PropField } from "@/lib/site-builder/types";
+import { newId, type Block, type BlockType, type PageSeo, type PropField } from "@/lib/site-builder/types";
 import { PAGE_DEFINITIONS, type PageSlug } from "@/lib/site-builder/seed";
+import { getTemplatesForPage } from "@/lib/site-builder/templates";
 import { useHistory, useUndoRedoShortcut } from "@/lib/site-builder/history";
 import { InlineEditProvider } from "@/lib/site-builder/inline-context";
 import ImageUploadInput from "@/components/admin/ImageUploadInput";
