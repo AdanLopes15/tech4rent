@@ -205,12 +205,17 @@ const Produtos = () => {
                               {equipment?.description || "Projetado para ambientes industriais e operações logísticas intensivas."}
                             </p>
                             <div className="mt-5 flex flex-wrap gap-2">
-                              {fallbackTags.map(({ icon: Icon, label }) => (
-                                <span key={label} className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
-                                  <Icon className="h-3 w-3" /> {label}
-                                </span>
-                              ))}
-                              <span className="rounded-full border border-border bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">+1</span>
+                              {Array.isArray(equipment?.tags) && equipment.tags.length > 0
+                                ? equipment.tags.slice(0, 4).map((tag: any) => (
+                                    <span key={tag.label} className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
+                                      {tag.label}
+                                    </span>
+                                  ))
+                                : fallbackTags.map(({ icon: Icon, label }) => (
+                                    <span key={label} className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
+                                      <Icon className="h-3 w-3" /> {label}
+                                    </span>
+                                  ))}
                             </div>
                             <div className="mt-auto flex gap-2 pt-6">
                               <Button variant="outline" className="h-10 flex-1" asChild>
