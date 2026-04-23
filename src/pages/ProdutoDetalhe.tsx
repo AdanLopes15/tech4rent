@@ -181,22 +181,22 @@ const ProdutoDetalhe = () => {
           </div>
         </section>
 
-        <section className="bg-foreground py-20 text-background">
+        <section className="border-y border-border bg-muted py-20 text-foreground">
           <div className="container max-w-4xl">
             <div className="mb-8 h-1 w-14 bg-primary" />
-            <h2 className="text-3xl font-black"><span className="text-background">DADOS </span><span className="text-primary">TÉCNICOS</span></h2>
-            <div className="mt-10 overflow-hidden rounded-lg border border-background/15">
+            <h2 className="text-3xl font-black"><span>DADOS </span><span className="text-primary">TÉCNICOS</span></h2>
+            <div className="mt-10 overflow-hidden rounded-lg border border-border bg-card shadow-sm">
               {specs.map(([label, value], index) => (
-                <div key={label} className={`grid gap-3 px-5 py-4 text-sm sm:grid-cols-[160px_1fr] ${index % 2 === 0 ? "bg-background/6" : "bg-background/3"}`}>
+                <div key={label} className={`grid gap-3 px-5 py-4 text-sm sm:grid-cols-[160px_1fr] ${index % 2 === 0 ? "bg-card" : "bg-muted"}`}>
                   <span className="font-black text-primary">{label}:</span>
-                  <span className="text-background/85">{value}</span>
+                  <span className="text-muted-foreground">{value}</span>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="bg-foreground py-20 text-center text-background">
+        <section className="py-20 text-center text-background" style={{ background: "linear-gradient(180deg, hsl(var(--foreground) / 0.92), hsl(var(--foreground)))" }}>
           <div className="container max-w-3xl">
             <ShieldCheck className="mx-auto h-14 w-14 text-primary" />
             <h2 className="mt-8 text-3xl font-black">VOCÊ NÃO FICA <span className="text-primary">NA MÃO.</span></h2>
@@ -208,7 +208,7 @@ const ProdutoDetalhe = () => {
         </section>
 
         {relatedProducts.length > 0 && (
-          <section className="py-16">
+          <section className="bg-background py-16">
             <div className="container max-w-5xl">
               <h2 className="text-2xl font-black">Produtos Relacionados</h2>
               <div className="mt-8 grid gap-6 md:grid-cols-3">
