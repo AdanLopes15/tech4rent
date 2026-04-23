@@ -238,14 +238,62 @@ const ProdutoDetalhe = () => {
           </div>
         </section>
 
-        <section className="py-20 text-center text-background" style={{ background: "linear-gradient(180deg, hsl(var(--foreground) / 0.92), hsl(var(--foreground)))" }}>
-          <div className="container max-w-3xl">
-            <ShieldCheck className="mx-auto h-14 w-14 text-primary" />
-            <h2 className="mt-8 text-3xl font-black">VOCÊ NÃO FICA <span className="text-primary">NA MÃO.</span></h2>
-            <p className="mt-4 text-lg text-background/70">1 ano de garantia + assistência técnica no Brasil.</p>
-            <div className="mx-auto mt-7 max-w-lg rounded-lg border border-background/15 bg-background/5 p-5 text-sm font-bold italic text-background/85">
-              “Deu problema, resolve.”
+        <section className="py-20 text-background" style={{ background: "linear-gradient(180deg, hsl(var(--foreground) / 0.96), hsl(var(--foreground)))" }}>
+          <div className="container max-w-5xl">
+            <div className="grid gap-14 lg:grid-cols-2 lg:items-center">
+              <div>
+                <div className="mb-5 h-1 w-14 bg-primary" />
+                <h2 className="text-3xl font-black leading-tight">ATUALIZADO DE VERDADE: <span className="text-primary">ANDROID 14.</span></h2>
+                <p className="mt-4 text-background/70">Compatível com sistemas ERP, WMS e apps Android. Opera online/offline conforme sua rotina.</p>
+                <div className="mt-6 rounded-lg border border-background/15 bg-background/5 p-4 text-sm font-bold italic text-background/85">
+                  “Chega de comprar coletor que nasce velho.”
+                </div>
+              </div>
+              <div className="rounded-lg border border-background/10 bg-background/5 p-8">
+                <img src={selectedImage} alt={`Android no ${productName}`} className="mx-auto h-72 w-full object-contain" loading="lazy" />
+              </div>
             </div>
+
+            <div className="mt-20 grid gap-14 lg:grid-cols-[0.9fr_1fr] lg:items-center">
+              <div className="rounded-lg border border-background/10 bg-background/5 p-8">
+                <img src={selectedImage} alt={`Bateria e operação do ${productName}`} className="mx-auto h-72 w-full object-contain" loading="lazy" />
+              </div>
+              <div>
+                <div className="mb-5 h-1 w-14 bg-primary" />
+                <h2 className="text-3xl font-black leading-tight">TRABALHA O TURNO INTEIRO <span className="text-primary">SEM PEDIR ARREGO.</span></h2>
+                <div className="mt-6 space-y-3">
+                  {featureCards.map(({ icon: Icon, title, description: itemDescription }) => (
+                    <div key={title} className="flex items-center gap-4 rounded-lg border border-background/15 bg-background/5 p-4">
+                      <Icon className="h-5 w-5 text-primary" />
+                      <div>
+                        <h3 className="text-sm font-black">{title}</h3>
+                        <p className="text-xs text-background/60">{itemDescription}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-6 text-sm font-black italic text-background/75">“Operação não para porque <span className="text-primary">o coletor cansou</span>.”</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-card py-20 text-center text-foreground">
+          <div className="container max-w-3xl">
+            <div className="mx-auto mb-6 h-1 w-14 bg-primary" />
+            <h2 className="text-3xl font-black">VOCÊ JÁ RECEBE <span className="text-primary">PRONTO PRA OPERAÇÃO.</span></h2>
+            <p className="mt-2 text-sm text-muted-foreground">O que vem na caixa</p>
+            <div className="mx-auto mt-10 grid max-w-2xl gap-3 rounded-lg border border-border bg-muted p-5 sm:grid-cols-4">
+              {["Capa silicone", "Película vidro", "Fonte com cabo", "Gatilho"].map((item) => (
+                <div key={item} className="rounded-md bg-card p-4 text-sm font-black uppercase shadow-sm">
+                  <QrCode className="mx-auto mb-3 h-8 w-8 text-primary" /> {item}
+                </div>
+              ))}
+            </div>
+            <Button asChild size="lg" className="mt-8 gap-2 px-10">
+              <a href={whatsappUrl} target="_blank" rel="noreferrer"><MessageCircle className="h-5 w-5" /> Solicitar orçamento</a>
+            </Button>
+            <p className="mx-auto mt-5 max-w-lg text-sm text-muted-foreground">A maioria dos coletores não acompanha gatilho — aqui, ele já vem incluso no kit.</p>
           </div>
         </section>
 
