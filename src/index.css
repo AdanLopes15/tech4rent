@@ -138,3 +138,20 @@
     }
   }
 }
+
+/* Google Translate - esconde a barra superior mas mantém a tradução ativa */
+.goog-te-banner-frame.skiptranslate,
+iframe.goog-te-banner-frame {
+  display: none !important;
+}
+body {
+  top: 0 !important;
+  position: static !important;
+}
+.goog-tooltip,
+.goog-tooltip:hover,
+.goog-text-highlight {
+  display: none !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
