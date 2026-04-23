@@ -87,6 +87,11 @@ const Contato = () => {
   if (usePublished) {
     return (
       <div className="min-h-screen bg-background text-foreground">
+        <PageSeoHead
+          seo={seo}
+          fallbackTitle="Contato — TECH4RENT"
+          fallbackDescription="Fale com a TECH4RENT pelo WhatsApp, e-mail ou formulário. Atendimento técnico dedicado."
+        />
         <Navbar />
         <main>
           {publishedBlocks.filter((b) => b.visible !== false).map((b) => (
@@ -100,6 +105,11 @@ const Contato = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <PageSeoHead
+        seo={seo}
+        fallbackTitle="Contato — TECH4RENT"
+        fallbackDescription="Fale com a TECH4RENT pelo WhatsApp, e-mail ou formulário. Atendimento técnico dedicado."
+      />
       <Navbar />
       <main>
         <section className="relative overflow-hidden border-b border-border bg-foreground py-24 text-background">
