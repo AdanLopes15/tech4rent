@@ -177,11 +177,13 @@ const ProdutoDetalhe = () => {
                 <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">{description}</p>
 
                 <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-muted-foreground">
-                  <span className="rounded-full border border-border bg-muted px-3 py-1">Android</span>
-                  <span className="rounded-full border border-border bg-muted px-3 py-1">2D</span>
-                  <span className="rounded-full border border-border bg-muted px-3 py-1">Wi‑Fi</span>
-                  <span className="rounded-full border border-border bg-muted px-3 py-1">Bluetooth</span>
-                  <span className="rounded-full border border-border bg-muted px-3 py-1">Chip 4G</span>
+                  {customTags
+                    ? customTags.map((tag: any) => (
+                        <span key={tag.label} className="rounded-full border border-border bg-muted px-3 py-1">{tag.label}</span>
+                      ))
+                    : ["Android", "2D", "Wi‑Fi", "Bluetooth", "Chip 4G"].map((t) => (
+                        <span key={t} className="rounded-full border border-border bg-muted px-3 py-1">{t}</span>
+                      ))}
                 </div>
 
                 <div className="mt-7 grid gap-3 sm:grid-cols-2">
@@ -313,13 +315,45 @@ const ProdutoDetalhe = () => {
           </div>
         </section>
 
+        {customVideo && (
+          <section className="bg-background py-16">
+            <div className="container max-w-5xl">
+              <h2 className="text-center text-3xl font-black">Veja o <span className="text-primary">{productName}</span> em ação</h2>
+              <div className="mx-auto mt-8 overflow-hidden rounded-lg border border-border bg-card shadow-lg">
+                <video src={customVideo} controls className="h-full w-full" />
+              </div>
+            </div>
+          </section>
+        )}
+
+        {customSections.length > 0 && (
+          <section className="bg-background py-16">
+            <div className="container max-w-5xl space-y-16">
+              {customSections.map((sec: any, i: number) => (
+                <div key={i} className={`grid gap-10 lg:grid-cols-2 lg:items-center ${i % 2 === 1 ? "lg:[&>*:first-child]:order-2" : ""}`}>
+                  {sec.imageUrl ? (
+                    <div className="overflow-hidden rounded-lg border border-border bg-muted p-6">
+                      <img src={sec.imageUrl} alt={sec.title || `Seção ${i + 1}`} className="mx-auto h-72 w-full object-contain" loading="lazy" />
+                    </div>
+                  ) : <div />}
+                  <div>
+                    <div className="mb-5 h-1 w-14 bg-primary" />
+                    {sec.title && <h2 className="text-3xl font-black leading-tight">{sec.title}</h2>}
+                    {sec.text && <p className="mt-4 whitespace-pre-line text-base leading-relaxed text-muted-foreground">{sec.text}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         <section className="bg-card py-20 text-center text-foreground">
           <div className="container max-w-3xl">
             <div className="mx-auto mb-6 h-1 w-14 bg-primary" />
             <h2 className="text-3xl font-black">VOCÊ JÁ RECEBE <span className="text-primary">PRONTO PRA OPERAÇÃO.</span></h2>
             <p className="mt-2 text-sm text-muted-foreground">O que vem na caixa</p>
             <div className="mx-auto mt-10 grid max-w-2xl gap-3 rounded-lg border border-border bg-muted p-5 sm:grid-cols-4">
-              {["Capa silicone", "Película vidro", "Fonte com cabo", "Gatilho"].map((item) => (
+              {(customBox.length > 0 ? customBox : ["Capa silicone", "Película vidro", "Fonte com cabo", "Gatilho"]).map((item: string) => (
                 <div key={item} className="rounded-md bg-card p-4 text-sm font-black uppercase shadow-sm">
                   <QrCode className="mx-auto mb-3 h-8 w-8 text-primary" /> {item}
                 </div>
@@ -328,7 +362,6 @@ const ProdutoDetalhe = () => {
             <Button asChild size="lg" className="mt-8 gap-2 px-10">
               <a href={whatsappUrl} target="_blank" rel="noreferrer"><MessageCircle className="h-5 w-5" /> Solicitar orçamento</a>
             </Button>
-            <p className="mx-auto mt-5 max-w-lg text-sm text-muted-foreground">A maioria dos coletores não acompanha gatilho — aqui, ele já vem incluso no kit.</p>
           </div>
         </section>
 
