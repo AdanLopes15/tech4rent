@@ -15,6 +15,11 @@ import CtaBlock from "@/components/site-builder/blocks/CtaBlock";
 import TextImageBlock from "@/components/site-builder/blocks/TextImageBlock";
 import FaqBlock from "@/components/site-builder/blocks/FaqBlock";
 import SpacerBlock from "@/components/site-builder/blocks/SpacerBlock";
+import GalleryBlock from "@/components/site-builder/blocks/GalleryBlock";
+import TestimonialsBlock from "@/components/site-builder/blocks/TestimonialsBlock";
+import PricingBlock from "@/components/site-builder/blocks/PricingBlock";
+import LogoCloudBlock from "@/components/site-builder/blocks/LogoCloudBlock";
+import StatsBlock from "@/components/site-builder/blocks/StatsBlock";
 
 export const BLOCK_META: Record<BlockType, BlockMeta> = {
   hero: {
@@ -284,6 +289,201 @@ export const BLOCK_META: Record<BlockType, BlockMeta> = {
     icon: "MoveVertical",
     defaults: { height: 60 },
     fields: [{ key: "height", label: "Altura (px)", type: "number", min: 8, max: 400 }],
+  },
+  gallery: {
+    type: "gallery",
+    label: "Galeria",
+    description: "Grid de imagens com legendas",
+    icon: "Images",
+    defaults: {
+      eyebrow: "Galeria",
+      title: "Conheça nossos equipamentos",
+      subtitle: "",
+      columns: 3,
+      items: [
+        { imageUrl: "", caption: "Equipamento 1" },
+        { imageUrl: "", caption: "Equipamento 2" },
+        { imageUrl: "", caption: "Equipamento 3" },
+      ],
+    },
+    fields: [
+      { key: "eyebrow", label: "Eyebrow", type: "text" },
+      { key: "title", label: "Título", type: "text" },
+      { key: "subtitle", label: "Subtítulo", type: "textarea" },
+      { key: "columns", label: "Colunas (2-4)", type: "number", min: 2, max: 4 },
+      {
+        key: "items",
+        label: "Imagens",
+        type: "list",
+        itemFields: [
+          { key: "imageUrl", label: "Imagem", type: "image" },
+          { key: "caption", label: "Legenda", type: "text" },
+        ],
+      },
+    ],
+  },
+  testimonials: {
+    type: "testimonials",
+    label: "Depoimentos",
+    description: "Cards de depoimentos com avatar e estrelas",
+    icon: "MessageSquareQuote",
+    defaults: {
+      eyebrow: "Depoimentos",
+      title: "O que dizem nossos clientes",
+      items: [
+        {
+          quote: "Atendimento excelente e equipamentos de ponta.",
+          author: "Cliente Satisfeito",
+          role: "Gerente de Operações",
+          avatarUrl: "",
+          rating: 5,
+        },
+      ],
+    },
+    fields: [
+      { key: "eyebrow", label: "Eyebrow", type: "text" },
+      { key: "title", label: "Título", type: "text" },
+      {
+        key: "items",
+        label: "Depoimentos",
+        type: "list",
+        itemFields: [
+          { key: "quote", label: "Citação", type: "textarea" },
+          { key: "author", label: "Autor", type: "text" },
+          { key: "role", label: "Cargo / empresa", type: "text" },
+          { key: "avatarUrl", label: "Avatar", type: "image" },
+          { key: "rating", label: "Estrelas (0-5)", type: "number", min: 0, max: 5 },
+        ],
+      },
+    ],
+  },
+  pricing: {
+    type: "pricing",
+    label: "Planos / Pricing",
+    description: "Comparativo de planos com preços",
+    icon: "BadgeDollarSign",
+    defaults: {
+      eyebrow: "Planos",
+      title: "Escolha o plano ideal",
+      subtitle: "",
+      plans: [
+        {
+          name: "Starter",
+          price: "R$ 199",
+          period: "mês",
+          description: "Para começar",
+          features: [{ _value: "Recurso 1" }, { _value: "Recurso 2" }],
+          highlight: false,
+          buttonLabel: "Assinar",
+          buttonUrl: "/contato",
+        },
+        {
+          name: "Pro",
+          price: "R$ 499",
+          period: "mês",
+          description: "Mais popular",
+          features: [{ _value: "Tudo do Starter" }, { _value: "Recurso extra" }],
+          highlight: true,
+          buttonLabel: "Quero esse",
+          buttonUrl: "/contato",
+        },
+      ],
+    },
+    fields: [
+      { key: "eyebrow", label: "Eyebrow", type: "text" },
+      { key: "title", label: "Título", type: "text" },
+      { key: "subtitle", label: "Subtítulo", type: "textarea" },
+      {
+        key: "plans",
+        label: "Planos",
+        type: "list",
+        itemFields: [
+          { key: "name", label: "Nome", type: "text" },
+          { key: "price", label: "Preço", type: "text" },
+          { key: "period", label: "Período (ex: mês)", type: "text" },
+          { key: "description", label: "Descrição", type: "text" },
+          {
+            key: "features",
+            label: "Recursos",
+            type: "list",
+            itemFields: [{ key: "_value", label: "Recurso", type: "text" }],
+          },
+          { key: "highlight", label: "Destacar (popular)", type: "switch" },
+          { key: "buttonLabel", label: "Botão — texto", type: "text" },
+          { key: "buttonUrl", label: "Botão — URL", type: "text" },
+        ],
+      },
+    ],
+  },
+  logoCloud: {
+    type: "logoCloud",
+    label: "Logos de Clientes",
+    description: "Grid de logos com efeito grayscale",
+    icon: "Building2",
+    defaults: {
+      eyebrow: "Confiam em nós",
+      title: "Empresas que aceleram com a Tech4Rent",
+      grayscale: true,
+      items: [{ alt: "Empresa 1" }, { alt: "Empresa 2" }, { alt: "Empresa 3" }],
+    },
+    fields: [
+      { key: "eyebrow", label: "Eyebrow", type: "text" },
+      { key: "title", label: "Título", type: "text" },
+      { key: "grayscale", label: "Logos em escala de cinza", type: "switch" },
+      {
+        key: "items",
+        label: "Logos",
+        type: "list",
+        itemFields: [
+          { key: "imageUrl", label: "Imagem do logo", type: "image" },
+          { key: "alt", label: "Nome / alt", type: "text" },
+          { key: "url", label: "URL (opcional)", type: "text" },
+        ],
+      },
+    ],
+  },
+  stats: {
+    type: "stats",
+    label: "Estatísticas",
+    description: "Bloco de números/métricas em destaque",
+    icon: "BarChart3",
+    defaults: {
+      eyebrow: "",
+      title: "Números que falam por nós",
+      subtitle: "",
+      variant: "light",
+      items: [
+        { icon: "Users", value: "1.000+", label: "Clientes" },
+        { icon: "Package", value: "10.000+", label: "Equipamentos" },
+        { icon: "MapPin", value: "20+", label: "Estados" },
+        { icon: "Clock", value: "24h", label: "Suporte" },
+      ],
+    },
+    fields: [
+      { key: "eyebrow", label: "Eyebrow", type: "text" },
+      { key: "title", label: "Título", type: "text" },
+      { key: "subtitle", label: "Subtítulo", type: "textarea" },
+      {
+        key: "variant",
+        label: "Estilo",
+        type: "select",
+        options: [
+          { label: "Claro", value: "light" },
+          { label: "Escuro", value: "dark" },
+          { label: "Laranja", value: "primary" },
+        ],
+      },
+      {
+        key: "items",
+        label: "Estatísticas",
+        type: "list",
+        itemFields: [
+          { key: "icon", label: "Ícone (lucide)", type: "text" },
+          { key: "value", label: "Valor", type: "text" },
+          { key: "label", label: "Rótulo", type: "text" },
+        ],
+      },
+    ],
   },
 };
 
