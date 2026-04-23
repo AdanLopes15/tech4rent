@@ -847,15 +847,17 @@ const useStore = create<State & Actions>((set, get) => {
           getDoc(doc(db, "settings", "clauses")),
           getDocs(collection(db, "equipments")),
           getDocs(collection(db, "catalogItems")),
+          getDoc(doc(db, "settings", "homePage")),
         ])) as [
           DocumentSnapshot<DocumentData>,
           DocumentSnapshot<DocumentData>,
           DocumentSnapshot<DocumentData>,
           QuerySnapshot<DocumentData>,
           QuerySnapshot<DocumentData>,
+          DocumentSnapshot<DocumentData>,
         ];
 
-        const [companySettingsSnap, smtpSettingsSnap, clausesSnap, equipmentsSnap, catalogItemsSnap] = baseSnaps;
+        const [companySettingsSnap, smtpSettingsSnap, clausesSnap, equipmentsSnap, catalogItemsSnap, homePageSnap] = baseSnaps;
 
         const existingCompanySettings = companySettingsSnap.exists()
           ? (companySettingsSnap.data() as Partial<CompanySettings>)
@@ -910,6 +912,14 @@ const useStore = create<State & Actions>((set, get) => {
           saleClauses: clausesSnap.exists() ? clausesSnap.data()?.sale || initialSaleClauses : initialSaleClauses,
           equipments: equipmentsSnap.docs.map(mapDoc),
           catalogItems: catalogItemsSnap.docs.map(mapDoc),
+          homePage: homePageSnap.exists()
+            ? {
+                draft: (homePageSnap.data() as any).draft || [],
+                published: (homePageSnap.data() as any).published || [],
+                updatedAt: (homePageSnap.data() as any).updatedAt,
+                publishedAt: (homePageSnap.data() as any).publishedAt,
+              }
+            : { draft: [], published: [] },
         };
 
         if (!publicOnly) {
