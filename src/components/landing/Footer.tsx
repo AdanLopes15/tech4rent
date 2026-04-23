@@ -58,14 +58,16 @@ const Footer = () => {
               <li className="flex items-center gap-2">
                 <Clock className="h-3.5 w-3.5 shrink-0" />
                 <span>Segunda a Sexta, 8h às 18h</span>
+              </li>
+              <li>
                 <a
                   href={companySettings?.instagramUrl || "#"}
                   target={companySettings?.instagramUrl ? "_blank" : undefined}
                   rel="noreferrer"
                   aria-label="Instagram"
-                  className="ml-1 transition-colors hover:text-background"
+                  className="inline-flex transition-colors hover:text-background"
                 >
-                  <Instagram className="h-3.5 w-3.5" />
+                  <Instagram className="h-4 w-4" />
                 </a>
               </li>
             </ul>
