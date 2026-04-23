@@ -115,7 +115,7 @@ const CatalogoSite = () => {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-3 gap-3">
             <div className="rounded-lg border border-border bg-muted/30 p-3">
-              <p className="text-xs text-muted-foreground">Total no /produtos</p>
+              <p className="text-xs text-muted-foreground">Total de Anúncios</p>
               <p className="text-2xl font-bold">{stats.total}</p>
             </div>
             <div className="rounded-lg border border-border bg-muted/30 p-3">
