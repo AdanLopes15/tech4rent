@@ -220,34 +220,47 @@ const CatalogoSite = () => {
             />
           </div>
 
-          {availableEquipments.length === 0 ? (
+          {pickerEquipments.length === 0 ? (
             <div className="flex h-40 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border text-center">
               <X className="h-6 w-6 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
                 {pickerSearch
                   ? "Nenhum equipamento encontrado."
-                  : "Todos os equipamentos cadastrados já têm anúncio. Cadastre novos em Equipamentos."}
+                  : "Nenhum equipamento cadastrado. Cadastre em Equipamentos."}
               </p>
             </div>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
-              {availableEquipments.map((equipment: any) => {
+              {pickerEquipments.map((equipment: any) => {
                 const img =
                   equipment.imageUrl ||
                   equipment.imageUrls?.[0] ||
                   "https://placehold.co/200x150.png";
+                const alreadyUsed = usedEquipmentIds.has(equipment.id);
                 return (
                   <button
                     key={equipment.id}
                     type="button"
+                    disabled={alreadyUsed}
                     onClick={() => handlePickEquipment(equipment)}
-                    className="flex items-center gap-3 rounded-lg border border-border bg-card p-3 text-left transition-colors hover:border-primary hover:bg-muted/50"
+                    className={`flex items-center gap-3 rounded-lg border border-border bg-card p-3 text-left transition-colors ${
+                      alreadyUsed
+                        ? "cursor-not-allowed opacity-60"
+                        : "hover:border-primary hover:bg-muted/50"
+                    }`}
                   >
                     <div className="h-16 w-16 shrink-0 overflow-hidden rounded-md bg-muted">
                       <img src={img} alt={equipment.name} className="h-full w-full object-contain p-1" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs uppercase text-muted-foreground">{equipment.category || "—"}</p>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs uppercase text-muted-foreground">{equipment.category || "—"}</p>
+                        {alreadyUsed && (
+                          <Badge variant="secondary" className="text-[10px]">
+                            <CheckCircle2 className="mr-1 h-3 w-3" /> Já anunciado
+                          </Badge>
+                        )}
+                      </div>
                       <p className="line-clamp-1 font-semibold">{equipment.name}</p>
                       <p className="text-xs text-muted-foreground">ID: {equipment.id}</p>
                     </div>
