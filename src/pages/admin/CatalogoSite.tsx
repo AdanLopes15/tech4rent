@@ -26,6 +26,8 @@ const CatalogoSite = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedEquipment, setSelectedEquipment] = useState<any | null>(null);
   const [editingItem, setEditingItem] = useState<any | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerSearch, setPickerSearch] = useState("");
 
   useEffect(() => {
     fetchAllData?.();
