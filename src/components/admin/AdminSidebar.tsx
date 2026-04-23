@@ -87,15 +87,7 @@ const menuItems: MenuItem[] = [
     icon: Settings,
     label: "Configurações",
     children: [
-      {
-        icon: Globe,
-        label: "Page Builder",
-        children: [
-          { icon: Globe, label: "Homepage", path: "/admin/site-builder" },
-          { icon: Globe, label: "Sobre", path: "/admin/site-builder/sobre" },
-          { icon: Globe, label: "Contato", path: "/admin/site-builder/contato" },
-        ],
-      },
+      { icon: Globe, label: "Page Builder", path: "/admin/site-builder" },
       { icon: Settings, label: "Painel de Configurações", path: "/admin/configuracoes" },
       { icon: Users, label: "Usuários", path: "/admin/usuarios" },
     ],
