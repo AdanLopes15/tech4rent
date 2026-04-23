@@ -1,6 +1,7 @@
 //src/pages/Produtos.tsx
 
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Bluetooth, Download, MessageCircle, PackageSearch, Search, Smartphone, Usb, Wifi } from "lucide-react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
@@ -39,6 +40,8 @@ const normalize = (value: string) =>
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
+
+const getProductPath = (equipment: any) => `/produtos/${encodeURIComponent(String(equipment?.id || equipment?.name || "produto"))}`;
 
 const Produtos = () => {
   const fetchAllData = useStore((s) => s.fetchAllData);
@@ -187,7 +190,7 @@ const Produtos = () => {
                             </div>
                             <div className="mt-auto flex gap-2 pt-6">
                               <Button variant="outline" className="h-10 flex-1" asChild>
-                                <a href={buildWhatsAppUrl(companySettings?.phone, productName)} target="_blank" rel="noreferrer">Ver detalhes</a>
+                                <Link to={getProductPath(equipment)}>Ver produto</Link>
                               </Button>
                               <Button size="icon" asChild className="h-10 w-10 shrink-0">
                                 <a href={buildWhatsAppUrl(companySettings?.phone, productName)} target="_blank" rel="noreferrer" aria-label={`Solicitar orçamento para ${productName}`}>
