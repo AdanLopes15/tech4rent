@@ -290,7 +290,7 @@ export const BLOCK_META: Record<BlockType, BlockMeta> = {
 export const BLOCK_LIBRARY: BlockMeta[] = Object.values(BLOCK_META);
 
 export function renderBlock(block: Block) {
-  const props = { ...BLOCK_META[block.type]?.defaults, ...block.props };
+  const props = { ...BLOCK_META[block.type]?.defaults, ...block.props, _blockId: block.id };
   switch (block.type) {
     case "hero":
       return <HeroBlock {...(props as any)} />;
