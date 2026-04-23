@@ -63,25 +63,23 @@ const Sobre = () => {
     ? `https://wa.me/55${companySettings.phone.replace(/\D/g, "")}?text=${encodeURIComponent("Olá, gostaria de falar com um especialista.")}`
     : "#contato";
 
+  if (usePublished) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <Navbar />
+        <main>
+          {publishedBlocks.filter((b) => b.visible !== false).map((b) => (
+            <div key={b.id}>{renderBlock(b)}</div>
+          ))}
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
-      <main>
-        {usePublished ? (
-          publishedBlocks.filter((b) => b.visible !== false).map((b) => <div key={b.id}>{renderBlock(b)}</div>)
-        ) : (
-        <></>
-        )}
-        {!usePublished && (
-        <></>
-        )}
-      {!usePublished && <></>}
-      {!usePublished && <></>}
-      </main>
-      {!usePublished && (
-        <></>
-      )}
-      {usePublished ? null : (
       <main>
         {/* legacy layout below kept as fallback */}
         <section className="relative overflow-hidden bg-foreground py-24 text-background md:py-32">
