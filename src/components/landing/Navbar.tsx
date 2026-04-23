@@ -227,7 +227,11 @@ const Navbar = () => {
           </div>
         </div>
       )}
-      <div id="google_translate_element" className="hidden" />
+      <div
+        id="google_translate_element"
+        style={{ position: "absolute", left: "-9999px", top: "-9999px", visibility: "hidden" }}
+        aria-hidden="true"
+      />
     </nav>
   );
 };
