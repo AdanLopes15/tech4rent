@@ -1,19 +1,81 @@
 //src/components/landing/Navbar.tsx
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowRight, Menu, MessageCircle, X } from "lucide-react";
+import { ArrowRight, ChevronDown, Menu, MessageCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/store";
 
+const languages = [
+  { code: "pt", label: "BR Português" },
+  { code: "en", label: "US English" },
+  { code: "es", label: "ES Español" },
+  { code: "zh-CN", label: "CN 中文" },
+  { code: "ru", label: "RU Русский" },
+  { code: "fr", label: "FR Français" },
+  { code: "de", label: "DE Deutsch" },
+  { code: "it", label: "IT Italiano" },
+];
+
+declare global {
+  interface Window {
+    googleTranslateElementInit?: () => void;
+    google?: {
+      translate?: {
+        TranslateElement: new (options: Record<string, unknown>, elementId: string) => void;
+      };
+    };
+  }
+}
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLanguageOpen, setIsLanguageOpen] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState(() => localStorage.getItem("site-language") || "pt");
   const location = useLocation();
   const navigate = useNavigate();
   const { companySettings } = useStore();
 
   const fantasyName = companySettings?.fantasyName || companySettings?.name || "TECH4RENT";
   const siteLogoUrl = companySettings?.siteLogoUrl;
+
+  useEffect(() => {
+    if (document.getElementById("google-translate-script")) return;
+
+    window.googleTranslateElementInit = () => {
+      if (!window.google?.translate?.TranslateElement) return;
+
+      new window.google.translate.TranslateElement(
+        {
+          pageLanguage: "pt",
+          includedLanguages: languages.map((language) => language.code).join(","),
+          autoDisplay: false,
+        },
+        "google_translate_element",
+      );
+    };
+
+    const script = document.createElement("script");
+    script.id = "google-translate-script";
+    script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
+  const changeLanguage = (languageCode: string) => {
+    const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
+    const cookieValue = languageCode === "pt" ? "/pt/pt" : `/pt/${languageCode}`;
+
+    document.cookie = `googtrans=${cookieValue}; expires=${expires}; path=/`;
+    document.cookie = `googtrans=${cookieValue}; expires=${expires}; path=/; domain=.${window.location.hostname}`;
+    localStorage.setItem("site-language", languageCode);
+    setSelectedLanguage(languageCode);
+    setIsLanguageOpen(false);
+    setIsOpen(false);
+    window.location.reload();
+  };
+
+  const selectedLanguageLabel = languages.find((language) => language.code === selectedLanguage)?.label || "BR Português";
 
   const goToHomeSection = (id: string) => {
     setIsOpen(false);
@@ -74,7 +136,33 @@ const Navbar = () => {
         </div>
 
         <div className="hidden items-center gap-4 lg:flex">
-          <span className="text-xs font-bold text-background/65">BR&nbsp; Português</span>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsLanguageOpen((open) => !open)}
+              className="flex h-11 items-center gap-2 rounded-md border border-background/70 px-3 text-xs font-bold text-background/75 transition-colors hover:border-background hover:text-background"
+              aria-expanded={isLanguageOpen}
+              aria-label="Trocar idioma"
+            >
+              {selectedLanguageLabel}
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isLanguageOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {isLanguageOpen && (
+              <div className="absolute right-0 top-full mt-2 w-40 overflow-hidden rounded-md border border-background/10 bg-foreground shadow-lg">
+                {languages.map((language) => (
+                  <button
+                    key={language.code}
+                    type="button"
+                    onClick={() => changeLanguage(language.code)}
+                    className={`flex w-full px-3 py-3 text-left text-xs font-bold transition-colors hover:bg-primary/15 hover:text-primary ${selectedLanguage === language.code ? "bg-primary/15 text-primary" : "text-background/75"}`}
+                  >
+                    {language.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <Button onClick={goToContact} className="h-11 gap-2 px-5 font-bold">
             <MessageCircle className="h-4 w-4" /> Fale Conosco
           </Button>
@@ -93,12 +181,28 @@ const Navbar = () => {
             <button onClick={() => goToAboutSection()} className="block w-full text-left text-sm font-bold text-primary">Sobre</button>
             <button onClick={goToContact} className={`block w-full text-left text-sm font-bold ${location.pathname === "/contato" ? "text-primary" : "text-background/75"}`}>Contato</button>
             <Link to="/login" onClick={() => setIsOpen(false)} className="block text-sm font-bold text-background/75">Área Restrita</Link>
+            <div className="space-y-2 pt-2">
+              <p className="text-xs font-black uppercase tracking-widest text-background/45">Idioma</p>
+              <div className="grid grid-cols-2 gap-2">
+                {languages.map((language) => (
+                  <button
+                    key={language.code}
+                    type="button"
+                    onClick={() => changeLanguage(language.code)}
+                    className={`rounded-md border border-background/10 px-3 py-2 text-left text-xs font-bold ${selectedLanguage === language.code ? "bg-primary/15 text-primary" : "text-background/75"}`}
+                  >
+                    {language.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <Button onClick={goToContact} className="w-full gap-2">
               Fale Conosco <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
       )}
+      <div id="google_translate_element" className="hidden" />
     </nav>
   );
 };
