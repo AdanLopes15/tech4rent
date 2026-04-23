@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, Eye, EyeOff, Pencil, RefreshCw, Search, Sparkles, Trash2 } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff, Pencil, Plus, RefreshCw, Search, Sparkles, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,8 @@ const CatalogoSite = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedEquipment, setSelectedEquipment] = useState<any | null>(null);
   const [editingItem, setEditingItem] = useState<any | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerSearch, setPickerSearch] = useState("");
 
   useEffect(() => {
     fetchAllData?.();
@@ -94,9 +97,14 @@ const CatalogoSite = () => {
               para personalizar seu anúncio (fotos, descrição, vídeo, especificações, seções).
             </p>
           </div>
-          <Button variant="outline" onClick={() => fetchAllData?.()}>
-            <RefreshCw className="mr-2 h-4 w-4" /> Atualizar
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button onClick={() => { setPickerSearch(""); setPickerOpen(true); }}>
+              <Plus className="mr-2 h-4 w-4" /> Criar anúncio
+            </Button>
+            <Button variant="outline" onClick={() => fetchAllData?.()}>
+              <RefreshCw className="mr-2 h-4 w-4" /> Atualizar
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-3 gap-3">
@@ -237,6 +245,77 @@ const CatalogoSite = () => {
         equipment={selectedEquipment}
         catalogItem={editingItem}
       />
+
+      <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Criar anúncio</DialogTitle>
+            <DialogDescription>
+              Escolha um equipamento para criar o anúncio. Equipamentos que já têm anúncio aparecem desabilitados.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              autoFocus
+              value={pickerSearch}
+              onChange={(e) => setPickerSearch(e.target.value)}
+              placeholder="Buscar equipamento..."
+              className="pl-9"
+            />
+          </div>
+          <div className="max-h-[55vh] space-y-2 overflow-y-auto">
+            {(equipments || [])
+              .filter((e: any) =>
+                [e?.name, e?.code, e?.category]
+                  .filter(Boolean)
+                  .join(" ")
+                  .toLowerCase()
+                  .includes(pickerSearch.toLowerCase()),
+              )
+              .map((e: any) => {
+                const hasItem = !!catalogByEquipmentId[e.id];
+                const img = e?.imageUrl || e?.imageUrls?.[0] || "https://placehold.co/80x80.png";
+                return (
+                  <button
+                    key={e.id}
+                    type="button"
+                    disabled={hasItem}
+                    onClick={() => {
+                      setPickerOpen(false);
+                      handleEdit(e, null);
+                    }}
+                    className={`flex w-full items-center gap-3 rounded-lg border p-3 text-left transition ${
+                      hasItem
+                        ? "cursor-not-allowed border-border bg-muted/30 opacity-60"
+                        : "border-border hover:border-primary hover:bg-muted/40"
+                    }`}
+                  >
+                    <img src={img} alt={e?.name} className="h-12 w-12 rounded-md border border-border bg-card object-contain p-1" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-bold">{e?.name || "Sem nome"}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {e?.category || "—"} {e?.code ? `· ${e.code}` : ""}
+                      </p>
+                    </div>
+                    {hasItem ? (
+                      <Badge variant="secondary" className="gap-1">
+                        <CheckCircle2 className="h-3 w-3" /> Já cadastrado
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline">Selecionar</Badge>
+                    )}
+                  </button>
+                );
+              })}
+            {(equipments || []).length === 0 && (
+              <p className="rounded-md border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                Nenhum equipamento cadastrado. Cadastre em Equipamentos primeiro.
+              </p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
