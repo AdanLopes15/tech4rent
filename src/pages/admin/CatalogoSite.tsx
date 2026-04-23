@@ -97,9 +97,14 @@ const CatalogoSite = () => {
               para personalizar seu anúncio (fotos, descrição, vídeo, especificações, seções).
             </p>
           </div>
-          <Button variant="outline" onClick={() => fetchAllData?.()}>
-            <RefreshCw className="mr-2 h-4 w-4" /> Atualizar
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button onClick={() => { setPickerSearch(""); setPickerOpen(true); }}>
+              <Plus className="mr-2 h-4 w-4" /> Criar anúncio
+            </Button>
+            <Button variant="outline" onClick={() => fetchAllData?.()}>
+              <RefreshCw className="mr-2 h-4 w-4" /> Atualizar
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-3 gap-3">
