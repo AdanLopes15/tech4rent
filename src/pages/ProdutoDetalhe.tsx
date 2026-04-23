@@ -122,10 +122,15 @@ const ProdutoDetalhe = () => {
   const code = product?.code || product?.model || product?.patrimony || product?.category || "TECH4RENT";
   const description = product?.description || "Projetado para ambientes industriais e operações logísticas intensivas.";
   const whatsappUrl = buildWhatsAppUrl(companySettings?.phone, productName);
-  const customSpecs = Array.isArray(product?.specs) && product.specs.length > 0
+  // ===== Custom data from catalog item (overrides fallback when present) =====
+  const customSpecGroups = Array.isArray(product?.specGroups) && product.specGroups.length > 0
+    ? product.specGroups.filter((g: any) => g?.title || (Array.isArray(g?.rows) && g.rows.length > 0))
+    : null;
+  const legacySpecs = Array.isArray(product?.specs) && product.specs.length > 0
     ? product.specs.map((s: any) => [s.label, s.value])
     : null;
-  const specs = customSpecs || [
+  // Fallback "specs" array (for the right sidebar table) in case nothing custom
+  const fallbackSpecs = [
     ["Categoria", product?.category],
     ["Código", code],
     ["Modelo", product?.model],
@@ -133,10 +138,16 @@ const ProdutoDetalhe = () => {
     ["Finalidade", product?.purpose],
     ["Garantia", "1 ano + assistência no Brasil"],
   ].filter(([, value]) => Boolean(value));
+  const flatSpecs = legacySpecs || fallbackSpecs;
 
   const customTags = Array.isArray(product?.tags) && product.tags.length > 0 ? product.tags : null;
-  const customSections = Array.isArray(product?.sections) ? product.sections.filter((s: any) => s?.title || s?.text || s?.imageUrl) : [];
-  const customBox = Array.isArray(product?.whatsBoxItems) ? product.whatsBoxItems.filter(Boolean) : [];
+  const customSections = Array.isArray(product?.sections)
+    ? product.sections.filter((s: any) => s?.title || s?.text || s?.imageUrl || s?.videoUrl)
+    : [];
+  const customKit = Array.isArray(product?.kitItems) && product.kitItems.length > 0
+    ? product.kitItems.filter((k: any) => k?.name || k?.imageUrl)
+    : null;
+  const legacyBox = Array.isArray(product?.whatsBoxItems) ? product.whatsBoxItems.filter(Boolean) : [];
   const customVideo = product?.videoUrl;
 
   return (
