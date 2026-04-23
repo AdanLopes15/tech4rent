@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useStore } from "@/store";
 import { toast } from "sonner";
 import { createContact } from "@/ai/flows/create-contact-flow";
+import { renderBlock } from "@/lib/site-builder/registry";
+import type { Block } from "@/lib/site-builder/types";
 
 const contactSchema = z.object({
   name: z.string().trim().min(2, "Informe seu nome.").max(100, "Nome muito longo."),
@@ -25,6 +27,9 @@ const buildWhatsAppUrl = (phone?: string, message = "Olá, gostaria de falar com
 
 const Contato = () => {
   const { companySettings } = useStore();
+  const sitePages = useStore((s) => s.sitePages);
+  const publishedBlocks = useMemo<Block[]>(() => (sitePages?.contato?.published || []) as Block[], [sitePages?.contato?.published]);
+  const usePublished = publishedBlocks.length > 0;
   const address = companySettings?.address;
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ name: "", company: "", city: "", interest: "", message: "" });
