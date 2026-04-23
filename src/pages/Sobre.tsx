@@ -7,7 +7,8 @@ import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/store";
 import { renderBlock } from "@/lib/site-builder/registry";
-import type { Block } from "@/lib/site-builder/types";
+import type { Block, PageSeo } from "@/lib/site-builder/types";
+import PageSeoHead from "@/components/site-builder/PageSeoHead";
 
 const defaultDescription =
   "A TECH4RENT é uma marca brasileira especializada em locação e venda de equipamentos para operações de logística, estoque e varejo. Desenvolvemos soluções robustas, pensadas para o dia a dia intenso das operações no Brasil.";

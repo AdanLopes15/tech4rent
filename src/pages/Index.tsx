@@ -11,11 +11,13 @@ import PresenceSection from "@/components/landing/PresenceSection";
 import ResultsSection from "@/components/landing/ResultsSection";
 import VideoShowcaseSection from "@/components/landing/VideoShowcaseSection";
 import { renderBlock } from "@/lib/site-builder/registry";
-import type { Block } from "@/lib/site-builder/types";
+import type { Block, PageSeo } from "@/lib/site-builder/types";
+import PageSeoHead from "@/components/site-builder/PageSeoHead";
 
 const Index = () => {
   const fetchAllData = useStore((s) => s.fetchAllData);
   const homePage = useStore((s) => s.homePage);
+  const sitePages = useStore((s) => s.sitePages);
 
   useEffect(() => {
     fetchAllData(true);
@@ -23,9 +25,15 @@ const Index = () => {
 
   const publishedBlocks = useMemo<Block[]>(() => (homePage?.published || []) as Block[], [homePage?.published]);
   const usePublished = publishedBlocks.length > 0;
+  const seo = (sitePages?.home?.seo as PageSeo) || {};
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <PageSeoHead
+        seo={seo}
+        fallbackTitle="TECH4RENT — Equipamentos para sua operação"
+        fallbackDescription="Locação e venda de equipamentos profissionais para logística, varejo e indústria."
+      />
       <Navbar />
       <main>
         {usePublished ? (

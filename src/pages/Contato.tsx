@@ -10,7 +10,8 @@ import { useStore } from "@/store";
 import { toast } from "sonner";
 import { createContact } from "@/ai/flows/create-contact-flow";
 import { renderBlock } from "@/lib/site-builder/registry";
-import type { Block } from "@/lib/site-builder/types";
+import type { Block, PageSeo } from "@/lib/site-builder/types";
+import PageSeoHead from "@/components/site-builder/PageSeoHead";
 
 const contactSchema = z.object({
   name: z.string().trim().min(2, "Informe seu nome.").max(100, "Nome muito longo."),
