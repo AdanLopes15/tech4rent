@@ -67,6 +67,23 @@ const Sobre = () => {
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
       <main>
+        {usePublished ? (
+          publishedBlocks.filter((b) => b.visible !== false).map((b) => <div key={b.id}>{renderBlock(b)}</div>)
+        ) : (
+        <></>
+        )}
+        {!usePublished && (
+        <></>
+        )}
+      {!usePublished && <></>}
+      {!usePublished && <></>}
+      </main>
+      {!usePublished && (
+        <></>
+      )}
+      {usePublished ? null : (
+      <main>
+        {/* legacy layout below kept as fallback */}
         <section className="relative overflow-hidden bg-foreground py-24 text-background md:py-32">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_28%_32%,hsl(var(--primary)/0.16),transparent_34%)]" />
           <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-background to-background/0" />
