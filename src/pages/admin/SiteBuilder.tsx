@@ -334,6 +334,37 @@ const SiteBuilder = () => {
     toast.success("Rascunho descartado");
   };
 
+  const applyTemplate = (templateBlocks: Block[]) => {
+    if (blocks.length > 0 && !confirm("Aplicar template substituirá todos os blocos atuais. Continuar?")) return;
+    // Garante novos IDs para evitar colisão
+    const fresh = templateBlocks.map((b) => ({ ...b, id: newId() }));
+    setBlocks(fresh);
+    setDirty(true);
+    setSelectedId(null);
+    setTemplatesOpen(false);
+    toast.success("Template aplicado. Lembre-se de salvar.");
+  };
+
+  const handleSaveSeo = async () => {
+    try {
+      setSavingSeo(true);
+      await savePageSeo(slug, seo);
+      setSeoDirty(false);
+      toast.success("SEO salvo");
+    } catch (e: any) {
+      toast.error(e?.message || "Erro ao salvar SEO");
+    } finally {
+      setSavingSeo(false);
+    }
+  };
+
+  const updateSeo = (key: keyof PageSeo, value: any) => {
+    setSeo((prev) => ({ ...prev, [key]: value }));
+    setSeoDirty(true);
+  };
+
+  const templates = useMemo(() => getTemplatesForPage(slug), [slug]);
+
   const groupedFields = useMemo(() => {
     if (!meta) return new Map<string, PropField[]>();
     const map = new Map<string, PropField[]>();
