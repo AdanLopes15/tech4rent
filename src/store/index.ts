@@ -263,6 +263,7 @@ type State = {
   smtpSettings: SmtpSettings;
   rentalClauses: Clause[];
   saleClauses: Clause[];
+  homePage: { draft: any[]; published: any[]; updatedAt?: any; publishedAt?: any };
   loading: boolean;
   isQuoteDialogOpen: boolean;
 };
@@ -358,6 +359,9 @@ type Actions = {
     siteFiles: { [path: string]: File | null },
   ) => Promise<void>;
   updateSmtpSettings: (settings: SmtpSettings) => Promise<void>;
+  saveHomeDraft: (blocks: any[]) => Promise<void>;
+  publishHome: () => Promise<void>;
+  resetHomeDraft: () => Promise<void>;
   updateRentalClauses: (clauses: Clause[]) => Promise<void>;
   updateSaleClauses: (clauses: Clause[]) => Promise<void>;
 };
@@ -827,6 +831,7 @@ const useStore = create<State & Actions>((set, get) => {
     siteContacts: [],
     notifications: [],
     companySettings: initialCompanySettings,
+    homePage: { draft: [], published: [] },
     smtpSettings: initialSmtpSettings,
     rentalClauses: initialRentalClauses,
     saleClauses: initialSaleClauses,
