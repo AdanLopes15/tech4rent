@@ -23,13 +23,17 @@ const buildWhatsAppUrl = (phone?: string, product?: string) => {
   return digits ? `https://wa.me/55${digits}?text=${encodeURIComponent(message)}` : "#";
 };
 
-const getImages = (equipment: any) => {
-  const urls = Array.isArray(equipment?.imageUrls) ? equipment.imageUrls.filter((url: string) => isValidHttpUrl(url)) : [];
+const getImages = (product: any) => {
+  const fromCatalog = Array.isArray(product?.galleryUrls) ? product.galleryUrls.filter((url: string) => isValidHttpUrl(url)) : [];
+  const hero = isValidHttpUrl(product?.heroImageUrl) ? [product.heroImageUrl] : [];
+  const merged = [...hero, ...fromCatalog];
+  if (merged.length > 0) return Array.from(new Set(merged));
+  const urls = Array.isArray(product?.imageUrls) ? product.imageUrls.filter((url: string) => isValidHttpUrl(url)) : [];
   if (urls.length > 0) return urls;
-  return [isValidHttpUrl(equipment?.imageUrl) ? equipment.imageUrl : "https://placehold.co/900x900.png"];
+  return [isValidHttpUrl(product?.imageUrl) ? product.imageUrl : "https://placehold.co/900x900.png"];
 };
 
-const getProductPath = (equipment: any) => `/produtos/${encodeURIComponent(String(equipment?.id || equipment?.name || "produto"))}`;
+const getProductPath = (item: any) => `/produtos/${encodeURIComponent(String(item?.id || item?.name || "produto"))}`;
 
 const featureCards = [
   { icon: Smartphone, title: "Android", description: "Sistema pronto para operação" },
@@ -50,17 +54,40 @@ const operationPerks = ["Leitura 1D/2D de alta performance", "Funciona com códi
 const ProdutoDetalhe = () => {
   const { productId } = useParams();
   const fetchAllData = useStore((s) => s.fetchAllData);
-  const { companySettings, equipments } = useStore();
+  const { companySettings, equipments, catalogItems } = useStore();
   const decodedId = productId ? decodeURIComponent(productId) : "";
 
   useEffect(() => {
     fetchAllData(true);
   }, [fetchAllData]);
 
-  const product = useMemo(
+  const catalogItem = useMemo(() => {
+    if (decodedId.startsWith("cat-")) {
+      const realId = decodedId.replace(/^cat-/, "");
+      return (catalogItems || []).find((c: any) => String(c.id) === realId);
+    }
+    // fallback: catalog item linked to the same equipmentId or matching by name
+    return (catalogItems || []).find(
+      (c: any) => c.published && (String(c.equipmentId) === decodedId || String(c.name) === decodedId),
+    );
+  }, [catalogItems, decodedId]);
+
+  const baseEquipment = useMemo(
     () => equipments.find((equipment: any) => String(equipment?.id) === decodedId || String(equipment?.name) === decodedId),
     [equipments, decodedId],
   );
+
+  // Merge: catalog item overrides equipment fields when present
+  const product = useMemo(() => {
+    if (!catalogItem && !baseEquipment) return null;
+    if (!catalogItem) return baseEquipment;
+    const linkedEquip = baseEquipment || equipments.find((e: any) => String(e.id) === String(catalogItem.equipmentId));
+    return {
+      ...(linkedEquip || {}),
+      ...catalogItem,
+      description: catalogItem.longDescription || catalogItem.shortDescription || linkedEquip?.description,
+    };
+  }, [catalogItem, baseEquipment, equipments]);
 
   const images = useMemo(() => getImages(product), [product]);
   const [selectedImage, setSelectedImage] = useState(images[0]);
@@ -70,8 +97,8 @@ const ProdutoDetalhe = () => {
   }, [images]);
 
   const relatedProducts = useMemo(
-    () => equipments.filter((equipment: any) => equipment?.id !== product?.id).slice(0, 3),
-    [equipments, product?.id],
+    () => equipments.filter((equipment: any) => equipment?.id !== product?.id && equipment?.id !== catalogItem?.equipmentId).slice(0, 3),
+    [equipments, product?.id, catalogItem?.equipmentId],
   );
 
   if (!product) {
