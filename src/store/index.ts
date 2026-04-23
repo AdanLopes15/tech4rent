@@ -39,12 +39,27 @@ export type Differentiator = {
   description: string;
 };
 
+export type MediaSource = {
+  imageUrl?: string;
+  videoUrl?: string;
+};
+
+export type StatItem = { icon?: string; value: string; label: string };
+export type IconTextItem = { icon?: string; title: string; description?: string };
+export type SimpleLinkItem = { label: string; url?: string };
+
+/* ===========================
+ * Estrutura COMPLETA editável
+ * =========================== */
 export type SiteContent = {
+  /* Compatibilidade com versão anterior (usada em vários lugares) */
   hero: {
     title: string;
     subtitle: string;
     backgroundImageUrl: string;
     backgroundVideoUrl?: string;
+    primaryCtaLabel?: string;
+    secondaryCtaLabel?: string;
   };
   featuredProduct: {
     tag: string;
@@ -73,6 +88,96 @@ export type SiteContent = {
     description?: string;
     backgroundImageUrl: string;
     backgroundVideoUrl?: string;
+  };
+
+  /* ====== HOME (página inicial) ====== */
+  home?: {
+    benefits?: { title: string; description: string; icon?: string }[];
+    equipmentHeader?: { eyebrow?: string; title?: string; subtitle?: string };
+    presence?: {
+      logosTitle?: string;
+      logos?: string[];
+      sectionTitle?: string;
+      stats?: StatItem[];
+      segmentsTitle?: string;
+      segments?: IconTextItem[];
+    };
+    results?: {
+      eyebrow?: string;
+      title?: string;
+      items?: { tag: string; title: string; description: string; icon?: string }[];
+    };
+    video?: {
+      title?: string;
+      videoUrl?: string;
+      placeholderTopText?: string;
+      placeholderBottomText?: string;
+    };
+  };
+
+  /* ====== PRODUTOS ====== */
+  produtos?: {
+    hero?: { title?: string; subtitle?: string; ctaLabel?: string };
+    emptyTitle?: string;
+    emptySubtitle?: string;
+    fallbackTags?: { icon?: string; label: string }[];
+  };
+
+  /* ====== SOBRE ====== */
+  sobre?: {
+    hero?: { eyebrow?: string; title?: string; subtitle?: string; backgroundImageUrl?: string; backgroundVideoUrl?: string };
+    quemSomos?: { eyebrow?: string; title?: string; titleHighlight?: string; paragraphs?: string[] };
+    mvp?: { icon?: string; title: string; text: string }[];
+    stats?: StatItem[];
+    estrutura?: {
+      eyebrow?: string;
+      title?: string;
+      items?: { title: string; description: string; imageUrl?: string }[];
+    };
+    duvidas?: {
+      eyebrow?: string;
+      title?: string;
+      items?: { icon?: string; text: string }[];
+    };
+    valores?: {
+      eyebrow?: string;
+      title?: string;
+      items?: { icon?: string; title: string; description: string }[];
+    };
+    localizacao?: {
+      eyebrow?: string;
+      title?: string;
+    };
+    cta?: { title?: string; subtitle?: string; buttonLabel?: string };
+  };
+
+  /* ====== CONTATO ====== */
+  contato?: {
+    hero?: { eyebrow?: string; title?: string; subtitle?: string; backgroundImageUrl?: string; backgroundVideoUrl?: string };
+    channels?: { icon?: string; title: string; subtitle: string; value: string; actionLabel?: string }[];
+    form?: { eyebrow?: string; title?: string; subtitle?: string; submitLabel?: string; whatsappLabel?: string; interests?: string[] };
+  };
+
+  /* ====== NAVBAR ====== */
+  navbar?: {
+    productsLabel?: string;
+    questionsLabel?: string;
+    aboutLabel?: string;
+    contactLabel?: string;
+    ctaLabel?: string;
+    restrictedAreaLabel?: string;
+  };
+
+  /* ====== FOOTER ====== */
+  footer?: {
+    tagline?: string;
+    columns?: {
+      title: string;
+      items: string[];
+    }[];
+    hoursLabel?: string;
+    copyrightExtra?: string;
+    restrictedAreaLabel?: string;
   };
 };
 
@@ -244,6 +349,10 @@ type Actions = {
     siteFiles: { [key: string]: File | null },
     styleSettings: StyleSettings,
   ) => Promise<void>;
+  updateSiteContent: (
+    siteContent: SiteContent,
+    siteFiles: { [path: string]: File | null },
+  ) => Promise<void>;
   updateSmtpSettings: (settings: SmtpSettings) => Promise<void>;
   updateRentalClauses: (clauses: Clause[]) => Promise<void>;
   updateSaleClauses: (clauses: Clause[]) => Promise<void>;
@@ -282,6 +391,8 @@ const initialCompanySettings: CompanySettings = {
       subtitle: "Qualidade, segurança e a tecnologia que você precisa para alcançar os melhores resultados.",
       backgroundImageUrl: "",
       backgroundVideoUrl: "",
+      primaryCtaLabel: "Ver Catálogo",
+      secondaryCtaLabel: "Falar no WhatsApp",
     },
     featuredProduct: {
       tag: "Soluções para grandes empresas",
@@ -291,24 +402,13 @@ const initialCompanySettings: CompanySettings = {
       imageUrl: "https://placehold.co/400x400.png",
       backgroundImageUrl: "",
     },
-    productHighlight: {
-      backgroundImageUrl: "",
-    },
+    productHighlight: { backgroundImageUrl: "" },
     differentiators: {
       title: "Nossos Diferenciais",
       items: [
-        {
-          title: "Qualidade Garantida",
-          description: "Equipamentos modernos e com manutenção em dia para sua segurança.",
-        },
-        {
-          title: "Atendimento Especializado",
-          description: "Nossa equipe está pronta para te ajudar a escolher a melhor solução.",
-        },
-        {
-          title: "Suporte Completo",
-          description: "Oferecemos suporte técnico durante todo o período de locação.",
-        },
+        { title: "Qualidade Garantida", description: "Equipamentos modernos e com manutenção em dia para sua segurança." },
+        { title: "Atendimento Especializado", description: "Nossa equipe está pronta para te ajudar a escolher a melhor solução." },
+        { title: "Suporte Completo", description: "Oferecemos suporte técnico durante todo o período de locação." },
       ],
     },
     about: {
@@ -318,6 +418,170 @@ const initialCompanySettings: CompanySettings = {
       backgroundImageUrl: "",
     },
     contact: { backgroundImageUrl: "" },
+
+    home: {
+      benefits: [
+        { icon: "Shield", title: "Garantia de 1 ano", description: "Todos os produtos com garantia" },
+        { icon: "BriefcaseBusiness", title: "Solução para sua operação", description: "Indicação conforme sua rotina logística" },
+        { icon: "Headphones", title: "Suporte especializado", description: "Atendimento técnico dedicado" },
+      ],
+      equipmentHeader: { eyebrow: "Catálogo", title: "Equipamentos em destaque", subtitle: "Conheça os principais produtos da nossa frota." },
+      presence: {
+        logosTitle: "Empresas que tiveram resultados com a Tech4Rent",
+        logos: ["Pelog", "Memphis Courier", "CEVA Logistics", "VDC Log", "Porto Guimarães", "Maxton"],
+        sectionTitle: "Presença em todo o Brasil",
+        stats: [
+          { icon: "Package", value: "10.000+", label: "Aparelhos em operação" },
+          { icon: "Users", value: "1.000+", label: "Clientes ativos" },
+          { icon: "MapPin", value: "20+", label: "Estados atendidos" },
+        ],
+        segmentsTitle: "Segmentos atendidos",
+        segments: [
+          { icon: "Truck", title: "Logística & Transporte" },
+          { icon: "ShoppingCart", title: "E-commerce & Fulfillment" },
+          { icon: "Warehouse", title: "Varejo & Atacado" },
+          { icon: "Factory", title: "Indústria & Manufatura" },
+          { icon: "Heart", title: "Saúde & Hospitalar" },
+          { icon: "Package", title: "Alimentício & Frigorífico" },
+        ],
+      },
+      results: {
+        eyebrow: "Cases",
+        title: "Resultados reais de quem usa Tech4Rent",
+        items: [
+          { icon: "TrendingUp", tag: "E-commerce", title: "Redução de 40% nos erros de leitura", description: "Operação de picking com SKUs migrou de coletores antigos para equipamentos atualizados. Os erros de separação caíram quase pela metade." },
+          { icon: "Zap", tag: "Logística", title: "2x mais agilidade no picking", description: "Transportadora substituiu leitores convencionais por PDAs com leitor 2D integrado. O tempo médio de separação por pedido caiu de 4 para 2 minutos." },
+          { icon: "Clock", tag: "Distribuição", title: "Implantação em 5 dias úteis", description: "Distribuidora recebeu equipamentos configurados e prontos para uso. Operação rodando sem paradas desde o primeiro dia." },
+        ],
+      },
+      video: {
+        title: "Veja na prática",
+        videoUrl: "",
+        placeholderTopText: "Coletor de dados",
+        placeholderBottomText: "TC60",
+      },
+    },
+
+    produtos: {
+      hero: { title: "Catálogo de Produtos", subtitle: "Coletores, leitores e impressoras para sua operação", ctaLabel: "Baixar Catálogo PDF" },
+      emptyTitle: "Nenhum produto encontrado",
+      emptySubtitle: "Tente ajustar sua busca ou remover filtros.",
+      fallbackTags: [
+        { icon: "Smartphone", label: "Android" },
+        { icon: "Wifi", label: "Wi-Fi" },
+        { icon: "Bluetooth", label: "Bluetooth" },
+        { icon: "Usb", label: "USB" },
+      ],
+    },
+
+    sobre: {
+      hero: {
+        eyebrow: "Desde 2020 · Rio Claro, SP",
+        title: "Sobre a TECH4RENT",
+        subtitle: "Tecnologia e equipamentos para quem move o Brasil",
+        backgroundImageUrl: "",
+        backgroundVideoUrl: "",
+      },
+      quemSomos: {
+        eyebrow: "Quem somos",
+        title: "Uma marca brasileira",
+        titleHighlight: "feita para o campo de operação",
+        paragraphs: [
+          "A TECH4RENT é uma marca brasileira especializada em locação e venda de equipamentos para operações de logística, estoque e varejo. Desenvolvemos soluções robustas, pensadas para o dia a dia intenso das operações no Brasil.",
+          "Nossos equipamentos são projetados para entregar performance, durabilidade e conectividade, atendendo desde pequenas empresas até grandes centros de distribuição.",
+          "Garantimos atendimento próximo, suporte técnico especializado e condições comerciais competitivas para empresas de todos os portes.",
+        ],
+      },
+      mvp: [
+        { icon: "Target", title: "Missão", text: "Fornecer soluções tecnológicas que aceleram e simplificam operações de logística e varejo em todo o Brasil." },
+        { icon: "Eye", title: "Visão", text: "Ser referência nacional em equipamentos para automação de operações, reconhecida pela qualidade e atendimento." },
+        { icon: "Heart", title: "Propósito", text: "Empoderar empresas com tecnologia que transforma a eficiência e competitividade de suas operações." },
+      ],
+      stats: [
+        { value: "500+", label: "Clientes atendidos" },
+        { value: "20+", label: "Estados atendidos" },
+        { value: "98%", label: "Satisfação" },
+      ],
+      estrutura: {
+        eyebrow: "Por dentro",
+        title: "Conheça nossa estrutura",
+        items: [
+          { title: "Entrada Tech4Rent", description: "Estrutura preparada para receber clientes e parceiros com conforto e profissionalismo.", imageUrl: "" },
+          { title: "Bancada de suporte", description: "Equipamentos testados e configurados antes do envio, com diagnóstico técnico e reparo.", imageUrl: "" },
+          { title: "Equipamentos em operação", description: "PDAs, leitores e impressoras em uso no dia a dia de centros de distribuição e operações logísticas.", imageUrl: "" },
+        ],
+      },
+      duvidas: {
+        eyebrow: "Confiança",
+        title: "Por que escolher a TECH4RENT?",
+        items: [
+          { icon: "BR", text: "Empresa 100% brasileira" },
+          { icon: "🛠️", text: "Suporte técnico no Brasil" },
+          { icon: "✅", text: "Garantia de 1 ano" },
+          { icon: "🎯", text: "Atendimento técnico dedicado" },
+          { icon: "💪", text: "Robustez garantida na operação" },
+        ],
+      },
+      valores: {
+        eyebrow: "Princípios",
+        title: "Nossos Valores",
+        items: [
+          { icon: "Shield", title: "Confiança", description: "Produtos de qualidade com garantia e suporte técnico no Brasil." },
+          { icon: "Zap", title: "Agilidade", description: "Atendimento rápido e entregas em todo o Brasil." },
+          { icon: "Users", title: "Parceria", description: "Relações de longo prazo com clientes, equipes e parceiros." },
+        ],
+      },
+      localizacao: { eyebrow: "Localização", title: "Onde Estamos" },
+      cta: {
+        title: "Pronto para modernizar sua operação?",
+        subtitle: "Fale com nosso time comercial e descubra o melhor equipamento para sua necessidade.",
+        buttonLabel: "Falar com especialista",
+      },
+    },
+
+    contato: {
+      hero: {
+        eyebrow: "Fale conosco",
+        title: "Contato",
+        subtitle: "Estamos prontos para ajudar. Escolha o melhor canal para falar conosco.",
+        backgroundImageUrl: "",
+        backgroundVideoUrl: "",
+      },
+      channels: [
+        { icon: "MessageCircle", title: "WhatsApp", subtitle: "Atendimento rápido e direto", value: "", actionLabel: "Iniciar conversa" },
+        { icon: "Mail", title: "E-mail", subtitle: "Para orçamentos e documentos", value: "", actionLabel: "Enviar e-mail" },
+        { icon: "Clock", title: "Horário", subtitle: "Atendimento comercial", value: "Segunda a Sexta, 8h às 18h" },
+        { icon: "MapPin", title: "Localização", subtitle: "Atendemos todo o Brasil", value: "" },
+      ],
+      form: {
+        eyebrow: "Formulário",
+        title: "Envie sua mensagem",
+        subtitle: "Preencha o formulário e entraremos em contato",
+        submitLabel: "Enviar Mensagem",
+        whatsappLabel: "Prefiro WhatsApp",
+        interests: ["Locação de equipamentos", "Compra de equipamentos", "Assistência técnica", "Suporte comercial"],
+      },
+    },
+
+    navbar: {
+      productsLabel: "Produtos",
+      questionsLabel: "Dúvidas",
+      aboutLabel: "Sobre",
+      contactLabel: "Contato",
+      ctaLabel: "Fale Conosco",
+      restrictedAreaLabel: "Área Restrita",
+    },
+
+    footer: {
+      tagline: "Coletores, leitores, tablets e equipamentos para logística e operação.",
+      columns: [
+        { title: "Navegação", items: ["Produtos", "Coletores PDA", "Leitores de Código", "Impressoras Térmicas"] },
+        { title: "Institucional", items: ["Sobre a Tech4Rent", "Suporte e Contato", "Política de Devolução", "Dúvidas Frequentes"] },
+      ],
+      hoursLabel: "Segunda a Sexta, 8h às 18h",
+      copyrightExtra: "Empresa orgulhosamente brasileira BR",
+      restrictedAreaLabel: "Área Restrita",
+    },
   },
   styleSettings: {
     typography: {
@@ -1836,51 +2100,69 @@ const useStore = create<State & Actions>((set, get) => {
         return await getDownloadURL(snapshot.ref);
       };
 
-      let updatedSettings = JSON.parse(JSON.stringify({ ...settings, siteContent, styleSettings }));
+      let updatedSettings: any = JSON.parse(JSON.stringify({ ...settings, siteContent, styleSettings }));
 
       if (logoFile) {
-        updatedSettings.logoUrl = await uploadAndGetURL(logoFile, `company/logo-${logoFile.name}`);
+        updatedSettings.logoUrl = await uploadAndGetURL(logoFile, `company/logo-${Date.now()}-${logoFile.name}`);
       }
 
       if (siteLogoFile) {
-        updatedSettings.siteLogoUrl = await uploadAndGetURL(siteLogoFile, `company/siteLogo-${siteLogoFile.name}`);
+        updatedSettings.siteLogoUrl = await uploadAndGetURL(siteLogoFile, `company/siteLogo-${Date.now()}-${siteLogoFile.name}`);
       }
 
-      const fileKeys: { [key: string]: keyof SiteContent } = {
-        featuredProductImage: "featuredProduct",
-        heroBackgroundImage: "hero",
-        heroBackgroundVideo: "hero",
-        featuredProductBackgroundImage: "featuredProduct",
-        aboutBackgroundImage: "about",
-        contactBackgroundImage: "contact",
-        productHighlightBackgroundImage: "productHighlight",
+      // Mapeamento legado (chaves não-dot)
+      const legacyKeys: { [key: string]: { section: string; field: string } } = {
+        featuredProductImage: { section: "featuredProduct", field: "imageUrl" },
+        heroBackgroundImage: { section: "hero", field: "backgroundImageUrl" },
+        heroBackgroundVideo: { section: "hero", field: "backgroundVideoUrl" },
+        featuredProductBackgroundImage: { section: "featuredProduct", field: "backgroundImageUrl" },
+        aboutBackgroundImage: { section: "about", field: "backgroundImageUrl" },
+        contactBackgroundImage: { section: "contact", field: "backgroundImageUrl" },
+        productHighlightBackgroundImage: { section: "productHighlight", field: "backgroundImageUrl" },
+      };
+
+      const setByPath = (obj: any, path: string, value: any) => {
+        const parts = path.split(".");
+        let current = obj;
+        for (let i = 0; i < parts.length - 1; i++) {
+          const key = parts[i];
+          const nextIsArray = /^\d+$/.test(parts[i + 1]);
+          if (current[key] === undefined || current[key] === null) current[key] = nextIsArray ? [] : {};
+          current = current[key];
+        }
+        current[parts[parts.length - 1]] = value;
       };
 
       for (const key in siteFiles) {
-        if (siteFiles[key]) {
-          const file = siteFiles[key]!;
-          const downloadURL = await uploadAndGetURL(file, `site/${key}-${file.name}`);
+        const file = siteFiles[key];
+        if (!file) continue;
+        const downloadURL = await uploadAndGetURL(file, `site/${key.replace(/\./g, "_")}-${Date.now()}-${file.name}`);
 
-          const sectionKey = fileKeys[key];
-          if (sectionKey) {
-            if (!updatedSettings.siteContent[sectionKey]) {
-              (updatedSettings.siteContent as any)[sectionKey] = {};
-            }
-
-            if (key === "featuredProductImage") {
-              (updatedSettings.siteContent[sectionKey] as any).imageUrl = downloadURL;
-            } else if (key === "heroBackgroundVideo") {
-              (updatedSettings.siteContent[sectionKey] as any).backgroundVideoUrl = downloadURL;
-            } else {
-              (updatedSettings.siteContent[sectionKey] as any).backgroundImageUrl = downloadURL;
-            }
-          }
+        if (key.includes(".")) {
+          // Caminho dot-notation (ex: home.video.videoUrl, sobre.estrutura.items.0.imageUrl)
+          setByPath(updatedSettings.siteContent, key, downloadURL);
+        } else if (legacyKeys[key]) {
+          const { section, field } = legacyKeys[key];
+          if (!updatedSettings.siteContent[section]) updatedSettings.siteContent[section] = {};
+          updatedSettings.siteContent[section][field] = downloadURL;
         }
       }
 
       const settingsRef = doc(db, "settings", "company");
       await setDoc(settingsRef, updatedSettings, { merge: true });
       set({ companySettings: updatedSettings });
+    },
+
+    updateSiteContent: async (siteContent, siteFiles) => {
+      const { companySettings } = get();
+      await get().updateCompanySettings(
+        companySettings,
+        null,
+        null,
+        siteContent,
+        siteFiles,
+        companySettings.styleSettings,
+      );
     },
 
     updateSmtpSettings: async (settings) => {
