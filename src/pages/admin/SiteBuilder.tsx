@@ -402,6 +402,41 @@ const SiteBuilder = () => {
             <Button size="icon" variant="ghost" className="h-7 w-7" onClick={undo} disabled={!canUndo} title="Desfazer (Ctrl+Z)"><Undo2 className="h-3.5 w-3.5" /></Button>
             <Button size="icon" variant="ghost" className="h-7 w-7" onClick={redo} disabled={!canRedo} title="Refazer (Ctrl+Shift+Z)"><Redo2 className="h-3.5 w-3.5" /></Button>
           </div>
+          <Dialog open={templatesOpen} onOpenChange={setTemplatesOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" variant="outline" className="gap-1" title="Aplicar template pré-pronto">
+                <LayoutTemplate className="h-3.5 w-3.5" /> Templates
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl">
+              <DialogHeader>
+                <DialogTitle>Templates para {pageDef.label}</DialogTitle>
+                <DialogDescription>
+                  Escolha um template pré-pronto. Os blocos atuais serão substituídos.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 max-h-[60vh] overflow-auto pr-1">
+                {templates.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => applyTemplate(t.build())}
+                    className="group flex flex-col items-start gap-2 rounded-lg border border-border bg-card p-4 text-left transition-all hover:border-primary hover:shadow-md"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded bg-primary/10">
+                        <LayoutTemplate className="h-4 w-4 text-primary" />
+                      </div>
+                      <div className="text-sm font-bold text-foreground">{t.name}</div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{t.description}</p>
+                    <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                      {t.build().length} blocos
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
           <Button size="sm" variant={inlineMode ? "default" : "outline"} onClick={() => setInlineMode((v) => !v)} className="gap-1" title="Editar textos no canvas">
             <MousePointerClick className="h-3.5 w-3.5" /> {inlineMode ? "Inline ativo" : "Editar inline"}
           </Button>
