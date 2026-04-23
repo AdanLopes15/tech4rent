@@ -179,20 +179,45 @@ const ProdutoDetalhe = () => {
           </div>
         </section>
 
-        <section className="py-20 text-background" style={{ background: "linear-gradient(180deg, hsl(var(--foreground)), hsl(var(--foreground) / 0.94))" }}>
+        <section className="py-20 text-background" style={{ background: "linear-gradient(180deg, hsl(var(--foreground)), hsl(var(--foreground) / 0.96))" }}>
           <div className="container max-w-5xl">
             <h2 className="text-center text-3xl font-black md:text-4xl">Detalhes do <span className="text-primary">{productName}</span></h2>
-            <div className="mt-12 grid gap-10 lg:grid-cols-[0.9fr_1fr] lg:items-center">
+            <div className="mx-auto mt-8 max-w-3xl overflow-hidden rounded-lg border border-background/10 bg-primary/10 p-4 shadow-2xl shadow-foreground/30">
+              <img src={selectedImage} alt={`Demonstração do ${productName}`} className="mx-auto h-72 w-full object-contain" loading="lazy" />
+            </div>
+
+            <div className="mt-14 grid gap-10 lg:grid-cols-[0.9fr_1fr] lg:items-center">
               <div>
-                <div className="mb-7 h-1 w-16 bg-primary" />
+                <div className="mb-5 h-1 w-16 bg-primary" />
                 <h3 className="text-4xl font-black leading-tight">AGUENTA O TRANCO. <span className="text-primary">PONTO.</span></h3>
-                <p className="mt-5 text-lg leading-relaxed text-background/70">Equipamento preparado para operação intensa, logística, estoque, expedição e loja.</p>
+                <p className="mt-5 text-lg leading-relaxed text-background/70">Construção robusta para operação intensa em logística, estoque, expedição e loja.</p>
                 <div className="mt-6 rounded-lg border border-background/15 bg-background/10 p-5 text-sm font-bold italic text-background/85">
                   “Não é para ficar bonito na mesa. É para sobreviver no chão.”
                 </div>
               </div>
-              <div className="overflow-hidden rounded-lg border border-background/10 bg-background/10 p-8 shadow-2xl shadow-foreground/30">
-                <img src={selectedImage} alt={`Detalhes do ${productName}`} className="mx-auto h-80 w-full object-contain" loading="lazy" />
+              <div className="overflow-hidden rounded-lg border border-background/10 bg-background/10 p-8">
+                <img src={selectedImage} alt={`Resistência do ${productName}`} className="mx-auto h-80 w-full object-contain" loading="lazy" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-muted py-20 text-foreground">
+          <div className="container max-w-5xl">
+            <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+              <div className="overflow-hidden rounded-lg border border-border bg-card p-8 shadow-sm">
+                <img src={selectedImage} alt={`Leitura rápida com ${productName}`} className="mx-auto h-80 w-full object-contain" loading="lazy" />
+              </div>
+              <div>
+                <div className="mb-5 h-1 w-14 bg-primary" />
+                <h2 className="text-3xl font-black leading-tight">LEITURA RÁPIDA. <span className="text-primary">MESMO COM O CÓDIGO FEIO.</span></h2>
+                <p className="mt-4 text-base leading-relaxed text-muted-foreground">Leitura 1D/2D de alta performance, inclusive em códigos danificados ou com impressão ruim.</p>
+                <ul className="mt-6 space-y-3 text-sm font-semibold text-foreground">
+                  {operationPerks.map((perk) => (
+                    <li key={perk} className="flex items-center gap-3"><CheckCircle2 className="h-5 w-5 text-primary" /> {perk}</li>
+                  ))}
+                </ul>
+                <p className="mt-6 text-sm font-black italic text-muted-foreground">“Se o código existe, o <span className="text-primary">{code}</span> faz a leitura.”</p>
               </div>
             </div>
           </div>
