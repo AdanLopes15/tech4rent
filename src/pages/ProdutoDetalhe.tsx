@@ -227,102 +227,167 @@ const ProdutoDetalhe = () => {
           </div>
         </section>
 
-        <section className="py-20 text-background" style={{ background: "linear-gradient(180deg, hsl(var(--foreground)), hsl(var(--foreground) / 0.96))" }}>
-          <div className="container max-w-5xl">
-            <h2 className="text-center text-3xl font-black md:text-4xl">Detalhes do <span className="text-primary">{productName}</span></h2>
-            <div className="mx-auto mt-8 max-w-3xl overflow-hidden rounded-lg border border-background/10 bg-primary/10 p-4 shadow-2xl shadow-foreground/30">
-              <img src={selectedImage} alt={`Demonstração do ${productName}`} className="mx-auto h-72 w-full object-contain" loading="lazy" />
+        {/* ============ SEÇÕES LIVRES (substitui as fixas quando configuradas) ============ */}
+        {customSections.length > 0 ? (
+          <section className="bg-background py-16 md:py-20">
+            <div className="container max-w-5xl space-y-16">
+              {customSections.map((sec: any, i: number) => {
+                const mediaOnRight = (sec.mediaSide || "left") === "right";
+                const hasMedia = sec.imageUrl || sec.videoUrl;
+                return (
+                  <div key={i} className={`grid gap-10 lg:grid-cols-2 lg:items-center ${mediaOnRight ? "lg:[&>*:first-child]:order-1 lg:[&>*:last-child]:order-2" : "lg:[&>*:first-child]:order-1"}`}>
+                    {hasMedia && !mediaOnRight && (
+                      <div className="overflow-hidden rounded-lg border border-border bg-muted p-6">
+                        {sec.videoUrl ? (
+                          <video src={sec.videoUrl} className="mx-auto h-72 w-full object-contain" autoPlay muted loop playsInline />
+                        ) : (
+                          <img src={sec.imageUrl} alt={sec.title || `Seção ${i + 1}`} className="mx-auto h-72 w-full object-contain" loading="lazy" />
+                        )}
+                      </div>
+                    )}
+                    <div>
+                      <div className="mb-5 h-1 w-14 bg-primary" />
+                      {sec.title && <h2 className="text-3xl font-black leading-tight md:text-4xl">{sec.title}</h2>}
+                      {sec.text && <p className="mt-4 whitespace-pre-line text-base leading-relaxed text-muted-foreground">{sec.text}</p>}
+                      {sec.highlight && (
+                        <div className="mt-6 rounded-lg border border-border bg-muted p-4 text-sm font-bold italic text-foreground">
+                          “{sec.highlight}”
+                        </div>
+                      )}
+                    </div>
+                    {hasMedia && mediaOnRight && (
+                      <div className="overflow-hidden rounded-lg border border-border bg-muted p-6">
+                        {sec.videoUrl ? (
+                          <video src={sec.videoUrl} className="mx-auto h-72 w-full object-contain" autoPlay muted loop playsInline />
+                        ) : (
+                          <img src={sec.imageUrl} alt={sec.title || `Seção ${i + 1}`} className="mx-auto h-72 w-full object-contain" loading="lazy" />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-
-            <div className="mt-14 grid gap-10 lg:grid-cols-[0.9fr_1fr] lg:items-center">
-              <div>
-                <div className="mb-5 h-1 w-16 bg-primary" />
-                <h3 className="text-4xl font-black leading-tight">AGUENTA O TRANCO. <span className="text-primary">PONTO.</span></h3>
-                <p className="mt-5 text-lg leading-relaxed text-background/70">Construção robusta para operação intensa em logística, estoque, expedição e loja.</p>
-                <div className="mt-6 rounded-lg border border-background/15 bg-background/10 p-5 text-sm font-bold italic text-background/85">
-                  “Não é para ficar bonito na mesa. É para sobreviver no chão.”
+          </section>
+        ) : (
+          <>
+            <section className="py-20 text-background" style={{ background: "linear-gradient(180deg, hsl(var(--foreground)), hsl(var(--foreground) / 0.96))" }}>
+              <div className="container max-w-5xl">
+                <h2 className="text-center text-3xl font-black md:text-4xl">Detalhes do <span className="text-primary">{productName}</span></h2>
+                <div className="mx-auto mt-8 max-w-3xl overflow-hidden rounded-lg border border-background/10 bg-primary/10 p-4 shadow-2xl shadow-foreground/30">
+                  <img src={selectedImage} alt={`Demonstração do ${productName}`} className="mx-auto h-72 w-full object-contain" loading="lazy" />
+                </div>
+                <div className="mt-14 grid gap-10 lg:grid-cols-[0.9fr_1fr] lg:items-center">
+                  <div>
+                    <div className="mb-5 h-1 w-16 bg-primary" />
+                    <h3 className="text-4xl font-black leading-tight">AGUENTA O TRANCO. <span className="text-primary">PONTO.</span></h3>
+                    <p className="mt-5 text-lg leading-relaxed text-background/70">Construção robusta para operação intensa em logística, estoque, expedição e loja.</p>
+                    <div className="mt-6 rounded-lg border border-background/15 bg-background/10 p-5 text-sm font-bold italic text-background/85">
+                      “Não é para ficar bonito na mesa. É para sobreviver no chão.”
+                    </div>
+                  </div>
+                  <div className="overflow-hidden rounded-lg border border-background/10 bg-background/10 p-8">
+                    <img src={selectedImage} alt={`Resistência do ${productName}`} className="mx-auto h-80 w-full object-contain" loading="lazy" />
+                  </div>
                 </div>
               </div>
-              <div className="overflow-hidden rounded-lg border border-background/10 bg-background/10 p-8">
-                <img src={selectedImage} alt={`Resistência do ${productName}`} className="mx-auto h-80 w-full object-contain" loading="lazy" />
-              </div>
-            </div>
-          </div>
-        </section>
+            </section>
 
-        <section className="bg-muted py-20 text-foreground">
-          <div className="container max-w-5xl">
-            <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-              <div className="overflow-hidden rounded-lg border border-border bg-card p-8 shadow-sm">
-                <img src={selectedImage} alt={`Leitura rápida com ${productName}`} className="mx-auto h-80 w-full object-contain" loading="lazy" />
+            <section className="bg-muted py-20 text-foreground">
+              <div className="container max-w-5xl">
+                <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+                  <div className="overflow-hidden rounded-lg border border-border bg-card p-8 shadow-sm">
+                    <img src={selectedImage} alt={`Leitura rápida com ${productName}`} className="mx-auto h-80 w-full object-contain" loading="lazy" />
+                  </div>
+                  <div>
+                    <div className="mb-5 h-1 w-14 bg-primary" />
+                    <h2 className="text-3xl font-black leading-tight">LEITURA RÁPIDA. <span className="text-primary">MESMO COM O CÓDIGO FEIO.</span></h2>
+                    <p className="mt-4 text-base leading-relaxed text-muted-foreground">Leitura 1D/2D de alta performance, inclusive em códigos danificados ou com impressão ruim.</p>
+                    <ul className="mt-6 space-y-3 text-sm font-semibold text-foreground">
+                      {operationPerks.map((perk) => (
+                        <li key={perk} className="flex items-center gap-3"><CheckCircle2 className="h-5 w-5 text-primary" /> {perk}</li>
+                      ))}
+                    </ul>
+                    <p className="mt-6 text-sm font-black italic text-muted-foreground">“Se o código existe, o <span className="text-primary">{code}</span> faz a leitura.”</p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <div className="mb-5 h-1 w-14 bg-primary" />
-                <h2 className="text-3xl font-black leading-tight">LEITURA RÁPIDA. <span className="text-primary">MESMO COM O CÓDIGO FEIO.</span></h2>
-                <p className="mt-4 text-base leading-relaxed text-muted-foreground">Leitura 1D/2D de alta performance, inclusive em códigos danificados ou com impressão ruim.</p>
-                <ul className="mt-6 space-y-3 text-sm font-semibold text-foreground">
-                  {operationPerks.map((perk) => (
-                    <li key={perk} className="flex items-center gap-3"><CheckCircle2 className="h-5 w-5 text-primary" /> {perk}</li>
-                  ))}
-                </ul>
-                <p className="mt-6 text-sm font-black italic text-muted-foreground">“Se o código existe, o <span className="text-primary">{code}</span> faz a leitura.”</p>
-              </div>
-            </div>
-          </div>
-        </section>
+            </section>
 
+            <section className="py-20 text-background" style={{ background: "linear-gradient(180deg, hsl(var(--foreground) / 0.96), hsl(var(--foreground)))" }}>
+              <div className="container max-w-5xl">
+                <div className="grid gap-14 lg:grid-cols-2 lg:items-center">
+                  <div>
+                    <div className="mb-5 h-1 w-14 bg-primary" />
+                    <h2 className="text-3xl font-black leading-tight">ATUALIZADO DE VERDADE: <span className="text-primary">ANDROID 14.</span></h2>
+                    <p className="mt-4 text-background/70">Compatível com sistemas ERP, WMS e apps Android. Opera online/offline conforme sua rotina.</p>
+                    <div className="mt-6 rounded-lg border border-background/15 bg-background/5 p-4 text-sm font-bold italic text-background/85">
+                      “Chega de comprar coletor que nasce velho.”
+                    </div>
+                  </div>
+                  <div className="rounded-lg border border-background/10 bg-background/5 p-8">
+                    <img src={selectedImage} alt={`Android no ${productName}`} className="mx-auto h-72 w-full object-contain" loading="lazy" />
+                  </div>
+                </div>
+
+                <div className="mt-20 grid gap-14 lg:grid-cols-[0.9fr_1fr] lg:items-center">
+                  <div className="rounded-lg border border-background/10 bg-background/5 p-8">
+                    <img src={selectedImage} alt={`Bateria e operação do ${productName}`} className="mx-auto h-72 w-full object-contain" loading="lazy" />
+                  </div>
+                  <div>
+                    <div className="mb-5 h-1 w-14 bg-primary" />
+                    <h2 className="text-3xl font-black leading-tight">TRABALHA O TURNO INTEIRO <span className="text-primary">SEM PEDIR ARREGO.</span></h2>
+                    <div className="mt-6 space-y-3">
+                      {featureCards.map(({ icon: Icon, title, description: itemDescription }) => (
+                        <div key={title} className="flex items-center gap-4 rounded-lg border border-background/15 bg-background/5 p-4">
+                          <Icon className="h-5 w-5 text-primary" />
+                          <div>
+                            <h3 className="text-sm font-black">{title}</h3>
+                            <p className="text-xs text-background/60">{itemDescription}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="mt-6 text-sm font-black italic text-background/75">“Operação não para porque <span className="text-primary">o coletor cansou</span>.”</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </>
+        )}
+
+        {/* ============ DADOS TÉCNICOS ============ */}
         <section className="border-y border-border bg-muted py-20 text-foreground">
           <div className="container max-w-4xl">
             <div className="mb-8 h-1 w-14 bg-primary" />
             <h2 className="text-3xl font-black"><span>DADOS </span><span className="text-primary">TÉCNICOS</span></h2>
-            <div className="mt-10 overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-              {specs.map(([label, value], index) => (
-                <div key={label} className={`grid gap-3 px-5 py-4 text-sm sm:grid-cols-[160px_1fr] ${index % 2 === 0 ? "bg-card" : "bg-muted"}`}>
-                  <span className="font-black text-primary">{label}:</span>
-                  <span className="text-muted-foreground">{value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
-        <section className="py-20 text-background" style={{ background: "linear-gradient(180deg, hsl(var(--foreground) / 0.96), hsl(var(--foreground)))" }}>
-          <div className="container max-w-5xl">
-            <div className="grid gap-14 lg:grid-cols-2 lg:items-center">
-              <div>
-                <div className="mb-5 h-1 w-14 bg-primary" />
-                <h2 className="text-3xl font-black leading-tight">ATUALIZADO DE VERDADE: <span className="text-primary">ANDROID 14.</span></h2>
-                <p className="mt-4 text-background/70">Compatível com sistemas ERP, WMS e apps Android. Opera online/offline conforme sua rotina.</p>
-                <div className="mt-6 rounded-lg border border-background/15 bg-background/5 p-4 text-sm font-bold italic text-background/85">
-                  “Chega de comprar coletor que nasce velho.”
-                </div>
-              </div>
-              <div className="rounded-lg border border-background/10 bg-background/5 p-8">
-                <img src={selectedImage} alt={`Android no ${productName}`} className="mx-auto h-72 w-full object-contain" loading="lazy" />
-              </div>
-            </div>
-
-            <div className="mt-20 grid gap-14 lg:grid-cols-[0.9fr_1fr] lg:items-center">
-              <div className="rounded-lg border border-background/10 bg-background/5 p-8">
-                <img src={selectedImage} alt={`Bateria e operação do ${productName}`} className="mx-auto h-72 w-full object-contain" loading="lazy" />
-              </div>
-              <div>
-                <div className="mb-5 h-1 w-14 bg-primary" />
-                <h2 className="text-3xl font-black leading-tight">TRABALHA O TURNO INTEIRO <span className="text-primary">SEM PEDIR ARREGO.</span></h2>
-                <div className="mt-6 space-y-3">
-                  {featureCards.map(({ icon: Icon, title, description: itemDescription }) => (
-                    <div key={title} className="flex items-center gap-4 rounded-lg border border-background/15 bg-background/5 p-4">
-                      <Icon className="h-5 w-5 text-primary" />
-                      <div>
-                        <h3 className="text-sm font-black">{title}</h3>
-                        <p className="text-xs text-background/60">{itemDescription}</p>
-                      </div>
+            {customSpecGroups ? (
+              <div className="mt-10 space-y-8">
+                {customSpecGroups.map((group: any, gi: number) => (
+                  <div key={gi}>
+                    <h3 className="mb-3 text-sm font-black uppercase tracking-wider text-primary">{group.title}</h3>
+                    <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+                      {(group.rows || []).map((row: any, ri: number) => (
+                        <div key={ri} className={`grid gap-3 px-5 py-4 text-sm sm:grid-cols-[200px_1fr] ${ri % 2 === 0 ? "bg-card" : "bg-muted"}`}>
+                          <span className="font-black text-foreground">{row.label}</span>
+                          <span className="text-muted-foreground">{row.value}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-                <p className="mt-6 text-sm font-black italic text-background/75">“Operação não para porque <span className="text-primary">o coletor cansou</span>.”</p>
+                  </div>
+                ))}
               </div>
-            </div>
+            ) : (
+              <div className="mt-10 overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+                {flatSpecs.map(([label, value], index) => (
+                  <div key={String(label)} className={`grid gap-3 px-5 py-4 text-sm sm:grid-cols-[160px_1fr] ${index % 2 === 0 ? "bg-card" : "bg-muted"}`}>
+                    <span className="font-black text-primary">{label}:</span>
+                    <span className="text-muted-foreground">{value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
@@ -333,27 +398,6 @@ const ProdutoDetalhe = () => {
               <div className="mx-auto mt-8 overflow-hidden rounded-lg border border-border bg-card shadow-lg">
                 <video src={customVideo} controls className="h-full w-full" />
               </div>
-            </div>
-          </section>
-        )}
-
-        {customSections.length > 0 && (
-          <section className="bg-background py-16">
-            <div className="container max-w-5xl space-y-16">
-              {customSections.map((sec: any, i: number) => (
-                <div key={i} className={`grid gap-10 lg:grid-cols-2 lg:items-center ${i % 2 === 1 ? "lg:[&>*:first-child]:order-2" : ""}`}>
-                  {sec.imageUrl ? (
-                    <div className="overflow-hidden rounded-lg border border-border bg-muted p-6">
-                      <img src={sec.imageUrl} alt={sec.title || `Seção ${i + 1}`} className="mx-auto h-72 w-full object-contain" loading="lazy" />
-                    </div>
-                  ) : <div />}
-                  <div>
-                    <div className="mb-5 h-1 w-14 bg-primary" />
-                    {sec.title && <h2 className="text-3xl font-black leading-tight">{sec.title}</h2>}
-                    {sec.text && <p className="mt-4 whitespace-pre-line text-base leading-relaxed text-muted-foreground">{sec.text}</p>}
-                  </div>
-                </div>
-              ))}
             </div>
           </section>
         )}
