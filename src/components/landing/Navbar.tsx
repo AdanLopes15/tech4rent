@@ -1,19 +1,81 @@
 //src/components/landing/Navbar.tsx
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowRight, Menu, MessageCircle, X } from "lucide-react";
+import { ArrowRight, ChevronDown, Menu, MessageCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/store";
 
+const languages = [
+  { code: "pt", label: "BR Português" },
+  { code: "en", label: "US English" },
+  { code: "es", label: "ES Español" },
+  { code: "zh-CN", label: "CN 中文" },
+  { code: "ru", label: "RU Русский" },
+  { code: "fr", label: "FR Français" },
+  { code: "de", label: "DE Deutsch" },
+  { code: "it", label: "IT Italiano" },
+];
+
+declare global {
+  interface Window {
+    googleTranslateElementInit?: () => void;
+    google?: {
+      translate?: {
+        TranslateElement: new (options: Record<string, unknown>, elementId: string) => void;
+      };
+    };
+  }
+}
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLanguageOpen, setIsLanguageOpen] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState(() => localStorage.getItem("site-language") || "pt");
   const location = useLocation();
   const navigate = useNavigate();
   const { companySettings } = useStore();
 
   const fantasyName = companySettings?.fantasyName || companySettings?.name || "TECH4RENT";
   const siteLogoUrl = companySettings?.siteLogoUrl;
+
+  useEffect(() => {
+    if (document.getElementById("google-translate-script")) return;
+
+    window.googleTranslateElementInit = () => {
+      if (!window.google?.translate?.TranslateElement) return;
+
+      new window.google.translate.TranslateElement(
+        {
+          pageLanguage: "pt",
+          includedLanguages: languages.map((language) => language.code).join(","),
+          autoDisplay: false,
+        },
+        "google_translate_element",
+      );
+    };
+
+    const script = document.createElement("script");
+    script.id = "google-translate-script";
+    script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
+  const changeLanguage = (languageCode: string) => {
+    const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
+    const cookieValue = languageCode === "pt" ? "/pt/pt" : `/pt/${languageCode}`;
+
+    document.cookie = `googtrans=${cookieValue}; expires=${expires}; path=/`;
+    document.cookie = `googtrans=${cookieValue}; expires=${expires}; path=/; domain=.${window.location.hostname}`;
+    localStorage.setItem("site-language", languageCode);
+    setSelectedLanguage(languageCode);
+    setIsLanguageOpen(false);
+    setIsOpen(false);
+    window.location.reload();
+  };
+
+  const selectedLanguageLabel = languages.find((language) => language.code === selectedLanguage)?.label || "BR Português";
 
   const goToHomeSection = (id: string) => {
     setIsOpen(false);
