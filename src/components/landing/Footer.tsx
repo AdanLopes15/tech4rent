@@ -1,6 +1,6 @@
 //src/components/landing/Footer.tsx
 
-import { Instagram, Linkedin, Lock, Mail, MapPin, Phone, Youtube } from "lucide-react";
+import { Clock, Instagram, Linkedin, Lock, Mail, MapPin, Phone, Youtube } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useStore } from "@/store";
 
@@ -55,10 +55,23 @@ const Footer = () => {
               {companySettings?.phone && <li className="flex gap-2"><Phone className="h-3.5 w-3.5 shrink-0" />{companySettings.phone}</li>}
               {companySettings?.email && <li className="flex gap-2"><Mail className="h-3.5 w-3.5 shrink-0" />{companySettings.email}</li>}
               {fullAddress && <li className="flex gap-2"><MapPin className="h-3.5 w-3.5 shrink-0" />{fullAddress}</li>}
-              <li>Segunda a Sexta, 8h às 18h</li>
+              <li className="flex items-center gap-2">
+                <Clock className="h-3.5 w-3.5 shrink-0" />
+                <span>Segunda a Sexta, 8h às 18h</span>
+                {companySettings?.instagramUrl && (
+                  <a
+                    href={companySettings.instagramUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Instagram"
+                    className="ml-1 transition-colors hover:text-background"
+                  >
+                    <Instagram className="h-3.5 w-3.5" />
+                  </a>
+                )}
+              </li>
             </ul>
             <div className="mt-4 flex gap-3 text-background/80">
-              {companySettings?.instagramUrl && <a href={companySettings.instagramUrl} target="_blank" rel="noreferrer" aria-label="Instagram"><Instagram className="h-4 w-4" /></a>}
               {companySettings?.youtubeUrl && <a href={companySettings.youtubeUrl} target="_blank" rel="noreferrer" aria-label="YouTube"><Youtube className="h-4 w-4" /></a>}
               {companySettings?.linkedinUrl && <a href={companySettings.linkedinUrl} target="_blank" rel="noreferrer" aria-label="LinkedIn"><Linkedin className="h-4 w-4" /></a>}
             </div>
