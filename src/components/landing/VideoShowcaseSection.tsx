@@ -1,5 +1,4 @@
 import { Play } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useStore } from "@/store";
 
 const getYoutubeEmbedUrl = (url?: string) => {
@@ -20,18 +19,10 @@ const VideoShowcaseSection = () => {
   const embedUrl = getYoutubeEmbedUrl(companySettings?.youtubeUrl);
 
   return (
-    <section className="bg-muted py-20">
-      <div className="container grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
-        <div className="space-y-5">
-          <span className="text-sm font-bold uppercase tracking-widest text-primary">Veja na prática</span>
-          <h2 className="text-3xl font-black text-foreground md:text-5xl">Tecnologia pronta para entrar na sua rotina</h2>
-          <p className="text-muted-foreground leading-relaxed">
-            Conheça aplicações de coletores, tablets, leitores e acessórios em operações de campo, estoque, logística e atendimento.
-          </p>
-          <Button onClick={() => document.getElementById("contato")?.scrollIntoView({ behavior: "smooth" })}>Solicitar demonstração</Button>
-        </div>
-
-        <div className="aspect-video overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+    <section className="bg-background pb-24 pt-8">
+      <div className="container max-w-3xl text-center">
+        <h2 className="mb-7 text-2xl font-black text-foreground">Veja na prática</h2>
+        <div className="mx-auto aspect-video overflow-hidden rounded-lg bg-foreground shadow-xl">
           {embedUrl ? (
             <iframe
               src={embedUrl}
@@ -41,11 +32,14 @@ const VideoShowcaseSection = () => {
               allowFullScreen
             />
           ) : (
-            <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-foreground text-background">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                <Play className="h-7 w-7 fill-current" />
+            <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_72%_40%,hsl(var(--primary)/0.2),transparent_28%),hsl(var(--foreground))] text-background">
+              <div className="text-left">
+                <div className="text-4xl font-black uppercase leading-none">Coletor de dados</div>
+                <div className="mt-2 text-6xl font-black text-primary">TC60</div>
               </div>
-              <p className="max-w-sm text-center text-sm text-background/75">Vídeo demonstrativo disponível em breve.</p>
+              <div className="ml-12 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
+                <Play className="h-8 w-8 fill-current" />
+              </div>
             </div>
           )}
         </div>
