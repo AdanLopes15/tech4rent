@@ -41,11 +41,11 @@ const normalize = (value: string) =>
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
 
-const getProductPath = (equipment: any) => `/produtos/${encodeURIComponent(String(equipment?.id || equipment?.name || "produto"))}`;
+const getProductPath = (item: any) => `/produtos/${encodeURIComponent(String(item?.id || item?.name || "produto"))}`;
 
 const Produtos = () => {
   const fetchAllData = useStore((s) => s.fetchAllData);
-  const { companySettings, equipments } = useStore();
+  const { companySettings, equipments, catalogItems } = useStore();
   const [search, setSearch] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [sort, setSort] = useState("destaques");
@@ -54,14 +54,38 @@ const Produtos = () => {
     fetchAllData(true);
   }, [fetchAllData]);
 
+  // Merge: catalog items publicados aparecem como "produtos enriquecidos"; equipamentos restantes (sem catalog) também aparecem
+  const allProducts = useMemo(() => {
+    const publishedItems = (catalogItems || []).filter((c: any) => c.published);
+    const publishedEquipmentIds = new Set(publishedItems.map((c: any) => c.equipmentId).filter(Boolean));
+
+    const fromCatalog = publishedItems.map((c: any) => ({
+      id: `cat-${c.id}`,
+      __isCatalog: true,
+      name: c.name,
+      code: c.code,
+      category: c.category,
+      description: c.shortDescription,
+      imageUrl: c.heroImageUrl,
+      imageUrls: [c.heroImageUrl, ...(c.galleryUrls || [])].filter(Boolean),
+      tags: c.tags,
+    }));
+
+    const fromEquipments = (equipments || [])
+      .filter((e: any) => !publishedEquipmentIds.has(e.id))
+      .map((e: any) => ({ ...e, __isCatalog: false }));
+
+    return [...fromCatalog, ...fromEquipments];
+  }, [equipments, catalogItems]);
+
   const categories = useMemo(() => {
-    const fromProducts = equipments.map((equipment: any) => equipment?.category).filter(Boolean);
+    const fromProducts = allProducts.map((equipment: any) => equipment?.category).filter(Boolean);
     return Array.from(new Set([...defaultCategories, ...fromProducts]));
-  }, [equipments]);
+  }, [allProducts]);
 
   const filteredProducts = useMemo(() => {
     const query = normalize(search);
-    const result = equipments.filter((equipment: any) => {
+    const result = allProducts.filter((equipment: any) => {
       const category = equipment?.category || "";
       const haystack = normalize(
         [equipment?.name, equipment?.code, equipment?.model, equipment?.patrimony, equipment?.category, equipment?.description]
@@ -78,7 +102,7 @@ const Produtos = () => {
       if (sort === "categoria") return String(a?.category || "").localeCompare(String(b?.category || ""));
       return 0;
     });
-  }, [equipments, search, selectedCategories, sort]);
+  }, [allProducts, search, selectedCategories, sort]);
 
   const toggleCategory = (category: string) => {
     setSelectedCategories((current) =>
