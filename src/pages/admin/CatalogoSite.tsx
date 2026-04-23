@@ -51,17 +51,17 @@ const CatalogoSite = () => {
     );
   }, [catalogItems, search]);
 
-  // Equipamentos disponíveis (sem anúncio ainda) — usados no picker
-  const availableEquipments = useMemo(() => {
+  // Todos os equipamentos (filtrados pela busca) — já marcando os que têm anúncio
+  const pickerEquipments = useMemo(() => {
     const q = pickerSearch.toLowerCase();
     return (equipments || [])
-      .filter((e: any) => !usedEquipmentIds.has(e.id))
       .filter((e: any) =>
         [e.name, e.code, e.category, e.model].filter(Boolean).join(" ").toLowerCase().includes(q),
       );
-  }, [equipments, usedEquipmentIds, pickerSearch]);
+  }, [equipments, pickerSearch]);
 
   const handlePickEquipment = (equipment: any) => {
+    if (usedEquipmentIds.has(equipment.id)) return;
     setSelectedEquipment(equipment);
     setEditingItem(null);
     setPickerOpen(false);
