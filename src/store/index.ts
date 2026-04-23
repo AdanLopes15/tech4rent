@@ -44,6 +44,7 @@ export type SiteContent = {
     title: string;
     subtitle: string;
     backgroundImageUrl: string;
+    backgroundVideoUrl?: string;
   };
   featuredProduct: {
     tag: string;
@@ -51,6 +52,7 @@ export type SiteContent = {
     description: string;
     imageUrl: string;
     backgroundImageUrl: string;
+    backgroundVideoUrl?: string;
   };
   productHighlight?: {
     backgroundImageUrl?: string;
@@ -64,11 +66,13 @@ export type SiteContent = {
     title: string;
     description: string;
     backgroundImageUrl: string;
+    backgroundVideoUrl?: string;
   };
   contact: {
     title?: string;
     description?: string;
     backgroundImageUrl: string;
+    backgroundVideoUrl?: string;
   };
 };
 
@@ -277,6 +281,7 @@ const initialCompanySettings: CompanySettings = {
       title: "Soluções em Equipamentos para sua Empresa",
       subtitle: "Qualidade, segurança e a tecnologia que você precisa para alcançar os melhores resultados.",
       backgroundImageUrl: "",
+      backgroundVideoUrl: "",
     },
     featuredProduct: {
       tag: "Soluções para grandes empresas",
@@ -326,41 +331,41 @@ const initialCompanySettings: CompanySettings = {
         backgroundColor: "#1f2937",
         titleColor: "#ffffff",
         textColor: "#e5e7eb",
-        accentColor: "#facc15",
+        accentColor: "#f97316",
       },
       contactBar: {
         ...defaultSectionStyles,
-        backgroundColor: "#1e40af",
+        backgroundColor: "#111827",
         titleColor: "#ffffff",
-        textColor: "#dbeafe",
+        textColor: "#f3f4f6",
         accentColor: "#ffffff",
       },
       featuredProduct: {
         ...defaultSectionStyles,
         backgroundColor: "#ffffff",
-        accentColor: "#2563eb",
+        accentColor: "#f97316",
       },
       productHighlight: {
         ...defaultSectionStyles,
         backgroundColor: "#f9fafb",
-        accentColor: "#2563eb",
+        accentColor: "#f97316",
       },
       differentiators: {
         ...defaultSectionStyles,
         backgroundColor: "#ffffff",
-        accentColor: "#2563eb",
+        accentColor: "#f97316",
       },
       about: {
         ...defaultSectionStyles,
         backgroundColor: "#f9fafb",
-        accentColor: "#2563eb",
+        accentColor: "#f97316",
       },
       contact: {
         ...defaultSectionStyles,
         backgroundColor: "#374151",
         titleColor: "#ffffff",
         textColor: "#d1d5db",
-        accentColor: "#60a5fa",
+        accentColor: "#f97316",
       },
     },
   },
@@ -1844,6 +1849,7 @@ const useStore = create<State & Actions>((set, get) => {
       const fileKeys: { [key: string]: keyof SiteContent } = {
         featuredProductImage: "featuredProduct",
         heroBackgroundImage: "hero",
+        heroBackgroundVideo: "hero",
         featuredProductBackgroundImage: "featuredProduct",
         aboutBackgroundImage: "about",
         contactBackgroundImage: "contact",
@@ -1863,6 +1869,8 @@ const useStore = create<State & Actions>((set, get) => {
 
             if (key === "featuredProductImage") {
               (updatedSettings.siteContent[sectionKey] as any).imageUrl = downloadURL;
+            } else if (key === "heroBackgroundVideo") {
+              (updatedSettings.siteContent[sectionKey] as any).backgroundVideoUrl = downloadURL;
             } else {
               (updatedSettings.siteContent[sectionKey] as any).backgroundImageUrl = downloadURL;
             }
