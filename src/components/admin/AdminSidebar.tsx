@@ -23,6 +23,7 @@ import {
   FileSpreadsheet,
   ArrowLeftRight,
   FileCheck,
+  Globe,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -42,6 +43,7 @@ const menuItems: MenuItem[] = [
     label: "Cadastros",
     children: [
       { icon: Package, label: "Equipamentos", path: "/admin/equipamentos" },
+      { icon: Globe, label: "Catálogo do Site", path: "/admin/catalogo-site" },
       { icon: Users, label: "Clientes", path: "/admin/clientes" },
       { icon: Truck, label: "Fornecedores", path: "/admin/fornecedores" },
       { icon: UserCheck, label: "Colaboradores", path: "/admin/colaboradores" },
