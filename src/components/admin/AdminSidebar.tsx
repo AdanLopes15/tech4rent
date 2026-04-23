@@ -87,6 +87,7 @@ const menuItems: MenuItem[] = [
     icon: Settings,
     label: "Configurações",
     children: [
+      { icon: Globe, label: "Page Builder", path: "/admin/site-builder" },
       { icon: Settings, label: "Painel de Configurações", path: "/admin/configuracoes" },
       { icon: Users, label: "Usuários", path: "/admin/usuarios" },
     ],
