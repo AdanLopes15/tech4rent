@@ -122,7 +122,10 @@ const ProdutoDetalhe = () => {
   const code = product?.code || product?.model || product?.patrimony || product?.category || "TECH4RENT";
   const description = product?.description || "Projetado para ambientes industriais e operações logísticas intensivas.";
   const whatsappUrl = buildWhatsAppUrl(companySettings?.phone, productName);
-  const specs = [
+  const customSpecs = Array.isArray(product?.specs) && product.specs.length > 0
+    ? product.specs.map((s: any) => [s.label, s.value])
+    : null;
+  const specs = customSpecs || [
     ["Categoria", product?.category],
     ["Código", code],
     ["Modelo", product?.model],
@@ -130,6 +133,11 @@ const ProdutoDetalhe = () => {
     ["Finalidade", product?.purpose],
     ["Garantia", "1 ano + assistência no Brasil"],
   ].filter(([, value]) => Boolean(value));
+
+  const customTags = Array.isArray(product?.tags) && product.tags.length > 0 ? product.tags : null;
+  const customSections = Array.isArray(product?.sections) ? product.sections.filter((s: any) => s?.title || s?.text || s?.imageUrl) : [];
+  const customBox = Array.isArray(product?.whatsBoxItems) ? product.whatsBoxItems.filter(Boolean) : [];
+  const customVideo = product?.videoUrl;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
