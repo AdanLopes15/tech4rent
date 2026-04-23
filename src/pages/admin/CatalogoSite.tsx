@@ -42,17 +42,22 @@ const CatalogoSite = () => {
     return map;
   }, [catalogItems]);
 
-  // Lista combinada: TODOS os equipamentos cadastrados, indicando se já tem anúncio personalizado
+  // Lista combinada: TODOS os equipamentos cadastrados
+  // created = já aparece no catálogo do site (/produtos), seja por anúncio personalizado ou pelo padrão do equipamento
   const rows = useMemo(() => {
     const q = search.toLowerCase();
     return (equipments || [])
       .map((e: any) => {
         const item = catalogByEquipmentId[e.id];
+        const hasItem = !!item;
+        const published = item ? !!item.published : true;
+        const created = published;
         return {
           equipment: e,
           item,
-          hasItem: !!item,
-          published: item ? !!item.published : true, // sem item = exibido por padrão em /produtos
+          hasItem,
+          published,
+          created,
         };
       })
       .filter(({ equipment, item }) =>
@@ -83,7 +88,8 @@ const CatalogoSite = () => {
     const total = rows.length;
     const personalizados = rows.filter((r) => r.hasItem).length;
     const publicados = rows.filter((r) => r.published).length;
-    return { total, personalizados, publicados };
+    const criados = rows.filter((r) => r.created).length;
+    return { total, personalizados, publicados, criados };
   }, [rows]);
 
   return (
@@ -274,19 +280,20 @@ const CatalogoSite = () => {
                   .includes(pickerSearch.toLowerCase()),
               )
               .map((e: any) => {
-                const hasItem = !!catalogByEquipmentId[e.id];
+                const row = rows.find((r) => r.equipment.id === e.id);
+                const alreadyCreated = !!row?.created;
                 const img = e?.imageUrl || e?.imageUrls?.[0] || "https://placehold.co/80x80.png";
                 return (
                   <button
                     key={e.id}
                     type="button"
-                    disabled={hasItem}
+                    disabled={alreadyCreated}
                     onClick={() => {
                       setPickerOpen(false);
                       handleEdit(e, null);
                     }}
                     className={`flex w-full items-center gap-3 rounded-lg border p-3 text-left transition ${
-                      hasItem
+                      alreadyCreated
                         ? "cursor-not-allowed border-border bg-muted/30 opacity-60"
                         : "border-border hover:border-primary hover:bg-muted/40"
                     }`}
@@ -298,9 +305,9 @@ const CatalogoSite = () => {
                         {e?.category || "—"} {e?.code ? `· ${e.code}` : ""}
                       </p>
                     </div>
-                    {hasItem ? (
+                    {alreadyCreated ? (
                       <Badge variant="secondary" className="gap-1">
-                        <CheckCircle2 className="h-3 w-3" /> Já cadastrado
+                        <CheckCircle2 className="h-3 w-3" /> Anúncio criado
                       </Badge>
                     ) : (
                       <Badge variant="outline">Selecionar</Badge>
