@@ -1,6 +1,7 @@
 //src/components/landing/Footer.tsx
 
-import { Instagram, Linkedin, Mail, MapPin, Phone, Youtube } from "lucide-react";
+import { Instagram, Linkedin, Lock, Mail, MapPin, Phone, Youtube } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useStore } from "@/store";
 
 const Footer = () => {
@@ -70,6 +71,14 @@ const Footer = () => {
         <p>{companySettings?.name || fantasyName} — CNPJ: {companySettings?.cnpj || ""}</p>
         <p>© {new Date().getFullYear()} {fantasyName}. Todos os direitos reservados.</p>
         <p>Empresa orgulhosamente brasileira BR</p>
+        <p className="mt-2">
+          <Link
+            to="/login"
+            className="inline-flex items-center gap-1.5 text-background/45 transition-colors hover:text-background/80"
+          >
+            <Lock className="h-3 w-3" /> Área Restrita
+          </Link>
+        </p>
       </div>
     </footer>
   );
