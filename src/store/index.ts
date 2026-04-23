@@ -264,6 +264,7 @@ type State = {
   rentalClauses: Clause[];
   saleClauses: Clause[];
   homePage: { draft: any[]; published: any[]; updatedAt?: any; publishedAt?: any };
+  sitePages: Record<string, { draft: any[]; published: any[]; updatedAt?: any; publishedAt?: any }>;
   loading: boolean;
   isQuoteDialogOpen: boolean;
 };
@@ -362,6 +363,9 @@ type Actions = {
   saveHomeDraft: (blocks: any[]) => Promise<void>;
   publishHome: () => Promise<void>;
   resetHomeDraft: () => Promise<void>;
+  savePageDraft: (slug: string, blocks: any[]) => Promise<void>;
+  publishPage: (slug: string) => Promise<void>;
+  resetPageDraft: (slug: string) => Promise<void>;
   updateRentalClauses: (clauses: Clause[]) => Promise<void>;
   updateSaleClauses: (clauses: Clause[]) => Promise<void>;
 };
@@ -832,6 +836,7 @@ const useStore = create<State & Actions>((set, get) => {
     notifications: [],
     companySettings: initialCompanySettings,
     homePage: { draft: [], published: [] },
+    sitePages: {},
     smtpSettings: initialSmtpSettings,
     rentalClauses: initialRentalClauses,
     saleClauses: initialSaleClauses,
