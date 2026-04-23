@@ -65,14 +65,17 @@ const Navbar = () => {
   const changeLanguage = (languageCode: string) => {
     const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
     const cookieValue = languageCode === "pt" ? "/pt/pt" : `/pt/${languageCode}`;
+    const hostname = window.location.hostname;
 
     document.cookie = `googtrans=${cookieValue}; expires=${expires}; path=/`;
-    document.cookie = `googtrans=${cookieValue}; expires=${expires}; path=/; domain=.${window.location.hostname}`;
+    if (hostname.includes(".")) {
+      document.cookie = `googtrans=${cookieValue}; expires=${expires}; path=/; domain=.${hostname}`;
+    }
     localStorage.setItem("site-language", languageCode);
     setSelectedLanguage(languageCode);
     setIsLanguageOpen(false);
     setIsOpen(false);
-    window.location.reload();
+    window.location.href = `${window.location.pathname}${window.location.search}${window.location.hash}`;
   };
 
   const selectedLanguageLabel = languages.find((language) => language.code === selectedLanguage)?.label || "BR Português";
@@ -140,7 +143,7 @@ const Navbar = () => {
             <button
               type="button"
               onClick={() => setIsLanguageOpen((open) => !open)}
-              className="flex h-11 items-center gap-2 rounded-md border border-background/70 px-3 text-xs font-bold text-background/75 transition-colors hover:border-background hover:text-background"
+              className="flex h-11 items-center gap-2 px-3 text-xs font-bold text-background/75 transition-colors hover:text-background"
               aria-expanded={isLanguageOpen}
               aria-label="Trocar idioma"
             >
