@@ -200,7 +200,13 @@ const Sobre = () => {
           </div>
         </section>
 
-        <section className="bg-foreground py-20 text-center text-background">
+        <section
+          className="border-b border-background/10 py-20 text-center text-background"
+          style={{
+            background:
+              "radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.18), transparent 42%), linear-gradient(180deg, hsl(var(--foreground) / 0.98), hsl(var(--foreground) / 0.92))",
+          }}
+        >
           <div className="container max-w-xl">
             <h2 className="text-3xl font-black leading-tight">Pronto para modernizar sua operação?</h2>
             <p className="mt-5 text-sm text-background/70">Fale com nosso time comercial e descubra o melhor equipamento para sua necessidade.</p>
