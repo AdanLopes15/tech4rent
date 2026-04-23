@@ -2,15 +2,13 @@
 // Cria a estrutura padrão de blocos baseada nas seções atuais da home
 
 import type { Block } from "./types";
-import { BLOCK_META, newId } from "./types";
-import { BLOCK_META as META } from "./registry";
+import { newId } from "./types";
 
 export function buildDefaultHomeBlocks(siteContent?: any): Block[] {
-  const heroDefaults = META.hero.defaults;
   const heroOverride: any = siteContent?.hero
     ? {
-        title: siteContent.hero.title || heroDefaults.title,
-        subtitle: siteContent.hero.subtitle || heroDefaults.subtitle,
+        title: siteContent.hero.title || undefined,
+        subtitle: siteContent.hero.subtitle || undefined,
         backgroundImageUrl: siteContent.hero.backgroundImageUrl || "",
         backgroundVideoUrl: siteContent.hero.backgroundVideoUrl || "",
       }
