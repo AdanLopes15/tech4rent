@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Image as ImageIcon, Plus, Trash2, Video } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,18 +8,29 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import MediaUploadField from "@/components/admin/MediaUploadField";
 import { useStore } from "@/store";
 import { toast } from "sonner";
 
-interface Section {
+type MediaKind = "image" | "video";
+
+interface SectionBlock {
   title?: string;
   text?: string;
+  mediaSide?: "left" | "right";
+  mediaKind?: MediaKind;
   imageUrl?: string;
+  videoUrl?: string;
+  highlight?: string; // citação opcional
 }
-interface Spec {
-  label: string;
-  value: string;
+interface SpecGroup {
+  title: string;
+  rows: { label: string; value: string }[];
+}
+interface KitItem {
+  name: string;
+  imageUrl?: string;
 }
 interface Tag {
   label: string;
@@ -39,8 +50,12 @@ interface CatalogItemForm {
   videoUrl?: string;
   galleryUrls?: string[];
   tags?: Tag[];
-  specs?: Spec[];
-  sections?: Section[];
+  specGroups?: SpecGroup[];
+  // legado: specs simples (mantidas para back-compat na leitura)
+  specs?: { label: string; value: string }[];
+  sections?: SectionBlock[];
+  kitItems?: KitItem[];
+  // legado
   whatsBoxItems?: string[];
 }
 
@@ -56,9 +71,9 @@ const empty: CatalogItemForm = {
   published: true,
   galleryUrls: [],
   tags: [],
-  specs: [],
+  specGroups: [],
   sections: [],
-  whatsBoxItems: [],
+  kitItems: [],
 };
 
 const CatalogItemDialog = ({ open, onOpenChange, equipment, catalogItem }: Props) => {
@@ -71,14 +86,31 @@ const CatalogItemDialog = ({ open, onOpenChange, equipment, catalogItem }: Props
   useEffect(() => {
     if (!open) return;
     if (catalogItem) {
+      // Migra specs antigas para specGroups se necessário
+      const legacySpecs = Array.isArray(catalogItem.specs) ? catalogItem.specs : [];
+      const groups: SpecGroup[] = Array.isArray(catalogItem.specGroups) && catalogItem.specGroups.length > 0
+        ? catalogItem.specGroups
+        : legacySpecs.length > 0
+          ? [{ title: "Especificações", rows: legacySpecs }]
+          : [];
+      // Migra whatsBoxItems para kitItems se necessário
+      const legacyKit = Array.isArray(catalogItem.whatsBoxItems) ? catalogItem.whatsBoxItems : [];
+      const kit: KitItem[] = Array.isArray(catalogItem.kitItems) && catalogItem.kitItems.length > 0
+        ? catalogItem.kitItems
+        : legacyKit.map((n: string) => ({ name: n }));
+
       setForm({
         ...empty,
         ...catalogItem,
         galleryUrls: catalogItem.galleryUrls || [],
         tags: catalogItem.tags || [],
-        specs: catalogItem.specs || [],
-        sections: catalogItem.sections || [],
-        whatsBoxItems: catalogItem.whatsBoxItems || [],
+        sections: (catalogItem.sections || []).map((s: any) => ({
+          mediaSide: s.mediaSide || "left",
+          mediaKind: s.videoUrl ? "video" : "image",
+          ...s,
+        })),
+        specGroups: groups,
+        kitItems: kit,
       });
     } else if (equipment) {
       setForm({
@@ -122,13 +154,71 @@ const CatalogItemDialog = ({ open, onOpenChange, equipment, catalogItem }: Props
     }
   };
 
-  const addSection = () => setField("sections", [...(form.sections || []), { title: "", text: "" }]);
-  const removeSection = (i: number) =>
-    setField("sections", (form.sections || []).filter((_, idx) => idx !== i));
+  // ===== Sections helpers =====
+  const sections = form.sections || [];
+  const updateSection = (i: number, patch: Partial<SectionBlock>) => {
+    const next = [...sections];
+    next[i] = { ...next[i], ...patch };
+    setField("sections", next);
+  };
+  const addSection = () =>
+    setField("sections", [...sections, { title: "", text: "", mediaSide: "left", mediaKind: "image" }]);
+  const removeSection = (i: number) => {
+    setField("sections", sections.filter((_, idx) => idx !== i));
+    // Limpa arquivos pendentes da seção
+    setFiles((p) => {
+      const np = { ...p };
+      delete np[`section.${i}.image`];
+      delete np[`section.${i}.video`];
+      return np;
+    });
+  };
+  const moveSection = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= sections.length) return;
+    const next = [...sections];
+    [next[i], next[j]] = [next[j], next[i]];
+    setField("sections", next);
+  };
+
+  // ===== Spec groups helpers =====
+  const specGroups = form.specGroups || [];
+  const updateGroup = (gi: number, patch: Partial<SpecGroup>) => {
+    const next = [...specGroups];
+    next[gi] = { ...next[gi], ...patch };
+    setField("specGroups", next);
+  };
+  const addGroup = () => setField("specGroups", [...specGroups, { title: "Categoria", rows: [] }]);
+  const removeGroup = (gi: number) => setField("specGroups", specGroups.filter((_, idx) => idx !== gi));
+  const addRow = (gi: number) => updateGroup(gi, { rows: [...(specGroups[gi].rows || []), { label: "", value: "" }] });
+  const updateRow = (gi: number, ri: number, patch: Partial<{ label: string; value: string }>) => {
+    const rows = [...(specGroups[gi].rows || [])];
+    rows[ri] = { ...rows[ri], ...patch };
+    updateGroup(gi, { rows });
+  };
+  const removeRow = (gi: number, ri: number) =>
+    updateGroup(gi, { rows: (specGroups[gi].rows || []).filter((_, idx) => idx !== ri) });
+
+  // ===== Kit helpers =====
+  const kitItems = form.kitItems || [];
+  const addKitItem = () => setField("kitItems", [...kitItems, { name: "" }]);
+  const updateKitItem = (i: number, patch: Partial<KitItem>) => {
+    const next = [...kitItems];
+    next[i] = { ...next[i], ...patch };
+    setField("kitItems", next);
+  };
+  const removeKitItem = (i: number) => {
+    setField("kitItems", kitItems.filter((_, idx) => idx !== i));
+    setFiles((p) => {
+      const np = { ...p };
+      delete np[`kit.${i}`];
+      return np;
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{form.id ? "Editar publicação" : "Publicar no Catálogo do Site"}</DialogTitle>
           <DialogDescription>
@@ -149,11 +239,12 @@ const CatalogItemDialog = ({ open, onOpenChange, equipment, catalogItem }: Props
             <TabsTrigger value="basico">Básico</TabsTrigger>
             <TabsTrigger value="midia">Mídia</TabsTrigger>
             <TabsTrigger value="tags">Tags</TabsTrigger>
-            <TabsTrigger value="specs">Specs</TabsTrigger>
+            <TabsTrigger value="specs">Dados Técnicos</TabsTrigger>
             <TabsTrigger value="secoes">Seções</TabsTrigger>
-            <TabsTrigger value="caixa">Na caixa</TabsTrigger>
+            <TabsTrigger value="kit">Kit Completo</TabsTrigger>
           </TabsList>
 
+          {/* ============ BÁSICO ============ */}
           <TabsContent value="basico" className="space-y-4 pt-4">
             <div className="grid gap-3 md:grid-cols-2">
               <div>
@@ -179,6 +270,7 @@ const CatalogItemDialog = ({ open, onOpenChange, equipment, catalogItem }: Props
             </div>
           </TabsContent>
 
+          {/* ============ MÍDIA ============ */}
           <TabsContent value="midia" className="space-y-4 pt-4">
             <MediaUploadField
               label="Imagem principal (hero)"
@@ -193,7 +285,7 @@ const CatalogItemDialog = ({ open, onOpenChange, equipment, catalogItem }: Props
               }}
             />
             <MediaUploadField
-              label="Vídeo do produto"
+              label="Vídeo principal do produto"
               type="video"
               value={form.videoUrl}
               onChange={(file, dataUrl) => {
@@ -251,6 +343,7 @@ const CatalogItemDialog = ({ open, onOpenChange, equipment, catalogItem }: Props
             </div>
           </TabsContent>
 
+          {/* ============ TAGS ============ */}
           <TabsContent value="tags" className="space-y-3 pt-4">
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">Badges exibidas no card e na página de detalhe.</p>
@@ -270,7 +363,7 @@ const CatalogItemDialog = ({ open, onOpenChange, equipment, catalogItem }: Props
                   }}
                 />
                 <Input
-                  placeholder="Ícone (opcional)"
+                  placeholder="Ícone (opcional, ex: Wifi)"
                   value={tag.icon || ""}
                   onChange={(e) => {
                     const next = [...(form.tags || [])];
@@ -285,119 +378,221 @@ const CatalogItemDialog = ({ open, onOpenChange, equipment, catalogItem }: Props
             ))}
           </TabsContent>
 
-          <TabsContent value="specs" className="space-y-3 pt-4">
+          {/* ============ DADOS TÉCNICOS (categorias) ============ */}
+          <TabsContent value="specs" className="space-y-4 pt-4">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Tabela de especificações técnicas.</p>
-              <Button size="sm" variant="outline" onClick={() => setField("specs", [...(form.specs || []), { label: "", value: "" }])}>
-                <Plus className="mr-1 h-3.5 w-3.5" /> Adicionar
+              <p className="text-sm text-muted-foreground">
+                Especificações agrupadas por categoria (ex: Hardware, Conectividade, Físico).
+              </p>
+              <Button size="sm" variant="outline" onClick={addGroup}>
+                <Plus className="mr-1 h-3.5 w-3.5" /> Adicionar categoria
               </Button>
             </div>
-            {(form.specs || []).map((spec, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <Input
-                  placeholder="Característica (ex: Sistema)"
-                  value={spec.label}
-                  onChange={(e) => {
-                    const next = [...(form.specs || [])];
-                    next[i] = { ...spec, label: e.target.value };
-                    setField("specs", next);
-                  }}
-                />
-                <Input
-                  placeholder="Valor (ex: Android 14)"
-                  value={spec.value}
-                  onChange={(e) => {
-                    const next = [...(form.specs || [])];
-                    next[i] = { ...spec, value: e.target.value };
-                    setField("specs", next);
-                  }}
-                />
-                <Button size="icon" variant="ghost" onClick={() => setField("specs", (form.specs || []).filter((_, idx) => idx !== i))}>
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-              </div>
-            ))}
-          </TabsContent>
-
-          <TabsContent value="secoes" className="space-y-3 pt-4">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Blocos de conteúdo livres na página de detalhe.</p>
-              <Button size="sm" variant="outline" onClick={addSection}>
-                <Plus className="mr-1 h-3.5 w-3.5" /> Adicionar seção
-              </Button>
-            </div>
-            {(form.sections || []).map((sec, i) => (
-              <Card key={i}>
+            {specGroups.length === 0 && (
+              <p className="rounded-md border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
+                Nenhuma categoria. Clique em "Adicionar categoria" para começar.
+              </p>
+            )}
+            {specGroups.map((group, gi) => (
+              <Card key={gi}>
                 <CardContent className="space-y-3 p-4">
-                  <div className="flex items-center justify-between">
-                    <Label className="font-semibold">Seção {i + 1}</Label>
-                    <Button size="icon" variant="ghost" onClick={() => removeSection(i)}>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      className="font-semibold"
+                      placeholder="Nome da categoria (ex: Hardware)"
+                      value={group.title}
+                      onChange={(e) => updateGroup(gi, { title: e.target.value })}
+                    />
+                    <Button size="icon" variant="ghost" onClick={() => removeGroup(gi)}>
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
-                  <Input
-                    placeholder="Título"
-                    value={sec.title || ""}
-                    onChange={(e) => {
-                      const next = [...(form.sections || [])];
-                      next[i] = { ...sec, title: e.target.value };
-                      setField("sections", next);
-                    }}
-                  />
-                  <Textarea
-                    rows={3}
-                    placeholder="Texto"
-                    value={sec.text || ""}
-                    onChange={(e) => {
-                      const next = [...(form.sections || [])];
-                      next[i] = { ...sec, text: e.target.value };
-                      setField("sections", next);
-                    }}
-                  />
-                  <MediaUploadField
-                    label="Imagem da seção"
-                    value={sec.imageUrl}
-                    onChange={(file, dataUrl) => {
-                      setFiles((p) => ({ ...p, [`section.${i}`]: file }));
-                      const next = [...(form.sections || [])];
-                      next[i] = { ...sec, imageUrl: dataUrl };
-                      setField("sections", next);
-                    }}
-                    onClear={() => {
-                      setFiles((p) => ({ ...p, [`section.${i}`]: null }));
-                      const next = [...(form.sections || [])];
-                      next[i] = { ...sec, imageUrl: "" };
-                      setField("sections", next);
-                    }}
-                  />
+                  {(group.rows || []).map((row, ri) => (
+                    <div key={ri} className="flex items-center gap-2">
+                      <Input
+                        placeholder="Característica (ex: Sistema)"
+                        value={row.label}
+                        onChange={(e) => updateRow(gi, ri, { label: e.target.value })}
+                      />
+                      <Input
+                        placeholder="Valor (ex: Android 14)"
+                        value={row.value}
+                        onChange={(e) => updateRow(gi, ri, { value: e.target.value })}
+                      />
+                      <Button size="icon" variant="ghost" onClick={() => removeRow(gi, ri)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button size="sm" variant="outline" onClick={() => addRow(gi)}>
+                    <Plus className="mr-1 h-3.5 w-3.5" /> Adicionar linha
+                  </Button>
                 </CardContent>
               </Card>
             ))}
           </TabsContent>
 
-          <TabsContent value="caixa" className="space-y-3 pt-4">
+          {/* ============ SEÇÕES LIVRES ============ */}
+          <TabsContent value="secoes" className="space-y-3 pt-4">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Itens que vêm na caixa do produto.</p>
-              <Button size="sm" variant="outline" onClick={() => setField("whatsBoxItems", [...(form.whatsBoxItems || []), ""])}>
-                <Plus className="mr-1 h-3.5 w-3.5" /> Adicionar
+              <p className="text-sm text-muted-foreground">
+                Blocos livres com título, texto e mídia (foto OU vídeo). Ordene com as setas.
+              </p>
+              <Button size="sm" variant="outline" onClick={addSection}>
+                <Plus className="mr-1 h-3.5 w-3.5" /> Adicionar seção
               </Button>
             </div>
-            {(form.whatsBoxItems || []).map((item, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <Input
-                  placeholder="Ex: Capa de silicone"
-                  value={item}
-                  onChange={(e) => {
-                    const next = [...(form.whatsBoxItems || [])];
-                    next[i] = e.target.value;
-                    setField("whatsBoxItems", next);
-                  }}
-                />
-                <Button size="icon" variant="ghost" onClick={() => setField("whatsBoxItems", (form.whatsBoxItems || []).filter((_, idx) => idx !== i))}>
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-              </div>
-            ))}
+            {sections.length === 0 && (
+              <p className="rounded-md border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
+                Nenhuma seção. Crie blocos livres para a página de detalhe.
+              </p>
+            )}
+            {sections.map((sec, i) => {
+              const kind: MediaKind = sec.mediaKind || (sec.videoUrl ? "video" : "image");
+              return (
+                <Card key={i}>
+                  <CardContent className="space-y-3 p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <Label className="font-semibold">Seção {i + 1}</Label>
+                      <div className="flex items-center gap-1">
+                        <Button size="icon" variant="ghost" onClick={() => moveSection(i, -1)} disabled={i === 0} title="Mover para cima">
+                          <ArrowUp className="h-4 w-4" />
+                        </Button>
+                        <Button size="icon" variant="ghost" onClick={() => moveSection(i, 1)} disabled={i === sections.length - 1} title="Mover para baixo">
+                          <ArrowDown className="h-4 w-4" />
+                        </Button>
+                        <Button size="icon" variant="ghost" onClick={() => removeSection(i)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <div>
+                        <Label className="text-xs">Lado da mídia</Label>
+                        <Select value={sec.mediaSide || "left"} onValueChange={(v) => updateSection(i, { mediaSide: v as "left" | "right" })}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="left">Mídia à esquerda</SelectItem>
+                            <SelectItem value="right">Mídia à direita</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Tipo de mídia</Label>
+                        <Select
+                          value={kind}
+                          onValueChange={(v) =>
+                            updateSection(i, {
+                              mediaKind: v as MediaKind,
+                              // limpa o tipo oposto
+                              ...(v === "image" ? { videoUrl: "" } : { imageUrl: "" }),
+                            })
+                          }
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="image"><span className="inline-flex items-center gap-2"><ImageIcon className="h-3.5 w-3.5" /> Foto</span></SelectItem>
+                            <SelectItem value="video"><span className="inline-flex items-center gap-2"><Video className="h-3.5 w-3.5" /> Vídeo</span></SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <Input
+                      placeholder="Título (ex: AGUENTA O TRANCO. PONTO.)"
+                      value={sec.title || ""}
+                      onChange={(e) => updateSection(i, { title: e.target.value })}
+                    />
+                    <Textarea
+                      rows={3}
+                      placeholder="Texto descritivo do bloco"
+                      value={sec.text || ""}
+                      onChange={(e) => updateSection(i, { text: e.target.value })}
+                    />
+                    <Input
+                      placeholder="Citação em destaque (opcional, ex: 'Não é para ficar bonito na mesa.')"
+                      value={sec.highlight || ""}
+                      onChange={(e) => updateSection(i, { highlight: e.target.value })}
+                    />
+
+                    {kind === "image" ? (
+                      <MediaUploadField
+                        label="Foto da seção"
+                        value={sec.imageUrl}
+                        onChange={(file, dataUrl) => {
+                          setFiles((p) => ({ ...p, [`section.${i}.image`]: file }));
+                          updateSection(i, { imageUrl: dataUrl, videoUrl: "" });
+                        }}
+                        onClear={() => {
+                          setFiles((p) => ({ ...p, [`section.${i}.image`]: null }));
+                          updateSection(i, { imageUrl: "" });
+                        }}
+                      />
+                    ) : (
+                      <MediaUploadField
+                        label="Vídeo da seção"
+                        type="video"
+                        value={sec.videoUrl}
+                        onChange={(file, dataUrl) => {
+                          setFiles((p) => ({ ...p, [`section.${i}.video`]: file }));
+                          updateSection(i, { videoUrl: dataUrl, imageUrl: "" });
+                        }}
+                        onClear={() => {
+                          setFiles((p) => ({ ...p, [`section.${i}.video`]: null }));
+                          updateSection(i, { videoUrl: "" });
+                        }}
+                      />
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </TabsContent>
+
+          {/* ============ KIT COMPLETO ============ */}
+          <TabsContent value="kit" className="space-y-3 pt-4">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">Itens que vêm na caixa, cada um com imagem própria.</p>
+              <Button size="sm" variant="outline" onClick={addKitItem}>
+                <Plus className="mr-1 h-3.5 w-3.5" /> Adicionar item
+              </Button>
+            </div>
+            {kitItems.length === 0 && (
+              <p className="rounded-md border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
+                Nenhum item. Adicione PDA, Capa, Película etc.
+              </p>
+            )}
+            <div className="grid gap-3 sm:grid-cols-2">
+              {kitItems.map((item, i) => (
+                <Card key={i}>
+                  <CardContent className="space-y-3 p-3">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        placeholder="Nome (ex: Capa Silicone)"
+                        value={item.name}
+                        onChange={(e) => updateKitItem(i, { name: e.target.value })}
+                      />
+                      <Button size="icon" variant="ghost" onClick={() => removeKitItem(i)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                    <MediaUploadField
+                      label="Imagem do item"
+                      value={item.imageUrl}
+                      onChange={(file, dataUrl) => {
+                        setFiles((p) => ({ ...p, [`kit.${i}`]: file }));
+                        updateKitItem(i, { imageUrl: dataUrl });
+                      }}
+                      onClear={() => {
+                        setFiles((p) => ({ ...p, [`kit.${i}`]: null }));
+                        updateKitItem(i, { imageUrl: "" });
+                      }}
+                    />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </TabsContent>
         </Tabs>
 
