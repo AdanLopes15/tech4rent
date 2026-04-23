@@ -99,7 +99,7 @@ const ProdutoDetalhe = () => {
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
       <main>
-        <section className="py-8 md:py-16">
+        <section className="border-b border-border bg-card py-8 md:py-16">
           <div className="container max-w-6xl">
             <Link to="/produtos" className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-primary">
               <ArrowLeft className="h-4 w-4" /> Produtos / {product?.category || "Catálogo"} / {productName}
@@ -107,7 +107,7 @@ const ProdutoDetalhe = () => {
 
             <div className="grid gap-12 lg:grid-cols-[1fr_0.95fr] lg:items-center">
               <div>
-                <div className="aspect-square overflow-hidden rounded-lg bg-muted p-8">
+                <div className="aspect-square overflow-hidden rounded-lg border border-border bg-background p-8 shadow-sm">
                   <img src={selectedImage} alt={productName} className="h-full w-full object-contain" />
                 </div>
                 {images.length > 1 && (
@@ -128,13 +128,13 @@ const ProdutoDetalhe = () => {
               </div>
 
               <div>
-                <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">{code}</p>
+                <p className="text-sm font-bold uppercase tracking-widest text-primary">{code}</p>
                 <h1 className="mt-4 text-4xl font-black leading-tight md:text-5xl">{productName}</h1>
                 <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">{description}</p>
 
                 <div className="mt-7 grid gap-3 sm:grid-cols-2">
                   {featureCards.map(({ icon: Icon, title, description: itemDescription }) => (
-                    <div key={title} className="rounded-lg border border-border bg-card p-4">
+                    <div key={title} className="rounded-lg border border-border bg-background p-4 shadow-sm">
                       <Icon className="h-5 w-5 text-primary" />
                       <h2 className="mt-3 text-sm font-black">{title}</h2>
                       <p className="mt-1 text-xs text-muted-foreground">{itemDescription}</p>
@@ -162,7 +162,7 @@ const ProdutoDetalhe = () => {
           </div>
         </section>
 
-        <section className="bg-foreground py-20 text-background">
+        <section className="py-20 text-background" style={{ background: "linear-gradient(180deg, hsl(var(--foreground)), hsl(var(--foreground) / 0.94))" }}>
           <div className="container max-w-5xl">
             <h2 className="text-center text-3xl font-black md:text-4xl">Detalhes do <span className="text-primary">{productName}</span></h2>
             <div className="mt-12 grid gap-10 lg:grid-cols-[0.9fr_1fr] lg:items-center">
@@ -170,11 +170,11 @@ const ProdutoDetalhe = () => {
                 <div className="mb-7 h-1 w-16 bg-primary" />
                 <h3 className="text-4xl font-black leading-tight">AGUENTA O TRANCO. <span className="text-primary">PONTO.</span></h3>
                 <p className="mt-5 text-lg leading-relaxed text-background/70">Equipamento preparado para operação intensa, logística, estoque, expedição e loja.</p>
-                <div className="mt-6 rounded-lg border border-background/15 bg-background/5 p-5 text-sm font-bold italic text-background/80">
+                <div className="mt-6 rounded-lg border border-background/15 bg-background/10 p-5 text-sm font-bold italic text-background/85">
                   “Não é para ficar bonito na mesa. É para sobreviver no chão.”
                 </div>
               </div>
-              <div className="overflow-hidden rounded-lg border border-background/10 bg-background/5 p-8">
+              <div className="overflow-hidden rounded-lg border border-background/10 bg-background/10 p-8 shadow-2xl shadow-foreground/30">
                 <img src={selectedImage} alt={`Detalhes do ${productName}`} className="mx-auto h-80 w-full object-contain" loading="lazy" />
               </div>
             </div>
