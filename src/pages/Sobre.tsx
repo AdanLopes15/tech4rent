@@ -1,11 +1,13 @@
 //src/pages/Sobre.tsx
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Award, Clock, Eye, Heart, MapPin, MessageCircle, PackageCheck, Shield, Target, Users, Wrench, Zap } from "lucide-react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/store";
+import { renderBlock } from "@/lib/site-builder/registry";
+import type { Block } from "@/lib/site-builder/types";
 
 const defaultDescription =
   "A TECH4RENT é uma marca brasileira especializada em locação e venda de equipamentos para operações de logística, estoque e varejo. Desenvolvemos soluções robustas, pensadas para o dia a dia intenso das operações no Brasil.";
@@ -33,10 +35,14 @@ const structure = [
 const Sobre = () => {
   const fetchAllData = useStore((s) => s.fetchAllData);
   const { companySettings } = useStore();
+  const sitePages = useStore((s) => s.sitePages);
 
   useEffect(() => {
     fetchAllData(true);
   }, [fetchAllData]);
+
+  const publishedBlocks = useMemo<Block[]>(() => (sitePages?.sobre?.published || []) as Block[], [sitePages?.sobre?.published]);
+  const usePublished = publishedBlocks.length > 0;
 
   const fantasyName = companySettings?.fantasyName || "TECH4RENT";
   const about = companySettings?.siteContent?.about;
