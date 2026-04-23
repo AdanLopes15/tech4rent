@@ -44,6 +44,7 @@ const Footer = () => {
             <ul className="space-y-3 text-xs text-background/75">
               <li><Link to="/sobre" className="transition-colors hover:text-background">Sobre a Tech4Rent</Link></li>
               <li><Link to="/contato" className="transition-colors hover:text-background">Suporte e Contato</Link></li>
+              <li><Link to="/politica-de-devolucao" className="transition-colors hover:text-background">Política de Devolução</Link></li>
               <li><Link to="/sobre#duvidas" className="transition-colors hover:text-background">Dúvidas Frequentes</Link></li>
             </ul>
           </div>
