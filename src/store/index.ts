@@ -264,7 +264,7 @@ type State = {
   rentalClauses: Clause[];
   saleClauses: Clause[];
   homePage: { draft: any[]; published: any[]; updatedAt?: any; publishedAt?: any };
-  sitePages: Record<string, { draft: any[]; published: any[]; updatedAt?: any; publishedAt?: any }>;
+  sitePages: Record<string, { draft: any[]; published: any[]; seo?: any; updatedAt?: any; publishedAt?: any }>;
   loading: boolean;
   isQuoteDialogOpen: boolean;
 };
