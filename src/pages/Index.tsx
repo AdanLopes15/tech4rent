@@ -9,9 +9,6 @@ import EquipmentSection from "@/components/landing/EquipmentSection";
 import PresenceSection from "@/components/landing/PresenceSection";
 import ResultsSection from "@/components/landing/ResultsSection";
 import VideoShowcaseSection from "@/components/landing/VideoShowcaseSection";
-import AboutSection from "@/components/landing/AboutSection";
-import ContactSection from "@/components/landing/ContactSection";
-import Footer from "@/components/landing/Footer";
 
 const Index = () => {
   const fetchAllData = useStore((s) => s.fetchAllData);
@@ -29,10 +26,7 @@ const Index = () => {
         <PresenceSection />
         <ResultsSection />
         <VideoShowcaseSection />
-        <AboutSection />
-        <ContactSection />
       </main>
-      <Footer />
     </div>
   );
 };

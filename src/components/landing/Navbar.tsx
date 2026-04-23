@@ -1,65 +1,73 @@
 //src/components/landing/Navbar.tsx
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowRight, Menu, X } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ArrowRight, Menu, MessageCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/store";
 
-const navItems = [
-  ["Produtos", "equipamentos"],
-  ["Diferenciais", "diferenciais"],
-  ["Sobre", "sobre"],
-  ["Contato", "contato"],
-];
-
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
   const { companySettings } = useStore();
 
   const fantasyName = companySettings?.fantasyName || companySettings?.name || "TECH4RENT";
   const siteLogoUrl = companySettings?.siteLogoUrl;
 
-  const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  const goToHomeSection = (id: string) => {
     setIsOpen(false);
+    if (location.pathname !== "/") {
+      navigate(`/#${id}`);
+      setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }), 80);
+      return;
+    }
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const goToAboutSection = (id?: string) => {
+    setIsOpen(false);
+    navigate(id ? `/sobre#${id}` : "/sobre");
+    if (id) setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }), 80);
   };
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-xl">
-      <div className="container flex h-20 items-center justify-between gap-6">
-        <button onClick={() => scrollTo("hero")} className="flex min-w-0 items-center gap-3" aria-label="Voltar ao início">
+    <nav className="sticky top-0 z-50 border-b border-border bg-foreground text-background">
+      <div className="container flex h-16 max-w-6xl items-center justify-between gap-6">
+        <button onClick={() => goToHomeSection("hero")} className="flex min-w-0 items-center gap-3" aria-label="Voltar ao início">
           {siteLogoUrl ? (
-            <img src={siteLogoUrl} alt="Logo da Tech4Rent" className="h-12 w-auto max-w-44 object-contain" />
+            <img src={siteLogoUrl} alt="Logo da Tech4Rent" className="h-8 w-auto max-w-36 object-contain brightness-0 invert" />
           ) : (
-            <div className="flex h-11 w-11 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold">
-              T4
-            </div>
+            <span className="text-2xl font-black tracking-tight">{fantasyName}</span>
           )}
-          {!siteLogoUrl && <span className="text-xl font-black tracking-tight text-foreground">{fantasyName}</span>}
         </button>
 
-        <div className="hidden items-center gap-8 lg:flex">
-          {navItems.map(([label, id]) => (
-            <button
-              key={id}
-              onClick={() => scrollTo(id)}
-              className="text-sm font-semibold text-muted-foreground transition-colors hover:text-primary"
-            >
-              {label}
-            </button>
-          ))}
-          <Link to="/login" className="text-sm font-semibold text-muted-foreground transition-colors hover:text-primary">
-            Área Restrita
-          </Link>
+        <div className="hidden items-center gap-7 lg:flex">
+          <button onClick={() => goToHomeSection("equipamentos")} className="text-sm font-bold text-background/75 transition-colors hover:text-background">
+            Produtos
+          </button>
+          <button onClick={() => goToHomeSection("diferenciais")} className="text-sm font-bold text-background/75 transition-colors hover:text-background">
+            Protect+
+          </button>
+          <button onClick={() => goToAboutSection("duvidas")} className="text-sm font-bold text-background/75 transition-colors hover:text-background">
+            Dúvidas
+          </button>
+          <button
+            onClick={() => goToAboutSection()}
+            className={`rounded-md px-3 py-2 text-sm font-bold transition-colors ${location.pathname === "/sobre" ? "bg-primary/15 text-primary" : "text-background/75 hover:text-background"}`}
+          >
+            Sobre
+          </button>
+          <button onClick={() => goToAboutSection("contato")} className="text-sm font-bold text-background/75 transition-colors hover:text-background">
+            Contato
+          </button>
+          <span className="text-sm font-bold text-background/75">Blog</span>
         </div>
 
-        <div className="hidden items-center gap-3 lg:flex">
-          <Button variant="outline" onClick={() => scrollTo("equipamentos")}>
-            Ver Catálogo
-          </Button>
-          <Button onClick={() => scrollTo("contato")} className="gap-2">
-            Solicitar Orçamento <ArrowRight className="h-4 w-4" />
+        <div className="hidden items-center gap-4 lg:flex">
+          <span className="text-xs font-bold text-background/65">BR&nbsp; Português</span>
+          <Button onClick={() => goToAboutSection("contato")} className="h-11 gap-2 px-5 font-bold">
+            <MessageCircle className="h-4 w-4" /> Fale Conosco
           </Button>
         </div>
 
@@ -69,22 +77,16 @@ const Navbar = () => {
       </div>
 
       {isOpen && (
-        <div className="border-t border-border bg-background px-6 py-5 lg:hidden">
+        <div className="border-t border-background/10 bg-foreground px-6 py-5 lg:hidden">
           <div className="space-y-4">
-            {navItems.map(([label, id]) => (
-              <button
-                key={id}
-                onClick={() => scrollTo(id)}
-                className="block w-full text-left text-sm font-semibold text-muted-foreground transition-colors hover:text-primary"
-              >
-                {label}
-              </button>
-            ))}
-            <Link to="/login" onClick={() => setIsOpen(false)} className="block text-sm font-semibold text-muted-foreground">
-              Área Restrita
-            </Link>
-            <Button onClick={() => scrollTo("contato")} className="w-full gap-2">
-              Solicitar Orçamento <ArrowRight className="h-4 w-4" />
+            <button onClick={() => goToHomeSection("equipamentos")} className="block w-full text-left text-sm font-bold text-background/75">Produtos</button>
+            <button onClick={() => goToHomeSection("diferenciais")} className="block w-full text-left text-sm font-bold text-background/75">Protect+</button>
+            <button onClick={() => goToAboutSection("duvidas")} className="block w-full text-left text-sm font-bold text-background/75">Dúvidas</button>
+            <button onClick={() => goToAboutSection()} className="block w-full text-left text-sm font-bold text-primary">Sobre</button>
+            <button onClick={() => goToAboutSection("contato")} className="block w-full text-left text-sm font-bold text-background/75">Contato</button>
+            <Link to="/login" onClick={() => setIsOpen(false)} className="block text-sm font-bold text-background/75">Área Restrita</Link>
+            <Button onClick={() => goToAboutSection("contato")} className="w-full gap-2">
+              Fale Conosco <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
