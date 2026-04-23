@@ -12,6 +12,7 @@ export async function getNextId(collectionName: string): Promise<string> {
     quotes: "ORC",
     purchaseOrders: "OC",
     collaborators: "COL",
+    catalogItems: "CAT",
   };
 
   const counterRef = doc(db, "counters", collectionName);

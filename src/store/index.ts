@@ -244,6 +244,7 @@ type State = {
   user: User | null;
   clients: any[];
   equipments: any[];
+  catalogItems: any[];
   contracts: any[];
   sales: any[];
   quotes: any[];
@@ -280,6 +281,9 @@ type Actions = {
   addEquipment: (equipment: any) => Promise<void>;
   updateEquipment: (equipment: any) => Promise<void>;
   deleteEquipment: (equipmentId: string) => Promise<void>;
+  addCatalogItem: (item: any) => Promise<void>;
+  updateCatalogItem: (item: any) => Promise<void>;
+  deleteCatalogItem: (itemId: string) => Promise<void>;
   addQuote: (quoteData: any) => Promise<any>;
   updateQuote: (quoteData: any) => Promise<void>;
   deleteQuote: (quoteId: string) => Promise<void>;
@@ -807,6 +811,7 @@ const useStore = create<State & Actions>((set, get) => {
     user: null,
     clients: [],
     equipments: [],
+    catalogItems: [],
     contracts: [],
     sales: [],
     quotes: [],
