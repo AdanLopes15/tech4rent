@@ -136,7 +136,33 @@ const Navbar = () => {
         </div>
 
         <div className="hidden items-center gap-4 lg:flex">
-          <span className="text-xs font-bold text-background/65">BR&nbsp; Português</span>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsLanguageOpen((open) => !open)}
+              className="flex h-11 items-center gap-2 rounded-md border border-background/70 px-3 text-xs font-bold text-background/75 transition-colors hover:border-background hover:text-background"
+              aria-expanded={isLanguageOpen}
+              aria-label="Trocar idioma"
+            >
+              {selectedLanguageLabel}
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isLanguageOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {isLanguageOpen && (
+              <div className="absolute right-0 top-full mt-2 w-40 overflow-hidden rounded-md border border-background/10 bg-foreground shadow-lg">
+                {languages.map((language) => (
+                  <button
+                    key={language.code}
+                    type="button"
+                    onClick={() => changeLanguage(language.code)}
+                    className={`flex w-full px-3 py-3 text-left text-xs font-bold transition-colors hover:bg-primary/15 hover:text-primary ${selectedLanguage === language.code ? "bg-primary/15 text-primary" : "text-background/75"}`}
+                  >
+                    {language.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <Button onClick={goToContact} className="h-11 gap-2 px-5 font-bold">
             <MessageCircle className="h-4 w-4" /> Fale Conosco
           </Button>
@@ -155,12 +181,28 @@ const Navbar = () => {
             <button onClick={() => goToAboutSection()} className="block w-full text-left text-sm font-bold text-primary">Sobre</button>
             <button onClick={goToContact} className={`block w-full text-left text-sm font-bold ${location.pathname === "/contato" ? "text-primary" : "text-background/75"}`}>Contato</button>
             <Link to="/login" onClick={() => setIsOpen(false)} className="block text-sm font-bold text-background/75">Área Restrita</Link>
+            <div className="space-y-2 pt-2">
+              <p className="text-xs font-black uppercase tracking-widest text-background/45">Idioma</p>
+              <div className="grid grid-cols-2 gap-2">
+                {languages.map((language) => (
+                  <button
+                    key={language.code}
+                    type="button"
+                    onClick={() => changeLanguage(language.code)}
+                    className={`rounded-md border border-background/10 px-3 py-2 text-left text-xs font-bold ${selectedLanguage === language.code ? "bg-primary/15 text-primary" : "text-background/75"}`}
+                  >
+                    {language.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <Button onClick={goToContact} className="w-full gap-2">
               Fale Conosco <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
       )}
+      <div id="google_translate_element" className="hidden" />
     </nav>
   );
 };
