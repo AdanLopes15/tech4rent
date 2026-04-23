@@ -853,6 +853,8 @@ const useStore = create<State & Actions>((set, get) => {
           getDocs(collection(db, "equipments")),
           getDocs(collection(db, "catalogItems")),
           getDoc(doc(db, "settings", "homePage")),
+          getDoc(doc(db, "settings", "page_sobre")),
+          getDoc(doc(db, "settings", "page_contato")),
         ])) as [
           DocumentSnapshot<DocumentData>,
           DocumentSnapshot<DocumentData>,
@@ -860,9 +862,11 @@ const useStore = create<State & Actions>((set, get) => {
           QuerySnapshot<DocumentData>,
           QuerySnapshot<DocumentData>,
           DocumentSnapshot<DocumentData>,
+          DocumentSnapshot<DocumentData>,
+          DocumentSnapshot<DocumentData>,
         ];
 
-        const [companySettingsSnap, smtpSettingsSnap, clausesSnap, equipmentsSnap, catalogItemsSnap, homePageSnap] = baseSnaps;
+        const [companySettingsSnap, smtpSettingsSnap, clausesSnap, equipmentsSnap, catalogItemsSnap, homePageSnap, sobrePageSnap, contatoPageSnap] = baseSnaps;
 
         const existingCompanySettings = companySettingsSnap.exists()
           ? (companySettingsSnap.data() as Partial<CompanySettings>)
