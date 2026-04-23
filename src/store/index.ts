@@ -2100,51 +2100,69 @@ const useStore = create<State & Actions>((set, get) => {
         return await getDownloadURL(snapshot.ref);
       };
 
-      let updatedSettings = JSON.parse(JSON.stringify({ ...settings, siteContent, styleSettings }));
+      let updatedSettings: any = JSON.parse(JSON.stringify({ ...settings, siteContent, styleSettings }));
 
       if (logoFile) {
-        updatedSettings.logoUrl = await uploadAndGetURL(logoFile, `company/logo-${logoFile.name}`);
+        updatedSettings.logoUrl = await uploadAndGetURL(logoFile, `company/logo-${Date.now()}-${logoFile.name}`);
       }
 
       if (siteLogoFile) {
-        updatedSettings.siteLogoUrl = await uploadAndGetURL(siteLogoFile, `company/siteLogo-${siteLogoFile.name}`);
+        updatedSettings.siteLogoUrl = await uploadAndGetURL(siteLogoFile, `company/siteLogo-${Date.now()}-${siteLogoFile.name}`);
       }
 
-      const fileKeys: { [key: string]: keyof SiteContent } = {
-        featuredProductImage: "featuredProduct",
-        heroBackgroundImage: "hero",
-        heroBackgroundVideo: "hero",
-        featuredProductBackgroundImage: "featuredProduct",
-        aboutBackgroundImage: "about",
-        contactBackgroundImage: "contact",
-        productHighlightBackgroundImage: "productHighlight",
+      // Mapeamento legado (chaves não-dot)
+      const legacyKeys: { [key: string]: { section: string; field: string } } = {
+        featuredProductImage: { section: "featuredProduct", field: "imageUrl" },
+        heroBackgroundImage: { section: "hero", field: "backgroundImageUrl" },
+        heroBackgroundVideo: { section: "hero", field: "backgroundVideoUrl" },
+        featuredProductBackgroundImage: { section: "featuredProduct", field: "backgroundImageUrl" },
+        aboutBackgroundImage: { section: "about", field: "backgroundImageUrl" },
+        contactBackgroundImage: { section: "contact", field: "backgroundImageUrl" },
+        productHighlightBackgroundImage: { section: "productHighlight", field: "backgroundImageUrl" },
+      };
+
+      const setByPath = (obj: any, path: string, value: any) => {
+        const parts = path.split(".");
+        let current = obj;
+        for (let i = 0; i < parts.length - 1; i++) {
+          const key = parts[i];
+          const nextIsArray = /^\d+$/.test(parts[i + 1]);
+          if (current[key] === undefined || current[key] === null) current[key] = nextIsArray ? [] : {};
+          current = current[key];
+        }
+        current[parts[parts.length - 1]] = value;
       };
 
       for (const key in siteFiles) {
-        if (siteFiles[key]) {
-          const file = siteFiles[key]!;
-          const downloadURL = await uploadAndGetURL(file, `site/${key}-${file.name}`);
+        const file = siteFiles[key];
+        if (!file) continue;
+        const downloadURL = await uploadAndGetURL(file, `site/${key.replace(/\./g, "_")}-${Date.now()}-${file.name}`);
 
-          const sectionKey = fileKeys[key];
-          if (sectionKey) {
-            if (!updatedSettings.siteContent[sectionKey]) {
-              (updatedSettings.siteContent as any)[sectionKey] = {};
-            }
-
-            if (key === "featuredProductImage") {
-              (updatedSettings.siteContent[sectionKey] as any).imageUrl = downloadURL;
-            } else if (key === "heroBackgroundVideo") {
-              (updatedSettings.siteContent[sectionKey] as any).backgroundVideoUrl = downloadURL;
-            } else {
-              (updatedSettings.siteContent[sectionKey] as any).backgroundImageUrl = downloadURL;
-            }
-          }
+        if (key.includes(".")) {
+          // Caminho dot-notation (ex: home.video.videoUrl, sobre.estrutura.items.0.imageUrl)
+          setByPath(updatedSettings.siteContent, key, downloadURL);
+        } else if (legacyKeys[key]) {
+          const { section, field } = legacyKeys[key];
+          if (!updatedSettings.siteContent[section]) updatedSettings.siteContent[section] = {};
+          updatedSettings.siteContent[section][field] = downloadURL;
         }
       }
 
       const settingsRef = doc(db, "settings", "company");
       await setDoc(settingsRef, updatedSettings, { merge: true });
       set({ companySettings: updatedSettings });
+    },
+
+    updateSiteContent: async (siteContent, siteFiles) => {
+      const { companySettings } = get();
+      await get().updateCompanySettings(
+        companySettings,
+        null,
+        null,
+        siteContent,
+        siteFiles,
+        companySettings.styleSettings,
+      );
     },
 
     updateSmtpSettings: async (settings) => {
