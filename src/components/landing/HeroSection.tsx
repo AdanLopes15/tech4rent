@@ -1,6 +1,7 @@
 //src/components/landing/HeroSection.tsx
 
 import { ArrowRight, MessageCircle } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/store";
 
@@ -35,7 +36,7 @@ const HeroSection = () => {
   const titleParts = title.split(" ");
   const orangeStart = Math.max(0, titleParts.length - 3);
 
-  const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  
 
   return (
     <section id="hero" className="relative min-h-[760px] overflow-hidden bg-foreground text-background lg:min-h-[calc(100vh-5rem)]">
@@ -67,10 +68,12 @@ const HeroSection = () => {
             <Button
               size="lg"
               variant="outline"
-              onClick={() => scrollTo("equipamentos")}
+              asChild
               className="h-14 min-w-48 gap-4 border-background/45 bg-background/5 px-8 text-background hover:bg-background hover:text-foreground"
             >
-              Ver Catálogo <ArrowRight className="h-4 w-4" />
+              <Link to="/produtos">
+                Ver Catálogo <ArrowRight className="h-4 w-4" />
+              </Link>
             </Button>
             <Button size="lg" asChild className="h-14 min-w-56 gap-2 px-8 text-base font-bold">
               <a href={buildWhatsAppUrl(companySettings?.phone)} target="_blank" rel="noreferrer">
