@@ -244,6 +244,7 @@ type State = {
   user: User | null;
   clients: any[];
   equipments: any[];
+  catalogItems: any[];
   contracts: any[];
   sales: any[];
   quotes: any[];
@@ -280,6 +281,9 @@ type Actions = {
   addEquipment: (equipment: any) => Promise<void>;
   updateEquipment: (equipment: any) => Promise<void>;
   deleteEquipment: (equipmentId: string) => Promise<void>;
+  addCatalogItem: (item: any) => Promise<void>;
+  updateCatalogItem: (item: any) => Promise<void>;
+  deleteCatalogItem: (itemId: string) => Promise<void>;
   addQuote: (quoteData: any) => Promise<any>;
   updateQuote: (quoteData: any) => Promise<void>;
   deleteQuote: (quoteId: string) => Promise<void>;
@@ -807,6 +811,7 @@ const useStore = create<State & Actions>((set, get) => {
     user: null,
     clients: [],
     equipments: [],
+    catalogItems: [],
     contracts: [],
     sales: [],
     quotes: [],
@@ -836,14 +841,16 @@ const useStore = create<State & Actions>((set, get) => {
           getDoc(doc(db, "settings", "smtp")),
           getDoc(doc(db, "settings", "clauses")),
           getDocs(collection(db, "equipments")),
+          getDocs(collection(db, "catalogItems")),
         ])) as [
           DocumentSnapshot<DocumentData>,
           DocumentSnapshot<DocumentData>,
           DocumentSnapshot<DocumentData>,
           QuerySnapshot<DocumentData>,
+          QuerySnapshot<DocumentData>,
         ];
 
-        const [companySettingsSnap, smtpSettingsSnap, clausesSnap, equipmentsSnap] = baseSnaps;
+        const [companySettingsSnap, smtpSettingsSnap, clausesSnap, equipmentsSnap, catalogItemsSnap] = baseSnaps;
 
         const existingCompanySettings = companySettingsSnap.exists()
           ? (companySettingsSnap.data() as Partial<CompanySettings>)
@@ -897,6 +904,7 @@ const useStore = create<State & Actions>((set, get) => {
             : initialRentalClauses,
           saleClauses: clausesSnap.exists() ? clausesSnap.data()?.sale || initialSaleClauses : initialSaleClauses,
           equipments: equipmentsSnap.docs.map(mapDoc),
+          catalogItems: catalogItemsSnap.docs.map(mapDoc),
         };
 
         if (!publicOnly) {
@@ -1141,6 +1149,108 @@ const useStore = create<State & Actions>((set, get) => {
       await deleteDoc(doc(db, "equipments", equipmentId));
       set((state) => ({
         equipments: state.equipments.filter((eq) => eq.id !== equipmentId),
+      }));
+    },
+
+    addCatalogItem: async (item) => {
+      const { mediaFiles = {}, ...itemData } = item;
+      const newId = await get().getNextId("catalogItems");
+
+      const uploadedMedia: Record<string, string> = {};
+      for (const [path, file] of Object.entries(mediaFiles)) {
+        if (!file) continue;
+        const f = file as File;
+        const storageRef = ref(storage, `catalogItems/${newId}/${path}-${Date.now()}-${f.name}`);
+        const snap = await uploadBytes(storageRef, f);
+        uploadedMedia[path] = await getDownloadURL(snap.ref);
+      }
+
+      const finalData: any = { ...itemData, id: newId };
+
+      // Multi-image gallery upload
+      if (Array.isArray(mediaFiles.galleryFiles)) {
+        const galleryUploads = await Promise.all(
+          (mediaFiles.galleryFiles as (File | null)[])
+            .map((f, i) => ({ f, i }))
+            .filter((x) => x.f)
+            .map(async (x) => {
+              const storageRef = ref(storage, `catalogItems/${newId}/gallery-${x.i}-${(x.f as File).name}`);
+              const snap = await uploadBytes(storageRef, x.f as File);
+              return { i: x.i, url: await getDownloadURL(snap.ref) };
+            }),
+        );
+        const galleryUrls = [...(itemData.galleryUrls || [])];
+        galleryUploads.forEach((u) => {
+          galleryUrls[u.i] = u.url;
+        });
+        finalData.galleryUrls = galleryUrls.filter(Boolean);
+      }
+
+      // Apply singular media (heroImageUrl, videoUrl, sectionImage_X, etc.)
+      Object.entries(uploadedMedia).forEach(([path, url]) => {
+        if (path.startsWith("section.")) {
+          const idx = Number(path.split(".")[1]);
+          finalData.sections = finalData.sections || [];
+          finalData.sections[idx] = { ...(finalData.sections[idx] || {}), imageUrl: url };
+        } else {
+          finalData[path] = url;
+        }
+      });
+
+      await setDoc(doc(db, "catalogItems", newId), finalData);
+      set((state) => ({ catalogItems: [...state.catalogItems, finalData] }));
+    },
+
+    updateCatalogItem: async (item) => {
+      const { id, mediaFiles = {}, ...itemData } = item;
+      if (!id) throw new Error("ID obrigatório.");
+
+      const finalData: any = { ...itemData };
+
+      // Gallery (array of files indexed; nulls preserved)
+      if (Array.isArray(mediaFiles.galleryFiles)) {
+        const galleryUrls = [...(itemData.galleryUrls || [])];
+        const galleryUploads = await Promise.all(
+          (mediaFiles.galleryFiles as (File | null)[])
+            .map((f, i) => ({ f, i }))
+            .filter((x) => x.f)
+            .map(async (x) => {
+              const storageRef = ref(storage, `catalogItems/${id}/gallery-${x.i}-${Date.now()}-${(x.f as File).name}`);
+              const snap = await uploadBytes(storageRef, x.f as File);
+              return { i: x.i, url: await getDownloadURL(snap.ref) };
+            }),
+        );
+        galleryUploads.forEach((u) => {
+          galleryUrls[u.i] = u.url;
+        });
+        finalData.galleryUrls = galleryUrls.filter(Boolean);
+      }
+
+      for (const [path, file] of Object.entries(mediaFiles)) {
+        if (!file || path === "galleryFiles") continue;
+        const f = file as File;
+        const storageRef = ref(storage, `catalogItems/${id}/${path}-${Date.now()}-${f.name}`);
+        const snap = await uploadBytes(storageRef, f);
+        const url = await getDownloadURL(snap.ref);
+        if (path.startsWith("section.")) {
+          const idx = Number(path.split(".")[1]);
+          finalData.sections = finalData.sections || [];
+          finalData.sections[idx] = { ...(finalData.sections[idx] || {}), imageUrl: url };
+        } else {
+          finalData[path] = url;
+        }
+      }
+
+      await updateDoc(doc(db, "catalogItems", id), finalData);
+      set((state) => ({
+        catalogItems: state.catalogItems.map((c) => (c.id === id ? { id, ...finalData } : c)),
+      }));
+    },
+
+    deleteCatalogItem: async (itemId) => {
+      await deleteDoc(doc(db, "catalogItems", itemId));
+      set((state) => ({
+        catalogItems: state.catalogItems.filter((c) => c.id !== itemId),
       }));
     },
 

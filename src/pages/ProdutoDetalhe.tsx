@@ -23,13 +23,17 @@ const buildWhatsAppUrl = (phone?: string, product?: string) => {
   return digits ? `https://wa.me/55${digits}?text=${encodeURIComponent(message)}` : "#";
 };
 
-const getImages = (equipment: any) => {
-  const urls = Array.isArray(equipment?.imageUrls) ? equipment.imageUrls.filter((url: string) => isValidHttpUrl(url)) : [];
+const getImages = (product: any) => {
+  const fromCatalog = Array.isArray(product?.galleryUrls) ? product.galleryUrls.filter((url: string) => isValidHttpUrl(url)) : [];
+  const hero = isValidHttpUrl(product?.heroImageUrl) ? [product.heroImageUrl] : [];
+  const merged = [...hero, ...fromCatalog];
+  if (merged.length > 0) return Array.from(new Set(merged));
+  const urls = Array.isArray(product?.imageUrls) ? product.imageUrls.filter((url: string) => isValidHttpUrl(url)) : [];
   if (urls.length > 0) return urls;
-  return [isValidHttpUrl(equipment?.imageUrl) ? equipment.imageUrl : "https://placehold.co/900x900.png"];
+  return [isValidHttpUrl(product?.imageUrl) ? product.imageUrl : "https://placehold.co/900x900.png"];
 };
 
-const getProductPath = (equipment: any) => `/produtos/${encodeURIComponent(String(equipment?.id || equipment?.name || "produto"))}`;
+const getProductPath = (item: any) => `/produtos/${encodeURIComponent(String(item?.id || item?.name || "produto"))}`;
 
 const featureCards = [
   { icon: Smartphone, title: "Android", description: "Sistema pronto para operação" },
@@ -50,17 +54,40 @@ const operationPerks = ["Leitura 1D/2D de alta performance", "Funciona com códi
 const ProdutoDetalhe = () => {
   const { productId } = useParams();
   const fetchAllData = useStore((s) => s.fetchAllData);
-  const { companySettings, equipments } = useStore();
+  const { companySettings, equipments, catalogItems } = useStore();
   const decodedId = productId ? decodeURIComponent(productId) : "";
 
   useEffect(() => {
     fetchAllData(true);
   }, [fetchAllData]);
 
-  const product = useMemo(
+  const catalogItem = useMemo(() => {
+    if (decodedId.startsWith("cat-")) {
+      const realId = decodedId.replace(/^cat-/, "");
+      return (catalogItems || []).find((c: any) => String(c.id) === realId);
+    }
+    // fallback: catalog item linked to the same equipmentId or matching by name
+    return (catalogItems || []).find(
+      (c: any) => c.published && (String(c.equipmentId) === decodedId || String(c.name) === decodedId),
+    );
+  }, [catalogItems, decodedId]);
+
+  const baseEquipment = useMemo(
     () => equipments.find((equipment: any) => String(equipment?.id) === decodedId || String(equipment?.name) === decodedId),
     [equipments, decodedId],
   );
+
+  // Merge: catalog item overrides equipment fields when present
+  const product = useMemo(() => {
+    if (!catalogItem && !baseEquipment) return null;
+    if (!catalogItem) return baseEquipment;
+    const linkedEquip = baseEquipment || equipments.find((e: any) => String(e.id) === String(catalogItem.equipmentId));
+    return {
+      ...(linkedEquip || {}),
+      ...catalogItem,
+      description: catalogItem.longDescription || catalogItem.shortDescription || linkedEquip?.description,
+    };
+  }, [catalogItem, baseEquipment, equipments]);
 
   const images = useMemo(() => getImages(product), [product]);
   const [selectedImage, setSelectedImage] = useState(images[0]);
@@ -70,8 +97,8 @@ const ProdutoDetalhe = () => {
   }, [images]);
 
   const relatedProducts = useMemo(
-    () => equipments.filter((equipment: any) => equipment?.id !== product?.id).slice(0, 3),
-    [equipments, product?.id],
+    () => equipments.filter((equipment: any) => equipment?.id !== product?.id && equipment?.id !== catalogItem?.equipmentId).slice(0, 3),
+    [equipments, product?.id, catalogItem?.equipmentId],
   );
 
   if (!product) {
@@ -95,7 +122,10 @@ const ProdutoDetalhe = () => {
   const code = product?.code || product?.model || product?.patrimony || product?.category || "TECH4RENT";
   const description = product?.description || "Projetado para ambientes industriais e operações logísticas intensivas.";
   const whatsappUrl = buildWhatsAppUrl(companySettings?.phone, productName);
-  const specs = [
+  const customSpecs = Array.isArray(product?.specs) && product.specs.length > 0
+    ? product.specs.map((s: any) => [s.label, s.value])
+    : null;
+  const specs = customSpecs || [
     ["Categoria", product?.category],
     ["Código", code],
     ["Modelo", product?.model],
@@ -103,6 +133,11 @@ const ProdutoDetalhe = () => {
     ["Finalidade", product?.purpose],
     ["Garantia", "1 ano + assistência no Brasil"],
   ].filter(([, value]) => Boolean(value));
+
+  const customTags = Array.isArray(product?.tags) && product.tags.length > 0 ? product.tags : null;
+  const customSections = Array.isArray(product?.sections) ? product.sections.filter((s: any) => s?.title || s?.text || s?.imageUrl) : [];
+  const customBox = Array.isArray(product?.whatsBoxItems) ? product.whatsBoxItems.filter(Boolean) : [];
+  const customVideo = product?.videoUrl;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -142,11 +177,13 @@ const ProdutoDetalhe = () => {
                 <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">{description}</p>
 
                 <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-muted-foreground">
-                  <span className="rounded-full border border-border bg-muted px-3 py-1">Android</span>
-                  <span className="rounded-full border border-border bg-muted px-3 py-1">2D</span>
-                  <span className="rounded-full border border-border bg-muted px-3 py-1">Wi‑Fi</span>
-                  <span className="rounded-full border border-border bg-muted px-3 py-1">Bluetooth</span>
-                  <span className="rounded-full border border-border bg-muted px-3 py-1">Chip 4G</span>
+                  {customTags
+                    ? customTags.map((tag: any) => (
+                        <span key={tag.label} className="rounded-full border border-border bg-muted px-3 py-1">{tag.label}</span>
+                      ))
+                    : ["Android", "2D", "Wi‑Fi", "Bluetooth", "Chip 4G"].map((t) => (
+                        <span key={t} className="rounded-full border border-border bg-muted px-3 py-1">{t}</span>
+                      ))}
                 </div>
 
                 <div className="mt-7 grid gap-3 sm:grid-cols-2">
@@ -278,13 +315,45 @@ const ProdutoDetalhe = () => {
           </div>
         </section>
 
+        {customVideo && (
+          <section className="bg-background py-16">
+            <div className="container max-w-5xl">
+              <h2 className="text-center text-3xl font-black">Veja o <span className="text-primary">{productName}</span> em ação</h2>
+              <div className="mx-auto mt-8 overflow-hidden rounded-lg border border-border bg-card shadow-lg">
+                <video src={customVideo} controls className="h-full w-full" />
+              </div>
+            </div>
+          </section>
+        )}
+
+        {customSections.length > 0 && (
+          <section className="bg-background py-16">
+            <div className="container max-w-5xl space-y-16">
+              {customSections.map((sec: any, i: number) => (
+                <div key={i} className={`grid gap-10 lg:grid-cols-2 lg:items-center ${i % 2 === 1 ? "lg:[&>*:first-child]:order-2" : ""}`}>
+                  {sec.imageUrl ? (
+                    <div className="overflow-hidden rounded-lg border border-border bg-muted p-6">
+                      <img src={sec.imageUrl} alt={sec.title || `Seção ${i + 1}`} className="mx-auto h-72 w-full object-contain" loading="lazy" />
+                    </div>
+                  ) : <div />}
+                  <div>
+                    <div className="mb-5 h-1 w-14 bg-primary" />
+                    {sec.title && <h2 className="text-3xl font-black leading-tight">{sec.title}</h2>}
+                    {sec.text && <p className="mt-4 whitespace-pre-line text-base leading-relaxed text-muted-foreground">{sec.text}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         <section className="bg-card py-20 text-center text-foreground">
           <div className="container max-w-3xl">
             <div className="mx-auto mb-6 h-1 w-14 bg-primary" />
             <h2 className="text-3xl font-black">VOCÊ JÁ RECEBE <span className="text-primary">PRONTO PRA OPERAÇÃO.</span></h2>
             <p className="mt-2 text-sm text-muted-foreground">O que vem na caixa</p>
             <div className="mx-auto mt-10 grid max-w-2xl gap-3 rounded-lg border border-border bg-muted p-5 sm:grid-cols-4">
-              {["Capa silicone", "Película vidro", "Fonte com cabo", "Gatilho"].map((item) => (
+              {(customBox.length > 0 ? customBox : ["Capa silicone", "Película vidro", "Fonte com cabo", "Gatilho"]).map((item: string) => (
                 <div key={item} className="rounded-md bg-card p-4 text-sm font-black uppercase shadow-sm">
                   <QrCode className="mx-auto mb-3 h-8 w-8 text-primary" /> {item}
                 </div>
@@ -293,7 +362,6 @@ const ProdutoDetalhe = () => {
             <Button asChild size="lg" className="mt-8 gap-2 px-10">
               <a href={whatsappUrl} target="_blank" rel="noreferrer"><MessageCircle className="h-5 w-5" /> Solicitar orçamento</a>
             </Button>
-            <p className="mx-auto mt-5 max-w-lg text-sm text-muted-foreground">A maioria dos coletores não acompanha gatilho — aqui, ele já vem incluso no kit.</p>
           </div>
         </section>
 
