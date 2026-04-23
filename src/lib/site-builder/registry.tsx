@@ -512,6 +512,16 @@ export function renderBlock(block: Block) {
       return <FaqBlock {...(props as any)} />;
     case "spacer":
       return <SpacerBlock {...(props as any)} />;
+    case "gallery":
+      return <GalleryBlock {...(props as any)} />;
+    case "testimonials":
+      return <TestimonialsBlock {...(props as any)} />;
+    case "pricing":
+      return <PricingBlock {...(props as any)} />;
+    case "logoCloud":
+      return <LogoCloudBlock {...(props as any)} />;
+    case "stats":
+      return <StatsBlock {...(props as any)} />;
     default:
       return null;
   }
