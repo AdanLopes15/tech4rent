@@ -841,14 +841,16 @@ const useStore = create<State & Actions>((set, get) => {
           getDoc(doc(db, "settings", "smtp")),
           getDoc(doc(db, "settings", "clauses")),
           getDocs(collection(db, "equipments")),
+          getDocs(collection(db, "catalogItems")),
         ])) as [
           DocumentSnapshot<DocumentData>,
           DocumentSnapshot<DocumentData>,
           DocumentSnapshot<DocumentData>,
           QuerySnapshot<DocumentData>,
+          QuerySnapshot<DocumentData>,
         ];
 
-        const [companySettingsSnap, smtpSettingsSnap, clausesSnap, equipmentsSnap] = baseSnaps;
+        const [companySettingsSnap, smtpSettingsSnap, clausesSnap, equipmentsSnap, catalogItemsSnap] = baseSnaps;
 
         const existingCompanySettings = companySettingsSnap.exists()
           ? (companySettingsSnap.data() as Partial<CompanySettings>)
@@ -902,6 +904,7 @@ const useStore = create<State & Actions>((set, get) => {
             : initialRentalClauses,
           saleClauses: clausesSnap.exists() ? clausesSnap.data()?.sale || initialSaleClauses : initialSaleClauses,
           equipments: equipmentsSnap.docs.map(mapDoc),
+          catalogItems: catalogItemsSnap.docs.map(mapDoc),
         };
 
         if (!publicOnly) {
