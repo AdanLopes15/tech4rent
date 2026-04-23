@@ -59,9 +59,6 @@ const Navbar = () => {
           >
             Produtos
           </button>
-          <button onClick={() => goToHomeSection("diferenciais")} className="text-sm font-bold text-background/75 transition-colors hover:text-background">
-            Protect+
-          </button>
           <button onClick={() => goToAboutSection("duvidas")} className="text-sm font-bold text-background/75 transition-colors hover:text-background">
             Dúvidas
           </button>
@@ -74,7 +71,6 @@ const Navbar = () => {
           <button onClick={goToContact} className={`rounded-md px-3 py-2 text-sm font-bold transition-colors ${location.pathname === "/contato" ? "bg-primary/15 text-primary" : "text-background/75 hover:text-background"}`}>
             Contato
           </button>
-          <span className="text-sm font-bold text-background/75">Blog</span>
         </div>
 
         <div className="hidden items-center gap-4 lg:flex">
@@ -93,7 +89,6 @@ const Navbar = () => {
         <div className="border-t border-background/10 bg-foreground px-6 py-5 lg:hidden">
           <div className="space-y-4">
             <button onClick={goToProducts} className={`block w-full text-left text-sm font-bold ${location.pathname === "/produtos" ? "text-primary" : "text-background/75"}`}>Produtos</button>
-            <button onClick={() => goToHomeSection("diferenciais")} className="block w-full text-left text-sm font-bold text-background/75">Protect+</button>
             <button onClick={() => goToAboutSection("duvidas")} className="block w-full text-left text-sm font-bold text-background/75">Dúvidas</button>
             <button onClick={() => goToAboutSection()} className="block w-full text-left text-sm font-bold text-primary">Sobre</button>
             <button onClick={goToContact} className={`block w-full text-left text-sm font-bold ${location.pathname === "/contato" ? "text-primary" : "text-background/75"}`}>Contato</button>
