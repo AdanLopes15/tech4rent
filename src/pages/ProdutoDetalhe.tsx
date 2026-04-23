@@ -403,17 +403,36 @@ const ProdutoDetalhe = () => {
         )}
 
         <section className="bg-card py-20 text-center text-foreground">
-          <div className="container max-w-3xl">
+          <div className="container max-w-4xl">
             <div className="mx-auto mb-6 h-1 w-14 bg-primary" />
             <h2 className="text-3xl font-black">VOCÊ JÁ RECEBE <span className="text-primary">PRONTO PRA OPERAÇÃO.</span></h2>
             <p className="mt-2 text-sm text-muted-foreground">O que vem na caixa</p>
-            <div className="mx-auto mt-10 grid max-w-2xl gap-3 rounded-lg border border-border bg-muted p-5 sm:grid-cols-4">
-              {(customBox.length > 0 ? customBox : ["Capa silicone", "Película vidro", "Fonte com cabo", "Gatilho"]).map((item: string) => (
-                <div key={item} className="rounded-md bg-card p-4 text-sm font-black uppercase shadow-sm">
-                  <QrCode className="mx-auto mb-3 h-8 w-8 text-primary" /> {item}
-                </div>
-              ))}
-            </div>
+
+            {customKit ? (
+              <div className="mx-auto mt-10 grid max-w-3xl gap-4 sm:grid-cols-2 md:grid-cols-4">
+                {customKit.map((item: any, i: number) => (
+                  <div key={i} className="flex flex-col items-center rounded-lg border border-border bg-muted p-4 shadow-sm">
+                    {item.imageUrl ? (
+                      <img src={item.imageUrl} alt={item.name} className="h-24 w-24 object-contain" loading="lazy" />
+                    ) : (
+                      <div className="flex h-24 w-24 items-center justify-center rounded-md bg-card">
+                        <QrCode className="h-10 w-10 text-primary" />
+                      </div>
+                    )}
+                    <p className="mt-3 text-center text-xs font-black uppercase text-foreground">{item.name}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="mx-auto mt-10 grid max-w-2xl gap-3 rounded-lg border border-border bg-muted p-5 sm:grid-cols-4">
+                {(legacyBox.length > 0 ? legacyBox : ["Capa silicone", "Película vidro", "Fonte com cabo", "Gatilho"]).map((item: string) => (
+                  <div key={item} className="rounded-md bg-card p-4 text-sm font-black uppercase shadow-sm">
+                    <QrCode className="mx-auto mb-3 h-8 w-8 text-primary" /> {item}
+                  </div>
+                ))}
+              </div>
+            )}
+
             <Button asChild size="lg" className="mt-8 gap-2 px-10">
               <a href={whatsappUrl} target="_blank" rel="noreferrer"><MessageCircle className="h-5 w-5" /> Solicitar orçamento</a>
             </Button>
