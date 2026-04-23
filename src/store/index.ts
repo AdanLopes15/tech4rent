@@ -2344,6 +2344,52 @@ const useStore = create<State & Actions>((set, get) => {
       set({ homePage: { ...current, draft: current.published } });
     },
 
+    savePageDraft: async (slug, blocks) => {
+      const docId = `page_${slug}`;
+      const refDoc = doc(db, "settings", docId);
+      await setDoc(refDoc, { draft: blocks, updatedAt: serverTimestamp() }, { merge: true });
+      const pages = { ...get().sitePages };
+      const current = pages[slug] || { draft: [], published: [] };
+      pages[slug] = { ...current, draft: blocks };
+      set({ sitePages: pages });
+      // Mantém compatibilidade do homePage legado
+      if (slug === "home") {
+        const homeRef = doc(db, "settings", "homePage");
+        await setDoc(homeRef, { draft: blocks, updatedAt: serverTimestamp() }, { merge: true });
+        set({ homePage: { ...(get().homePage || { draft: [], published: [] }), draft: blocks } });
+      }
+    },
+
+    publishPage: async (slug) => {
+      const docId = `page_${slug}`;
+      const refDoc = doc(db, "settings", docId);
+      const pages = { ...get().sitePages };
+      const current = pages[slug] || { draft: [], published: [] };
+      await setDoc(refDoc, { published: current.draft, publishedAt: serverTimestamp() }, { merge: true });
+      pages[slug] = { ...current, published: current.draft };
+      set({ sitePages: pages });
+      if (slug === "home") {
+        const homeRef = doc(db, "settings", "homePage");
+        await setDoc(homeRef, { published: current.draft, publishedAt: serverTimestamp() }, { merge: true });
+        set({ homePage: { ...(get().homePage || { draft: [], published: [] }), published: current.draft } });
+      }
+    },
+
+    resetPageDraft: async (slug) => {
+      const docId = `page_${slug}`;
+      const refDoc = doc(db, "settings", docId);
+      const pages = { ...get().sitePages };
+      const current = pages[slug] || { draft: [], published: [] };
+      await setDoc(refDoc, { draft: current.published, updatedAt: serverTimestamp() }, { merge: true });
+      pages[slug] = { ...current, draft: current.published };
+      set({ sitePages: pages });
+      if (slug === "home") {
+        const homeRef = doc(db, "settings", "homePage");
+        await setDoc(homeRef, { draft: current.published, updatedAt: serverTimestamp() }, { merge: true });
+        set({ homePage: { ...(get().homePage || { draft: [], published: [] }), draft: current.published } });
+      }
+    },
+
     updateRentalClauses: async (clauses) => {
       const clausesRef = doc(db, "settings", "clauses");
       await setDoc(clausesRef, { rental: clauses }, { merge: true });
