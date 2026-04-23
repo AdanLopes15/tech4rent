@@ -7,7 +7,8 @@ import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/store";
 import { renderBlock } from "@/lib/site-builder/registry";
-import type { Block } from "@/lib/site-builder/types";
+import type { Block, PageSeo } from "@/lib/site-builder/types";
+import PageSeoHead from "@/components/site-builder/PageSeoHead";
 
 const defaultDescription =
   "A TECH4RENT é uma marca brasileira especializada em locação e venda de equipamentos para operações de logística, estoque e varejo. Desenvolvemos soluções robustas, pensadas para o dia a dia intenso das operações no Brasil.";
@@ -43,6 +44,7 @@ const Sobre = () => {
 
   const publishedBlocks = useMemo<Block[]>(() => (sitePages?.sobre?.published || []) as Block[], [sitePages?.sobre?.published]);
   const usePublished = publishedBlocks.length > 0;
+  const seo = (sitePages?.sobre?.seo as PageSeo) || {};
 
   const fantasyName = companySettings?.fantasyName || "TECH4RENT";
   const about = companySettings?.siteContent?.about;
@@ -66,6 +68,11 @@ const Sobre = () => {
   if (usePublished) {
     return (
       <div className="min-h-screen bg-background text-foreground">
+        <PageSeoHead
+          seo={seo}
+          fallbackTitle="Sobre — TECH4RENT"
+          fallbackDescription="Conheça a TECH4RENT, marca brasileira de equipamentos para logística, varejo e indústria."
+        />
         <Navbar />
         <main>
           {publishedBlocks.filter((b) => b.visible !== false).map((b) => (
@@ -79,6 +86,11 @@ const Sobre = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <PageSeoHead
+        seo={seo}
+        fallbackTitle="Sobre — TECH4RENT"
+        fallbackDescription="Conheça a TECH4RENT, marca brasileira de equipamentos para logística, varejo e indústria."
+      />
       <Navbar />
       <main>
         {/* legacy layout below kept as fallback */}

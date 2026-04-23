@@ -10,7 +10,8 @@ import { useStore } from "@/store";
 import { toast } from "sonner";
 import { createContact } from "@/ai/flows/create-contact-flow";
 import { renderBlock } from "@/lib/site-builder/registry";
-import type { Block } from "@/lib/site-builder/types";
+import type { Block, PageSeo } from "@/lib/site-builder/types";
+import PageSeoHead from "@/components/site-builder/PageSeoHead";
 
 const contactSchema = z.object({
   name: z.string().trim().min(2, "Informe seu nome.").max(100, "Nome muito longo."),
@@ -30,6 +31,7 @@ const Contato = () => {
   const sitePages = useStore((s) => s.sitePages);
   const publishedBlocks = useMemo<Block[]>(() => (sitePages?.contato?.published || []) as Block[], [sitePages?.contato?.published]);
   const usePublished = publishedBlocks.length > 0;
+  const seo = (sitePages?.contato?.seo as PageSeo) || {};
   const address = companySettings?.address;
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ name: "", company: "", city: "", interest: "", message: "" });
@@ -85,6 +87,11 @@ const Contato = () => {
   if (usePublished) {
     return (
       <div className="min-h-screen bg-background text-foreground">
+        <PageSeoHead
+          seo={seo}
+          fallbackTitle="Contato — TECH4RENT"
+          fallbackDescription="Fale com a TECH4RENT pelo WhatsApp, e-mail ou formulário. Atendimento técnico dedicado."
+        />
         <Navbar />
         <main>
           {publishedBlocks.filter((b) => b.visible !== false).map((b) => (
@@ -98,6 +105,11 @@ const Contato = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <PageSeoHead
+        seo={seo}
+        fallbackTitle="Contato — TECH4RENT"
+        fallbackDescription="Fale com a TECH4RENT pelo WhatsApp, e-mail ou formulário. Atendimento técnico dedicado."
+      />
       <Navbar />
       <main>
         <section className="relative overflow-hidden border-b border-border bg-foreground py-24 text-background">

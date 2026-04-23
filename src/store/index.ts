@@ -264,7 +264,7 @@ type State = {
   rentalClauses: Clause[];
   saleClauses: Clause[];
   homePage: { draft: any[]; published: any[]; updatedAt?: any; publishedAt?: any };
-  sitePages: Record<string, { draft: any[]; published: any[]; updatedAt?: any; publishedAt?: any }>;
+  sitePages: Record<string, { draft: any[]; published: any[]; seo?: any; updatedAt?: any; publishedAt?: any }>;
   loading: boolean;
   isQuoteDialogOpen: boolean;
 };
@@ -366,6 +366,7 @@ type Actions = {
   savePageDraft: (slug: string, blocks: any[]) => Promise<void>;
   publishPage: (slug: string) => Promise<void>;
   resetPageDraft: (slug: string) => Promise<void>;
+  savePageSeo: (slug: string, seo: any) => Promise<void>;
   updateRentalClauses: (clauses: Clause[]) => Promise<void>;
   updateSaleClauses: (clauses: Clause[]) => Promise<void>;
 };
@@ -934,26 +935,29 @@ const useStore = create<State & Actions>((set, get) => {
               ? {
                   draft: (homePageSnap.data() as any).draft || [],
                   published: (homePageSnap.data() as any).published || [],
+                  seo: (homePageSnap.data() as any).seo || {},
                   updatedAt: (homePageSnap.data() as any).updatedAt,
                   publishedAt: (homePageSnap.data() as any).publishedAt,
                 }
-              : { draft: [], published: [] },
+              : { draft: [], published: [], seo: {} },
             sobre: sobrePageSnap.exists()
               ? {
                   draft: (sobrePageSnap.data() as any).draft || [],
                   published: (sobrePageSnap.data() as any).published || [],
+                  seo: (sobrePageSnap.data() as any).seo || {},
                   updatedAt: (sobrePageSnap.data() as any).updatedAt,
                   publishedAt: (sobrePageSnap.data() as any).publishedAt,
                 }
-              : { draft: [], published: [] },
+              : { draft: [], published: [], seo: {} },
             contato: contatoPageSnap.exists()
               ? {
                   draft: (contatoPageSnap.data() as any).draft || [],
                   published: (contatoPageSnap.data() as any).published || [],
+                  seo: (contatoPageSnap.data() as any).seo || {},
                   updatedAt: (contatoPageSnap.data() as any).updatedAt,
                   publishedAt: (contatoPageSnap.data() as any).publishedAt,
                 }
-              : { draft: [], published: [] },
+              : { draft: [], published: [], seo: {} },
           },
         };
 
@@ -2418,6 +2422,16 @@ const useStore = create<State & Actions>((set, get) => {
         await setDoc(homeRef, { draft: current.published, updatedAt: serverTimestamp() }, { merge: true });
         set({ homePage: { ...(get().homePage || { draft: [], published: [] }), draft: current.published } });
       }
+    },
+
+    savePageSeo: async (slug, seo) => {
+      const docId = slug === "home" ? "homePage" : `page_${slug}`;
+      const refDoc = doc(db, "settings", docId);
+      await setDoc(refDoc, { seo, updatedAt: serverTimestamp() }, { merge: true });
+      const pages = { ...get().sitePages };
+      const current = pages[slug] || { draft: [], published: [] };
+      pages[slug] = { ...current, seo };
+      set({ sitePages: pages });
     },
 
     updateRentalClauses: async (clauses) => {

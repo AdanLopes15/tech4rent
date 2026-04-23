@@ -10,7 +10,21 @@ export type BlockType =
   | "cta"
   | "textImage"
   | "faq"
-  | "spacer";
+  | "spacer"
+  | "gallery"
+  | "testimonials"
+  | "pricing"
+  | "logoCloud"
+  | "stats";
+
+export type PageSeo = {
+  title?: string;
+  description?: string;
+  keywords?: string;
+  ogImageUrl?: string;
+  canonicalUrl?: string;
+  noindex?: boolean;
+};
 
 export type Block = {
   id: string;

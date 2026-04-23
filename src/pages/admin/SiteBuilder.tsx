@@ -15,12 +15,14 @@ import {
   Eye,
   GripVertical,
   Layers,
+  LayoutTemplate,
   Monitor,
   MousePointerClick,
   Plus,
   Redo2,
   RotateCcw,
   Save,
+  Search,
   Settings,
   Smartphone,
   Tablet,
@@ -35,11 +37,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useStore } from "@/store";
 import { BLOCK_LIBRARY, BLOCK_META, renderBlock } from "@/lib/site-builder/registry";
-import { newId, type Block, type BlockType, type PropField } from "@/lib/site-builder/types";
+import { newId, type Block, type BlockType, type PageSeo, type PropField } from "@/lib/site-builder/types";
 import { PAGE_DEFINITIONS, type PageSlug } from "@/lib/site-builder/seed";
+import { getTemplatesForPage } from "@/lib/site-builder/templates";
 import { useHistory, useUndoRedoShortcut } from "@/lib/site-builder/history";
 import { InlineEditProvider } from "@/lib/site-builder/inline-context";
 import ImageUploadInput from "@/components/admin/ImageUploadInput";
@@ -205,6 +209,7 @@ const SiteBuilder = () => {
   const savePageDraft = useStore((s) => s.savePageDraft);
   const publishPage = useStore((s) => s.publishPage);
   const resetPageDraft = useStore((s) => s.resetPageDraft);
+  const savePageSeo = useStore((s) => s.savePageSeo);
 
   const { state: blocks, set: setBlocks, reset: resetBlocks, undo, redo, canUndo, canRedo } = useHistory<Block[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -213,6 +218,10 @@ const SiteBuilder = () => {
   const [publishing, setPublishing] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [inlineMode, setInlineMode] = useState(false);
+  const [templatesOpen, setTemplatesOpen] = useState(false);
+  const [seo, setSeo] = useState<PageSeo>({});
+  const [seoDirty, setSeoDirty] = useState(false);
+  const [savingSeo, setSavingSeo] = useState(false);
 
   useUndoRedoShortcut(undo, redo);
 
@@ -231,7 +240,9 @@ const SiteBuilder = () => {
     resetBlocks(initial as Block[]);
     setSelectedId(null);
     setDirty(false);
-  }, [slug, sitePages?.[slug]?.draft, sitePages?.[slug]?.published, companySettings?.siteContent]);
+    setSeo((page?.seo as PageSeo) || {});
+    setSeoDirty(false);
+  }, [slug, sitePages?.[slug]?.draft, sitePages?.[slug]?.published, sitePages?.[slug]?.seo, companySettings?.siteContent]);
 
   const selected = useMemo(() => blocks.find((b) => b.id === selectedId) || null, [blocks, selectedId]);
   const meta = selected ? BLOCK_META[selected.type] : null;
@@ -323,6 +334,37 @@ const SiteBuilder = () => {
     toast.success("Rascunho descartado");
   };
 
+  const applyTemplate = (templateBlocks: Block[]) => {
+    if (blocks.length > 0 && !confirm("Aplicar template substituirá todos os blocos atuais. Continuar?")) return;
+    // Garante novos IDs para evitar colisão
+    const fresh = templateBlocks.map((b) => ({ ...b, id: newId() }));
+    setBlocks(fresh);
+    setDirty(true);
+    setSelectedId(null);
+    setTemplatesOpen(false);
+    toast.success("Template aplicado. Lembre-se de salvar.");
+  };
+
+  const handleSaveSeo = async () => {
+    try {
+      setSavingSeo(true);
+      await savePageSeo(slug, seo);
+      setSeoDirty(false);
+      toast.success("SEO salvo");
+    } catch (e: any) {
+      toast.error(e?.message || "Erro ao salvar SEO");
+    } finally {
+      setSavingSeo(false);
+    }
+  };
+
+  const updateSeo = (key: keyof PageSeo, value: any) => {
+    setSeo((prev) => ({ ...prev, [key]: value }));
+    setSeoDirty(true);
+  };
+
+  const templates = useMemo(() => getTemplatesForPage(slug), [slug]);
+
   const groupedFields = useMemo(() => {
     if (!meta) return new Map<string, PropField[]>();
     const map = new Map<string, PropField[]>();
@@ -360,6 +402,41 @@ const SiteBuilder = () => {
             <Button size="icon" variant="ghost" className="h-7 w-7" onClick={undo} disabled={!canUndo} title="Desfazer (Ctrl+Z)"><Undo2 className="h-3.5 w-3.5" /></Button>
             <Button size="icon" variant="ghost" className="h-7 w-7" onClick={redo} disabled={!canRedo} title="Refazer (Ctrl+Shift+Z)"><Redo2 className="h-3.5 w-3.5" /></Button>
           </div>
+          <Dialog open={templatesOpen} onOpenChange={setTemplatesOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" variant="outline" className="gap-1" title="Aplicar template pré-pronto">
+                <LayoutTemplate className="h-3.5 w-3.5" /> Templates
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl">
+              <DialogHeader>
+                <DialogTitle>Templates para {pageDef.label}</DialogTitle>
+                <DialogDescription>
+                  Escolha um template pré-pronto. Os blocos atuais serão substituídos.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 max-h-[60vh] overflow-auto pr-1">
+                {templates.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => applyTemplate(t.build())}
+                    className="group flex flex-col items-start gap-2 rounded-lg border border-border bg-card p-4 text-left transition-all hover:border-primary hover:shadow-md"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded bg-primary/10">
+                        <LayoutTemplate className="h-4 w-4 text-primary" />
+                      </div>
+                      <div className="text-sm font-bold text-foreground">{t.name}</div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{t.description}</p>
+                    <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                      {t.build().length} blocos
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
           <Button size="sm" variant={inlineMode ? "default" : "outline"} onClick={() => setInlineMode((v) => !v)} className="gap-1" title="Editar textos no canvas">
             <MousePointerClick className="h-3.5 w-3.5" /> {inlineMode ? "Inline ativo" : "Editar inline"}
           </Button>
@@ -464,40 +541,154 @@ const SiteBuilder = () => {
           </div>
         </div>
 
-        {/* Sidebar direita: propriedades */}
+        {/* Sidebar direita: propriedades + SEO */}
         <aside className="flex w-80 shrink-0 flex-col border-l border-border bg-card">
-          {selected && meta ? (
-            <>
-              <div className="flex items-center justify-between border-b border-border p-3">
-                <div className="flex items-center gap-2">
-                  <Settings className="h-4 w-4 text-muted-foreground" />
-                  <h2 className="text-sm font-bold">{meta.label}</h2>
-                </div>
-              </div>
-              <div className="flex-1 space-y-4 overflow-auto p-3">
-                {Array.from(groupedFields.entries()).map(([group, fields]) => (
-                  <div key={group} className="space-y-3">
-                    {group !== "Geral" && <div className="border-b border-border pb-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">{group}</div>}
-                    {fields.map((f) => (
-                      <div key={f.key} className="space-y-1.5">
-                        <Label className="text-xs font-semibold">{f.label}</Label>
-                        <FieldEditor
-                          field={f}
-                          value={selected.props[f.key] ?? meta.defaults[f.key]}
-                          onChange={(v) => updateBlockProp(selected.id, f.key, v)}
-                        />
-                      </div>
-                    ))}
+          <Tabs defaultValue="bloco" className="flex flex-1 flex-col">
+            <TabsList className="m-2 grid grid-cols-2">
+              <TabsTrigger value="bloco" className="gap-1"><Settings className="h-3.5 w-3.5" /> Bloco</TabsTrigger>
+              <TabsTrigger value="seo" className="gap-1">
+                <Search className="h-3.5 w-3.5" /> SEO
+                {seoDirty && <span className="ml-1 h-1.5 w-1.5 rounded-full bg-amber-500" />}
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="bloco" className="flex-1 overflow-auto px-3 pb-3">
+              {selected && meta ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 border-b border-border pb-2">
+                    <Settings className="h-4 w-4 text-muted-foreground" />
+                    <h2 className="text-sm font-bold">{meta.label}</h2>
                   </div>
-                ))}
+                  {Array.from(groupedFields.entries()).map(([group, fields]) => (
+                    <div key={group} className="space-y-3">
+                      {group !== "Geral" && (
+                        <div className="border-b border-border pb-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                          {group}
+                        </div>
+                      )}
+                      {fields.map((f) => (
+                        <div key={f.key} className="space-y-1.5">
+                          <Label className="text-xs font-semibold">{f.label}</Label>
+                          <FieldEditor
+                            field={f}
+                            value={selected.props[f.key] ?? meta.defaults[f.key]}
+                            onChange={(v) => updateBlockProp(selected.id, f.key, v)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-1 flex-col items-center justify-center p-6 text-center text-sm text-muted-foreground">
+                  <Settings className="mb-2 h-8 w-8 opacity-30" />
+                  Clique em um bloco no canvas ou na lista para editar suas propriedades.
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="seo" className="flex-1 overflow-auto px-3 pb-3">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 border-b border-border pb-2">
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                  <h2 className="text-sm font-bold">SEO da página</h2>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold">Título (title)</Label>
+                  <Input
+                    value={seo.title || ""}
+                    onChange={(e) => updateSeo("title", e.target.value)}
+                    placeholder="TECH4RENT — Equipamentos para sua operação"
+                    maxLength={70}
+                  />
+                  <div className="text-[10px] text-muted-foreground">
+                    {(seo.title || "").length}/60 caracteres ideal
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold">Descrição (meta description)</Label>
+                  <Textarea
+                    rows={3}
+                    value={seo.description || ""}
+                    onChange={(e) => updateSeo("description", e.target.value)}
+                    placeholder="Descrição que aparece nos resultados de busca"
+                    maxLength={180}
+                  />
+                  <div className="text-[10px] text-muted-foreground">
+                    {(seo.description || "").length}/160 caracteres ideal
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold">Palavras-chave</Label>
+                  <Input
+                    value={seo.keywords || ""}
+                    onChange={(e) => updateSeo("keywords", e.target.value)}
+                    placeholder="locação, equipamentos, PDA, leitor"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold">Imagem de compartilhamento (Open Graph)</Label>
+                  <ImageUploadInput
+                    value={seo.ogImageUrl}
+                    onChange={(v) => updateSeo("ogImageUrl", v)}
+                    accept="image/*"
+                    placeholder="https://..."
+                    folder="site-builder/seo"
+                  />
+                  <div className="text-[10px] text-muted-foreground">Recomendado: 1200×630px</div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold">URL canônica (opcional)</Label>
+                  <Input
+                    value={seo.canonicalUrl || ""}
+                    onChange={(e) => updateSeo("canonicalUrl", e.target.value)}
+                    placeholder="https://www.tech4rent.com.br/"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between rounded-md border border-border p-3">
+                  <div>
+                    <Label className="text-xs font-semibold">Não indexar (noindex)</Label>
+                    <p className="text-[10px] text-muted-foreground">Oculta a página dos buscadores</p>
+                  </div>
+                  <Switch
+                    checked={!!seo.noindex}
+                    onCheckedChange={(v) => updateSeo("noindex", v)}
+                  />
+                </div>
+
+                <div className="rounded-md border border-border bg-muted/40 p-3">
+                  <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                    Pré-visualização
+                  </div>
+                  <div className="mt-2 space-y-0.5">
+                    <div className="truncate text-sm font-semibold text-primary">
+                      {seo.title || "TECH4RENT"}
+                    </div>
+                    <div className="truncate text-xs text-emerald-700 dark:text-emerald-400">
+                      {seo.canonicalUrl || `https://www.tech4rent.com.br${pageDef.path}`}
+                    </div>
+                    <div className="line-clamp-2 text-xs text-muted-foreground">
+                      {seo.description || "Sem descrição."}
+                    </div>
+                  </div>
+                </div>
+
+                <Button
+                  className="w-full gap-2"
+                  onClick={handleSaveSeo}
+                  disabled={!seoDirty || savingSeo}
+                >
+                  <Save className="h-3.5 w-3.5" /> {savingSeo ? "Salvando..." : "Salvar SEO"}
+                </Button>
               </div>
-            </>
-          ) : (
-            <div className="flex flex-1 flex-col items-center justify-center p-6 text-center text-sm text-muted-foreground">
-              <Settings className="mb-2 h-8 w-8 opacity-30" />
-              Clique em um bloco no canvas ou na lista para editar suas propriedades.
-            </div>
-          )}
+            </TabsContent>
+          </Tabs>
         </aside>
       </div>
     </div>
