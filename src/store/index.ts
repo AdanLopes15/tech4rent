@@ -2318,6 +2318,27 @@ const useStore = create<State & Actions>((set, get) => {
       set({ smtpSettings: settings });
     },
 
+    saveHomeDraft: async (blocks) => {
+      const ref = doc(db, "settings", "homePage");
+      await setDoc(ref, { draft: blocks, updatedAt: serverTimestamp() }, { merge: true });
+      const current = get().homePage || { draft: [], published: [] };
+      set({ homePage: { ...current, draft: blocks } });
+    },
+
+    publishHome: async () => {
+      const ref = doc(db, "settings", "homePage");
+      const current = get().homePage || { draft: [], published: [] };
+      await setDoc(ref, { published: current.draft, publishedAt: serverTimestamp() }, { merge: true });
+      set({ homePage: { ...current, published: current.draft } });
+    },
+
+    resetHomeDraft: async () => {
+      const ref = doc(db, "settings", "homePage");
+      const current = get().homePage || { draft: [], published: [] };
+      await setDoc(ref, { draft: current.published, updatedAt: serverTimestamp() }, { merge: true });
+      set({ homePage: { ...current, draft: current.published } });
+    },
+
     updateRentalClauses: async (clauses) => {
       const clausesRef = doc(db, "settings", "clauses");
       await setDoc(clausesRef, { rental: clauses }, { merge: true });
