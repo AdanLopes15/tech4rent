@@ -1,9 +1,9 @@
 // src/pages/admin/SiteBuilder.tsx
-// Page Builder MVP: lista de blocos com adicionar, reordenar, duplicar, excluir, editar props.
-// Drag & drop de reordenação. Painel de propriedades à direita. Salvar rascunho e publicar.
+// Page Builder MVP — agora multi-página (home/sobre/contato), com Undo/Redo,
+// upload de imagens no Firebase Storage e edição inline opcional.
 
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -16,13 +16,16 @@ import {
   GripVertical,
   Layers,
   Monitor,
+  MousePointerClick,
   Plus,
+  Redo2,
   RotateCcw,
   Save,
   Settings,
   Smartphone,
   Tablet,
   Trash2,
+  Undo2,
   Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,7 +39,10 @@ import { toast } from "sonner";
 import { useStore } from "@/store";
 import { BLOCK_LIBRARY, BLOCK_META, renderBlock } from "@/lib/site-builder/registry";
 import { newId, type Block, type BlockType, type PropField } from "@/lib/site-builder/types";
-import { buildDefaultHomeBlocks } from "@/lib/site-builder/seed";
+import { PAGE_DEFINITIONS, type PageSlug } from "@/lib/site-builder/seed";
+import { useHistory, useUndoRedoShortcut } from "@/lib/site-builder/history";
+import { InlineEditProvider } from "@/lib/site-builder/inline-context";
+import ImageUploadInput from "@/components/admin/ImageUploadInput";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
@@ -137,6 +143,12 @@ const FieldEditor = ({ field, value, onChange }: { field: PropField; value: any;
       </Select>
     );
   }
+  if (field.type === "image") {
+    return <ImageUploadInput value={value} onChange={onChange} accept="image/*" placeholder={field.placeholder} />;
+  }
+  if (field.type === "video") {
+    return <ImageUploadInput value={value} onChange={onChange} accept="video/*" placeholder={field.placeholder} folder="site-builder/videos" />;
+  }
   if (field.type === "list") {
     const list: any[] = Array.isArray(value) ? value : [];
     const updateAt = (i: number, next: any) => onChange(list.map((it, idx) => (idx === i ? next : it)));
@@ -178,41 +190,48 @@ const FieldEditor = ({ field, value, onChange }: { field: PropField; value: any;
       </div>
     );
   }
-  // text, image, video → input + preview
-  return (
-    <div className="space-y-1">
-      <Input value={value ?? ""} onChange={(e) => onChange(e.target.value)} placeholder={field.placeholder} />
-      {field.type === "image" && value ? (
-        <img src={value} alt="" className="mt-1 h-20 w-full rounded border border-border object-cover" />
-      ) : null}
-    </div>
-  );
+  return <Input value={value ?? ""} onChange={(e) => onChange(e.target.value)} placeholder={field.placeholder} />;
 };
 
 const SiteBuilder = () => {
-  const fetchAllData = useStore((s) => s.fetchAllData);
-  const homePage = useStore((s) => s.homePage);
-  const companySettings = useStore((s) => s.companySettings);
-  const saveHomeDraft = useStore((s) => s.saveHomeDraft);
-  const publishHome = useStore((s) => s.publishHome);
-  const resetHomeDraft = useStore((s) => s.resetHomeDraft);
+  const params = useParams<{ slug?: string }>();
+  const slugParam = (params.slug as PageSlug) || "home";
+  const pageDef = PAGE_DEFINITIONS.find((p) => p.slug === slugParam) || PAGE_DEFINITIONS[0];
+  const slug = pageDef.slug;
 
-  const [blocks, setBlocks] = useState<Block[]>([]);
+  const fetchAllData = useStore((s) => s.fetchAllData);
+  const sitePages = useStore((s) => s.sitePages);
+  const companySettings = useStore((s) => s.companySettings);
+  const savePageDraft = useStore((s) => s.savePageDraft);
+  const publishPage = useStore((s) => s.publishPage);
+  const resetPageDraft = useStore((s) => s.resetPageDraft);
+
+  const { state: blocks, set: setBlocks, reset: resetBlocks, undo, redo, canUndo, canRedo } = useHistory<Block[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [viewport, setViewport] = useState<Viewport>("desktop");
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [dirty, setDirty] = useState(false);
-  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [inlineMode, setInlineMode] = useState(false);
+
+  useUndoRedoShortcut(undo, redo);
 
   useEffect(() => {
     fetchAllData(false);
   }, [fetchAllData]);
 
+  // Carrega blocos ao trocar de página/dados
   useEffect(() => {
-    const initial = homePage?.draft?.length ? homePage.draft : (homePage?.published?.length ? homePage.published : buildDefaultHomeBlocks(companySettings?.siteContent));
-    setBlocks(initial as Block[]);
-  }, [homePage?.draft, homePage?.published, companySettings?.siteContent]);
+    const page = sitePages?.[slug];
+    const initial = page?.draft?.length
+      ? page.draft
+      : page?.published?.length
+        ? page.published
+        : pageDef.build(companySettings?.siteContent);
+    resetBlocks(initial as Block[]);
+    setSelectedId(null);
+    setDirty(false);
+  }, [slug, sitePages?.[slug]?.draft, sitePages?.[slug]?.published, companySettings?.siteContent]);
 
   const selected = useMemo(() => blocks.find((b) => b.id === selectedId) || null, [blocks, selectedId]);
   const meta = selected ? BLOCK_META[selected.type] : null;
@@ -229,7 +248,6 @@ const SiteBuilder = () => {
     const block: Block = { id: newId(), type, props: { ...m.defaults } };
     updateBlocks([...blocks, block]);
     setSelectedId(block.id);
-    setLibraryOpen(false);
   };
 
   const moveBlock = (id: string, dir: -1 | 1) => {
@@ -258,9 +276,8 @@ const SiteBuilder = () => {
     updateBlocks(blocks.map((b) => (b.id === id ? { ...b, visible: b.visible === false ? true : false } : b)));
   };
 
-  const updateSelectedProp = (key: string, value: any) => {
-    if (!selected) return;
-    updateBlocks(blocks.map((b) => (b.id === selected.id ? { ...b, props: { ...b.props, [key]: value } } : b)));
+  const updateBlockProp = (blockId: string, key: string, value: any) => {
+    updateBlocks(blocks.map((b) => (b.id === blockId ? { ...b, props: { ...b.props, [key]: value } } : b)));
   };
 
   const onDragEnd = (e: DragEndEvent) => {
@@ -275,7 +292,7 @@ const SiteBuilder = () => {
   const handleSave = async () => {
     try {
       setSaving(true);
-      await saveHomeDraft(blocks);
+      await savePageDraft(slug, blocks);
       setDirty(false);
       toast.success("Rascunho salvo");
     } catch (e: any) {
@@ -288,10 +305,10 @@ const SiteBuilder = () => {
   const handlePublish = async () => {
     try {
       setPublishing(true);
-      if (dirty) await saveHomeDraft(blocks);
-      await publishHome();
+      if (dirty) await savePageDraft(slug, blocks);
+      await publishPage(slug);
       setDirty(false);
-      toast.success("Homepage publicada!");
+      toast.success(`${pageDef.label} publicada!`);
     } catch (e: any) {
       toast.error(e?.message || "Erro ao publicar");
     } finally {
@@ -301,7 +318,7 @@ const SiteBuilder = () => {
 
   const handleReset = async () => {
     if (!confirm("Descartar rascunho e voltar ao publicado?")) return;
-    await resetHomeDraft();
+    await resetPageDraft(slug);
     setDirty(false);
     toast.success("Rascunho descartado");
   };
@@ -324,25 +341,43 @@ const SiteBuilder = () => {
         <div className="flex items-center gap-3">
           <Link to="/admin" className="text-sm font-bold text-primary">← Admin</Link>
           <span className="text-sm text-muted-foreground">/</span>
-          <h1 className="text-sm font-bold">Page Builder · Homepage</h1>
+          <h1 className="text-sm font-bold">Page Builder</h1>
+          <div className="flex items-center gap-1 rounded-md border border-border bg-background p-0.5">
+            {PAGE_DEFINITIONS.map((p) => (
+              <Link
+                key={p.slug}
+                to={`/admin/site-builder/${p.slug === "home" ? "" : p.slug}`}
+                className={`rounded px-2 py-1 text-xs font-bold transition-colors ${slug === p.slug ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                {p.label}
+              </Link>
+            ))}
+          </div>
           {dirty && <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">Alterações não salvas</span>}
         </div>
         <div className="flex items-center gap-2">
+          <div className="flex items-center rounded-md border border-border bg-background p-0.5">
+            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={undo} disabled={!canUndo} title="Desfazer (Ctrl+Z)"><Undo2 className="h-3.5 w-3.5" /></Button>
+            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={redo} disabled={!canRedo} title="Refazer (Ctrl+Shift+Z)"><Redo2 className="h-3.5 w-3.5" /></Button>
+          </div>
+          <Button size="sm" variant={inlineMode ? "default" : "outline"} onClick={() => setInlineMode((v) => !v)} className="gap-1" title="Editar textos no canvas">
+            <MousePointerClick className="h-3.5 w-3.5" /> {inlineMode ? "Inline ativo" : "Editar inline"}
+          </Button>
           <div className="flex items-center rounded-md border border-border bg-background p-0.5">
             <Button size="icon" variant={viewport === "desktop" ? "secondary" : "ghost"} className="h-7 w-7" onClick={() => setViewport("desktop")}><Monitor className="h-3.5 w-3.5" /></Button>
             <Button size="icon" variant={viewport === "tablet" ? "secondary" : "ghost"} className="h-7 w-7" onClick={() => setViewport("tablet")}><Tablet className="h-3.5 w-3.5" /></Button>
             <Button size="icon" variant={viewport === "mobile" ? "secondary" : "ghost"} className="h-7 w-7" onClick={() => setViewport("mobile")}><Smartphone className="h-3.5 w-3.5" /></Button>
           </div>
-          <Button size="sm" variant="outline" asChild><a href="/" target="_blank" rel="noreferrer" className="gap-1"><Eye className="mr-1 h-3.5 w-3.5" /> Ver site</a></Button>
+          <Button size="sm" variant="outline" asChild><a href={pageDef.path} target="_blank" rel="noreferrer" className="gap-1"><Eye className="mr-1 h-3.5 w-3.5" /> Ver site</a></Button>
           <Button size="sm" variant="outline" onClick={handleReset} className="gap-1"><RotateCcw className="h-3.5 w-3.5" /> Descartar</Button>
           <Button size="sm" variant="outline" onClick={handleSave} disabled={saving} className="gap-1"><Save className="h-3.5 w-3.5" /> {saving ? "Salvando..." : "Salvar rascunho"}</Button>
           <Button size="sm" onClick={handlePublish} disabled={publishing} className="gap-1"><Upload className="h-3.5 w-3.5" /> {publishing ? "Publicando..." : "Publicar"}</Button>
         </div>
       </div>
 
-      {/* Workspace: sidebar esquerda + canvas + sidebar direita */}
+      {/* Workspace */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar esquerda: estrutura + biblioteca */}
+        {/* Sidebar esquerda */}
         <aside className="flex w-72 shrink-0 flex-col border-r border-border bg-card">
           <Tabs defaultValue="estrutura" className="flex flex-1 flex-col">
             <TabsList className="m-2 grid grid-cols-2">
@@ -400,29 +435,31 @@ const SiteBuilder = () => {
         <div className="flex-1 overflow-auto bg-muted/40">
           <div className="mx-auto my-4 transition-all" style={{ width: VIEWPORT_WIDTHS[viewport], maxWidth: "100%" }}>
             <div className="overflow-hidden rounded-md border border-border bg-background shadow-sm">
-              <Navbar />
-              <main>
-                {blocks.filter((b) => b.visible !== false).map((block) => (
-                  <div
-                    key={block.id}
-                    onClick={() => setSelectedId(block.id)}
-                    className={`relative cursor-pointer outline-offset-[-2px] transition-all hover:outline hover:outline-2 hover:outline-primary/40 ${selectedId === block.id ? "outline outline-2 outline-primary" : ""}`}
-                  >
-                    {selectedId === block.id && (
-                      <div className="pointer-events-none absolute left-2 top-2 z-20 rounded bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">
-                        {BLOCK_META[block.type]?.label}
-                      </div>
-                    )}
-                    {renderBlock(block)}
-                  </div>
-                ))}
-                {blocks.length === 0 && (
-                  <div className="p-20 text-center text-muted-foreground">
-                    Adicione blocos pela barra lateral à esquerda.
-                  </div>
-                )}
-              </main>
-              <Footer />
+              <InlineEditProvider value={{ enabled: inlineMode, updateProp: updateBlockProp }}>
+                <Navbar />
+                <main>
+                  {blocks.filter((b) => b.visible !== false).map((block) => (
+                    <div
+                      key={block.id}
+                      onClick={() => setSelectedId(block.id)}
+                      className={`relative cursor-pointer outline-offset-[-2px] transition-all hover:outline hover:outline-2 hover:outline-primary/40 ${selectedId === block.id ? "outline outline-2 outline-primary" : ""}`}
+                    >
+                      {selectedId === block.id && (
+                        <div className="pointer-events-none absolute left-2 top-2 z-20 rounded bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">
+                          {BLOCK_META[block.type]?.label}
+                        </div>
+                      )}
+                      {renderBlock(block)}
+                    </div>
+                  ))}
+                  {blocks.length === 0 && (
+                    <div className="p-20 text-center text-muted-foreground">
+                      Adicione blocos pela barra lateral à esquerda.
+                    </div>
+                  )}
+                </main>
+                <Footer />
+              </InlineEditProvider>
             </div>
           </div>
         </div>
@@ -447,7 +484,7 @@ const SiteBuilder = () => {
                         <FieldEditor
                           field={f}
                           value={selected.props[f.key] ?? meta.defaults[f.key]}
-                          onChange={(v) => updateSelectedProp(f.key, v)}
+                          onChange={(v) => updateBlockProp(selected.id, f.key, v)}
                         />
                       </div>
                     ))}
@@ -468,3 +505,4 @@ const SiteBuilder = () => {
 };
 
 export default SiteBuilder;
+
