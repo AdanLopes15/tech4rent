@@ -263,6 +263,7 @@ type State = {
   smtpSettings: SmtpSettings;
   rentalClauses: Clause[];
   saleClauses: Clause[];
+  homePage: { draft: any[]; published: any[]; updatedAt?: any; publishedAt?: any };
   loading: boolean;
   isQuoteDialogOpen: boolean;
 };
@@ -358,6 +359,9 @@ type Actions = {
     siteFiles: { [path: string]: File | null },
   ) => Promise<void>;
   updateSmtpSettings: (settings: SmtpSettings) => Promise<void>;
+  saveHomeDraft: (blocks: any[]) => Promise<void>;
+  publishHome: () => Promise<void>;
+  resetHomeDraft: () => Promise<void>;
   updateRentalClauses: (clauses: Clause[]) => Promise<void>;
   updateSaleClauses: (clauses: Clause[]) => Promise<void>;
 };
@@ -827,6 +831,7 @@ const useStore = create<State & Actions>((set, get) => {
     siteContacts: [],
     notifications: [],
     companySettings: initialCompanySettings,
+    homePage: { draft: [], published: [] },
     smtpSettings: initialSmtpSettings,
     rentalClauses: initialRentalClauses,
     saleClauses: initialSaleClauses,
@@ -842,15 +847,17 @@ const useStore = create<State & Actions>((set, get) => {
           getDoc(doc(db, "settings", "clauses")),
           getDocs(collection(db, "equipments")),
           getDocs(collection(db, "catalogItems")),
+          getDoc(doc(db, "settings", "homePage")),
         ])) as [
           DocumentSnapshot<DocumentData>,
           DocumentSnapshot<DocumentData>,
           DocumentSnapshot<DocumentData>,
           QuerySnapshot<DocumentData>,
           QuerySnapshot<DocumentData>,
+          DocumentSnapshot<DocumentData>,
         ];
 
-        const [companySettingsSnap, smtpSettingsSnap, clausesSnap, equipmentsSnap, catalogItemsSnap] = baseSnaps;
+        const [companySettingsSnap, smtpSettingsSnap, clausesSnap, equipmentsSnap, catalogItemsSnap, homePageSnap] = baseSnaps;
 
         const existingCompanySettings = companySettingsSnap.exists()
           ? (companySettingsSnap.data() as Partial<CompanySettings>)
@@ -905,6 +912,14 @@ const useStore = create<State & Actions>((set, get) => {
           saleClauses: clausesSnap.exists() ? clausesSnap.data()?.sale || initialSaleClauses : initialSaleClauses,
           equipments: equipmentsSnap.docs.map(mapDoc),
           catalogItems: catalogItemsSnap.docs.map(mapDoc),
+          homePage: homePageSnap.exists()
+            ? {
+                draft: (homePageSnap.data() as any).draft || [],
+                published: (homePageSnap.data() as any).published || [],
+                updatedAt: (homePageSnap.data() as any).updatedAt,
+                publishedAt: (homePageSnap.data() as any).publishedAt,
+              }
+            : { draft: [], published: [] },
         };
 
         if (!publicOnly) {
@@ -2301,6 +2316,27 @@ const useStore = create<State & Actions>((set, get) => {
       const settingsRef = doc(db, "settings", "smtp");
       await setDoc(settingsRef, settings, { merge: true });
       set({ smtpSettings: settings });
+    },
+
+    saveHomeDraft: async (blocks) => {
+      const ref = doc(db, "settings", "homePage");
+      await setDoc(ref, { draft: blocks, updatedAt: serverTimestamp() }, { merge: true });
+      const current = get().homePage || { draft: [], published: [] };
+      set({ homePage: { ...current, draft: blocks } });
+    },
+
+    publishHome: async () => {
+      const ref = doc(db, "settings", "homePage");
+      const current = get().homePage || { draft: [], published: [] };
+      await setDoc(ref, { published: current.draft, publishedAt: serverTimestamp() }, { merge: true });
+      set({ homePage: { ...current, published: current.draft } });
+    },
+
+    resetHomeDraft: async () => {
+      const ref = doc(db, "settings", "homePage");
+      const current = get().homePage || { draft: [], published: [] };
+      await setDoc(ref, { draft: current.published, updatedAt: serverTimestamp() }, { merge: true });
+      set({ homePage: { ...current, draft: current.published } });
     },
 
     updateRentalClauses: async (clauses) => {

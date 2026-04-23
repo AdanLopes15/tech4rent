@@ -22,6 +22,7 @@ import Configuracoes from "./pages/admin/Configuracoes";
 import MeuPerfil from "./pages/admin/MeuPerfil";
 import Equipamentos from "./pages/admin/Equipamentos";
 import CatalogoSite from "./pages/admin/CatalogoSite";
+import SiteBuilder from "./pages/admin/SiteBuilder";
 import Clientes from "./pages/admin/Clientes";
 import Fornecedores from "./pages/admin/Fornecedores";
 import Colaboradores from "./pages/admin/Colaboradores";
@@ -86,6 +87,7 @@ const App = () => (
               <Route path="perfil" element={<MeuPerfil />} />
               <Route path="equipamentos" element={<Equipamentos />} />
               <Route path="catalogo-site" element={<CatalogoSite />} />
+              <Route path="site-builder" element={<SiteBuilder />} />
               <Route path="clientes" element={<Clientes />} />
               <Route path="fornecedores" element={<Fornecedores />} />
               <Route path="colaboradores" element={<Colaboradores />} />
