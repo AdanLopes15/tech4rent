@@ -31,6 +31,11 @@ const Navbar = () => {
     if (id) setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }), 80);
   };
 
+  const goToProducts = () => {
+    setIsOpen(false);
+    navigate("/produtos");
+  };
+
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-foreground text-background">
       <div className="container flex h-16 max-w-6xl items-center justify-between gap-6">
@@ -43,7 +48,10 @@ const Navbar = () => {
         </button>
 
         <div className="hidden items-center gap-7 lg:flex">
-          <button onClick={() => goToHomeSection("equipamentos")} className="text-sm font-bold text-background/75 transition-colors hover:text-background">
+          <button
+            onClick={goToProducts}
+            className={`rounded-md px-3 py-2 text-sm font-bold transition-colors ${location.pathname === "/produtos" ? "bg-primary/15 text-primary" : "text-background/75 hover:text-background"}`}
+          >
             Produtos
           </button>
           <button onClick={() => goToHomeSection("diferenciais")} className="text-sm font-bold text-background/75 transition-colors hover:text-background">
@@ -79,7 +87,7 @@ const Navbar = () => {
       {isOpen && (
         <div className="border-t border-background/10 bg-foreground px-6 py-5 lg:hidden">
           <div className="space-y-4">
-            <button onClick={() => goToHomeSection("equipamentos")} className="block w-full text-left text-sm font-bold text-background/75">Produtos</button>
+            <button onClick={goToProducts} className={`block w-full text-left text-sm font-bold ${location.pathname === "/produtos" ? "text-primary" : "text-background/75"}`}>Produtos</button>
             <button onClick={() => goToHomeSection("diferenciais")} className="block w-full text-left text-sm font-bold text-background/75">Protect+</button>
             <button onClick={() => goToAboutSection("duvidas")} className="block w-full text-left text-sm font-bold text-background/75">Dúvidas</button>
             <button onClick={() => goToAboutSection()} className="block w-full text-left text-sm font-bold text-primary">Sobre</button>
