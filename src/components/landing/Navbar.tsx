@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowRight, ChevronDown, Menu, MessageCircle, X } from "lucide-react";
+import { ArrowRight, ChevronDown, Lock, Menu, MessageCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/store";
 
@@ -191,6 +191,14 @@ const Navbar = () => {
           <Button onClick={goToContact} className="h-11 gap-2 px-5 font-bold">
             <MessageCircle className="h-4 w-4" /> Fale Conosco
           </Button>
+          <Link
+            to="/login"
+            className="flex h-11 w-11 items-center justify-center rounded-md text-background/60 transition-colors hover:bg-background/10 hover:text-background"
+            aria-label="Área Restrita - Acesso ao Sistema"
+            title="Área Restrita"
+          >
+            <Lock className="h-4 w-4" />
+          </Link>
         </div>
 
         <button className="lg:hidden" onClick={() => setIsOpen(!isOpen)} aria-label="Abrir menu">
