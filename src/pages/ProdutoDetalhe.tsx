@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Battery, Bluetooth, CheckCircle2, MessageCircle, PackageCheck, ShieldCheck, Smartphone, Truck, Wifi } from "lucide-react";
+import { ArrowLeft, Battery, Bluetooth, CheckCircle2, GitCompare, MessageCircle, PackageCheck, QrCode, ScanLine, ShieldCheck, Smartphone, Truck, Wifi } from "lucide-react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,15 @@ const featureCards = [
   { icon: Battery, title: "Bateria reforçada", description: "Mais autonomia no turno" },
   { icon: Bluetooth, title: "Bluetooth", description: "Integração com acessórios" },
 ];
+
+const highlightSpecs = [
+  { icon: ScanLine, title: "Scanner 2D com IA", description: "Lê até código danificado" },
+  { icon: Battery, title: "Bateria 5000mAh", description: "Turno inteiro sem carregar" },
+  { icon: Smartphone, title: "Android 14", description: "Google Play Store nativo" },
+  { icon: Wifi, title: "Wi‑Fi 5 + 4G LTE", description: "Conectividade completa" },
+];
+
+const operationPerks = ["Leitura 1D/2D de alta performance", "Funciona com códigos danificados ou mal impressos", "Mais agilidade no picking, recebimento e inventário"];
 
 const ProdutoDetalhe = () => {
   const { productId } = useParams();
@@ -132,8 +141,16 @@ const ProdutoDetalhe = () => {
                 <h1 className="mt-4 text-4xl font-black leading-tight md:text-5xl">{productName}</h1>
                 <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">{description}</p>
 
+                <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-muted-foreground">
+                  <span className="rounded-full border border-border bg-muted px-3 py-1">Android</span>
+                  <span className="rounded-full border border-border bg-muted px-3 py-1">2D</span>
+                  <span className="rounded-full border border-border bg-muted px-3 py-1">Wi‑Fi</span>
+                  <span className="rounded-full border border-border bg-muted px-3 py-1">Bluetooth</span>
+                  <span className="rounded-full border border-border bg-muted px-3 py-1">Chip 4G</span>
+                </div>
+
                 <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                  {featureCards.map(({ icon: Icon, title, description: itemDescription }) => (
+                  {highlightSpecs.map(({ icon: Icon, title, description: itemDescription }) => (
                     <div key={title} className="rounded-lg border border-border bg-background p-4 shadow-sm">
                       <Icon className="h-5 w-5 text-primary" />
                       <h2 className="mt-3 text-sm font-black">{title}</h2>
@@ -149,7 +166,7 @@ const ProdutoDetalhe = () => {
                     </a>
                   </Button>
                   <Button asChild size="lg" variant="outline">
-                    <Link to="/produtos">Voltar ao catálogo</Link>
+                    <Link to="/produtos"><GitCompare className="mr-2 h-4 w-4" /> Comparar</Link>
                   </Button>
                 </div>
 
@@ -162,20 +179,45 @@ const ProdutoDetalhe = () => {
           </div>
         </section>
 
-        <section className="py-20 text-background" style={{ background: "linear-gradient(180deg, hsl(var(--foreground)), hsl(var(--foreground) / 0.94))" }}>
+        <section className="py-20 text-background" style={{ background: "linear-gradient(180deg, hsl(var(--foreground)), hsl(var(--foreground) / 0.96))" }}>
           <div className="container max-w-5xl">
             <h2 className="text-center text-3xl font-black md:text-4xl">Detalhes do <span className="text-primary">{productName}</span></h2>
-            <div className="mt-12 grid gap-10 lg:grid-cols-[0.9fr_1fr] lg:items-center">
+            <div className="mx-auto mt-8 max-w-3xl overflow-hidden rounded-lg border border-background/10 bg-primary/10 p-4 shadow-2xl shadow-foreground/30">
+              <img src={selectedImage} alt={`Demonstração do ${productName}`} className="mx-auto h-72 w-full object-contain" loading="lazy" />
+            </div>
+
+            <div className="mt-14 grid gap-10 lg:grid-cols-[0.9fr_1fr] lg:items-center">
               <div>
-                <div className="mb-7 h-1 w-16 bg-primary" />
+                <div className="mb-5 h-1 w-16 bg-primary" />
                 <h3 className="text-4xl font-black leading-tight">AGUENTA O TRANCO. <span className="text-primary">PONTO.</span></h3>
-                <p className="mt-5 text-lg leading-relaxed text-background/70">Equipamento preparado para operação intensa, logística, estoque, expedição e loja.</p>
+                <p className="mt-5 text-lg leading-relaxed text-background/70">Construção robusta para operação intensa em logística, estoque, expedição e loja.</p>
                 <div className="mt-6 rounded-lg border border-background/15 bg-background/10 p-5 text-sm font-bold italic text-background/85">
                   “Não é para ficar bonito na mesa. É para sobreviver no chão.”
                 </div>
               </div>
-              <div className="overflow-hidden rounded-lg border border-background/10 bg-background/10 p-8 shadow-2xl shadow-foreground/30">
-                <img src={selectedImage} alt={`Detalhes do ${productName}`} className="mx-auto h-80 w-full object-contain" loading="lazy" />
+              <div className="overflow-hidden rounded-lg border border-background/10 bg-background/10 p-8">
+                <img src={selectedImage} alt={`Resistência do ${productName}`} className="mx-auto h-80 w-full object-contain" loading="lazy" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-muted py-20 text-foreground">
+          <div className="container max-w-5xl">
+            <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+              <div className="overflow-hidden rounded-lg border border-border bg-card p-8 shadow-sm">
+                <img src={selectedImage} alt={`Leitura rápida com ${productName}`} className="mx-auto h-80 w-full object-contain" loading="lazy" />
+              </div>
+              <div>
+                <div className="mb-5 h-1 w-14 bg-primary" />
+                <h2 className="text-3xl font-black leading-tight">LEITURA RÁPIDA. <span className="text-primary">MESMO COM O CÓDIGO FEIO.</span></h2>
+                <p className="mt-4 text-base leading-relaxed text-muted-foreground">Leitura 1D/2D de alta performance, inclusive em códigos danificados ou com impressão ruim.</p>
+                <ul className="mt-6 space-y-3 text-sm font-semibold text-foreground">
+                  {operationPerks.map((perk) => (
+                    <li key={perk} className="flex items-center gap-3"><CheckCircle2 className="h-5 w-5 text-primary" /> {perk}</li>
+                  ))}
+                </ul>
+                <p className="mt-6 text-sm font-black italic text-muted-foreground">“Se o código existe, o <span className="text-primary">{code}</span> faz a leitura.”</p>
               </div>
             </div>
           </div>
@@ -196,14 +238,62 @@ const ProdutoDetalhe = () => {
           </div>
         </section>
 
-        <section className="py-20 text-center text-background" style={{ background: "linear-gradient(180deg, hsl(var(--foreground) / 0.92), hsl(var(--foreground)))" }}>
-          <div className="container max-w-3xl">
-            <ShieldCheck className="mx-auto h-14 w-14 text-primary" />
-            <h2 className="mt-8 text-3xl font-black">VOCÊ NÃO FICA <span className="text-primary">NA MÃO.</span></h2>
-            <p className="mt-4 text-lg text-background/70">1 ano de garantia + assistência técnica no Brasil.</p>
-            <div className="mx-auto mt-7 max-w-lg rounded-lg border border-background/15 bg-background/5 p-5 text-sm font-bold italic text-background/85">
-              “Deu problema, resolve.”
+        <section className="py-20 text-background" style={{ background: "linear-gradient(180deg, hsl(var(--foreground) / 0.96), hsl(var(--foreground)))" }}>
+          <div className="container max-w-5xl">
+            <div className="grid gap-14 lg:grid-cols-2 lg:items-center">
+              <div>
+                <div className="mb-5 h-1 w-14 bg-primary" />
+                <h2 className="text-3xl font-black leading-tight">ATUALIZADO DE VERDADE: <span className="text-primary">ANDROID 14.</span></h2>
+                <p className="mt-4 text-background/70">Compatível com sistemas ERP, WMS e apps Android. Opera online/offline conforme sua rotina.</p>
+                <div className="mt-6 rounded-lg border border-background/15 bg-background/5 p-4 text-sm font-bold italic text-background/85">
+                  “Chega de comprar coletor que nasce velho.”
+                </div>
+              </div>
+              <div className="rounded-lg border border-background/10 bg-background/5 p-8">
+                <img src={selectedImage} alt={`Android no ${productName}`} className="mx-auto h-72 w-full object-contain" loading="lazy" />
+              </div>
             </div>
+
+            <div className="mt-20 grid gap-14 lg:grid-cols-[0.9fr_1fr] lg:items-center">
+              <div className="rounded-lg border border-background/10 bg-background/5 p-8">
+                <img src={selectedImage} alt={`Bateria e operação do ${productName}`} className="mx-auto h-72 w-full object-contain" loading="lazy" />
+              </div>
+              <div>
+                <div className="mb-5 h-1 w-14 bg-primary" />
+                <h2 className="text-3xl font-black leading-tight">TRABALHA O TURNO INTEIRO <span className="text-primary">SEM PEDIR ARREGO.</span></h2>
+                <div className="mt-6 space-y-3">
+                  {featureCards.map(({ icon: Icon, title, description: itemDescription }) => (
+                    <div key={title} className="flex items-center gap-4 rounded-lg border border-background/15 bg-background/5 p-4">
+                      <Icon className="h-5 w-5 text-primary" />
+                      <div>
+                        <h3 className="text-sm font-black">{title}</h3>
+                        <p className="text-xs text-background/60">{itemDescription}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-6 text-sm font-black italic text-background/75">“Operação não para porque <span className="text-primary">o coletor cansou</span>.”</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-card py-20 text-center text-foreground">
+          <div className="container max-w-3xl">
+            <div className="mx-auto mb-6 h-1 w-14 bg-primary" />
+            <h2 className="text-3xl font-black">VOCÊ JÁ RECEBE <span className="text-primary">PRONTO PRA OPERAÇÃO.</span></h2>
+            <p className="mt-2 text-sm text-muted-foreground">O que vem na caixa</p>
+            <div className="mx-auto mt-10 grid max-w-2xl gap-3 rounded-lg border border-border bg-muted p-5 sm:grid-cols-4">
+              {["Capa silicone", "Película vidro", "Fonte com cabo", "Gatilho"].map((item) => (
+                <div key={item} className="rounded-md bg-card p-4 text-sm font-black uppercase shadow-sm">
+                  <QrCode className="mx-auto mb-3 h-8 w-8 text-primary" /> {item}
+                </div>
+              ))}
+            </div>
+            <Button asChild size="lg" className="mt-8 gap-2 px-10">
+              <a href={whatsappUrl} target="_blank" rel="noreferrer"><MessageCircle className="h-5 w-5" /> Solicitar orçamento</a>
+            </Button>
+            <p className="mx-auto mt-5 max-w-lg text-sm text-muted-foreground">A maioria dos coletores não acompanha gatilho — aqui, ele já vem incluso no kit.</p>
           </div>
         </section>
 
