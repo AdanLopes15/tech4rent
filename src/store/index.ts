@@ -1158,7 +1158,7 @@ const useStore = create<State & Actions>((set, get) => {
 
       const uploadedMedia: Record<string, string> = {};
       for (const [path, file] of Object.entries(mediaFiles)) {
-        if (!file) continue;
+        if (!file || path === "galleryFiles") continue;
         const f = file as File;
         const storageRef = ref(storage, `catalogItems/${newId}/${path}-${Date.now()}-${f.name}`);
         const snap = await uploadBytes(storageRef, f);
@@ -1186,12 +1186,25 @@ const useStore = create<State & Actions>((set, get) => {
         finalData.galleryUrls = galleryUrls.filter(Boolean);
       }
 
-      // Apply singular media (heroImageUrl, videoUrl, sectionImage_X, etc.)
+      // Apply singular media: support sections (image OR video) and kit items
+      // Paths supported:
+      //   "heroImageUrl", "videoUrl"
+      //   "section.<i>.image" / "section.<i>.video"
+      //   "kit.<i>"
       Object.entries(uploadedMedia).forEach(([path, url]) => {
         if (path.startsWith("section.")) {
-          const idx = Number(path.split(".")[1]);
+          const parts = path.split(".");
+          const idx = Number(parts[1]);
+          const kind = parts[2] || "image";
           finalData.sections = finalData.sections || [];
-          finalData.sections[idx] = { ...(finalData.sections[idx] || {}), imageUrl: url };
+          const prev = finalData.sections[idx] || {};
+          finalData.sections[idx] = kind === "video"
+            ? { ...prev, videoUrl: url }
+            : { ...prev, imageUrl: url };
+        } else if (path.startsWith("kit.")) {
+          const idx = Number(path.split(".")[1]);
+          finalData.kitItems = finalData.kitItems || [];
+          finalData.kitItems[idx] = { ...(finalData.kitItems[idx] || {}), imageUrl: url };
         } else {
           finalData[path] = url;
         }
@@ -1233,9 +1246,18 @@ const useStore = create<State & Actions>((set, get) => {
         const snap = await uploadBytes(storageRef, f);
         const url = await getDownloadURL(snap.ref);
         if (path.startsWith("section.")) {
-          const idx = Number(path.split(".")[1]);
+          const parts = path.split(".");
+          const idx = Number(parts[1]);
+          const kind = parts[2] || "image";
           finalData.sections = finalData.sections || [];
-          finalData.sections[idx] = { ...(finalData.sections[idx] || {}), imageUrl: url };
+          const prev = finalData.sections[idx] || {};
+          finalData.sections[idx] = kind === "video"
+            ? { ...prev, videoUrl: url }
+            : { ...prev, imageUrl: url };
+        } else if (path.startsWith("kit.")) {
+          const idx = Number(path.split(".")[1]);
+          finalData.kitItems = finalData.kitItems || [];
+          finalData.kitItems[idx] = { ...(finalData.kitItems[idx] || {}), imageUrl: url };
         } else {
           finalData[path] = url;
         }
