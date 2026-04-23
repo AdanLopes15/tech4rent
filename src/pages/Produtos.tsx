@@ -1,7 +1,7 @@
 //src/pages/Produtos.tsx
 
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Bluetooth, Download, MessageCircle, PackageSearch, Search, Smartphone, Usb, Wifi } from "lucide-react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
@@ -46,6 +46,7 @@ const getProductPath = (item: any) => `/produtos/${encodeURIComponent(String(ite
 const Produtos = () => {
   const fetchAllData = useStore((s) => s.fetchAllData);
   const { companySettings, equipments, catalogItems } = useStore();
+  const [searchParams] = useSearchParams();
   const [search, setSearch] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [sort, setSort] = useState("destaques");
@@ -53,6 +54,12 @@ const Produtos = () => {
   useEffect(() => {
     fetchAllData(true);
   }, [fetchAllData]);
+
+  useEffect(() => {
+    const cat = searchParams.get("categoria");
+    if (cat) setSelectedCategories([cat]);
+    else setSelectedCategories([]);
+  }, [searchParams]);
 
   // Merge: catalog items publicados aparecem como "produtos enriquecidos"; equipamentos restantes (sem catalog) também aparecem
   const allProducts = useMemo(() => {
