@@ -39,12 +39,27 @@ export type Differentiator = {
   description: string;
 };
 
+export type MediaSource = {
+  imageUrl?: string;
+  videoUrl?: string;
+};
+
+export type StatItem = { icon?: string; value: string; label: string };
+export type IconTextItem = { icon?: string; title: string; description?: string };
+export type SimpleLinkItem = { label: string; url?: string };
+
+/* ===========================
+ * Estrutura COMPLETA editável
+ * =========================== */
 export type SiteContent = {
+  /* Compatibilidade com versão anterior (usada em vários lugares) */
   hero: {
     title: string;
     subtitle: string;
     backgroundImageUrl: string;
     backgroundVideoUrl?: string;
+    primaryCtaLabel?: string;
+    secondaryCtaLabel?: string;
   };
   featuredProduct: {
     tag: string;
@@ -73,6 +88,96 @@ export type SiteContent = {
     description?: string;
     backgroundImageUrl: string;
     backgroundVideoUrl?: string;
+  };
+
+  /* ====== HOME (página inicial) ====== */
+  home?: {
+    benefits?: { title: string; description: string; icon?: string }[];
+    equipmentHeader?: { eyebrow?: string; title?: string; subtitle?: string };
+    presence?: {
+      logosTitle?: string;
+      logos?: string[];
+      sectionTitle?: string;
+      stats?: StatItem[];
+      segmentsTitle?: string;
+      segments?: IconTextItem[];
+    };
+    results?: {
+      eyebrow?: string;
+      title?: string;
+      items?: { tag: string; title: string; description: string; icon?: string }[];
+    };
+    video?: {
+      title?: string;
+      videoUrl?: string;
+      placeholderTopText?: string;
+      placeholderBottomText?: string;
+    };
+  };
+
+  /* ====== PRODUTOS ====== */
+  produtos?: {
+    hero?: { title?: string; subtitle?: string; ctaLabel?: string };
+    emptyTitle?: string;
+    emptySubtitle?: string;
+    fallbackTags?: { icon?: string; label: string }[];
+  };
+
+  /* ====== SOBRE ====== */
+  sobre?: {
+    hero?: { eyebrow?: string; title?: string; subtitle?: string; backgroundImageUrl?: string; backgroundVideoUrl?: string };
+    quemSomos?: { eyebrow?: string; title?: string; titleHighlight?: string; paragraphs?: string[] };
+    mvp?: { icon?: string; title: string; text: string }[];
+    stats?: StatItem[];
+    estrutura?: {
+      eyebrow?: string;
+      title?: string;
+      items?: { title: string; description: string; imageUrl?: string }[];
+    };
+    duvidas?: {
+      eyebrow?: string;
+      title?: string;
+      items?: { icon?: string; text: string }[];
+    };
+    valores?: {
+      eyebrow?: string;
+      title?: string;
+      items?: { icon?: string; title: string; description: string }[];
+    };
+    localizacao?: {
+      eyebrow?: string;
+      title?: string;
+    };
+    cta?: { title?: string; subtitle?: string; buttonLabel?: string };
+  };
+
+  /* ====== CONTATO ====== */
+  contato?: {
+    hero?: { eyebrow?: string; title?: string; subtitle?: string; backgroundImageUrl?: string; backgroundVideoUrl?: string };
+    channels?: { icon?: string; title: string; subtitle: string; value: string; actionLabel?: string }[];
+    form?: { eyebrow?: string; title?: string; subtitle?: string; submitLabel?: string; whatsappLabel?: string; interests?: string[] };
+  };
+
+  /* ====== NAVBAR ====== */
+  navbar?: {
+    productsLabel?: string;
+    questionsLabel?: string;
+    aboutLabel?: string;
+    contactLabel?: string;
+    ctaLabel?: string;
+    restrictedAreaLabel?: string;
+  };
+
+  /* ====== FOOTER ====== */
+  footer?: {
+    tagline?: string;
+    columns?: {
+      title: string;
+      items: string[];
+    }[];
+    hoursLabel?: string;
+    copyrightExtra?: string;
+    restrictedAreaLabel?: string;
   };
 };
 
