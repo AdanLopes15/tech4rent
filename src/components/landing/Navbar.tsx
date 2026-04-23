@@ -36,6 +36,11 @@ const Navbar = () => {
     navigate("/produtos");
   };
 
+  const goToContact = () => {
+    setIsOpen(false);
+    navigate("/contato");
+  };
+
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-foreground text-background">
       <div className="container flex h-16 max-w-6xl items-center justify-between gap-6">
@@ -66,7 +71,7 @@ const Navbar = () => {
           >
             Sobre
           </button>
-          <button onClick={() => goToAboutSection("contato")} className="text-sm font-bold text-background/75 transition-colors hover:text-background">
+          <button onClick={goToContact} className={`rounded-md px-3 py-2 text-sm font-bold transition-colors ${location.pathname === "/contato" ? "bg-primary/15 text-primary" : "text-background/75 hover:text-background"}`}>
             Contato
           </button>
           <span className="text-sm font-bold text-background/75">Blog</span>
@@ -74,7 +79,7 @@ const Navbar = () => {
 
         <div className="hidden items-center gap-4 lg:flex">
           <span className="text-xs font-bold text-background/65">BR&nbsp; Português</span>
-          <Button onClick={() => goToAboutSection("contato")} className="h-11 gap-2 px-5 font-bold">
+          <Button onClick={goToContact} className="h-11 gap-2 px-5 font-bold">
             <MessageCircle className="h-4 w-4" /> Fale Conosco
           </Button>
         </div>
@@ -91,9 +96,9 @@ const Navbar = () => {
             <button onClick={() => goToHomeSection("diferenciais")} className="block w-full text-left text-sm font-bold text-background/75">Protect+</button>
             <button onClick={() => goToAboutSection("duvidas")} className="block w-full text-left text-sm font-bold text-background/75">Dúvidas</button>
             <button onClick={() => goToAboutSection()} className="block w-full text-left text-sm font-bold text-primary">Sobre</button>
-            <button onClick={() => goToAboutSection("contato")} className="block w-full text-left text-sm font-bold text-background/75">Contato</button>
+            <button onClick={goToContact} className={`block w-full text-left text-sm font-bold ${location.pathname === "/contato" ? "text-primary" : "text-background/75"}`}>Contato</button>
             <Link to="/login" onClick={() => setIsOpen(false)} className="block text-sm font-bold text-background/75">Área Restrita</Link>
-            <Button onClick={() => goToAboutSection("contato")} className="w-full gap-2">
+            <Button onClick={goToContact} className="w-full gap-2">
               Fale Conosco <ArrowRight className="h-4 w-4" />
             </Button>
           </div>

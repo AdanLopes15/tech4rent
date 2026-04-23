@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import Sobre from "./pages/Sobre";
 import Produtos from "./pages/Produtos";
 import ProdutoDetalhe from "./pages/ProdutoDetalhe";
+import Contato from "./pages/Contato";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import AdminLayout from "./components/admin/AdminLayout";
@@ -67,6 +68,7 @@ const App = () => (
             <Route path="/sobre" element={<Sobre />} />
             <Route path="/produtos" element={<Produtos />} />
             <Route path="/produtos/:productId" element={<ProdutoDetalhe />} />
+            <Route path="/contato" element={<Contato />} />
             <Route path="/login" element={<Login />} />
             <Route
               path="/admin"
