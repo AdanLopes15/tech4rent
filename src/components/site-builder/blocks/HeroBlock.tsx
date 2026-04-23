@@ -4,6 +4,8 @@ import { ArrowRight, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/store";
+import { useInlineEdit } from "@/lib/site-builder/inline-context";
+import InlineText from "@/components/site-builder/InlineText";
 
 function isValidHttpUrl(value?: string | null): boolean {
   if (!value) return false;
@@ -31,6 +33,7 @@ type Props = {
   secondaryCtaUrl?: string;
   overlayOpacity?: number;
   orangeWords?: number;
+  _blockId?: string;
 };
 
 const HeroBlock = ({
@@ -44,8 +47,10 @@ const HeroBlock = ({
   secondaryCtaUrl = "/produtos",
   overlayOpacity = 70,
   orangeWords = 3,
+  _blockId,
 }: Props) => {
   const { companySettings } = useStore();
+  const inline = useInlineEdit();
   const hasVideo = isValidHttpUrl(backgroundVideoUrl);
   const hasImage = isValidHttpUrl(backgroundImageUrl);
   const titleParts = (title || "").split(" ");
@@ -56,6 +61,8 @@ const HeroBlock = ({
   const isPrimaryExternal = /^https?:\/\//i.test(primaryHref);
   const secondaryHref = secondaryCtaUrl?.trim() || "/produtos";
   const isSecondaryExternal = /^https?:\/\//i.test(secondaryHref);
+
+  const onUpdate = (key: string) => (v: string) => inline?.updateProp && _blockId && inline.updateProp(_blockId, key, v);
 
   return (
     <section className="relative min-h-[760px] overflow-hidden bg-foreground text-background lg:min-h-[calc(100vh-5rem)]">
@@ -73,17 +80,21 @@ const HeroBlock = ({
 
       <div className="container relative z-10 flex min-h-[760px] items-center lg:min-h-[calc(100vh-5rem)]">
         <div className="mx-auto max-w-4xl translate-y-6 space-y-7 text-left lg:mx-0 lg:ml-[12%]">
-          <h1 className="max-w-4xl text-5xl font-black leading-[0.95] tracking-normal sm:text-6xl lg:text-7xl">
-            {titleParts.map((part, index) => (
-              <span key={`${part}-${index}`} className={index >= orangeStart ? "text-primary" : "text-background"}>
-                {part}
-                {index < titleParts.length - 1 ? " " : ""}
-              </span>
-            ))}
-          </h1>
+          {inline?.enabled ? (
+            <InlineText as="h1" className="block max-w-4xl text-5xl font-black leading-[0.95] tracking-normal text-background sm:text-6xl lg:text-7xl" value={title} onChange={onUpdate("title")} placeholder="Título do hero" />
+          ) : (
+            <h1 className="max-w-4xl text-5xl font-black leading-[0.95] tracking-normal sm:text-6xl lg:text-7xl">
+              {titleParts.map((part, index) => (
+                <span key={`${part}-${index}`} className={index >= orangeStart ? "text-primary" : "text-background"}>
+                  {part}
+                  {index < titleParts.length - 1 ? " " : ""}
+                </span>
+              ))}
+            </h1>
+          )}
 
-          {subtitle && (
-            <p className="max-w-3xl text-lg font-semibold leading-relaxed text-background/78 md:text-2xl">{subtitle}</p>
+          {(subtitle || inline?.enabled) && (
+            <InlineText as="p" multiline className="block max-w-3xl text-lg font-semibold leading-relaxed text-background/78 md:text-2xl" value={subtitle || ""} onChange={onUpdate("subtitle")} placeholder="Subtítulo" />
           )}
 
           <div className="flex flex-col gap-4 pt-3 sm:flex-row">
@@ -126,3 +137,4 @@ const HeroBlock = ({
 };
 
 export default HeroBlock;
+
