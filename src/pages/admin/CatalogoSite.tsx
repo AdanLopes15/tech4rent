@@ -280,19 +280,20 @@ const CatalogoSite = () => {
                   .includes(pickerSearch.toLowerCase()),
               )
               .map((e: any) => {
-                const hasItem = !!catalogByEquipmentId[e.id];
+                const row = rows.find((r) => r.equipment.id === e.id);
+                const alreadyCreated = !!row?.created;
                 const img = e?.imageUrl || e?.imageUrls?.[0] || "https://placehold.co/80x80.png";
                 return (
                   <button
                     key={e.id}
                     type="button"
-                    disabled={hasItem}
+                    disabled={alreadyCreated}
                     onClick={() => {
                       setPickerOpen(false);
                       handleEdit(e, null);
                     }}
                     className={`flex w-full items-center gap-3 rounded-lg border p-3 text-left transition ${
-                      hasItem
+                      alreadyCreated
                         ? "cursor-not-allowed border-border bg-muted/30 opacity-60"
                         : "border-border hover:border-primary hover:bg-muted/40"
                     }`}
@@ -304,9 +305,9 @@ const CatalogoSite = () => {
                         {e?.category || "—"} {e?.code ? `· ${e.code}` : ""}
                       </p>
                     </div>
-                    {hasItem ? (
+                    {alreadyCreated ? (
                       <Badge variant="secondary" className="gap-1">
-                        <CheckCircle2 className="h-3 w-3" /> Já cadastrado
+                        <CheckCircle2 className="h-3 w-3" /> Anúncio criado
                       </Badge>
                     ) : (
                       <Badge variant="outline">Selecionar</Badge>
