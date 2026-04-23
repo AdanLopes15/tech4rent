@@ -39,7 +39,11 @@ const Navbar = () => {
   const fantasyName = companySettings?.fantasyName || companySettings?.name || "TECH4RENT";
   const siteLogoUrl = companySettings?.siteLogoUrl;
 
+  // Rotas públicas onde a tradução fica ativa (não se aplica ao /admin e /login)
+  const isPublicRoute = !location.pathname.startsWith("/admin") && !location.pathname.startsWith("/login");
+
   useEffect(() => {
+    if (!isPublicRoute) return;
     if (document.getElementById("google-translate-script")) return;
 
     window.googleTranslateElementInit = () => {
@@ -50,6 +54,7 @@ const Navbar = () => {
           pageLanguage: "pt",
           includedLanguages: languages.map((language) => language.code).join(","),
           autoDisplay: false,
+          layout: 0,
         },
         "google_translate_element",
       );
@@ -60,22 +65,39 @@ const Navbar = () => {
     script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
     script.async = true;
     document.body.appendChild(script);
-  }, []);
+  }, [isPublicRoute]);
 
-  const changeLanguage = (languageCode: string) => {
+  const setGoogTransCookie = (languageCode: string) => {
     const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
     const cookieValue = languageCode === "pt" ? "/pt/pt" : `/pt/${languageCode}`;
     const hostname = window.location.hostname;
 
+    // Limpa cookies antigos em todos os escopos possíveis
+    const clearPaths = ["/", window.location.pathname];
+    clearPaths.forEach((path) => {
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${path}`;
+      if (hostname.includes(".")) {
+        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${path}; domain=${hostname}`;
+        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${path}; domain=.${hostname}`;
+      }
+    });
+
+    // Define o novo cookie
     document.cookie = `googtrans=${cookieValue}; expires=${expires}; path=/`;
     if (hostname.includes(".")) {
+      document.cookie = `googtrans=${cookieValue}; expires=${expires}; path=/; domain=${hostname}`;
       document.cookie = `googtrans=${cookieValue}; expires=${expires}; path=/; domain=.${hostname}`;
     }
+  };
+
+  const changeLanguage = (languageCode: string) => {
+    setGoogTransCookie(languageCode);
     localStorage.setItem("site-language", languageCode);
     setSelectedLanguage(languageCode);
     setIsLanguageOpen(false);
     setIsOpen(false);
-    window.location.href = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    // Hard reload para o Google Translate aplicar o cookie
+    window.location.reload();
   };
 
   const selectedLanguageLabel = languages.find((language) => language.code === selectedLanguage)?.label || "BR Português";
