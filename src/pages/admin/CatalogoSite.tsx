@@ -42,17 +42,22 @@ const CatalogoSite = () => {
     return map;
   }, [catalogItems]);
 
-  // Lista combinada: TODOS os equipamentos cadastrados, indicando se já tem anúncio personalizado
+  // Lista combinada: TODOS os equipamentos cadastrados
+  // created = já aparece no catálogo do site (/produtos), seja por anúncio personalizado ou pelo padrão do equipamento
   const rows = useMemo(() => {
     const q = search.toLowerCase();
     return (equipments || [])
       .map((e: any) => {
         const item = catalogByEquipmentId[e.id];
+        const hasItem = !!item;
+        const published = item ? !!item.published : true;
+        const created = published;
         return {
           equipment: e,
           item,
-          hasItem: !!item,
-          published: item ? !!item.published : true, // sem item = exibido por padrão em /produtos
+          hasItem,
+          published,
+          created,
         };
       })
       .filter(({ equipment, item }) =>
@@ -83,7 +88,8 @@ const CatalogoSite = () => {
     const total = rows.length;
     const personalizados = rows.filter((r) => r.hasItem).length;
     const publicados = rows.filter((r) => r.published).length;
-    return { total, personalizados, publicados };
+    const criados = rows.filter((r) => r.created).length;
+    return { total, personalizados, publicados, criados };
   }, [rows]);
 
   return (
