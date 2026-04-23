@@ -209,6 +209,7 @@ const SiteBuilder = () => {
   const savePageDraft = useStore((s) => s.savePageDraft);
   const publishPage = useStore((s) => s.publishPage);
   const resetPageDraft = useStore((s) => s.resetPageDraft);
+  const savePageSeo = useStore((s) => s.savePageSeo);
 
   const { state: blocks, set: setBlocks, reset: resetBlocks, undo, redo, canUndo, canRedo } = useHistory<Block[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -217,6 +218,10 @@ const SiteBuilder = () => {
   const [publishing, setPublishing] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [inlineMode, setInlineMode] = useState(false);
+  const [templatesOpen, setTemplatesOpen] = useState(false);
+  const [seo, setSeo] = useState<PageSeo>({});
+  const [seoDirty, setSeoDirty] = useState(false);
+  const [savingSeo, setSavingSeo] = useState(false);
 
   useUndoRedoShortcut(undo, redo);
 
@@ -235,7 +240,9 @@ const SiteBuilder = () => {
     resetBlocks(initial as Block[]);
     setSelectedId(null);
     setDirty(false);
-  }, [slug, sitePages?.[slug]?.draft, sitePages?.[slug]?.published, companySettings?.siteContent]);
+    setSeo((page?.seo as PageSeo) || {});
+    setSeoDirty(false);
+  }, [slug, sitePages?.[slug]?.draft, sitePages?.[slug]?.published, sitePages?.[slug]?.seo, companySettings?.siteContent]);
 
   const selected = useMemo(() => blocks.find((b) => b.id === selectedId) || null, [blocks, selectedId]);
   const meta = selected ? BLOCK_META[selected.type] : null;
