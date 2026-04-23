@@ -264,6 +264,7 @@ type State = {
   rentalClauses: Clause[];
   saleClauses: Clause[];
   homePage: { draft: any[]; published: any[]; updatedAt?: any; publishedAt?: any };
+  sitePages: Record<string, { draft: any[]; published: any[]; updatedAt?: any; publishedAt?: any }>;
   loading: boolean;
   isQuoteDialogOpen: boolean;
 };
@@ -362,6 +363,9 @@ type Actions = {
   saveHomeDraft: (blocks: any[]) => Promise<void>;
   publishHome: () => Promise<void>;
   resetHomeDraft: () => Promise<void>;
+  savePageDraft: (slug: string, blocks: any[]) => Promise<void>;
+  publishPage: (slug: string) => Promise<void>;
+  resetPageDraft: (slug: string) => Promise<void>;
   updateRentalClauses: (clauses: Clause[]) => Promise<void>;
   updateSaleClauses: (clauses: Clause[]) => Promise<void>;
 };
@@ -832,6 +836,7 @@ const useStore = create<State & Actions>((set, get) => {
     notifications: [],
     companySettings: initialCompanySettings,
     homePage: { draft: [], published: [] },
+    sitePages: {},
     smtpSettings: initialSmtpSettings,
     rentalClauses: initialRentalClauses,
     saleClauses: initialSaleClauses,
@@ -848,6 +853,8 @@ const useStore = create<State & Actions>((set, get) => {
           getDocs(collection(db, "equipments")),
           getDocs(collection(db, "catalogItems")),
           getDoc(doc(db, "settings", "homePage")),
+          getDoc(doc(db, "settings", "page_sobre")),
+          getDoc(doc(db, "settings", "page_contato")),
         ])) as [
           DocumentSnapshot<DocumentData>,
           DocumentSnapshot<DocumentData>,
@@ -855,9 +862,11 @@ const useStore = create<State & Actions>((set, get) => {
           QuerySnapshot<DocumentData>,
           QuerySnapshot<DocumentData>,
           DocumentSnapshot<DocumentData>,
+          DocumentSnapshot<DocumentData>,
+          DocumentSnapshot<DocumentData>,
         ];
 
-        const [companySettingsSnap, smtpSettingsSnap, clausesSnap, equipmentsSnap, catalogItemsSnap, homePageSnap] = baseSnaps;
+        const [companySettingsSnap, smtpSettingsSnap, clausesSnap, equipmentsSnap, catalogItemsSnap, homePageSnap, sobrePageSnap, contatoPageSnap] = baseSnaps;
 
         const existingCompanySettings = companySettingsSnap.exists()
           ? (companySettingsSnap.data() as Partial<CompanySettings>)
@@ -920,6 +929,32 @@ const useStore = create<State & Actions>((set, get) => {
                 publishedAt: (homePageSnap.data() as any).publishedAt,
               }
             : { draft: [], published: [] },
+          sitePages: {
+            home: homePageSnap.exists()
+              ? {
+                  draft: (homePageSnap.data() as any).draft || [],
+                  published: (homePageSnap.data() as any).published || [],
+                  updatedAt: (homePageSnap.data() as any).updatedAt,
+                  publishedAt: (homePageSnap.data() as any).publishedAt,
+                }
+              : { draft: [], published: [] },
+            sobre: sobrePageSnap.exists()
+              ? {
+                  draft: (sobrePageSnap.data() as any).draft || [],
+                  published: (sobrePageSnap.data() as any).published || [],
+                  updatedAt: (sobrePageSnap.data() as any).updatedAt,
+                  publishedAt: (sobrePageSnap.data() as any).publishedAt,
+                }
+              : { draft: [], published: [] },
+            contato: contatoPageSnap.exists()
+              ? {
+                  draft: (contatoPageSnap.data() as any).draft || [],
+                  published: (contatoPageSnap.data() as any).published || [],
+                  updatedAt: (contatoPageSnap.data() as any).updatedAt,
+                  publishedAt: (contatoPageSnap.data() as any).publishedAt,
+                }
+              : { draft: [], published: [] },
+          },
         };
 
         if (!publicOnly) {
@@ -2337,6 +2372,52 @@ const useStore = create<State & Actions>((set, get) => {
       const current = get().homePage || { draft: [], published: [] };
       await setDoc(ref, { draft: current.published, updatedAt: serverTimestamp() }, { merge: true });
       set({ homePage: { ...current, draft: current.published } });
+    },
+
+    savePageDraft: async (slug, blocks) => {
+      const docId = `page_${slug}`;
+      const refDoc = doc(db, "settings", docId);
+      await setDoc(refDoc, { draft: blocks, updatedAt: serverTimestamp() }, { merge: true });
+      const pages = { ...get().sitePages };
+      const current = pages[slug] || { draft: [], published: [] };
+      pages[slug] = { ...current, draft: blocks };
+      set({ sitePages: pages });
+      // Mantém compatibilidade do homePage legado
+      if (slug === "home") {
+        const homeRef = doc(db, "settings", "homePage");
+        await setDoc(homeRef, { draft: blocks, updatedAt: serverTimestamp() }, { merge: true });
+        set({ homePage: { ...(get().homePage || { draft: [], published: [] }), draft: blocks } });
+      }
+    },
+
+    publishPage: async (slug) => {
+      const docId = `page_${slug}`;
+      const refDoc = doc(db, "settings", docId);
+      const pages = { ...get().sitePages };
+      const current = pages[slug] || { draft: [], published: [] };
+      await setDoc(refDoc, { published: current.draft, publishedAt: serverTimestamp() }, { merge: true });
+      pages[slug] = { ...current, published: current.draft };
+      set({ sitePages: pages });
+      if (slug === "home") {
+        const homeRef = doc(db, "settings", "homePage");
+        await setDoc(homeRef, { published: current.draft, publishedAt: serverTimestamp() }, { merge: true });
+        set({ homePage: { ...(get().homePage || { draft: [], published: [] }), published: current.draft } });
+      }
+    },
+
+    resetPageDraft: async (slug) => {
+      const docId = `page_${slug}`;
+      const refDoc = doc(db, "settings", docId);
+      const pages = { ...get().sitePages };
+      const current = pages[slug] || { draft: [], published: [] };
+      await setDoc(refDoc, { draft: current.published, updatedAt: serverTimestamp() }, { merge: true });
+      pages[slug] = { ...current, draft: current.published };
+      set({ sitePages: pages });
+      if (slug === "home") {
+        const homeRef = doc(db, "settings", "homePage");
+        await setDoc(homeRef, { draft: current.published, updatedAt: serverTimestamp() }, { merge: true });
+        set({ homePage: { ...(get().homePage || { draft: [], published: [] }), draft: current.published } });
+      }
     },
 
     updateRentalClauses: async (clauses) => {

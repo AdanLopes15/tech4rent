@@ -88,6 +88,7 @@ const App = () => (
               <Route path="equipamentos" element={<Equipamentos />} />
               <Route path="catalogo-site" element={<CatalogoSite />} />
               <Route path="site-builder" element={<SiteBuilder />} />
+              <Route path="site-builder/:slug" element={<SiteBuilder />} />
               <Route path="clientes" element={<Clientes />} />
               <Route path="fornecedores" element={<Fornecedores />} />
               <Route path="colaboradores" element={<Colaboradores />} />

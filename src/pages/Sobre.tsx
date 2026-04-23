@@ -1,11 +1,13 @@
 //src/pages/Sobre.tsx
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Award, Clock, Eye, Heart, MapPin, MessageCircle, PackageCheck, Shield, Target, Users, Wrench, Zap } from "lucide-react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/store";
+import { renderBlock } from "@/lib/site-builder/registry";
+import type { Block } from "@/lib/site-builder/types";
 
 const defaultDescription =
   "A TECH4RENT é uma marca brasileira especializada em locação e venda de equipamentos para operações de logística, estoque e varejo. Desenvolvemos soluções robustas, pensadas para o dia a dia intenso das operações no Brasil.";
@@ -33,10 +35,14 @@ const structure = [
 const Sobre = () => {
   const fetchAllData = useStore((s) => s.fetchAllData);
   const { companySettings } = useStore();
+  const sitePages = useStore((s) => s.sitePages);
 
   useEffect(() => {
     fetchAllData(true);
   }, [fetchAllData]);
+
+  const publishedBlocks = useMemo<Block[]>(() => (sitePages?.sobre?.published || []) as Block[], [sitePages?.sobre?.published]);
+  const usePublished = publishedBlocks.length > 0;
 
   const fantasyName = companySettings?.fantasyName || "TECH4RENT";
   const about = companySettings?.siteContent?.about;
@@ -57,10 +63,25 @@ const Sobre = () => {
     ? `https://wa.me/55${companySettings.phone.replace(/\D/g, "")}?text=${encodeURIComponent("Olá, gostaria de falar com um especialista.")}`
     : "#contato";
 
+  if (usePublished) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <Navbar />
+        <main>
+          {publishedBlocks.filter((b) => b.visible !== false).map((b) => (
+            <div key={b.id}>{renderBlock(b)}</div>
+          ))}
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
       <main>
+        {/* legacy layout below kept as fallback */}
         <section className="relative overflow-hidden bg-foreground py-24 text-background md:py-32">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_28%_32%,hsl(var(--primary)/0.16),transparent_34%)]" />
           <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-background to-background/0" />
