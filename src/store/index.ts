@@ -929,6 +929,32 @@ const useStore = create<State & Actions>((set, get) => {
                 publishedAt: (homePageSnap.data() as any).publishedAt,
               }
             : { draft: [], published: [] },
+          sitePages: {
+            home: homePageSnap.exists()
+              ? {
+                  draft: (homePageSnap.data() as any).draft || [],
+                  published: (homePageSnap.data() as any).published || [],
+                  updatedAt: (homePageSnap.data() as any).updatedAt,
+                  publishedAt: (homePageSnap.data() as any).publishedAt,
+                }
+              : { draft: [], published: [] },
+            sobre: sobrePageSnap.exists()
+              ? {
+                  draft: (sobrePageSnap.data() as any).draft || [],
+                  published: (sobrePageSnap.data() as any).published || [],
+                  updatedAt: (sobrePageSnap.data() as any).updatedAt,
+                  publishedAt: (sobrePageSnap.data() as any).publishedAt,
+                }
+              : { draft: [], published: [] },
+            contato: contatoPageSnap.exists()
+              ? {
+                  draft: (contatoPageSnap.data() as any).draft || [],
+                  published: (contatoPageSnap.data() as any).published || [],
+                  updatedAt: (contatoPageSnap.data() as any).updatedAt,
+                  publishedAt: (contatoPageSnap.data() as any).publishedAt,
+                }
+              : { draft: [], published: [] },
+          },
         };
 
         if (!publicOnly) {
