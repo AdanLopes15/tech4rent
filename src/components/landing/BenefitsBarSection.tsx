@@ -1,23 +1,23 @@
-import { Headphones, ShieldCheck, Truck } from "lucide-react";
+import { BriefcaseBusiness, Headphones, Shield } from "lucide-react";
 
 const benefits = [
-  { icon: ShieldCheck, title: "Garantia", description: "Equipamentos revisados e prontos para operação." },
-  { icon: Truck, title: "Solução para sua operação", description: "Locação, venda e implantação com agilidade." },
-  { icon: Headphones, title: "Suporte especializado", description: "Time técnico para acompanhar sua equipe." },
+  { icon: Shield, title: "Garantia de 1 ano", description: "Todos os produtos com garantia" },
+  { icon: BriefcaseBusiness, title: "Solução para sua operação", description: "Indicação conforme sua rotina logística" },
+  { icon: Headphones, title: "Suporte especializado", description: "Atendimento técnico dedicado" },
 ];
 
 const BenefitsBarSection = () => {
   return (
-    <section className="border-b border-border bg-background py-8">
-      <div className="container grid gap-5 md:grid-cols-3">
+    <section className="border-b border-border bg-muted py-5">
+      <div className="container grid gap-6 md:grid-cols-3">
         {benefits.map(({ icon: Icon, title, description }) => (
-          <div key={title} className="flex items-start gap-4 rounded-lg bg-card p-5 shadow-sm ring-1 ring-border">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+          <div key={title} className="flex items-center justify-center gap-4 md:justify-start">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm">
               <Icon className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-foreground">{title}</h2>
-              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{description}</p>
+              <h2 className="text-sm font-black uppercase tracking-wide text-foreground">{title}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{description}</p>
             </div>
           </div>
         ))}
