@@ -6,9 +6,11 @@ interface ImageUploadFieldProps {
   label: string;
   value?: string | null;
   onChange: (dataUrl: string, file: File) => void;
+  accept?: string;
+  type?: "image" | "video";
 }
 
-const ImageUploadField = ({ label, value, onChange }: ImageUploadFieldProps) => {
+const ImageUploadField = ({ label, value, onChange, accept = "image/*", type = "image" }: ImageUploadFieldProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(value || null);
 
@@ -34,7 +36,13 @@ const ImageUploadField = ({ label, value, onChange }: ImageUploadFieldProps) => 
       <div className="flex items-center gap-4">
         <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground overflow-hidden">
           {preview ? (
-            <img src={preview} alt={label} className="h-full w-full object-cover" />
+            type === "video" ? (
+              <video src={preview} className="h-full w-full object-cover" muted playsInline />
+            ) : (
+              <img src={preview} alt={label} className="h-full w-full object-cover" />
+            )
+          ) : type === "video" ? (
+            "Vídeo"
           ) : (
             "Img"
           )}
@@ -42,7 +50,7 @@ const ImageUploadField = ({ label, value, onChange }: ImageUploadFieldProps) => 
         <input
           ref={inputRef}
           type="file"
-          accept="image/*"
+          accept={accept}
           className="hidden"
           onChange={handleChange}
         />

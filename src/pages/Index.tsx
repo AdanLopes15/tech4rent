@@ -4,9 +4,11 @@ import { useEffect } from "react";
 import { useStore } from "@/store";
 import Navbar from "@/components/landing/Navbar";
 import HeroSection from "@/components/landing/HeroSection";
-import FeaturedProductSection from "@/components/landing/FeaturedProductSection";
+import BenefitsBarSection from "@/components/landing/BenefitsBarSection";
 import EquipmentSection from "@/components/landing/EquipmentSection";
-import DifferentialsSection from "@/components/landing/DifferentialsSection";
+import PresenceSection from "@/components/landing/PresenceSection";
+import ResultsSection from "@/components/landing/ResultsSection";
+import VideoShowcaseSection from "@/components/landing/VideoShowcaseSection";
 import AboutSection from "@/components/landing/AboutSection";
 import ContactSection from "@/components/landing/ContactSection";
 import Footer from "@/components/landing/Footer";
@@ -22,9 +24,11 @@ const Index = () => {
       <Navbar />
       <main>
         <HeroSection />
-        <FeaturedProductSection />
+        <BenefitsBarSection />
         <EquipmentSection />
-        <DifferentialsSection />
+        <PresenceSection />
+        <ResultsSection />
+        <VideoShowcaseSection />
         <AboutSection />
         <ContactSection />
       </main>

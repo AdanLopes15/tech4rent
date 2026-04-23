@@ -49,6 +49,7 @@ const Configuracoes = () => {
 
   const [siteFiles, setSiteFiles] = useState<{ [key: string]: File | null }>({
     heroBackgroundImage: null,
+    heroBackgroundVideo: null,
     featuredProductImage: null,
     featuredProductBackgroundImage: null,
     productHighlightBackgroundImage: null,
@@ -146,13 +147,21 @@ const Configuracoes = () => {
         settings,
         systemLogoFile,
         siteLogoFile,
-        companySettings!.siteContent,
+        {
+          ...companySettings!.siteContent,
+          hero: {
+            ...companySettings!.siteContent.hero,
+            title: companySettings!.siteContent.hero.title,
+            subtitle: companySettings!.siteContent.hero.subtitle,
+          },
+        },
         siteFiles,
         companySettings!.styleSettings,
       );
 
       setSiteFiles({
         heroBackgroundImage: null,
+        heroBackgroundVideo: null,
         featuredProductImage: null,
         featuredProductBackgroundImage: null,
         productHighlightBackgroundImage: null,
@@ -497,6 +506,13 @@ const Configuracoes = () => {
                   label="Imagem de Fundo (Hero)"
                   value={companySettings?.siteContent?.hero?.backgroundImageUrl}
                   onChange={(_url, file) => setSiteFiles(prev => ({ ...prev, heroBackgroundImage: file }))}
+                />
+                <ImageUploadField
+                  label="Vídeo de Fundo (Hero)"
+                  type="video"
+                  accept="video/*"
+                  value={companySettings?.siteContent?.hero?.backgroundVideoUrl}
+                  onChange={(_url, file) => setSiteFiles(prev => ({ ...prev, heroBackgroundVideo: file }))}
                 />
               </div>
 
