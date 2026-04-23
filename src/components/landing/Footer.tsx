@@ -32,21 +32,19 @@ const Footer = () => {
           <div>
             <h3 className="mb-4 text-xs font-black uppercase tracking-widest">Navegação</h3>
             <ul className="space-y-3 text-xs text-background/75">
-              <li>Produtos</li>
-              <li>Coletores PDA</li>
-              <li>Leitores de Código</li>
-              <li>Impressoras Térmicas</li>
+              <li><Link to="/produtos" className="transition-colors hover:text-background">Produtos</Link></li>
+              <li><Link to="/produtos?categoria=Coletores%20PDA" className="transition-colors hover:text-background">Coletores PDA</Link></li>
+              <li><Link to="/produtos?categoria=Acessórios" className="transition-colors hover:text-background">Leitores de Código</Link></li>
+              <li><Link to="/produtos?categoria=Impressoras" className="transition-colors hover:text-background">Impressoras Térmicas</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="mb-4 text-xs font-black uppercase tracking-widest">Institucional</h3>
             <ul className="space-y-3 text-xs text-background/75">
-              <li>Sobre a Tech4Rent</li>
-              <li>Blog</li>
-              <li>Suporte e Contato</li>
-              <li>Política de Devolução</li>
-              <li>Dúvidas Frequentes</li>
+              <li><Link to="/sobre" className="transition-colors hover:text-background">Sobre a Tech4Rent</Link></li>
+              <li><Link to="/contato" className="transition-colors hover:text-background">Suporte e Contato</Link></li>
+              <li><Link to="/sobre#duvidas" className="transition-colors hover:text-background">Dúvidas Frequentes</Link></li>
             </ul>
           </div>
 
