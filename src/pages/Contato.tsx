@@ -31,6 +31,7 @@ const Contato = () => {
   const sitePages = useStore((s) => s.sitePages);
   const publishedBlocks = useMemo<Block[]>(() => (sitePages?.contato?.published || []) as Block[], [sitePages?.contato?.published]);
   const usePublished = publishedBlocks.length > 0;
+  const seo = (sitePages?.contato?.seo as PageSeo) || {};
   const address = companySettings?.address;
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ name: "", company: "", city: "", interest: "", message: "" });
