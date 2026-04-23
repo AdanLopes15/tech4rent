@@ -82,6 +82,20 @@ const Contato = () => {
     }
   };
 
+  if (usePublished) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <Navbar />
+        <main>
+          {publishedBlocks.filter((b) => b.visible !== false).map((b) => (
+            <div key={b.id}>{renderBlock(b)}</div>
+          ))}
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
