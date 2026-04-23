@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Battery, Bluetooth, CheckCircle2, MessageCircle, PackageCheck, ShieldCheck, Smartphone, Truck, Wifi } from "lucide-react";
+import { ArrowLeft, Battery, Bluetooth, CheckCircle2, GitCompare, MessageCircle, PackageCheck, QrCode, ScanLine, ShieldCheck, Smartphone, Truck, Wifi } from "lucide-react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,15 @@ const featureCards = [
   { icon: Battery, title: "Bateria reforçada", description: "Mais autonomia no turno" },
   { icon: Bluetooth, title: "Bluetooth", description: "Integração com acessórios" },
 ];
+
+const highlightSpecs = [
+  { icon: ScanLine, title: "Scanner 2D com IA", description: "Lê até código danificado" },
+  { icon: Battery, title: "Bateria 5000mAh", description: "Turno inteiro sem carregar" },
+  { icon: Smartphone, title: "Android 14", description: "Google Play Store nativo" },
+  { icon: Wifi, title: "Wi‑Fi 5 + 4G LTE", description: "Conectividade completa" },
+];
+
+const operationPerks = ["Leitura 1D/2D de alta performance", "Funciona com códigos danificados ou mal impressos", "Mais agilidade no picking, recebimento e inventário"];
 
 const ProdutoDetalhe = () => {
   const { productId } = useParams();
@@ -132,8 +141,16 @@ const ProdutoDetalhe = () => {
                 <h1 className="mt-4 text-4xl font-black leading-tight md:text-5xl">{productName}</h1>
                 <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">{description}</p>
 
+                <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-muted-foreground">
+                  <span className="rounded-full border border-border bg-muted px-3 py-1">Android</span>
+                  <span className="rounded-full border border-border bg-muted px-3 py-1">2D</span>
+                  <span className="rounded-full border border-border bg-muted px-3 py-1">Wi‑Fi</span>
+                  <span className="rounded-full border border-border bg-muted px-3 py-1">Bluetooth</span>
+                  <span className="rounded-full border border-border bg-muted px-3 py-1">Chip 4G</span>
+                </div>
+
                 <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                  {featureCards.map(({ icon: Icon, title, description: itemDescription }) => (
+                  {highlightSpecs.map(({ icon: Icon, title, description: itemDescription }) => (
                     <div key={title} className="rounded-lg border border-border bg-background p-4 shadow-sm">
                       <Icon className="h-5 w-5 text-primary" />
                       <h2 className="mt-3 text-sm font-black">{title}</h2>
@@ -149,7 +166,7 @@ const ProdutoDetalhe = () => {
                     </a>
                   </Button>
                   <Button asChild size="lg" variant="outline">
-                    <Link to="/produtos">Voltar ao catálogo</Link>
+                    <Link to="/produtos"><GitCompare className="mr-2 h-4 w-4" /> Comparar</Link>
                   </Button>
                 </div>
 
