@@ -213,9 +213,15 @@ const ProdutoDetalhe = () => {
                       <MessageCircle className="h-5 w-5" /> Cotar agora
                     </a>
                   </Button>
-                  <Button asChild size="lg" variant="outline">
-                    <Link to="/produtos"><GitCompare className="mr-2 h-4 w-4" /> Comparar</Link>
-                  </Button>
+                  {(() => {
+                    const haystack = `${product?.category || ""} ${product?.type || ""} ${productName}`.toLowerCase();
+                    const isComparable = /\b(pda|coletor|coletores|handheld|smartphone)\b/.test(haystack);
+                    return isComparable ? (
+                      <Button asChild size="lg" variant="outline">
+                        <Link to="/produtos"><GitCompare className="mr-2 h-4 w-4" /> Comparar</Link>
+                      </Button>
+                    ) : null;
+                  })()}
                 </div>
 
                 <div className="mt-5 flex flex-wrap gap-4 text-sm text-muted-foreground">
