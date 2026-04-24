@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import Sobre from "./pages/Sobre";
 import Produtos from "./pages/Produtos";
 import ProdutoDetalhe from "./pages/ProdutoDetalhe";
+import Comparar from "./pages/Comparar";
 import Contato from "./pages/Contato";
 import PoliticaDevolucao from "./pages/PoliticaDevolucao";
 import Login from "./pages/Login";
@@ -71,6 +72,7 @@ const App = () => (
             <Route path="/sobre" element={<Sobre />} />
             <Route path="/produtos" element={<Produtos />} />
             <Route path="/produtos/:productId" element={<ProdutoDetalhe />} />
+            <Route path="/comparar" element={<Comparar />} />
             <Route path="/contato" element={<Contato />} />
             <Route path="/politica-de-devolucao" element={<PoliticaDevolucao />} />
             <Route path="/login" element={<Login />} />
