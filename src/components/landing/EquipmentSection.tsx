@@ -1,6 +1,7 @@
 //src/components/landing/EquipmentSection.tsx
 
 import { MessageCircle, Smartphone, Wifi, Bluetooth, Usb, PackageSearch } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useStore } from "@/store";
@@ -77,8 +78,8 @@ const EquipmentSection = () => {
                     </div>
 
                     <div className="mt-auto flex gap-2 pt-6">
-                      <Button variant="outline" className="h-10 flex-1" onClick={() => document.getElementById("contato")?.scrollIntoView({ behavior: "smooth" })}>
-                        Ver detalhes
+                      <Button variant="outline" className="h-10 flex-1" asChild>
+                        <Link to={`/produtos/${encodeURIComponent(equipment.id || productName)}`}>Ver detalhes</Link>
                       </Button>
                       <Button size="icon" asChild className="h-10 w-10 shrink-0">
                         <a href={buildWhatsAppUrl(companySettings?.phone, productName)} target="_blank" rel="noreferrer" aria-label={`Solicitar orçamento para ${productName}`}>
