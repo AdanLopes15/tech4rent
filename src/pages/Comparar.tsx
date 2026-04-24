@@ -205,14 +205,19 @@ const Comparar = () => {
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                       <SelectContent>
-                        {products.map((p) => (
-                          <SelectItem key={p.id} value={p.id}>
+                        {sameCategoryProducts.map((p) => (
+                          <SelectItem key={p.id} value={p.id} disabled={p.id === aId}>
                             <span className="flex flex-col">
                               <span className="font-medium">{p.name}</span>
                               {p.code && <span className="text-xs text-muted-foreground">{p.code}</span>}
                             </span>
                           </SelectItem>
                         ))}
+                        {sameCategoryProducts.length <= 1 && (
+                          <div className="px-3 py-2 text-xs text-muted-foreground">
+                            Sem outro produto na mesma categoria{productA?.category ? ` (${productA.category})` : ""}.
+                          </div>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
