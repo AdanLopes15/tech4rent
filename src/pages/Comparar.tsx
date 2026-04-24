@@ -99,13 +99,33 @@ const Comparar = () => {
     return [...fromCatalog, ...fromEquipments].filter(isComparable);
   }, [equipments, catalogItems]);
 
+  const normCategory = (p: any) => String(p?.category || "").trim().toLowerCase();
+
   const aId = searchParams.get("a") || products[0]?.id || "";
-  const bId = searchParams.get("b") || products.find((p) => p.id !== aId)?.id || "";
+  const productA = products.find((p) => p.id === aId) || null;
+
+  // B precisa ser da mesma categoria de A
+  const sameCategoryProducts = useMemo(
+    () => (productA ? products.filter((p) => normCategory(p) === normCategory(productA)) : products),
+    [products, productA],
+  );
+
+  const requestedB = searchParams.get("b");
+  const bId =
+    (requestedB && sameCategoryProducts.find((p) => p.id === requestedB)?.id) ||
+    sameCategoryProducts.find((p) => p.id !== aId)?.id ||
+    "";
+  const productB = sameCategoryProducts.find((p) => p.id === bId) || null;
 
   const setA = (id: string) => {
     const next = new URLSearchParams(searchParams);
     next.set("a", id);
-    if (!next.get("b") && bId) next.set("b", bId);
+    // Se a nova categoria não casa com B atual, limpa B
+    const newA = products.find((p) => p.id === id);
+    const currentB = products.find((p) => p.id === next.get("b"));
+    if (!newA || !currentB || normCategory(newA) !== normCategory(currentB)) {
+      next.delete("b");
+    }
     setSearchParams(next, { replace: true });
   };
   const setB = (id: string) => {
@@ -115,8 +135,6 @@ const Comparar = () => {
     setSearchParams(next, { replace: true });
   };
 
-  const productA = products.find((p) => p.id === aId) || null;
-  const productB = products.find((p) => p.id === bId) || null;
 
   // Union of spec labels (preserve order: A first, then B unique)
   const comparisonRows = useMemo(() => {
@@ -187,14 +205,19 @@ const Comparar = () => {
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                       <SelectContent>
-                        {products.map((p) => (
-                          <SelectItem key={p.id} value={p.id}>
+                        {sameCategoryProducts.map((p) => (
+                          <SelectItem key={p.id} value={p.id} disabled={p.id === aId}>
                             <span className="flex flex-col">
                               <span className="font-medium">{p.name}</span>
                               {p.code && <span className="text-xs text-muted-foreground">{p.code}</span>}
                             </span>
                           </SelectItem>
                         ))}
+                        {sameCategoryProducts.length <= 1 && (
+                          <div className="px-3 py-2 text-xs text-muted-foreground">
+                            Sem outro produto na mesma categoria{productA?.category ? ` (${productA.category})` : ""}.
+                          </div>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
