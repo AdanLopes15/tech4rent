@@ -218,7 +218,7 @@ const ProdutoDetalhe = () => {
                     const isComparable = /\b(pda|coletor|coletores|handheld|smartphone)\b/.test(haystack);
                     return isComparable ? (
                       <Button asChild size="lg" variant="outline">
-                        <Link to="/produtos"><GitCompare className="mr-2 h-4 w-4" /> Comparar</Link>
+                        <Link to={`/comparar?a=${encodeURIComponent(String(product?.id || ""))}`}><GitCompare className="mr-2 h-4 w-4" /> Comparar</Link>
                       </Button>
                     ) : null;
                   })()}
