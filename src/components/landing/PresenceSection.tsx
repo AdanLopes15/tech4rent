@@ -1,4 +1,5 @@
 import { Rocket, Target, ShieldCheck, TrendingUp, MapPin, Truck, Headphones } from "lucide-react";
+import mapaBrasil from "@/assets/landing/mapa-brasil.png";
 
 const pillars = [
   { icon: Rocket, title: "+ EFICIÊNCIA", description: "Mais produtividade em todos os processos.", color: "text-primary" },
@@ -75,27 +76,9 @@ const PresenceSection = () => {
               </div>
             </div>
 
-            <div className="relative mx-auto w-full max-w-md">
+            <div className="relative mx-auto w-full max-w-xl">
               <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.25),transparent_70%)] blur-2xl" />
-              {/* Mapa simplificado */}
-              <svg viewBox="0 0 400 420" className="h-auto w-full" fill="none">
-                <path
-                  d="M180 40 L240 60 L290 90 L320 140 L340 200 L330 270 L300 330 L240 370 L180 380 L130 360 L90 320 L70 260 L80 200 L110 140 L140 90 Z"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth="2"
-                  fill="hsl(var(--primary) / 0.08)"
-                  style={{ filter: "drop-shadow(0 0 10px hsl(var(--primary) / 0.6))" }}
-                />
-                {[
-                  [200, 110], [240, 160], [280, 200], [180, 180], [220, 230],
-                  [260, 270], [200, 290], [150, 240], [240, 330], [180, 350],
-                ].map(([cx, cy], i) => (
-                  <g key={i}>
-                    <circle cx={cx} cy={cy} r="6" fill="hsl(var(--success))" style={{ filter: "drop-shadow(0 0 6px hsl(var(--success)))" }} />
-                    <circle cx={cx} cy={cy} r="2" fill="white" />
-                  </g>
-                ))}
-              </svg>
+              <img src={mapaBrasil} alt="Atendimento em todo o Brasil" className="h-auto w-full object-contain" loading="lazy" />
             </div>
           </div>
         </div>
