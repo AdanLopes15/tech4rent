@@ -9,6 +9,7 @@ import iconAgilidade from "@/assets/landing/icon-agilidade.png";
 import iconErros from "@/assets/landing/icon-erros.png";
 import iconSeguranca from "@/assets/landing/icon-seguranca.png";
 import iconResultados from "@/assets/landing/icon-resultados.png";
+import btnEspecialista from "@/assets/landing/btn-especialista.png";
 
 const buildWhatsAppUrl = (phone?: string, message = "Olá, gostaria de falar com um especialista.") => {
   const digits = phone?.replace(/\D/g, "") || "";
@@ -58,7 +59,12 @@ const HeroSection = () => {
                 href={buildWhatsAppUrl(companySettings?.phone)}
                 target="_blank"
                 rel="noreferrer"
-                className="btn-cta h-12 px-6 text-sm uppercase tracking-wide transition-transform hover:-translate-y-0.5"
+                className="relative inline-flex h-12 items-center justify-center gap-2 px-8 text-sm font-semibold uppercase tracking-wide text-white transition-transform hover:-translate-y-0.5"
+                style={{
+                  backgroundImage: `url(${btnEspecialista})`,
+                  backgroundSize: "100% 100%",
+                  backgroundRepeat: "no-repeat",
+                }}
               >
                 <MessageCircle className="h-5 w-5" /> Fale com um especialista
               </a>
