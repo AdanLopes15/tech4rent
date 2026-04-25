@@ -89,23 +89,14 @@ const HeroSection = () => {
 
           </div>
 
-          {/* Mockup com fundo de armazém neon */}
+          {/* Mockup PDAs + scanner com aro neon (imagem completa) */}
           <div className="relative mx-auto w-full">
-            <div className="relative overflow-hidden rounded-3xl border border-border/40 shadow-[0_30px_80px_-20px_hsl(var(--primary)/0.45)]">
-              <img
-                src={heroBgWarehouse}
-                alt="Armazém logístico iluminado"
-                className="h-full w-full object-cover"
-                loading="eager"
-              />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/70 via-background/10 to-transparent" />
-              <img
-                src={heroDevices}
-                alt="Equipamentos Tech4Rent"
-                className="absolute inset-0 m-auto h-[88%] w-auto object-contain drop-shadow-[0_20px_40px_hsl(var(--primary)/0.55)]"
-                loading="eager"
-              />
-            </div>
+            <img
+              src={heroDevices}
+              alt="Equipamentos Tech4Rent"
+              className="h-auto w-full object-contain drop-shadow-[0_30px_60px_hsl(var(--primary)/0.45)]"
+              loading="eager"
+            />
           </div>
         </div>
 

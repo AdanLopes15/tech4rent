@@ -146,7 +146,11 @@
 
   /* Botões custom */
   .btn-cta {
-    @apply inline-flex items-center justify-center gap-2 rounded-[10px] bg-success px-5 py-3 text-sm font-bold text-success-foreground transition-all duration-300 hover:brightness-95;
+    @apply inline-flex items-center justify-center gap-2 rounded-[10px] bg-success px-5 py-3 text-sm font-bold text-success-foreground transition-all duration-300 hover:brightness-110;
+    box-shadow: 0 0 0 1px hsl(var(--success) / 0.6), 0 10px 30px -8px hsl(var(--success) / 0.55), 0 0 24px hsl(var(--success) / 0.45);
+  }
+  .btn-cta:hover {
+    box-shadow: 0 0 0 1px hsl(var(--success) / 0.8), 0 14px 40px -8px hsl(var(--success) / 0.7), 0 0 32px hsl(var(--success) / 0.6);
   }
   .btn-outline-blue {
     @apply inline-flex items-center justify-center gap-2 rounded-[10px] border border-primary bg-transparent px-5 py-3 text-sm font-bold text-primary transition-all duration-300 hover:bg-primary/10;
