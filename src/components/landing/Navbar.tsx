@@ -179,7 +179,7 @@ const Navbar = () => {
               </div>
             )}
           </div>
-          <button onClick={goToContact} className="inline-flex h-10 items-center gap-2 rounded-full border border-success bg-transparent px-5 text-xs font-bold uppercase tracking-wider text-foreground transition-all hover:bg-success/10">
+          <button onClick={() => goToHomeSection("contato")} className="inline-flex h-10 items-center gap-2 rounded-full border border-success bg-transparent px-5 text-xs font-bold uppercase tracking-wider text-foreground transition-all hover:bg-success/10">
             <MessageCircle className="h-4 w-4 text-success" /> Fale Agora
           </button>
           <Link
@@ -200,10 +200,15 @@ const Navbar = () => {
       {isOpen && (
         <div className="border-t border-border bg-card px-6 py-5 lg:hidden">
           <div className="space-y-4">
-            <button onClick={goToProducts} className={`block w-full text-left text-sm font-semibold ${location.pathname === "/produtos" ? "text-primary" : "text-foreground/75"}`}>Produtos</button>
-            <button onClick={() => goToAboutSection("duvidas")} className="block w-full text-left text-sm font-semibold text-foreground/75">Dúvidas</button>
-            <button onClick={() => goToAboutSection()} className="block w-full text-left text-sm font-semibold text-primary">Sobre</button>
-            <button onClick={goToContact} className={`block w-full text-left text-sm font-semibold ${location.pathname === "/contato" ? "text-primary" : "text-foreground/75"}`}>Contato</button>
+            {menuLinks.map((l) => (
+              <button
+                key={l.id}
+                onClick={() => goToHomeSection(l.id)}
+                className="block w-full text-left text-sm font-semibold text-foreground/75 hover:text-foreground"
+              >
+                {l.label}
+              </button>
+            ))}
             <Link to="/login" onClick={() => setIsOpen(false)} className="block text-sm font-semibold text-foreground/75">Área Restrita</Link>
             <div className="space-y-2 pt-2">
               <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Idioma</p>
@@ -220,7 +225,7 @@ const Navbar = () => {
                 ))}
               </div>
             </div>
-            <button onClick={goToContact} className="btn-cta w-full">
+            <button onClick={() => goToHomeSection("contato")} className="btn-cta w-full">
               Fale Conosco <ArrowRight className="h-4 w-4" />
             </button>
           </div>
