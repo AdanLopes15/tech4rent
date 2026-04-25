@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight, ChevronDown, Lock, Menu, MessageCircle, X } from "lucide-react";
 import { useStore } from "@/store";
+import logoTech4Rent from "@/assets/landing/logo-tech4rent.png";
 
 const languages = [
   { code: "pt", label: "BR Português" },
@@ -127,11 +128,11 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 border-b border-border bg-background/85 text-foreground backdrop-blur-md">
       <div className="container flex h-16 max-w-6xl items-center justify-between gap-6">
         <button onClick={() => goToHomeSection("hero")} className="flex min-w-0 items-center gap-3" aria-label="Voltar ao início">
-          {siteLogoUrl ? (
-            <img src={siteLogoUrl} alt="Logo da Tech4Rent" className="h-8 w-auto max-w-36 object-contain" />
-          ) : (
-            <span className="text-2xl font-extrabold tracking-tight text-foreground">{fantasyName}</span>
-          )}
+          <img
+            src={siteLogoUrl || logoTech4Rent}
+            alt="Logo da Tech4Rent"
+            className="h-10 w-auto max-w-44 object-contain"
+          />
         </button>
 
         <div className="hidden items-center gap-2 lg:flex">
