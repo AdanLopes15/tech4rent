@@ -36,8 +36,8 @@ const HeroSection = () => {
       />
       {/* Overlay escuro */}
       <div className="absolute inset-0 -z-10" style={{ backgroundColor: "rgba(5,7,13,0.7)" }} />
-      {/* Vinheta + brilhos laterais */}
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_80%_40%,hsl(var(--primary)/0.18),transparent_55%),radial-gradient(circle_at_20%_85%,hsl(var(--success)/0.15),transparent_55%)]" />
+      {/* Vinheta + brilhos laterais (sutis, estilo Stripe) */}
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_80%_40%,hsl(var(--primary)/0.10),transparent_45%),radial-gradient(circle_at_20%_85%,hsl(var(--success)/0.08),transparent_45%)]" />
 
       <div className="container mx-auto max-w-[1280px] px-6 py-20 md:py-28">
         <div className="grid items-center gap-14 lg:grid-cols-2">
@@ -78,32 +78,32 @@ const HeroSection = () => {
 
           {/* PRODUTOS COM NEON + PLATAFORMA */}
           <div className="relative mx-auto flex h-[460px] w-full max-w-[560px] items-center justify-center md:h-[520px]">
-            {/* Círculo neon grande atrás */}
+            {/* Círculo neon grande atrás (denso no centro, decai rápido) */}
             <div
               className="pointer-events-none absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full"
               style={{
                 background:
-                  "radial-gradient(circle, hsl(210 79% 51% / 0.55) 0%, hsl(108 62% 47% / 0.35) 35%, transparent 70%)",
-                filter: "blur(20px)",
+                  "radial-gradient(circle, hsl(210 79% 51% / 0.32) 0%, hsl(210 79% 51% / 0.18) 22%, hsl(108 62% 47% / 0.12) 45%, transparent 65%)",
+                filter: "blur(28px)",
               }}
             />
 
-            {/* Plataforma oval com glow azul → verde */}
+            {/* Plataforma oval com glow azul → verde (mais contido) */}
             <div
               className="pointer-events-none absolute left-1/2 bottom-6 h-[80px] w-[400px] -translate-x-1/2 rounded-[50%]"
               style={{
                 background:
-                  "radial-gradient(ellipse at center, hsl(210 79% 51% / 0.9) 0%, hsl(108 62% 47% / 0.7) 60%, transparent 80%)",
+                  "radial-gradient(ellipse at center, hsl(210 79% 51% / 0.55) 0%, hsl(108 62% 47% / 0.35) 55%, transparent 78%)",
                 boxShadow:
-                  "0 0 60px 10px hsl(210 79% 51% / 0.6), 0 0 120px 30px hsl(108 62% 47% / 0.45)",
+                  "0 0 40px 4px hsl(210 79% 51% / 0.35), 0 0 90px 20px hsl(108 62% 47% / 0.22)",
               }}
             />
             <div
-              className="pointer-events-none absolute left-1/2 bottom-[34px] h-[6px] w-[380px] -translate-x-1/2 rounded-full"
+              className="pointer-events-none absolute left-1/2 bottom-[34px] h-[3px] w-[380px] -translate-x-1/2 rounded-full"
               style={{
                 background:
                   "linear-gradient(90deg, hsl(210 79% 51%) 0%, hsl(108 62% 47%) 100%)",
-                boxShadow: "0 0 20px hsl(210 79% 51% / 0.9), 0 0 40px hsl(108 62% 47% / 0.7)",
+                boxShadow: "0 0 12px hsl(210 79% 51% / 0.7), 0 0 24px hsl(108 62% 47% / 0.5)",
               }}
             />
 
