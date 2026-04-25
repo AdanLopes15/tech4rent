@@ -1,83 +1,106 @@
-import { Factory, Heart, MapPin, Package, ShoppingCart, Truck, Users, Warehouse } from "lucide-react";
+import { Rocket, Target, ShieldCheck, TrendingUp, MapPin, Truck, Headphones } from "lucide-react";
 
-const logos = ["Pelog", "Memphis Courier", "CEVA Logistics", "VDC Log", "Porto Guimarães", "Maxton", "Pelog", "Memphis"];
-const stats = [
-  { icon: Package, value: "10.000+", label: "Aparelhos em operação" },
-  { icon: Users, value: "1.000+", label: "Clientes ativos" },
-  { icon: MapPin, value: "20+", label: "Estados atendidos" },
-];
-const segments = [
-  { icon: Truck, label: "Logística & Transporte" },
-  { icon: ShoppingCart, label: "E-commerce & Fulfillment" },
-  { icon: Warehouse, label: "Varejo & Atacado" },
-  { icon: Factory, label: "Indústria & Manufatura" },
-  { icon: Heart, label: "Saúde & Hospitalar" },
-  { icon: Package, label: "Alimentício & Frigorífico" },
-];
-const dots = [
-  [58, 18], [48, 23], [63, 33], [71, 42], [69, 51], [61, 60], [57, 70], [55, 82], [47, 75], [43, 64], [38, 53], [34, 42], [29, 34], [25, 47], [48, 39], [53, 51], [50, 66], [64, 72], [72, 28],
+const pillars = [
+  { icon: Rocket, title: "+ EFICIÊNCIA", description: "Mais produtividade em todos os processos.", color: "text-primary" },
+  { icon: Target, title: "+ CONTROLE", description: "Gestão inteligente e dados precisos.", color: "text-success" },
+  { icon: ShieldCheck, title: "+ SEGURANÇA", description: "Equipamentos robustos e confiáveis.", color: "text-warning" },
+  { icon: TrendingUp, title: "+ ESCALA", description: "Soluções que crescem com seu negócio.", color: "text-primary" },
 ];
 
 const PresenceSection = () => {
   return (
-    <section id="diferenciais" className="bg-background py-0">
-      <div className="overflow-hidden border-y border-border bg-muted py-8">
-        <h2 className="mb-7 text-center text-lg font-black uppercase tracking-widest text-muted-foreground">
-          Empresas que tiveram resultados com a Tech4Rent
-        </h2>
-        <div className="flex w-max animate-[marquee_24s_linear_infinite] items-center gap-20 px-10 opacity-60 grayscale">
-          {[...logos, ...logos].map((logo, index) => (
-            <span key={`${logo}-${index}`} className="whitespace-nowrap text-3xl font-black italic text-foreground/70">
-              {logo}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <div className="container max-w-6xl py-20">
-        <h2 className="mb-12 text-center text-2xl font-black uppercase tracking-[0.35em] text-foreground">Presença em todo o Brasil</h2>
-        <div className="grid gap-12 lg:grid-cols-[180px_1fr_280px] lg:items-center">
-          <div className="space-y-10">
-            {stats.map(({ icon: Icon, value, label }) => (
-              <div key={label} className="space-y-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground shadow-sm">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <div className="text-4xl font-black text-foreground">{value}</div>
-                <div className="text-sm text-muted-foreground">{label}</div>
+    <>
+      {/* QUEM SOMOS */}
+      <section id="quem-somos" className="relative overflow-hidden border-y border-border bg-background py-20">
+        <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.05]" style={{
+          backgroundImage:
+            "linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
+        }} />
+        <div className="container max-w-6xl">
+          <div className="grid gap-12 lg:grid-cols-[1fr_1.4fr] lg:items-center">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-[0.3em] text-success">Quem somos</span>
+              <h2 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight text-foreground md:text-4xl">
+                QUEM É A<br />TECH<span className="text-primary">4</span>RENT
+              </h2>
+              <div className="mt-5 space-y-4 text-sm leading-relaxed text-muted-foreground">
+                <p>A Tech4Rent nasceu para simplificar e escalar operações logísticas através da tecnologia.</p>
+                <p>Atuamos com locação de equipamentos e soluções inteligentes que reduzem custos, aumentam produtividade e eliminam gargalos operacionais.</p>
               </div>
-            ))}
-          </div>
+            </div>
 
-          <div className="relative mx-auto aspect-[0.95] w-full max-w-[460px]">
-            <div className="absolute inset-[10%] rounded-[48%_52%_45%_55%] bg-muted shadow-inner" />
-            <div className="absolute left-[23%] top-[8%] h-[78%] w-[52%] rounded-[55%_45%_52%_48%] border border-border bg-card/70 shadow-sm" />
-            <div className="absolute left-[35%] top-[18%] h-[55%] w-[35%] rotate-[-14deg] rounded-[45%_60%_40%_55%] border border-border bg-muted" />
-            {dots.map(([left, top], index) => (
-              <span
-                key={index}
-                className="absolute h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_0_5px_hsl(var(--primary)/0.14)]"
-                style={{ left: `${left}%`, top: `${top}%` }}
-              />
-            ))}
-          </div>
-
-          <div>
-            <h3 className="mb-5 text-sm font-black uppercase text-foreground">Segmentos atendidos</h3>
-            <div className="space-y-3">
-              {segments.map(({ icon: Icon, label }) => (
-                <div key={label} className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-card text-muted-foreground">
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <span className="text-sm font-medium text-foreground">{label}</span>
+            <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+              {pillars.map(({ icon: Icon, title, description, color }) => (
+                <div key={title} className="border-l border-border pl-4">
+                  <Icon className={`h-9 w-9 ${color}`} strokeWidth={1.5} />
+                  <h3 className="mt-4 text-sm font-extrabold tracking-tight text-foreground">{title}</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{description}</p>
                 </div>
               ))}
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* ABRANGÊNCIA */}
+      <section className="relative overflow-hidden bg-background py-20">
+        <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.05]" style={{
+          backgroundImage:
+            "linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
+        }} />
+        <div className="container max-w-6xl">
+          <div className="grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:items-center">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-[0.3em] text-success">Abrangência</span>
+              <h2 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight text-foreground md:text-4xl">
+                ATENDEMOS<br />TODO O BRASIL
+              </h2>
+              <p className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground">
+                Estrutura preparada para atender operações logísticas em qualquer região do país, com entrega rápida e suporte especializado.
+              </p>
+
+              <div className="mt-8 grid grid-cols-3 gap-4">
+                {[
+                  { icon: MapPin, label: "ATENDIMENTO\nNACIONAL", color: "text-primary" },
+                  { icon: Truck, label: "ENTREGA\nRÁPIDA", color: "text-success" },
+                  { icon: Headphones, label: "SUPORTE\nESPECIALIZADO", color: "text-warning" },
+                ].map(({ icon: Icon, label, color }) => (
+                  <div key={label} className="flex flex-col items-start gap-2">
+                    <Icon className={`h-7 w-7 ${color}`} strokeWidth={1.5} />
+                    <p className="whitespace-pre-line text-[11px] font-bold tracking-wider text-muted-foreground">{label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative mx-auto w-full max-w-md">
+              <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.25),transparent_70%)] blur-2xl" />
+              {/* Mapa simplificado */}
+              <svg viewBox="0 0 400 420" className="h-auto w-full" fill="none">
+                <path
+                  d="M180 40 L240 60 L290 90 L320 140 L340 200 L330 270 L300 330 L240 370 L180 380 L130 360 L90 320 L70 260 L80 200 L110 140 L140 90 Z"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth="2"
+                  fill="hsl(var(--primary) / 0.08)"
+                  style={{ filter: "drop-shadow(0 0 10px hsl(var(--primary) / 0.6))" }}
+                />
+                {[
+                  [200, 110], [240, 160], [280, 200], [180, 180], [220, 230],
+                  [260, 270], [200, 290], [150, 240], [240, 330], [180, 350],
+                ].map(([cx, cy], i) => (
+                  <g key={i}>
+                    <circle cx={cx} cy={cy} r="6" fill="hsl(var(--success))" style={{ filter: "drop-shadow(0 0 6px hsl(var(--success)))" }} />
+                    <circle cx={cx} cy={cy} r="2" fill="white" />
+                  </g>
+                ))}
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
   );
 };
 
