@@ -1,20 +1,12 @@
 //src/components/landing/EquipmentSection.tsx
 
-import { MessageCircle, Smartphone, Wifi, Bluetooth, Usb, PackageSearch } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useStore } from "@/store";
-
-function isValidHttpUrl(value?: string | null): boolean {
-  if (!value) return false;
-  try {
-    const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
+import imgColetor from "@/assets/landing/prod-coletor.png";
+import imgLeitor from "@/assets/landing/prod-leitor.png";
+import imgImpressora from "@/assets/landing/prod-impressora.png";
+import imgEtiquetas from "@/assets/landing/prod-etiquetas.png";
 
 const buildWhatsAppUrl = (phone?: string, product?: string) => {
   const digits = phone?.replace(/\D/g, "") || "";
@@ -22,17 +14,47 @@ const buildWhatsAppUrl = (phone?: string, product?: string) => {
   return digits ? `https://wa.me/55${digits}?text=${encodeURIComponent(message)}` : "#contato";
 };
 
-const fallbackTags = [
-  { icon: Smartphone, label: "Android" },
-  { icon: Wifi, label: "Wi-Fi" },
-  { icon: Bluetooth, label: "Bluetooth" },
-  { icon: Usb, label: "USB" },
+const products = [
+  {
+    image: imgColetor,
+    name: "COLETOR TC60",
+    features: ["Android 14", "Scanner 2D", "IP67", "Wi-Fi / 4G"],
+    cta: "ALUGAR AGORA",
+    variant: "primary" as const,
+  },
+  {
+    image: imgLeitor,
+    name: "LEITOR PISTOLA",
+    features: ["Alta velocidade", "Precisão Industrial", "Plug & Play", "Leitura 1D e 2D"],
+    cta: "SOLICITAR ORÇAMENTO",
+    variant: "outline" as const,
+  },
+  {
+    image: imgImpressora,
+    name: "IMPRESSORAS TÉRMICAS",
+    features: ["Etiquetas rápidas", "Alta durabilidade", "Integração fácil", "Diversos modelos"],
+    cta: "SOLICITAR ORÇAMENTO",
+    variant: "outline" as const,
+  },
+  {
+    image: imgEtiquetas,
+    name: "ETIQUETAS RESMA",
+    features: ["Caixa com 10.000 unidades", "Alta qualidade", "Compatível com mercado", "Diversos tamanhos"],
+    cta: "COMPRAR AGORA",
+    variant: "outline" as const,
+  },
 ];
 
+const Check = () => (
+  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-success/15 text-success">
+    <svg viewBox="0 0 24 24" className="h-2.5 w-2.5" fill="none" stroke="currentColor" strokeWidth="3">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  </span>
+);
+
 const EquipmentSection = () => {
-  const { companySettings, equipments } = useStore();
-  const hasEquipments = Array.isArray(equipments) && equipments.length > 0;
-  const visibleEquipments = hasEquipments ? equipments.slice(0, 3) : [];
+  const { companySettings } = useStore();
 
   return (
     <section id="equipamentos" className="bg-background py-20">
@@ -45,63 +67,45 @@ const EquipmentSection = () => {
           <div className="mx-auto mt-3 h-[3px] w-20 rounded-full bg-primary" />
         </div>
 
-        {hasEquipments ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {(equipments as any[]).slice(0, 4).map((equipment: any) => {
-              const imageUrls =
-                Array.isArray(equipment?.imageUrls) && equipment.imageUrls.filter((url: string) => isValidHttpUrl(url)).length > 0
-                  ? equipment.imageUrls.filter((url: string) => isValidHttpUrl(url))
-                  : [isValidHttpUrl(equipment?.imageUrl) ? equipment.imageUrl : "https://placehold.co/620x620.png"];
-              const firstValidUrl = imageUrls[0] || "https://placehold.co/620x620.png";
-              const productName = equipment?.name || "Equipamento";
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {products.map((p) => (
+            <article
+              key={p.name}
+              className="flex min-h-[460px] flex-col rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-1 hover:border-primary/40"
+            >
+              <div className="h-[200px] overflow-hidden rounded-xl bg-[hsl(var(--surface))]">
+                <img src={p.image} alt={p.name} className="h-full w-full object-contain p-2" loading="lazy" />
+              </div>
 
-              const features = Array.isArray(equipment?.features) && equipment.features.length
-                ? equipment.features.slice(0, 4)
-                : ["Android", "Wi-Fi", "Bluetooth", "USB"];
+              <h3 className="mt-5 text-base font-extrabold uppercase tracking-tight text-foreground">{p.name}</h3>
 
-              return (
-                <article
-                  key={equipment.id || productName}
-                  className="card-elevated flex min-h-[420px] flex-col p-5"
-                >
-                  <div className="h-[180px] overflow-hidden rounded-xl bg-[hsl(var(--surface))]">
-                    <img src={firstValidUrl} alt={productName} className="h-full w-full object-contain p-3" loading="lazy" />
-                  </div>
+              <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+                {p.features.map((f) => (
+                  <li key={f} className="flex items-center gap-2">
+                    <Check /> {f}
+                  </li>
+                ))}
+              </ul>
 
-                  <h3 className="mt-5 line-clamp-2 text-base font-extrabold uppercase tracking-tight text-foreground">{productName}</h3>
-
-                  <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-                    {features.map((label: string) => (
-                      <li key={label} className="flex items-center gap-2">
-                        <span className="flex h-4 w-4 items-center justify-center rounded-full bg-success/15 text-success">
-                          <svg viewBox="0 0 24 24" className="h-2.5 w-2.5" fill="none" stroke="currentColor" strokeWidth="3">
-                            <polyline points="20 6 9 17 4 12" />
-                          </svg>
-                        </span>
-                        {label}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="mt-auto pt-5">
-                    <Link
-                      to={`/produtos/${encodeURIComponent(equipment.id || productName)}`}
-                      className="btn-outline-blue w-full"
-                    >
-                      Solicitar Orçamento
-                    </Link>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="card-elevated mx-auto max-w-xl text-center">
-            <PackageSearch className="mx-auto h-10 w-10 text-primary" />
-            <h3 className="mt-4 text-xl font-bold text-foreground">Nenhum equipamento disponível no momento</h3>
-            <p className="mt-2 text-sm text-muted-foreground">Em breve novos equipamentos aparecerão aqui.</p>
-          </div>
-        )}
+              <div className="mt-auto pt-5">
+                {p.variant === "primary" ? (
+                  <a
+                    href={buildWhatsAppUrl(companySettings?.phone, p.name)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn-cta w-full text-xs uppercase tracking-wider"
+                  >
+                    {p.cta}
+                  </a>
+                ) : (
+                  <Link to="/produtos" className="btn-outline-blue w-full text-xs uppercase tracking-wider">
+                    <MessageCircle className="h-4 w-4" /> {p.cta}
+                  </Link>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );
