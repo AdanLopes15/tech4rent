@@ -1,5 +1,5 @@
 import { useStore } from "@/store";
-import { MessageCircle } from "lucide-react";
+import whatsappIcon from "@/assets/landing/whatsapp-icon.png";
 
 const FloatingWhatsApp = () => {
   const { companySettings } = useStore();
@@ -13,9 +13,9 @@ const FloatingWhatsApp = () => {
       target="_blank"
       rel="noreferrer"
       aria-label="Falar no WhatsApp"
-      className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-success text-success-foreground shadow-[0_15px_40px_-10px_hsl(var(--success)/0.6)] transition-all duration-300 hover:scale-110"
+      className="fixed bottom-5 right-5 z-50 flex h-16 w-16 items-center justify-center transition-all duration-300 hover:scale-110"
     >
-      <MessageCircle className="h-6 w-6" />
+      <img src={whatsappIcon} alt="WhatsApp" className="h-full w-full object-contain" />
     </a>
   );
 };
