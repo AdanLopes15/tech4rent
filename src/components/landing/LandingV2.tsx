@@ -96,8 +96,8 @@ const LandingV2 = () => {
           </div>
 
           <div className="relative flex min-h-[520px] items-center justify-center sm:min-h-[640px] md:min-h-[760px] lg:min-h-[900px]">
-            <div className="absolute h-[470px] w-[470px] rounded-full border-4 border-[#1E88E5] shadow-[0_0_80px_rgba(30,136,229,0.7)] sm:h-[570px] sm:w-[570px] md:h-[630px] md:w-[630px] lg:h-[690px] lg:w-[690px]" />
-            <div className="absolute h-[450px] w-[450px] rounded-full border-r-4 border-t-4 border-[#43B02A] shadow-[0_0_80px_rgba(67,176,42,0.5)] sm:h-[550px] sm:w-[550px] md:h-[610px] md:w-[610px] lg:h-[670px] lg:w-[670px]" />
+            <div className="absolute h-[300px] w-[300px] rounded-full border-4 border-[#1E88E5] shadow-[0_0_80px_rgba(30,136,229,0.7)] sm:h-[360px] sm:w-[360px] md:h-[400px] md:w-[400px] lg:h-[420px] lg:w-[420px]" />
+            <div className="absolute h-[280px] w-[280px] rounded-full border-r-4 border-t-4 border-[#43B02A] shadow-[0_0_80px_rgba(67,176,42,0.5)] sm:h-[340px] sm:w-[340px] md:h-[380px] md:w-[380px] lg:h-[400px] lg:w-[400px]" />
             <img
               src={heroDevices}
               alt="Equipamentos Tech4Rent"
