@@ -221,7 +221,7 @@ const LandingV2 = () => {
             <img
               src={mapaBrasil}
               alt="Atendimento Tech4Rent em todo o Brasil"
-              className="max-h-[620px] w-full max-w-[820px] object-contain drop-shadow-[0_0_40px_rgba(30,136,229,0.35)]"
+              className="max-h-[920px] w-full max-w-[1100px] object-contain drop-shadow-[0_0_40px_rgba(30,136,229,0.35)]"
             />
           </div>
         </div>
