@@ -124,6 +124,14 @@ const Navbar = () => {
   const linkClass = (active: boolean) =>
     `rounded-md px-3 py-2 text-sm font-semibold transition-colors ${active ? "text-primary" : "text-foreground/70 hover:text-foreground"}`;
 
+  // Links do menu agora rolam até as âncoras na home
+  const menuLinks: Array<{ id: string; label: string }> = [
+    { id: "produtos", label: "Produtos" },
+    { id: "duvidas", label: "Dúvidas" },
+    { id: "quem-somos", label: "Sobre" },
+    { id: "contato", label: "Contato" },
+  ];
+
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-background/85 text-foreground backdrop-blur-md">
       <div className="container flex h-16 max-w-6xl items-center justify-between gap-6">
@@ -136,10 +144,11 @@ const Navbar = () => {
         </button>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <button onClick={goToProducts} className={linkClass(location.pathname === "/produtos")}>Produtos</button>
-          <button onClick={() => goToAboutSection("duvidas")} className={linkClass(false)}>Dúvidas</button>
-          <button onClick={() => goToAboutSection()} className={linkClass(location.pathname === "/sobre")}>Sobre</button>
-          <button onClick={goToContact} className={linkClass(location.pathname === "/contato")}>Contato</button>
+          {menuLinks.map((l) => (
+            <button key={l.id} onClick={() => goToHomeSection(l.id)} className={linkClass(false)}>
+              {l.label}
+            </button>
+          ))}
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
