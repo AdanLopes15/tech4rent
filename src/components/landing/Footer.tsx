@@ -33,22 +33,22 @@ const Footer = () => {
           <div>
             <h3 className="mb-4 text-xs font-black uppercase tracking-widest">Navegação</h3>
             <ul className="space-y-3 text-xs text-muted-foreground">
-              <li><Link to="/produtos" className="transition-colors hover:text-foreground">Produtos</Link></li>
-              <li><Link to="/produtos?categoria=Coletores%20PDA" className="transition-colors hover:text-foreground">Coletores PDA</Link></li>
-              <li><Link to="/produtos?categoria=Acessórios" className="transition-colors hover:text-foreground">Leitores de Código</Link></li>
-              <li><Link to="/produtos?categoria=Impressoras" className="transition-colors hover:text-foreground">Impressoras Térmicas</Link></li>
+              <li><a href="#produtos" className="transition-colors hover:text-foreground">Produtos</a></li>
+              <li><a href="#duvidas" className="transition-colors hover:text-foreground">Dúvidas</a></li>
+              <li><a href="#quem-somos" className="transition-colors hover:text-foreground">Sobre</a></li>
+              <li><a href="#contato" className="transition-colors hover:text-foreground">Contato</a></li>
             </ul>
           </div>
 
           <div>
             <h3 className="mb-4 text-xs font-black uppercase tracking-widest">Institucional</h3>
             <ul className="space-y-3 text-xs text-muted-foreground">
-              <li><Link to="/sobre" className="transition-colors hover:text-foreground">Sobre a Tech4Rent</Link></li>
-              <li><Link to="/contato" className="transition-colors hover:text-foreground">Suporte e Contato</Link></li>
-              <li><Link to="/politica-de-devolucao" className="transition-colors hover:text-foreground">Política de Devolução</Link></li>
-              <li><Link to="/sobre#duvidas" className="transition-colors hover:text-foreground">Dúvidas Frequentes</Link></li>
+              <li><a href="#quem-somos" className="transition-colors hover:text-foreground">Sobre a Tech4Rent</a></li>
+              <li><a href="#contato" className="transition-colors hover:text-foreground">Suporte e Contato</a></li>
+              <li><a href="#duvidas" className="transition-colors hover:text-foreground">Dúvidas Frequentes</a></li>
             </ul>
           </div>
+
 
           <div>
             <h3 className="mb-4 text-xs font-black uppercase tracking-widest">Contato</h3>
