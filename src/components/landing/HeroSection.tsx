@@ -1,26 +1,58 @@
 //src/components/landing/HeroSection.tsx
 
-import { ArrowRight, MessageCircle } from "lucide-react";
+import { ArrowRight, MessageCircle, Zap, Target, ShieldCheck, BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useStore } from "@/store";
 import heroStage from "@/assets/landing/hero-stage.png";
 import devicesOnly from "@/assets/landing/devices-only.png";
-import iconAgilidade from "@/assets/landing/icon-agilidade.png";
-import iconErros from "@/assets/landing/icon-erros.png";
-import iconSeguranca from "@/assets/landing/icon-seguranca.png";
-import iconResultados from "@/assets/landing/icon-resultados.png";
-import btnEspecialista from "@/assets/landing/btn-especialista.png";
 
 const buildWhatsAppUrl = (phone?: string, message = "Olá, gostaria de falar com um especialista.") => {
   const digits = phone?.replace(/\D/g, "") || "";
   return digits ? `https://wa.me/55${digits}?text=${encodeURIComponent(message)}` : "#contato";
 };
 
-const benefits = [
-  { img: iconAgilidade, title: "MAIS AGILIDADE", desc: "Processos mais rápidos\ne eficientes.", color: "text-primary" },
-  { img: iconErros, title: "MENOS ERROS", desc: "Dados precisos e operações\nmais seguras.", color: "text-success" },
-  { img: iconSeguranca, title: "MAIS SEGURANÇA", desc: "Equipamentos robustos\ne confiáveis.", color: "text-warning" },
-  { img: iconResultados, title: "MAIS RESULTADOS", desc: "Soluções que elevam o\ndesempenho da sua empresa.", color: "text-primary" },
+type Benefit = {
+  Icon: typeof Zap;
+  title: string;
+  desc: string;
+  ring: string; // tailwind border + text + shadow color
+  text: string;
+  glow: string;
+};
+
+const benefits: Benefit[] = [
+  {
+    Icon: Zap,
+    title: "MAIS AGILIDADE",
+    desc: "Processos mais rápidos\ne eficientes.",
+    ring: "border-[#3B82F6]",
+    text: "text-[#3B82F6]",
+    glow: "shadow-[0_0_18px_rgba(59,130,246,0.55),inset_0_0_12px_rgba(59,130,246,0.35)]",
+  },
+  {
+    Icon: Target,
+    title: "MENOS ERROS",
+    desc: "Dados precisos e operações\nmais seguras.",
+    ring: "border-[#7CFC00]",
+    text: "text-[#7CFC00]",
+    glow: "shadow-[0_0_18px_rgba(124,252,0,0.55),inset_0_0_12px_rgba(124,252,0,0.35)]",
+  },
+  {
+    Icon: ShieldCheck,
+    title: "MAIS SEGURANÇA",
+    desc: "Equipamentos robustos\ne confiáveis.",
+    ring: "border-[#FFB020]",
+    text: "text-[#FFB020]",
+    glow: "shadow-[0_0_18px_rgba(255,176,32,0.55),inset_0_0_12px_rgba(255,176,32,0.35)]",
+  },
+  {
+    Icon: BarChart3,
+    title: "MAIS RESULTADOS",
+    desc: "Soluções que elevam o\ndesempenho da sua empresa.",
+    ring: "border-[#3B82F6]",
+    text: "text-[#3B82F6]",
+    glow: "shadow-[0_0_18px_rgba(59,130,246,0.55),inset_0_0_12px_rgba(59,130,246,0.35)]",
+  },
 ];
 
 const HeroSection = () => {
@@ -59,20 +91,15 @@ const HeroSection = () => {
                 href={buildWhatsAppUrl(companySettings?.phone)}
                 target="_blank"
                 rel="noreferrer"
-                className="relative inline-flex h-12 items-center justify-center gap-2 px-8 text-sm font-semibold uppercase tracking-wide text-white transition-transform hover:-translate-y-0.5"
-                style={{
-                  backgroundImage: `url(${btnEspecialista})`,
-                  backgroundSize: "100% 100%",
-                  backgroundRepeat: "no-repeat",
-                }}
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border-2 border-[#7CFC00] bg-[#7CFC00]/10 px-6 text-sm font-semibold uppercase tracking-wide text-white shadow-[0_0_20px_rgba(124,252,0,0.55),inset_0_0_14px_rgba(124,252,0,0.35)] transition-transform hover:-translate-y-0.5"
               >
-                <MessageCircle className="h-5 w-5" /> Fale com um especialista
+                <MessageCircle className="h-5 w-5 text-[#7CFC00]" /> Fale com um especialista
               </a>
               <Link
                 to="/produtos"
-                className="btn-outline-blue h-12 px-6 text-sm uppercase tracking-wide transition-transform hover:-translate-y-0.5"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border-2 border-[#3B82F6] bg-transparent px-6 text-sm font-semibold uppercase tracking-wide text-white shadow-[0_0_20px_rgba(59,130,246,0.55),inset_0_0_14px_rgba(59,130,246,0.35)] transition-transform hover:-translate-y-0.5"
               >
-                Ver equipamentos <ArrowRight className="h-4 w-4" />
+                Ver equipamentos <ArrowRight className="h-4 w-4 text-[#3B82F6]" />
               </Link>
             </div>
           </div>
@@ -98,23 +125,21 @@ const HeroSection = () => {
           </div>
         </div>
 
-        {/* BARRA DE BENEFÍCIOS — ícones reais (uniformes e maiores) */}
+        {/* BARRA DE BENEFÍCIOS — ícones com glow neon */}
         <div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-10 border-t border-white/10 pt-12 md:grid-cols-4">
-          {benefits.map(({ img, title, desc, color }) => (
+          {benefits.map(({ Icon, title, desc, ring, text, glow }) => (
             <div key={title} className="flex items-start gap-4">
-              <div className="flex h-20 w-20 shrink-0 items-center justify-center">
-                <img src={img} alt="" className="h-20 w-20 object-contain" loading="lazy" />
+              <div
+                className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-full border-2 bg-black/40 ${ring} ${glow}`}
+              >
+                <Icon className={`h-9 w-9 ${text}`} strokeWidth={2.25} />
               </div>
               <div className="space-y-2">
-                <h3 className={`text-lg font-bold tracking-wide ${color}`}>{title}</h3>
+                <h3 className={`text-lg font-bold tracking-wide ${text}`}>{title}</h3>
                 <p className="whitespace-pre-line text-sm leading-snug text-muted-foreground">{desc}</p>
               </div>
             </div>
           ))}
         </div>
-      </div>
-    </section>
-  );
-};
 
 export default HeroSection;
