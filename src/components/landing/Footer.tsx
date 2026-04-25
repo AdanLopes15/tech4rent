@@ -3,6 +3,7 @@
 import { Clock, Instagram, Linkedin, Lock, Mail, MapPin, Phone, Youtube } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useStore } from "@/store";
+import logoTech4Rent from "@/assets/landing/logo-tech4rent.png";
 
 const Footer = () => {
   const { companySettings } = useStore();
@@ -21,11 +22,11 @@ const Footer = () => {
       <div className="container max-w-5xl">
         <div className="grid gap-12 py-8 md:grid-cols-4">
           <div className="space-y-7">
-            {siteLogoUrl ? (
-              <img src={siteLogoUrl} alt="Logo da Tech4Rent" className="h-8 w-auto max-w-28 object-contain " />
-            ) : (
-              <h3 className="text-xl font-black tracking-tight">{fantasyName}</h3>
-            )}
+            <img
+              src={siteLogoUrl || logoTech4Rent}
+              alt="Logo da Tech4Rent"
+              className="h-12 w-auto max-w-44 object-contain"
+            />
             <p className="text-xs leading-relaxed text-muted-foreground">Coletores, leitores, tablets e equipamentos para logística e operação.</p>
           </div>
 
