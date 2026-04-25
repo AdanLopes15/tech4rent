@@ -1,9 +1,13 @@
 //src/components/landing/HeroSection.tsx
 
-import { ArrowRight, MessageCircle, Zap, Target, Shield, TrendingUp } from "lucide-react";
+import { ArrowRight, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useStore } from "@/store";
 import heroDevices from "@/assets/landing/hero-devices.png";
+import iconAgilidade from "@/assets/landing/icon-agilidade.png";
+import iconErros from "@/assets/landing/icon-erros.png";
+import iconSeguranca from "@/assets/landing/icon-seguranca.png";
+import iconResultados from "@/assets/landing/icon-resultados.png";
 
 function isValidHttpUrl(value?: string | null): boolean {
   if (!value) return false;
@@ -21,10 +25,10 @@ const buildWhatsAppUrl = (phone?: string, message = "Olá, gostaria de falar com
 };
 
 const microBenefits = [
-  { icon: Zap, label: "Mais agilidade\nnos processos", color: "text-primary" },
-  { icon: Target, label: "Menos erros\noperacionais", color: "text-success" },
-  { icon: Shield, label: "Mais segurança\nna operação", color: "text-warning" },
-  { icon: TrendingUp, label: "Mais resultados\npara o seu negócio", color: "text-primary" },
+  { img: iconAgilidade, title: "MAIS AGILIDADE", desc: "Processos mais rápidos\ne eficientes.", titleColor: "text-primary" },
+  { img: iconErros, title: "MENOS ERROS", desc: "Dados precisos e operações\nmais seguras.", titleColor: "text-success" },
+  { img: iconSeguranca, title: "MAIS SEGURANÇA", desc: "Equipamentos robustos\ne confiáveis.", titleColor: "text-warning" },
+  { img: iconResultados, title: "MAIS RESULTADOS", desc: "Soluções que elevam o\ndesempenho da sua empresa.", titleColor: "text-primary" },
 ];
 
 const HeroSection = () => {
@@ -80,16 +84,6 @@ const HeroSection = () => {
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 gap-5 pt-4 sm:grid-cols-4">
-              {microBenefits.map(({ icon: Icon, label, color }) => (
-                <div key={label} className="flex flex-col items-start gap-2">
-                  <div className={`flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card ${color}`}>
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <p className="whitespace-pre-line text-xs leading-snug text-muted-foreground">{label}</p>
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* Mockup com aro de neon (imagem da referência) */}
@@ -101,6 +95,19 @@ const HeroSection = () => {
               loading="eager"
             />
           </div>
+        </div>
+
+        {/* Barra de benefícios */}
+        <div className="mt-12 grid grid-cols-2 gap-x-6 gap-y-8 border-t border-border/40 pt-10 md:grid-cols-4">
+          {microBenefits.map(({ img, title, desc, titleColor }) => (
+            <div key={title} className="flex items-start gap-3">
+              <img src={img} alt="" className="h-12 w-12 shrink-0 object-contain" loading="lazy" />
+              <div className="space-y-1">
+                <h3 className={`text-sm font-bold tracking-wide ${titleColor}`}>{title}</h3>
+                <p className="whitespace-pre-line text-xs leading-snug text-muted-foreground">{desc}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
