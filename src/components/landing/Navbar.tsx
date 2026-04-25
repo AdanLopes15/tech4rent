@@ -129,7 +129,7 @@ const Navbar = () => {
       <div className="container flex h-16 max-w-6xl items-center justify-between gap-6">
         <button onClick={() => goToHomeSection("hero")} className="flex min-w-0 items-center gap-3" aria-label="Voltar ao início">
           <img
-            src={siteLogoUrl || logoTech4Rent}
+            src={logoTech4Rent}
             alt="Logo da Tech4Rent"
             className="h-10 w-auto max-w-44 object-contain"
           />

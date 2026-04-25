@@ -23,7 +23,7 @@ const Footer = () => {
         <div className="grid gap-12 py-8 md:grid-cols-4">
           <div className="space-y-7">
             <img
-              src={siteLogoUrl || logoTech4Rent}
+              src={logoTech4Rent}
               alt="Logo da Tech4Rent"
               className="h-12 w-auto max-w-44 object-contain"
             />
