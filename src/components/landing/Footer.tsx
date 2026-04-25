@@ -17,41 +17,41 @@ const Footer = () => {
   ].filter(Boolean).join(", ");
 
   return (
-    <footer className="bg-foreground pt-12 text-background">
+    <footer className="bg-card pt-12 text-foreground border-t border-border">
       <div className="container max-w-5xl">
         <div className="grid gap-12 py-8 md:grid-cols-4">
           <div className="space-y-7">
             {siteLogoUrl ? (
-              <img src={siteLogoUrl} alt="Logo da Tech4Rent" className="h-8 w-auto max-w-28 object-contain brightness-0 invert" />
+              <img src={siteLogoUrl} alt="Logo da Tech4Rent" className="h-8 w-auto max-w-28 object-contain " />
             ) : (
               <h3 className="text-xl font-black tracking-tight">{fantasyName}</h3>
             )}
-            <p className="text-xs leading-relaxed text-background/75">Coletores, leitores, tablets e equipamentos para logística e operação.</p>
+            <p className="text-xs leading-relaxed text-muted-foreground">Coletores, leitores, tablets e equipamentos para logística e operação.</p>
           </div>
 
           <div>
             <h3 className="mb-4 text-xs font-black uppercase tracking-widest">Navegação</h3>
-            <ul className="space-y-3 text-xs text-background/75">
-              <li><Link to="/produtos" className="transition-colors hover:text-background">Produtos</Link></li>
-              <li><Link to="/produtos?categoria=Coletores%20PDA" className="transition-colors hover:text-background">Coletores PDA</Link></li>
-              <li><Link to="/produtos?categoria=Acessórios" className="transition-colors hover:text-background">Leitores de Código</Link></li>
-              <li><Link to="/produtos?categoria=Impressoras" className="transition-colors hover:text-background">Impressoras Térmicas</Link></li>
+            <ul className="space-y-3 text-xs text-muted-foreground">
+              <li><Link to="/produtos" className="transition-colors hover:text-foreground">Produtos</Link></li>
+              <li><Link to="/produtos?categoria=Coletores%20PDA" className="transition-colors hover:text-foreground">Coletores PDA</Link></li>
+              <li><Link to="/produtos?categoria=Acessórios" className="transition-colors hover:text-foreground">Leitores de Código</Link></li>
+              <li><Link to="/produtos?categoria=Impressoras" className="transition-colors hover:text-foreground">Impressoras Térmicas</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="mb-4 text-xs font-black uppercase tracking-widest">Institucional</h3>
-            <ul className="space-y-3 text-xs text-background/75">
-              <li><Link to="/sobre" className="transition-colors hover:text-background">Sobre a Tech4Rent</Link></li>
-              <li><Link to="/contato" className="transition-colors hover:text-background">Suporte e Contato</Link></li>
-              <li><Link to="/politica-de-devolucao" className="transition-colors hover:text-background">Política de Devolução</Link></li>
-              <li><Link to="/sobre#duvidas" className="transition-colors hover:text-background">Dúvidas Frequentes</Link></li>
+            <ul className="space-y-3 text-xs text-muted-foreground">
+              <li><Link to="/sobre" className="transition-colors hover:text-foreground">Sobre a Tech4Rent</Link></li>
+              <li><Link to="/contato" className="transition-colors hover:text-foreground">Suporte e Contato</Link></li>
+              <li><Link to="/politica-de-devolucao" className="transition-colors hover:text-foreground">Política de Devolução</Link></li>
+              <li><Link to="/sobre#duvidas" className="transition-colors hover:text-foreground">Dúvidas Frequentes</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="mb-4 text-xs font-black uppercase tracking-widest">Contato</h3>
-            <ul className="space-y-3 text-xs text-background/75">
+            <ul className="space-y-3 text-xs text-muted-foreground">
               {companySettings?.phone && <li className="flex gap-2"><Phone className="h-3.5 w-3.5 shrink-0" />{companySettings.phone}</li>}
               {companySettings?.email && <li className="flex gap-2"><Mail className="h-3.5 w-3.5 shrink-0" />{companySettings.email}</li>}
               {fullAddress && <li className="flex gap-2"><MapPin className="h-3.5 w-3.5 shrink-0" />{fullAddress}</li>}
@@ -65,13 +65,13 @@ const Footer = () => {
                   target={companySettings?.instagramUrl ? "_blank" : undefined}
                   rel="noreferrer"
                   aria-label="Instagram"
-                  className="inline-flex transition-colors hover:text-background"
+                  className="inline-flex transition-colors hover:text-foreground"
                 >
                   <Instagram className="h-4 w-4" />
                 </a>
               </li>
             </ul>
-            <div className="mt-4 flex gap-3 text-background/80">
+            <div className="mt-4 flex gap-3 text-muted-foreground">
               {companySettings?.youtubeUrl && <a href={companySettings.youtubeUrl} target="_blank" rel="noreferrer" aria-label="YouTube"><Youtube className="h-4 w-4" /></a>}
               {companySettings?.linkedinUrl && <a href={companySettings.linkedinUrl} target="_blank" rel="noreferrer" aria-label="LinkedIn"><Linkedin className="h-4 w-4" /></a>}
             </div>
@@ -79,14 +79,14 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="border-t border-background/10 py-5 text-center text-[11px] leading-relaxed text-background/50">
+      <div className="border-t border-border py-5 text-center text-[11px] leading-relaxed text-muted-foreground/70">
         <p>{companySettings?.name || fantasyName} — CNPJ: {companySettings?.cnpj || ""}</p>
         <p>© {new Date().getFullYear()} {fantasyName}. Todos os direitos reservados.</p>
         <p>Empresa orgulhosamente brasileira BR</p>
         <p className="mt-2">
           <Link
             to="/login"
-            className="inline-flex items-center gap-1.5 text-background/45 transition-colors hover:text-background/80"
+            className="inline-flex items-center gap-1.5 text-muted-foreground/60 transition-colors hover:text-muted-foreground"
           >
             <Lock className="h-3 w-3" /> Área Restrita
           </Link>
