@@ -4,6 +4,7 @@ import { ArrowRight, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useStore } from "@/store";
 import heroDevices from "@/assets/landing/hero-devices.png";
+import heroBgWarehouse from "@/assets/landing/hero-bg-warehouse.jpg";
 import iconAgilidade from "@/assets/landing/icon-agilidade.png";
 import iconErros from "@/assets/landing/icon-erros.png";
 import iconSeguranca from "@/assets/landing/icon-seguranca.png";
@@ -86,14 +87,23 @@ const HeroSection = () => {
 
           </div>
 
-          {/* Mockup com aro de neon (imagem da referência) */}
+          {/* Mockup com fundo de armazém neon */}
           <div className="relative mx-auto w-full">
-            <img
-              src={heroDevices}
-              alt="Equipamentos Tech4Rent"
-              className="h-auto w-full object-contain"
-              loading="eager"
-            />
+            <div className="relative overflow-hidden rounded-3xl border border-border/40 shadow-[0_30px_80px_-20px_hsl(var(--primary)/0.45)]">
+              <img
+                src={heroBgWarehouse}
+                alt="Armazém logístico iluminado"
+                className="h-full w-full object-cover"
+                loading="eager"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/70 via-background/10 to-transparent" />
+              <img
+                src={heroDevices}
+                alt="Equipamentos Tech4Rent"
+                className="absolute inset-0 m-auto h-[88%] w-auto object-contain drop-shadow-[0_20px_40px_hsl(var(--primary)/0.55)]"
+                loading="eager"
+              />
+            </div>
           </div>
         </div>
 
