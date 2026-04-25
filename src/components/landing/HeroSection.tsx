@@ -92,24 +92,14 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Mockup com aro de neon */}
-          <div className="relative mx-auto w-full max-w-lg">
-            {/* Aros de neon */}
-            <div className="absolute left-1/2 top-1/2 h-[110%] w-[110%] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-success/70 blur-[1px]" style={{ boxShadow: "0 0 60px hsl(var(--success)/0.5)" }} />
-            <div className="absolute left-1/2 top-1/2 h-[95%] w-[95%] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-primary/70 blur-[1px]" style={{ boxShadow: "0 0 80px hsl(var(--primary)/0.6)" }} />
-            <div className="absolute left-1/2 top-1/2 h-[80%] w-[80%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,hsl(var(--primary)/0.18),transparent_70%)] blur-2xl" />
-
-            <div className="relative aspect-square">
-              <img
-                src={validImage}
-                alt="Equipamentos Tech4Rent"
-                className="relative z-10 h-full w-full animate-float object-contain p-6"
-                loading="eager"
-              />
-              {/* Base elíptica */}
-              <div className="absolute bottom-[8%] left-1/2 h-3 w-2/3 -translate-x-1/2 rounded-[50%] bg-primary/40 blur-md" />
-              <div className="absolute bottom-[10%] left-1/2 h-1 w-1/2 -translate-x-1/2 rounded-full bg-primary" />
-            </div>
+          {/* Mockup com aro de neon (imagem da referência) */}
+          <div className="relative mx-auto w-full">
+            <img
+              src={heroDevices}
+              alt="Equipamentos Tech4Rent"
+              className="h-auto w-full object-contain"
+              loading="eager"
+            />
           </div>
         </div>
       </div>
