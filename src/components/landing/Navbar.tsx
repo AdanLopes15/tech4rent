@@ -124,6 +124,14 @@ const Navbar = () => {
   const linkClass = (active: boolean) =>
     `rounded-md px-3 py-2 text-sm font-semibold transition-colors ${active ? "text-primary" : "text-foreground/70 hover:text-foreground"}`;
 
+  // Links do menu agora rolam até as âncoras na home
+  const menuLinks: Array<{ id: string; label: string }> = [
+    { id: "produtos", label: "Produtos" },
+    { id: "duvidas", label: "Dúvidas" },
+    { id: "quem-somos", label: "Sobre" },
+    { id: "contato", label: "Contato" },
+  ];
+
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-background/85 text-foreground backdrop-blur-md">
       <div className="container flex h-16 max-w-6xl items-center justify-between gap-6">
@@ -136,10 +144,11 @@ const Navbar = () => {
         </button>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <button onClick={goToProducts} className={linkClass(location.pathname === "/produtos")}>Produtos</button>
-          <button onClick={() => goToAboutSection("duvidas")} className={linkClass(false)}>Dúvidas</button>
-          <button onClick={() => goToAboutSection()} className={linkClass(location.pathname === "/sobre")}>Sobre</button>
-          <button onClick={goToContact} className={linkClass(location.pathname === "/contato")}>Contato</button>
+          {menuLinks.map((l) => (
+            <button key={l.id} onClick={() => goToHomeSection(l.id)} className={linkClass(false)}>
+              {l.label}
+            </button>
+          ))}
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
@@ -170,7 +179,7 @@ const Navbar = () => {
               </div>
             )}
           </div>
-          <button onClick={goToContact} className="inline-flex h-10 items-center gap-2 rounded-full border border-success bg-transparent px-5 text-xs font-bold uppercase tracking-wider text-foreground transition-all hover:bg-success/10">
+          <button onClick={() => goToHomeSection("contato")} className="inline-flex h-10 items-center gap-2 rounded-full border border-success bg-transparent px-5 text-xs font-bold uppercase tracking-wider text-foreground transition-all hover:bg-success/10">
             <MessageCircle className="h-4 w-4 text-success" /> Fale Agora
           </button>
           <Link
@@ -191,10 +200,15 @@ const Navbar = () => {
       {isOpen && (
         <div className="border-t border-border bg-card px-6 py-5 lg:hidden">
           <div className="space-y-4">
-            <button onClick={goToProducts} className={`block w-full text-left text-sm font-semibold ${location.pathname === "/produtos" ? "text-primary" : "text-foreground/75"}`}>Produtos</button>
-            <button onClick={() => goToAboutSection("duvidas")} className="block w-full text-left text-sm font-semibold text-foreground/75">Dúvidas</button>
-            <button onClick={() => goToAboutSection()} className="block w-full text-left text-sm font-semibold text-primary">Sobre</button>
-            <button onClick={goToContact} className={`block w-full text-left text-sm font-semibold ${location.pathname === "/contato" ? "text-primary" : "text-foreground/75"}`}>Contato</button>
+            {menuLinks.map((l) => (
+              <button
+                key={l.id}
+                onClick={() => goToHomeSection(l.id)}
+                className="block w-full text-left text-sm font-semibold text-foreground/75 hover:text-foreground"
+              >
+                {l.label}
+              </button>
+            ))}
             <Link to="/login" onClick={() => setIsOpen(false)} className="block text-sm font-semibold text-foreground/75">Área Restrita</Link>
             <div className="space-y-2 pt-2">
               <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Idioma</p>
@@ -211,7 +225,7 @@ const Navbar = () => {
                 ))}
               </div>
             </div>
-            <button onClick={goToContact} className="btn-cta w-full">
+            <button onClick={() => goToHomeSection("contato")} className="btn-cta w-full">
               Fale Conosco <ArrowRight className="h-4 w-4" />
             </button>
           </div>

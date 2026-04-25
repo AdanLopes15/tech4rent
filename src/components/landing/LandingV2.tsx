@@ -265,40 +265,120 @@ const LandingV2 = () => {
         </div>
       </section>
 
-      {/* CTA FINAL */}
-      <section id="contato" className="px-6 py-16">
-        <div className="mx-auto grid max-w-[1280px] items-center gap-8 rounded-3xl border border-[#43B02A]/40 bg-white/[0.04] p-8 md:grid-cols-[0.3fr_1fr_0.7fr]">
-          <div className="flex justify-center">
-            <div className="flex h-28 w-28 items-center justify-center rounded-full bg-[#43B02A]/20 text-5xl shadow-[0_0_45px_rgba(67,176,42,0.45)]">
-              ☎
+      {/* DÚVIDAS / FAQ */}
+      <section id="duvidas" className="border-t border-white/10 px-6 py-20">
+        <div className="mx-auto max-w-[1100px]">
+          <p className="text-center text-sm font-black uppercase tracking-[0.25em] text-[#43B02A]">Dúvidas frequentes</p>
+          <h2 className="mt-3 text-center text-3xl font-black uppercase md:text-4xl">
+            Tire suas dúvidas sobre a Tech<span className="text-[#43B02A]">4</span>Rent
+          </h2>
+          <div className="mt-10 grid gap-4 md:grid-cols-2">
+            {[
+              ["Como funciona a locação?", "Você escolhe os equipamentos, definimos o prazo e entregamos prontos para uso, com suporte técnico incluso."],
+              ["Quais são os prazos de entrega?", "Trabalhamos com entrega rápida em todo o Brasil. O prazo varia conforme a região, mas a maioria dos pedidos é despachada em até 48h."],
+              ["Posso comprar em vez de alugar?", "Sim. Atendemos tanto locação quanto venda de equipamentos novos e seminovos."],
+              ["Tem suporte técnico durante o contrato?", "Sim. Suporte especializado em horário comercial e atendimento emergencial conforme contrato."],
+              ["Quais formas de pagamento aceitam?", "Boleto, transferência, PIX e cartão. Para contratos recorrentes, faturamento mensal."],
+              ["Atendem todo o Brasil?", "Sim. Estrutura preparada para operações logísticas em qualquer região do país."],
+            ].map(([q, a]) => (
+              <details
+                key={q}
+                className="group rounded-2xl border border-white/10 bg-white/[0.04] p-5 transition hover:border-[#43B02A]/40"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-bold text-white">
+                  {q}
+                  <span className="text-2xl text-[#43B02A] transition group-open:rotate-45">+</span>
+                </summary>
+                <p className="mt-3 text-sm leading-relaxed text-white/70">{a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CONTATO — MAPA + FORMULÁRIO */}
+      <section id="contato" className="border-t border-white/10 px-6 py-20">
+        <div className="mx-auto max-w-[1280px]">
+          <p className="text-center text-sm font-black uppercase tracking-[0.25em] text-[#43B02A]">Contato</p>
+          <h2 className="mt-3 text-center text-3xl font-black uppercase md:text-4xl">Fale com a Tech<span className="text-[#43B02A]">4</span>Rent</h2>
+          <p className="mx-auto mt-3 max-w-[640px] text-center text-white/70">
+            Preencha o formulário ou venha nos visitar. Nossa equipe responde em até 24h úteis.
+          </p>
+
+          <div className="mt-12 grid gap-8 lg:grid-cols-2">
+            {/* Mapa */}
+            <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
+              <iframe
+                title="Localização Tech4Rent"
+                src="https://www.google.com/maps?q=Avenida+Paulista,+S%C3%A3o+Paulo,+SP&output=embed"
+                className="h-full min-h-[460px] w-full border-0"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
+              />
             </div>
-          </div>
-          <div>
-            <h2 className="text-3xl font-black uppercase">
-              Vamos levar sua operação <br />
-              para o <span className="text-[#43B02A]">próximo nível?</span>
-            </h2>
-            <p className="mt-3 text-white/70">
-              Fale agora com nossos especialistas e descubra como podemos acelerar seus resultados.
-            </p>
-          </div>
-          <div className="flex flex-col gap-4">
-            <a
-              href={WA}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-xl bg-[#43B02A] px-6 py-4 text-center text-sm font-black uppercase text-white transition hover:scale-105"
+
+            {/* Formulário */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const fd = new FormData(e.currentTarget);
+                const nome = fd.get("nome");
+                const email = fd.get("email");
+                const telefone = fd.get("telefone");
+                const mensagem = fd.get("mensagem");
+                const text = `Olá, sou ${nome}.%0AE-mail: ${email}%0ATelefone: ${telefone}%0A%0A${mensagem}`;
+                window.open(`${WA.split("?")[0]}?text=${text}`, "_blank");
+              }}
+              className="grid gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-6"
             >
-              Fale agora pelo WhatsApp
-            </a>
-            <a
-              href={WA}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-xl border border-[#1E88E5] px-6 py-4 text-center text-sm font-black uppercase text-[#1E88E5] transition hover:bg-[#1E88E5]/20"
-            >
-              Solicitar orçamento
-            </a>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block">
+                  <span className="text-xs font-bold uppercase tracking-wider text-white/60">Nome</span>
+                  <input
+                    name="nome"
+                    required
+                    className="mt-2 w-full rounded-lg border border-white/10 bg-black/30 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-[#43B02A] focus:outline-none"
+                    placeholder="Seu nome"
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-xs font-bold uppercase tracking-wider text-white/60">Telefone</span>
+                  <input
+                    name="telefone"
+                    required
+                    className="mt-2 w-full rounded-lg border border-white/10 bg-black/30 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-[#43B02A] focus:outline-none"
+                    placeholder="(11) 99999-9999"
+                  />
+                </label>
+              </div>
+              <label className="block">
+                <span className="text-xs font-bold uppercase tracking-wider text-white/60">E-mail</span>
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  className="mt-2 w-full rounded-lg border border-white/10 bg-black/30 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-[#43B02A] focus:outline-none"
+                  placeholder="seu@email.com"
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs font-bold uppercase tracking-wider text-white/60">Mensagem</span>
+                <textarea
+                  name="mensagem"
+                  required
+                  rows={5}
+                  className="mt-2 w-full rounded-lg border border-white/10 bg-black/30 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-[#43B02A] focus:outline-none"
+                  placeholder="Como podemos ajudar?"
+                />
+              </label>
+              <button
+                type="submit"
+                className="mt-2 rounded-xl bg-[#43B02A] px-6 py-4 text-sm font-black uppercase text-white shadow-[0_0_30px_rgba(67,176,42,0.45)] transition hover:scale-[1.02]"
+              >
+                Enviar mensagem
+              </button>
+            </form>
           </div>
         </div>
       </section>
