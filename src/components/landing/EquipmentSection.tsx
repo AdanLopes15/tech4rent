@@ -35,65 +35,69 @@ const EquipmentSection = () => {
   const visibleEquipments = hasEquipments ? equipments.slice(0, 3) : [];
 
   return (
-    <section id="equipamentos" className="bg-background py-16 md:py-20">
+    <section id="equipamentos" className="surface-soft py-20">
       <div className="container max-w-6xl">
+        <div className="mb-12 text-center">
+          <span className="text-xs font-bold uppercase tracking-[0.3em] text-primary">Vitrine</span>
+          <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
+            Equipamentos para sua operação
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-base text-muted-foreground">
+            Linha completa de coletores, leitores e tablets prontos para uso intensivo.
+          </p>
+        </div>
+
         {hasEquipments ? (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {visibleEquipments.map((equipment: any) => {
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {(equipments as any[]).slice(0, 4).map((equipment: any) => {
               const imageUrls =
                 Array.isArray(equipment?.imageUrls) && equipment.imageUrls.filter((url: string) => isValidHttpUrl(url)).length > 0
                   ? equipment.imageUrls.filter((url: string) => isValidHttpUrl(url))
                   : [isValidHttpUrl(equipment?.imageUrl) ? equipment.imageUrl : "https://placehold.co/620x620.png"];
               const firstValidUrl = imageUrls[0] || "https://placehold.co/620x620.png";
               const productName = equipment?.name || "Equipamento";
-              const code = equipment?.code || equipment?.patrimony || equipment?.model || productName.split(" ").slice(-1).join("");
 
               return (
-                <Card key={equipment.id || productName} className="overflow-hidden rounded-lg border-border bg-card shadow-sm">
-                  <div className="m-4 mb-0 aspect-square overflow-hidden bg-muted">
-                    <img src={firstValidUrl} alt={productName} className="h-full w-full object-contain p-5" loading="lazy" />
+                <article
+                  key={equipment.id || productName}
+                  className="card-elevated flex min-h-[420px] flex-col p-5"
+                >
+                  <div className="h-[180px] overflow-hidden rounded-xl bg-[hsl(var(--surface))]">
+                    <img src={firstValidUrl} alt={productName} className="h-full w-full object-contain p-3" loading="lazy" />
                   </div>
-                  <CardContent className="flex min-h-[292px] flex-col p-5 pt-6">
-                    <span className="mb-2 text-sm font-medium uppercase text-muted-foreground">{code}</span>
-                    <h2 className="text-xl font-bold leading-snug text-foreground">{productName}</h2>
+
+                  <h3 className="mt-5 line-clamp-2 text-lg font-bold leading-snug text-foreground">{productName}</h3>
+
+                  <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
+                    {fallbackTags.slice(0, 3).map(({ icon: Icon, label }) => (
+                      <li key={label} className="flex items-center gap-2">
+                        <Icon className="h-3.5 w-3.5 text-primary" /> {label}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-auto space-y-2 pt-5">
+                    <Link
+                      to={`/produtos/${encodeURIComponent(equipment.id || productName)}`}
+                      className="btn-cta w-full"
+                    >
+                      Alugar agora
+                    </Link>
                     <a
                       href={buildWhatsAppUrl(companySettings?.phone, productName)}
                       target="_blank"
                       rel="noreferrer"
-                      className="mt-5 inline-flex text-sm font-black text-primary"
+                      className="btn-outline-blue w-full"
                     >
-                      Sob Consulta →
+                      <MessageCircle className="h-4 w-4" /> Solicitar orçamento
                     </a>
-                    <p className="mt-5 line-clamp-2 text-base leading-relaxed text-muted-foreground">
-                      {equipment?.description || "Projetado para ambientes industriais e operações logísticas intensivas."}
-                    </p>
-
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      {fallbackTags.slice(0, 4).map(({ icon: Icon, label }) => (
-                        <span key={label} className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
-                          <Icon className="h-3 w-3" /> {label}
-                        </span>
-                      ))}
-                      <span className="rounded-full border border-border bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">+1</span>
-                    </div>
-
-                    <div className="mt-auto flex gap-2 pt-6">
-                      <Button variant="outline" className="h-10 flex-1" asChild>
-                        <Link to={`/produtos/${encodeURIComponent(equipment.id || productName)}`}>Ver detalhes</Link>
-                      </Button>
-                      <Button size="icon" asChild className="h-10 w-10 shrink-0">
-                        <a href={buildWhatsAppUrl(companySettings?.phone, productName)} target="_blank" rel="noreferrer" aria-label={`Solicitar orçamento para ${productName}`}>
-                          <MessageCircle className="h-4 w-4" />
-                        </a>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </article>
               );
             })}
           </div>
         ) : (
-          <div className="rounded-lg border border-dashed border-border bg-card p-10 text-center">
+          <div className="card-elevated mx-auto max-w-xl text-center">
             <PackageSearch className="mx-auto h-10 w-10 text-primary" />
             <h3 className="mt-4 text-xl font-bold text-foreground">Nenhum equipamento disponível no momento</h3>
             <p className="mt-2 text-sm text-muted-foreground">Em breve novos equipamentos aparecerão aqui.</p>
