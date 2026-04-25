@@ -58,7 +58,7 @@ const HeroSection = () => {
         <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr]">
           {/* Texto */}
           <div className="space-y-7">
-            <h1 className="text-5xl font-extrabold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
+            <h1 className="font-extrabold uppercase leading-[0.95] tracking-tight text-[2.75rem] sm:text-6xl lg:text-7xl xl:text-[5.5rem]">
               <span className="text-foreground">TECNOLOGIA</span>
               <br />
               <span className="text-foreground">QUE </span>
@@ -67,8 +67,10 @@ const HeroSection = () => {
               <span className="text-primary">RESULTADOS.</span>
             </h1>
 
-            <p className="max-w-md text-base leading-relaxed text-muted-foreground md:text-lg">
-              Locação de equipamentos e soluções inteligentes para escalar sua operação logística com eficiência e controle.
+            <p className="max-w-lg text-lg leading-relaxed text-muted-foreground md:text-xl">
+              Locação de equipamentos e soluções inteligentes para escalar sua operação logística com{" "}
+              <span className="text-primary">eficiência</span> e{" "}
+              <span className="text-success">controle</span>.
             </p>
 
             <div className="flex flex-col gap-3 sm:flex-row">
