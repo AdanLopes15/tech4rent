@@ -255,16 +255,29 @@ const LandingV2 = () => {
           <h2 className="mt-3 text-center text-3xl font-black uppercase md:text-4xl">
             Empresas que confiam na Tech<span className="text-[#43B02A]">4</span>Rent
           </h2>
-          <div className="mt-10 grid gap-5 rounded-2xl border border-white/10 bg-white/[0.035] p-6 md:grid-cols-4">
-            {clientStats.map(([number, text]) => (
-              <div key={number} className="text-center">
-                <p className="text-3xl font-black text-[#1E88E5]">{number}</p>
-                <p className="mt-2 text-sm font-bold uppercase text-white/75">{text}</p>
-              </div>
-            ))}
+
+          <div className="relative mt-10 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] py-8">
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-background to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-background to-transparent" />
+
+            <div className="flex w-max animate-[marquee_30s_linear_infinite] gap-16 px-8">
+              {[...Array(2)].map((_, dup) => (
+                <div key={dup} className="flex shrink-0 items-center gap-16">
+                  {["RPM", "SHOPEE", "MERCADO LIVRE", "MAGAZINE LUIZA", "DHL", "DAFITI", "GN SERVIÇOS"].map((brand) => (
+                    <span
+                      key={`${dup}-${brand}`}
+                      className="whitespace-nowrap text-2xl font-black uppercase tracking-[0.18em] text-white/55 transition hover:text-white md:text-3xl"
+                    >
+                      {brand}
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
+
 
       {/* DÚVIDAS / FAQ */}
       <section id="duvidas" className="border-t border-white/10 px-6 py-20">
