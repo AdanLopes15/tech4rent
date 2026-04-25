@@ -102,7 +102,7 @@ const LandingV2 = () => {
             <img
               src={heroDevices}
               alt="Equipamentos Tech4Rent"
-              className="relative z-10 max-h-[720px] w-full max-w-[780px] object-contain drop-shadow-[0_0_40px_rgba(30,136,229,0.45)]"
+              className="relative z-10 max-h-[920px] w-full max-w-[980px] object-contain drop-shadow-[0_0_40px_rgba(30,136,229,0.45)]"
             />
           </div>
         </div>
