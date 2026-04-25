@@ -3,6 +3,7 @@
 import { ArrowRight, MessageCircle, Zap, Target, Shield, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useStore } from "@/store";
+import heroDevices from "@/assets/landing/hero-devices.png";
 
 function isValidHttpUrl(value?: string | null): boolean {
   if (!value) return false;
