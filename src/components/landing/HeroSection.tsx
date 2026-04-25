@@ -96,6 +96,19 @@ const HeroSection = () => {
             />
           </div>
         </div>
+
+        {/* Barra de benefícios */}
+        <div className="mt-12 grid grid-cols-2 gap-x-6 gap-y-8 border-t border-border/40 pt-10 md:grid-cols-4">
+          {microBenefits.map(({ img, title, desc, titleColor }) => (
+            <div key={title} className="flex items-start gap-3">
+              <img src={img} alt="" className="h-12 w-12 shrink-0 object-contain" loading="lazy" />
+              <div className="space-y-1">
+                <h3 className={`text-sm font-bold tracking-wide ${titleColor}`}>{title}</h3>
+                <p className="whitespace-pre-line text-xs leading-snug text-muted-foreground">{desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
