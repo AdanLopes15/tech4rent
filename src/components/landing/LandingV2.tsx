@@ -95,15 +95,16 @@ const LandingV2 = () => {
             </div>
           </div>
 
-          <div className="relative flex min-h-[420px] items-center justify-center sm:min-h-[540px] md:min-h-[640px] lg:min-h-[780px]">
+          <div className="relative flex min-h-[520px] items-center justify-center sm:min-h-[640px] md:min-h-[760px] lg:min-h-[900px]">
             <div className="absolute h-[300px] w-[300px] rounded-full border-4 border-[#1E88E5] shadow-[0_0_80px_rgba(30,136,229,0.7)] sm:h-[400px] sm:w-[400px] md:h-[460px] md:w-[460px] lg:h-[520px] lg:w-[520px]" />
             <div className="absolute h-[280px] w-[280px] rounded-full border-r-4 border-t-4 border-[#43B02A] shadow-[0_0_80px_rgba(67,176,42,0.5)] sm:h-[380px] sm:w-[380px] md:h-[440px] md:w-[440px] lg:h-[500px] lg:w-[500px]" />
             <img
               src={heroDevices}
               alt="Equipamentos Tech4Rent"
-              className="relative z-10 max-h-[270px] w-full max-w-[270px] object-contain drop-shadow-[0_0_40px_rgba(30,136,229,0.45)] sm:max-h-[370px] sm:max-w-[370px] md:max-h-[430px] md:max-w-[430px] lg:max-h-[490px] lg:max-w-[490px]"
+              className="relative z-10 max-h-[470px] w-full max-w-[470px] object-contain drop-shadow-[0_25px_40px_rgba(0,0,0,0.55)] animate-[float_5s_ease-in-out_infinite] sm:max-h-[570px] sm:max-w-[570px] md:max-h-[630px] md:max-w-[630px] lg:max-h-[690px] lg:max-w-[690px]"
             />
           </div>
+
 
         </div>
 
