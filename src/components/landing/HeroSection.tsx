@@ -92,14 +92,16 @@ const HeroSection = () => {
           </div>
         </div>
 
-        {/* BARRA DE BENEFÍCIOS — ícones reais */}
-        <div className="mt-14 grid grid-cols-2 gap-x-6 gap-y-8 border-t border-white/10 pt-10 md:grid-cols-4">
+        {/* BARRA DE BENEFÍCIOS — ícones reais (uniformes e maiores) */}
+        <div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-10 border-t border-white/10 pt-12 md:grid-cols-4">
           {benefits.map(({ img, title, desc, color }) => (
-            <div key={title} className="flex items-start gap-3">
-              <img src={img} alt="" className="h-14 w-14 shrink-0 object-contain" loading="lazy" />
-              <div className="space-y-1">
-                <h3 className={`text-sm font-bold tracking-wide ${color}`}>{title}</h3>
-                <p className="whitespace-pre-line text-xs leading-snug text-muted-foreground">{desc}</p>
+            <div key={title} className="flex items-start gap-4">
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center">
+                <img src={img} alt="" className="h-20 w-20 object-contain" loading="lazy" />
+              </div>
+              <div className="space-y-2">
+                <h3 className={`text-lg font-bold tracking-wide ${color}`}>{title}</h3>
+                <p className="whitespace-pre-line text-sm leading-snug text-muted-foreground">{desc}</p>
               </div>
             </div>
           ))}
