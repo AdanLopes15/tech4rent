@@ -42,11 +42,9 @@ const Index = () => {
         ) : (
           <>
             <HeroSection />
-            <BenefitsBarSection />
             <EquipmentSection />
             <PresenceSection />
             <ResultsSection />
-            <VideoShowcaseSection />
           </>
         )}
       </main>

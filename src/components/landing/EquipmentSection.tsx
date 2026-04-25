@@ -35,20 +35,18 @@ const EquipmentSection = () => {
   const visibleEquipments = hasEquipments ? equipments.slice(0, 3) : [];
 
   return (
-    <section id="equipamentos" className="surface-soft py-20">
+    <section id="equipamentos" className="bg-background py-20">
       <div className="container max-w-6xl">
         <div className="mb-12 text-center">
-          <span className="text-xs font-bold uppercase tracking-[0.3em] text-primary">Vitrine</span>
+          <span className="text-xs font-bold uppercase tracking-[0.3em] text-success">Nossos Equipamentos</span>
           <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
-            Equipamentos para sua operação
+            VITRINE DE PRODUTOS
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-base text-muted-foreground">
-            Linha completa de coletores, leitores e tablets prontos para uso intensivo.
-          </p>
+          <div className="mx-auto mt-3 h-[3px] w-20 rounded-full bg-primary" />
         </div>
 
         {hasEquipments ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {(equipments as any[]).slice(0, 4).map((equipment: any) => {
               const imageUrls =
                 Array.isArray(equipment?.imageUrls) && equipment.imageUrls.filter((url: string) => isValidHttpUrl(url)).length > 0
@@ -56,6 +54,10 @@ const EquipmentSection = () => {
                   : [isValidHttpUrl(equipment?.imageUrl) ? equipment.imageUrl : "https://placehold.co/620x620.png"];
               const firstValidUrl = imageUrls[0] || "https://placehold.co/620x620.png";
               const productName = equipment?.name || "Equipamento";
+
+              const features = Array.isArray(equipment?.features) && equipment.features.length
+                ? equipment.features.slice(0, 4)
+                : ["Android", "Wi-Fi", "Bluetooth", "USB"];
 
               return (
                 <article
@@ -66,31 +68,28 @@ const EquipmentSection = () => {
                     <img src={firstValidUrl} alt={productName} className="h-full w-full object-contain p-3" loading="lazy" />
                   </div>
 
-                  <h3 className="mt-5 line-clamp-2 text-lg font-bold leading-snug text-foreground">{productName}</h3>
+                  <h3 className="mt-5 line-clamp-2 text-base font-extrabold uppercase tracking-tight text-foreground">{productName}</h3>
 
-                  <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
-                    {fallbackTags.slice(0, 3).map(({ icon: Icon, label }) => (
+                  <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+                    {features.map((label: string) => (
                       <li key={label} className="flex items-center gap-2">
-                        <Icon className="h-3.5 w-3.5 text-primary" /> {label}
+                        <span className="flex h-4 w-4 items-center justify-center rounded-full bg-success/15 text-success">
+                          <svg viewBox="0 0 24 24" className="h-2.5 w-2.5" fill="none" stroke="currentColor" strokeWidth="3">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        </span>
+                        {label}
                       </li>
                     ))}
                   </ul>
 
-                  <div className="mt-auto space-y-2 pt-5">
+                  <div className="mt-auto pt-5">
                     <Link
                       to={`/produtos/${encodeURIComponent(equipment.id || productName)}`}
-                      className="btn-cta w-full"
-                    >
-                      Alugar agora
-                    </Link>
-                    <a
-                      href={buildWhatsAppUrl(companySettings?.phone, productName)}
-                      target="_blank"
-                      rel="noreferrer"
                       className="btn-outline-blue w-full"
                     >
-                      <MessageCircle className="h-4 w-4" /> Solicitar orçamento
-                    </a>
+                      Solicitar Orçamento
+                    </Link>
                   </div>
                 </article>
               );

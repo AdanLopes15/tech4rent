@@ -169,8 +169,8 @@ const Navbar = () => {
               </div>
             )}
           </div>
-          <button onClick={goToContact} className="btn-cta h-10">
-            <MessageCircle className="h-4 w-4" /> Fale Conosco
+          <button onClick={goToContact} className="inline-flex h-10 items-center gap-2 rounded-full border border-success bg-transparent px-5 text-xs font-bold uppercase tracking-wider text-foreground transition-all hover:bg-success/10">
+            <MessageCircle className="h-4 w-4 text-success" /> Fale Agora
           </button>
           <Link
             to="/login"
