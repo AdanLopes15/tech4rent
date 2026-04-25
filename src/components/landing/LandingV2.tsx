@@ -95,14 +95,14 @@ const LandingV2 = () => {
             </div>
           </div>
 
-          <div className="relative flex min-h-[480px] items-center justify-center">
-            <div className="absolute h-[520px] w-[520px] rounded-full border-4 border-[#1E88E5] shadow-[0_0_80px_rgba(30,136,229,0.7)]" />
-            <div className="absolute h-[500px] w-[500px] rounded-full border-r-4 border-t-4 border-[#43B02A] shadow-[0_0_80px_rgba(67,176,42,0.5)]" />
-            <div className="absolute bottom-14 h-[90px] w-[460px] rounded-[50%] bg-gradient-to-r from-[#1E88E5] to-[#43B02A] opacity-70 blur-sm" />
+          <div className="relative flex min-h-[780px] items-center justify-center">
+            <div className="absolute h-[820px] w-[820px] rounded-full border-4 border-[#1E88E5] shadow-[0_0_80px_rgba(30,136,229,0.7)]" />
+            <div className="absolute h-[800px] w-[800px] rounded-full border-r-4 border-t-4 border-[#43B02A] shadow-[0_0_80px_rgba(67,176,42,0.5)]" />
+            <div className="absolute bottom-14 h-[90px] w-[720px] rounded-[50%] bg-gradient-to-r from-[#1E88E5] to-[#43B02A] opacity-70 blur-sm" />
             <img
               src={heroDevices}
               alt="Equipamentos Tech4Rent"
-              className="relative z-10 max-h-[920px] w-full max-w-[980px] object-contain drop-shadow-[0_0_40px_rgba(30,136,229,0.45)]"
+              className="relative z-10 max-h-[1220px] w-full max-w-[1280px] object-contain drop-shadow-[0_0_40px_rgba(30,136,229,0.45)]"
             />
           </div>
         </div>
