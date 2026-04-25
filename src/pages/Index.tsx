@@ -10,6 +10,7 @@ import EquipmentSection from "@/components/landing/EquipmentSection";
 import PresenceSection from "@/components/landing/PresenceSection";
 import ResultsSection from "@/components/landing/ResultsSection";
 import VideoShowcaseSection from "@/components/landing/VideoShowcaseSection";
+import FloatingWhatsApp from "@/components/landing/FloatingWhatsApp";
 import { renderBlock } from "@/lib/site-builder/registry";
 import type { Block, PageSeo } from "@/lib/site-builder/types";
 import PageSeoHead from "@/components/site-builder/PageSeoHead";
@@ -50,6 +51,7 @@ const Index = () => {
         )}
       </main>
       <Footer />
+      <FloatingWhatsApp />
     </div>
   );
 };
