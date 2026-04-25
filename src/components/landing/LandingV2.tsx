@@ -102,7 +102,7 @@ const LandingV2 = () => {
             <img
               src={heroDevices}
               alt="Equipamentos Tech4Rent"
-              className="relative z-10 max-h-[520px] w-full max-w-[580px] object-contain drop-shadow-[0_0_40px_rgba(30,136,229,0.45)]"
+              className="relative z-10 max-h-[720px] w-full max-w-[780px] object-contain drop-shadow-[0_0_40px_rgba(30,136,229,0.45)]"
             />
           </div>
         </div>
@@ -221,7 +221,7 @@ const LandingV2 = () => {
             <img
               src={mapaBrasil}
               alt="Atendimento Tech4Rent em todo o Brasil"
-              className="max-h-[420px] w-full max-w-[620px] object-contain drop-shadow-[0_0_40px_rgba(30,136,229,0.35)]"
+              className="max-h-[620px] w-full max-w-[820px] object-contain drop-shadow-[0_0_40px_rgba(30,136,229,0.35)]"
             />
           </div>
         </div>
