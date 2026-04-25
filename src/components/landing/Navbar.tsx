@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight, ChevronDown, Lock, Menu, MessageCircle, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useStore } from "@/store";
 
 const languages = [
@@ -39,7 +38,6 @@ const Navbar = () => {
   const fantasyName = companySettings?.fantasyName || companySettings?.name || "TECH4RENT";
   const siteLogoUrl = companySettings?.siteLogoUrl;
 
-  // Rotas públicas onde a tradução fica ativa (não se aplica ao /admin e /login)
   const isPublicRoute = !location.pathname.startsWith("/admin") && !location.pathname.startsWith("/login");
 
   useEffect(() => {
@@ -48,7 +46,6 @@ const Navbar = () => {
 
     window.googleTranslateElementInit = () => {
       if (!window.google?.translate?.TranslateElement) return;
-
       new window.google.translate.TranslateElement(
         {
           pageLanguage: "pt",
@@ -71,8 +68,6 @@ const Navbar = () => {
     const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
     const cookieValue = languageCode === "pt" ? "/pt/pt" : `/pt/${languageCode}`;
     const hostname = window.location.hostname;
-
-    // Limpa cookies antigos em todos os escopos possíveis
     const clearPaths = ["/", window.location.pathname];
     clearPaths.forEach((path) => {
       document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${path}`;
@@ -81,8 +76,6 @@ const Navbar = () => {
         document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${path}; domain=.${hostname}`;
       }
     });
-
-    // Define o novo cookie
     document.cookie = `googtrans=${cookieValue}; expires=${expires}; path=/`;
     if (hostname.includes(".")) {
       document.cookie = `googtrans=${cookieValue}; expires=${expires}; path=/; domain=${hostname}`;
@@ -96,7 +89,6 @@ const Navbar = () => {
     setSelectedLanguage(languageCode);
     setIsLanguageOpen(false);
     setIsOpen(false);
-    // Hard reload para o Google Translate aplicar o cookie
     window.location.reload();
   };
 
@@ -128,44 +120,33 @@ const Navbar = () => {
     navigate("/contato");
   };
 
+  const linkClass = (active: boolean) =>
+    `rounded-md px-3 py-2 text-sm font-semibold transition-colors ${active ? "text-primary" : "text-foreground/70 hover:text-foreground"}`;
+
   return (
-    <nav className="sticky top-0 z-50 border-b border-border bg-foreground text-background">
+    <nav className="sticky top-0 z-50 border-b border-border bg-background/85 text-foreground backdrop-blur-md">
       <div className="container flex h-16 max-w-6xl items-center justify-between gap-6">
         <button onClick={() => goToHomeSection("hero")} className="flex min-w-0 items-center gap-3" aria-label="Voltar ao início">
           {siteLogoUrl ? (
-            <img src={siteLogoUrl} alt="Logo da Tech4Rent" className="h-8 w-auto max-w-36 object-contain brightness-0 invert" />
+            <img src={siteLogoUrl} alt="Logo da Tech4Rent" className="h-8 w-auto max-w-36 object-contain" />
           ) : (
-            <span className="text-2xl font-black tracking-tight">{fantasyName}</span>
+            <span className="text-2xl font-extrabold tracking-tight text-foreground">{fantasyName}</span>
           )}
         </button>
 
-        <div className="hidden items-center gap-7 lg:flex">
-          <button
-            onClick={goToProducts}
-            className={`rounded-md px-3 py-2 text-sm font-bold transition-colors ${location.pathname === "/produtos" ? "bg-primary/15 text-primary" : "text-background/75 hover:text-background"}`}
-          >
-            Produtos
-          </button>
-          <button onClick={() => goToAboutSection("duvidas")} className="text-sm font-bold text-background/75 transition-colors hover:text-background">
-            Dúvidas
-          </button>
-          <button
-            onClick={() => goToAboutSection()}
-            className={`rounded-md px-3 py-2 text-sm font-bold transition-colors ${location.pathname === "/sobre" ? "bg-primary/15 text-primary" : "text-background/75 hover:text-background"}`}
-          >
-            Sobre
-          </button>
-          <button onClick={goToContact} className={`rounded-md px-3 py-2 text-sm font-bold transition-colors ${location.pathname === "/contato" ? "bg-primary/15 text-primary" : "text-background/75 hover:text-background"}`}>
-            Contato
-          </button>
+        <div className="hidden items-center gap-2 lg:flex">
+          <button onClick={goToProducts} className={linkClass(location.pathname === "/produtos")}>Produtos</button>
+          <button onClick={() => goToAboutSection("duvidas")} className={linkClass(false)}>Dúvidas</button>
+          <button onClick={() => goToAboutSection()} className={linkClass(location.pathname === "/sobre")}>Sobre</button>
+          <button onClick={goToContact} className={linkClass(location.pathname === "/contato")}>Contato</button>
         </div>
 
-        <div className="hidden items-center gap-4 lg:flex">
+        <div className="hidden items-center gap-3 lg:flex">
           <div className="relative">
             <button
               type="button"
               onClick={() => setIsLanguageOpen((open) => !open)}
-              className="flex h-11 items-center gap-2 px-3 text-xs font-bold text-background/75 transition-colors hover:text-background"
+              className="flex h-10 items-center gap-2 rounded-md px-3 text-xs font-semibold text-foreground/70 transition-colors hover:text-foreground"
               aria-expanded={isLanguageOpen}
               aria-label="Trocar idioma"
             >
@@ -174,13 +155,13 @@ const Navbar = () => {
             </button>
 
             {isLanguageOpen && (
-              <div className="absolute right-0 top-full mt-2 w-40 overflow-hidden rounded-md border border-background/10 bg-foreground shadow-lg">
+              <div className="absolute right-0 top-full mt-2 w-40 overflow-hidden rounded-md border border-border bg-card shadow-lg">
                 {languages.map((language) => (
                   <button
                     key={language.code}
                     type="button"
                     onClick={() => changeLanguage(language.code)}
-                    className={`flex w-full px-3 py-3 text-left text-xs font-bold transition-colors hover:bg-primary/15 hover:text-primary ${selectedLanguage === language.code ? "bg-primary/15 text-primary" : "text-background/75"}`}
+                    className={`flex w-full px-3 py-3 text-left text-xs font-semibold transition-colors hover:bg-primary/10 hover:text-primary ${selectedLanguage === language.code ? "bg-primary/10 text-primary" : "text-foreground/70"}`}
                   >
                     {language.label}
                   </button>
@@ -188,13 +169,13 @@ const Navbar = () => {
               </div>
             )}
           </div>
-          <Button onClick={goToContact} className="h-11 gap-2 px-5 font-bold">
+          <button onClick={goToContact} className="btn-cta h-10">
             <MessageCircle className="h-4 w-4" /> Fale Conosco
-          </Button>
+          </button>
           <Link
             to="/login"
-            className="flex h-11 w-11 items-center justify-center rounded-md text-background/60 transition-colors hover:bg-background/10 hover:text-background"
-            aria-label="Área Restrita - Acesso ao Sistema"
+            className="flex h-10 w-10 items-center justify-center rounded-md text-foreground/50 transition-colors hover:bg-muted hover:text-foreground"
+            aria-label="Área Restrita"
             title="Área Restrita"
           >
             <Lock className="h-4 w-4" />
@@ -207,31 +188,31 @@ const Navbar = () => {
       </div>
 
       {isOpen && (
-        <div className="border-t border-background/10 bg-foreground px-6 py-5 lg:hidden">
+        <div className="border-t border-border bg-card px-6 py-5 lg:hidden">
           <div className="space-y-4">
-            <button onClick={goToProducts} className={`block w-full text-left text-sm font-bold ${location.pathname === "/produtos" ? "text-primary" : "text-background/75"}`}>Produtos</button>
-            <button onClick={() => goToAboutSection("duvidas")} className="block w-full text-left text-sm font-bold text-background/75">Dúvidas</button>
-            <button onClick={() => goToAboutSection()} className="block w-full text-left text-sm font-bold text-primary">Sobre</button>
-            <button onClick={goToContact} className={`block w-full text-left text-sm font-bold ${location.pathname === "/contato" ? "text-primary" : "text-background/75"}`}>Contato</button>
-            <Link to="/login" onClick={() => setIsOpen(false)} className="block text-sm font-bold text-background/75">Área Restrita</Link>
+            <button onClick={goToProducts} className={`block w-full text-left text-sm font-semibold ${location.pathname === "/produtos" ? "text-primary" : "text-foreground/75"}`}>Produtos</button>
+            <button onClick={() => goToAboutSection("duvidas")} className="block w-full text-left text-sm font-semibold text-foreground/75">Dúvidas</button>
+            <button onClick={() => goToAboutSection()} className="block w-full text-left text-sm font-semibold text-primary">Sobre</button>
+            <button onClick={goToContact} className={`block w-full text-left text-sm font-semibold ${location.pathname === "/contato" ? "text-primary" : "text-foreground/75"}`}>Contato</button>
+            <Link to="/login" onClick={() => setIsOpen(false)} className="block text-sm font-semibold text-foreground/75">Área Restrita</Link>
             <div className="space-y-2 pt-2">
-              <p className="text-xs font-black uppercase tracking-widest text-background/45">Idioma</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Idioma</p>
               <div className="grid grid-cols-2 gap-2">
                 {languages.map((language) => (
                   <button
                     key={language.code}
                     type="button"
                     onClick={() => changeLanguage(language.code)}
-                    className={`rounded-md border border-background/10 px-3 py-2 text-left text-xs font-bold ${selectedLanguage === language.code ? "bg-primary/15 text-primary" : "text-background/75"}`}
+                    className={`rounded-md border border-border px-3 py-2 text-left text-xs font-semibold ${selectedLanguage === language.code ? "bg-primary/10 text-primary" : "text-foreground/75"}`}
                   >
                     {language.label}
                   </button>
                 ))}
               </div>
             </div>
-            <Button onClick={goToContact} className="w-full gap-2">
+            <button onClick={goToContact} className="btn-cta w-full">
               Fale Conosco <ArrowRight className="h-4 w-4" />
-            </Button>
+            </button>
           </div>
         </div>
       )}
