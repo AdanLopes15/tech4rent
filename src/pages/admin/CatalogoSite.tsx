@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, Eye, EyeOff, Pencil, Plus, RefreshCw, Search, Sparkles, Trash2 } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff, Pencil, Plus, RefreshCw, Search, Sparkles, Trash2, Home } from "lucide-react";
+import * as Icons from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -173,6 +174,16 @@ const CatalogoSite = () => {
                     {hasItem && !published && (
                       <Badge variant="outline" className="gap-1 bg-background/90">
                         <EyeOff className="h-3 w-3" /> Oculto
+                      </Badge>
+                    )}
+                    {hasItem && (item?.show_on_home || item?.show_on_landing) && (
+                      <Badge variant="default" className="gap-1 bg-blue-600">
+                        <Icons.Home className="h-3 w-3" /> Na Home
+                      </Badge>
+                    )}
+                    {!hasItem && (equipment?.show_on_home || equipment?.show_on_landing) && (
+                      <Badge variant="default" className="gap-1 bg-blue-600">
+                        <Icons.Home className="h-3 w-3" /> Na Home
                       </Badge>
                     )}
                   </div>
