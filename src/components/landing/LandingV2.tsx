@@ -28,10 +28,10 @@ const heroBenefits = [
   { title: "MAIS RESULTADOS", text: "Soluções que elevam o desempenho.", icon: iconResultados },
 ];
 
-const products = [
+const staticProducts = [
   { title: "Coletor TC60", image: prodColetor, items: ["Android 14", "Scanner 2D", "IP67", "Wi-Fi / 4G"], button: "Alugar agora" },
   { title: "Leitor Pistola", image: prodLeitor, items: ["Alta velocidade", "Precisão industrial", "Plug & Play", "Leitura 1D e 2D"], button: "Solicitar orçamento" },
-  { title: "Impressoras Térmicas", image: prodImpressora, items: ["Etiquetas rápidas", "Alta durabilidade", "Integração fácil", "Diversos modelos"], button: "Solicitar orçamento" },
+  { title: "Impressoras Térmicas", image: prodImpressora, items: ["Etiquetas rápida", "Alta durabilidade", "Integração fácil", "Diversos modelos"], button: "Solicitar orçamento" },
   { title: "Etiquetas Resma", image: prodEtiquetas, items: ["Caixa com 10.000 unidades", "Alta qualidade", "Compatível com mercado", "Diversos tamanhos"], button: "Comprar agora" },
 ];
 
@@ -65,18 +65,50 @@ const LandingV2 = () => {
   }, [fetchAllData]);
 
   const showcaseProducts = useMemo(() => {
-    // Pegamos itens do catálogo que estão publicados
-    const fromCatalog = (catalogItems || []).filter(item => item.published);
-    const catalogEquipmentIds = new Set(fromCatalog.map(item => item.equipmentId).filter(Boolean));
+    // 1. Itens publicados do catálogo
+    const fromCatalog = (catalogItems || [])
+      .filter(item => item.published)
+      .map(item => ({
+        id: item.id,
+        name: item.name || item.title || "Equipamento",
+        heroImageUrl: item.heroImageUrl || item.imageUrl || "/placeholder.svg",
+        items: item.specifications || item.tags?.map((t: any) => t.label) || ["Qualidade Garantida"],
+        buttonLabel: "Solicitar Orçamento",
+        show_on_home: !!item.show_on_home,
+        show_on_landing: !!item.show_on_landing
+      }));
+
+    const catalogEquipmentIds = new Set((catalogItems || []).map(item => item.equipmentId).filter(Boolean));
     
-    // Pegamos equipamentos que NÃO estão no catálogo mas estão marcados para aparecer na home
-    const fromEquipments = (equipments || []).filter(e => 
-      !catalogEquipmentIds.has(e.id) && (e.show_on_landing === true || e.show_on_home === true)
-    );
+    // 2. Equipamentos (sem anúncio personalizado)
+    const fromEquipments = (equipments || [])
+      .filter(e => !catalogEquipmentIds.has(e.id))
+      .map(e => ({
+        id: e.id,
+        name: e.name || "Equipamento",
+        heroImageUrl: e.imageUrl || (e.imageUrls && e.imageUrls[0]) || "/placeholder.svg",
+        items: ["Pronto para operação", "Alta durabilidade"],
+        buttonLabel: "Solicitar Orçamento",
+        show_on_home: !!e.show_on_home,
+        show_on_landing: !!e.show_on_landing
+      }));
     
-    // Combinamos e filtramos apenas os que devem aparecer na landing/home
+    // 3. Unir e filtrar apenas os marcados para vitrine
     const combined = [...fromCatalog, ...fromEquipments];
-    return combined.filter(p => p.show_on_landing === true || p.show_on_home === true);
+    const filtered = combined.filter(p => p.show_on_landing || p.show_on_home);
+
+    // 4. Fallback para estáticos se não houver nenhum marcado
+    const final = filtered.length > 0 ? filtered : staticProducts.map((p, i) => ({
+      id: `static-${i}`,
+      name: p.title,
+      heroImageUrl: p.image,
+      items: p.items,
+      buttonLabel: p.button,
+      show_on_home: true,
+      show_on_landing: true
+    }));
+
+    return final;
   }, [catalogItems, equipments]);
   
   const WA = buildWa(companySettings?.phone);
@@ -94,11 +126,9 @@ const LandingV2 = () => {
   };
 
   // Determina os 4 produtos visíveis no carrossel
-  const visibleProducts = showcaseProducts.length > 0 
-    ? showcaseProducts.length <= 4 
+  const visibleProducts = showcaseProducts.length <= 4 
       ? showcaseProducts 
-      : [...showcaseProducts, ...showcaseProducts].slice(currentIndex, currentIndex + 4)
-    : [];
+      : [...showcaseProducts, ...showcaseProducts].slice(currentIndex, currentIndex + 4);
 
   return (
     <div className="bg-[#05070D] text-white font-sans">
@@ -202,45 +232,39 @@ const LandingV2 = () => {
             )}
 
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4 overflow-hidden">
-              {visibleProducts.length > 0 ? (
-                visibleProducts.map((p, idx) => (
-                  <article
-                    key={`${p.id}-${idx}`}
-                    className="group flex min-h-[520px] flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition duration-300 hover:-translate-y-2 hover:border-[#1E88E5]/70 hover:shadow-[0_0_40px_rgba(30,136,229,0.18)]"
+              {visibleProducts.map((p, idx) => (
+                <article
+                  key={`${p.id}-${idx}`}
+                  className="group flex min-h-[520px] flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition duration-300 hover:-translate-y-2 hover:border-[#1E88E5]/70 hover:shadow-[0_0_40px_rgba(30,136,229,0.18)]"
+                >
+                  <div className="flex h-[220px] items-center justify-center">
+                    <img
+                      src={p.heroImageUrl}
+                      alt={p.name}
+                      className="max-h-[210px] w-full object-contain transition duration-300 group-hover:scale-105"
+                    />
+                  </div>
+                  <h3 className="mt-6 text-xl font-black uppercase">{p.name}</h3>
+                  <ul className="mt-5 space-y-3">
+                    {(p.items || []).slice(0, 4).map((it: any, i: number) => (
+                      <li key={i} className="flex items-center gap-3 text-sm text-white/80">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full border border-[#43B02A] text-xs text-[#43B02A]">
+                          ✓
+                        </span>
+                        {typeof it === 'string' ? it : it.label || it.value}
+                      </li>
+                    ))}
+                  </ul>
+                  <a
+                    href={WA}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-auto block rounded-lg border border-[#43B02A] px-5 py-3 text-center text-sm font-black uppercase text-[#43B02A] transition hover:bg-[#43B02A] hover:text-white"
                   >
-                    <div className="flex h-[220px] items-center justify-center">
-                      <img
-                        src={p.heroImageUrl || p.imageUrl || "/placeholder.svg"}
-                        alt={p.name || p.title}
-                        className="max-h-[210px] w-full object-contain transition duration-300 group-hover:scale-105"
-                      />
-                    </div>
-                    <h3 className="mt-6 text-xl font-black uppercase">{p.name || p.title}</h3>
-                    <ul className="mt-5 space-y-3">
-                      {(p.specifications || p.items || []).slice(0, 4).map((it: any, i: number) => (
-                        <li key={i} className="flex items-center gap-3 text-sm text-white/80">
-                          <span className="flex h-5 w-5 items-center justify-center rounded-full border border-[#43B02A] text-xs text-[#43B02A]">
-                            ✓
-                          </span>
-                          {typeof it === 'string' ? it : it.label || it.value}
-                        </li>
-                      ))}
-                    </ul>
-                    <a
-                      href={WA}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-auto block rounded-lg border border-[#43B02A] px-5 py-3 text-center text-sm font-black uppercase text-[#43B02A] transition hover:bg-[#43B02A] hover:text-white"
-                    >
-                      {p.buttonLabel || "Solicitar Orçamento"}
-                    </a>
-                  </article>
-                ))
-              ) : (
-                <div className="col-span-full py-20 text-center text-white/40 italic">
-                  Nenhum produto em destaque no momento.
-                </div>
-              )}
+                    {p.buttonLabel}
+                  </a>
+                </article>
+              ))}
             </div>
           </div>
         </div>
