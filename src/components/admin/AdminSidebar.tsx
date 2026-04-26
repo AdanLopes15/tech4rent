@@ -88,7 +88,9 @@ const menuItems: MenuItem[] = [
     icon: Settings,
     label: "Configurações",
     children: [
-      { icon: Globe, label: "Page Builder", path: "/admin/site-builder" },
+      { icon: Globe, label: "Conteúdo da Home", path: "/admin/site-builder" },
+      { icon: Globe, label: "Conteúdo de Contato", path: "/admin/site-builder/contato" },
+      { icon: Globe, label: "Conteúdo de Sobre", path: "/admin/site-builder/sobre" },
       { icon: Settings, label: "Painel de Configurações", path: "/admin/configuracoes" },
       { icon: Users, label: "Usuários", path: "/admin/usuarios" },
     ],
@@ -184,7 +186,7 @@ const AdminSidebar = ({ isDark }: { isDark?: boolean }) => {
         {!collapsed && (
           <Link to="/admin" className="hover:opacity-80 transition-opacity">
             <img 
-              src={isDark ? "/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png" : logoTech4Rent} 
+              src={isDark ? "/lovable-uploads/67633215-6809-4361-9f93-134919597143.png" : logoTech4Rent} 
               alt="Tech4Rent" 
               className="h-8 object-contain" 
             />
