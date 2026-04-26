@@ -1,13 +1,12 @@
 //src/components/landing/Navbar.tsx
-// Logo white fallback defined below via import
-
-import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowRight, ChevronDown, Lock, Menu, MessageCircle, X } from "lucide-react";
-import { useStore } from "@/store";
 import logoWhite from "@/assets/landing/logo-tech4rent.png";
 
+import { useEffect, useState } from "react";
+// ... keep existing code
+import { useStore } from "@/store";
+
 const languages = [
+// ... keep existing code
   { code: "pt", label: "BR Português" },
   { code: "en", label: "US English" },
   { code: "es", label: "ES Español" },
