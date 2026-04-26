@@ -9,7 +9,7 @@ import logoTech4Rent from "@/assets/landing/logo-tech4rent.png";
 const Footer = () => {
   const { companySettings } = useStore();
   const fantasyName = companySettings?.fantasyName || companySettings?.name || "TECH4RENT";
-  const siteLogoUrl = companySettings?.siteLogoUrl;
+  const siteLogoUrl = companySettings?.siteLogoUrl || logoWhite;
   const address = companySettings?.address;
   const fullAddress = [
     address?.logradouro,
@@ -24,7 +24,7 @@ const Footer = () => {
         <div className="grid gap-12 py-8 md:grid-cols-4">
           <div className="space-y-7">
             <img
-              src={logoWhite}
+              src={siteLogoUrl}
               alt="Logo da Tech4Rent"
               className="h-12 w-auto max-w-44 object-contain"
             />

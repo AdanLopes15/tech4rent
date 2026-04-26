@@ -38,7 +38,7 @@ const Navbar = () => {
   const { companySettings } = useStore();
 
   const fantasyName = companySettings?.fantasyName || companySettings?.name || "TECH4RENT";
-  const siteLogoUrl = companySettings?.siteLogoUrl;
+  const siteLogoUrl = companySettings?.siteLogoUrl || logoWhite;
 
   const isPublicRoute = !location.pathname.startsWith("/admin") && !location.pathname.startsWith("/login");
 
@@ -138,7 +138,7 @@ const Navbar = () => {
       <div className="container flex h-16 max-w-6xl items-center justify-between gap-6">
         <button onClick={() => goToHomeSection("hero")} className="flex min-w-0 items-center gap-3" aria-label="Voltar ao início">
           <img
-            src={logoWhite}
+            src={siteLogoUrl}
             alt="Logo da Tech4Rent"
             className="h-10 w-auto max-w-44 object-contain"
           />
