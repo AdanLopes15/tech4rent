@@ -95,7 +95,7 @@ const LandingV2 = () => {
             </div>
           </div>
 
-          <div className="relative flex min-h-[520px] items-center justify-center sm:min-h-[640px] md:min-h-[760px] lg:min-h-[900px]">
+          <div className="relative flex min-h-[420px] items-center justify-center sm:min-h-[500px] md:min-h-[550px] lg:min-h-[600px]">
             <div className="absolute h-[300px] w-[300px] rounded-full border-4 border-[#1E88E5] shadow-[0_0_80px_rgba(30,136,229,0.7)] sm:h-[360px] sm:w-[360px] md:h-[400px] md:w-[400px] lg:h-[420px] lg:w-[420px]" />
             <div className="absolute h-[280px] w-[280px] rounded-full border-r-4 border-t-4 border-[#43B02A] shadow-[0_0_80px_rgba(67,176,42,0.5)] sm:h-[340px] sm:w-[340px] md:h-[380px] md:w-[380px] lg:h-[400px] lg:w-[400px]" />
             <img
