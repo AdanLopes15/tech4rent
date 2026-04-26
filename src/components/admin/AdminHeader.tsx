@@ -1,4 +1,5 @@
 //src/components/admin/AdminHeader.tsx
+import logoTech4Rent from "@/assets/landing/logo-tech4rent.png";
 
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -137,7 +138,7 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
     <header className="h-14 border-b border-border bg-card flex items-center justify-between px-6 gap-2">
       <div className="flex items-center gap-2">
         <img 
-          src="/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png" 
+          src={isDark ? "/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png" : logoTech4Rent} 
           alt="Tech4Rent Logo" 
           className="h-8 object-contain"
         />
