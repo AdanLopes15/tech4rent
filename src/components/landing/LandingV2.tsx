@@ -298,9 +298,9 @@ const LandingV2 = () => {
           src={quemSomosImg}
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 right-0 h-full w-auto max-w-[70%] object-contain object-right opacity-30 lg:opacity-50"
+          className="pointer-events-none absolute inset-y-0 right-0 h-full w-auto max-w-[70%] object-contain object-right opacity-60 lg:opacity-85 mix-blend-lighten contrast-125 saturate-125"
         />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#05070D] via-[#05070D]/80 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#05070D] via-[#05070D]/40 to-transparent" />
         <div className="relative mx-auto max-w-[1280px]">
           <div className="grid gap-16 lg:grid-cols-[0.8fr_1.2fr] items-center">
             <div className="relative z-10">
