@@ -1,4 +1,4 @@
-
+import { cn } from "@/lib/utils";
 import { useMemo, useState, useEffect } from "react";
 import { useStore } from "@/store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -371,8 +371,5 @@ const ContatosSite = () => {
   );
 };
 
-const cn = (...inputs: any[]) => {
-  return inputs.filter(Boolean).join(" ");
-};
 
 export default ContatosSite;
