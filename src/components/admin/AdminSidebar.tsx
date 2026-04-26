@@ -186,7 +186,7 @@ const AdminSidebar = ({ isDark }: { isDark?: boolean }) => {
         {!collapsed && (
           <Link to="/admin" className="hover:opacity-80 transition-opacity">
             <img 
-              src={isDark ? "/lovable-uploads/67633215-6809-4361-9f93-134919597143.png" : logoTech4Rent} 
+              src={isDark ? "/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png" : logoTech4Rent} 
               alt="Tech4Rent" 
               className="h-8 object-contain" 
             />
