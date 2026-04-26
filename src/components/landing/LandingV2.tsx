@@ -299,14 +299,6 @@ const LandingV2 = () => {
           className="pointer-events-none absolute inset-y-0 right-0 h-full w-auto max-w-[70%] object-contain object-right opacity-30 lg:opacity-50"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#05070D] via-[#05070D]/80 to-transparent" />
-        <div className="mx-auto max-w-[1280px]">
-          <div className="grid gap-16 lg:grid-cols-[0.8fr_1.2fr] items-center">
-            <div>
-              <p className="text-sm font-black uppercase tracking-[0.3em] text-[#43B02A] mb-4">SOBRE NÓS</p>
-              <h2 className="text-5xl md:text-6xl font-black uppercase leading-[1.1]">
-                QUEM É A <br />
-                <span className="text-white">TECH</span><span className="text-[#43B02A]">4</span><span className="text-white">RENT</span>
-              </h2>
         <div className="relative mx-auto max-w-[1280px]">
           <div className="grid gap-16 lg:grid-cols-[0.8fr_1.2fr] items-center">
             <div className="relative z-10">
