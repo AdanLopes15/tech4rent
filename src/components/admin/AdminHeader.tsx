@@ -134,7 +134,16 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
   };
 
   return (
-    <header className="h-14 border-b border-border bg-card flex items-center justify-end px-6 gap-2">
+    <header className="h-14 border-b border-border bg-card flex items-center justify-between px-6 gap-2">
+      <div className="flex items-center gap-2">
+        <img 
+          src="/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png" 
+          alt="Tech4Rent Logo" 
+          className="h-8 object-contain"
+        />
+      </div>
+      
+      <div className="flex items-center gap-2">
       {/* Notifications */}
       <div ref={notifRef} className="relative">
         <button
@@ -260,6 +269,8 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
             </div>
           </div>
         )}
+      </div>
+        </div>
       </div>
     </header>
   );
