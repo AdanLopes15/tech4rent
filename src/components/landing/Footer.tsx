@@ -1,10 +1,10 @@
 //src/components/landing/Footer.tsx
-const logoWhite = "/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png";
+// Logo white fallback defined below via import
 
 import { Clock, Instagram, Linkedin, Lock, Mail, MapPin, Phone, Youtube } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useStore } from "@/store";
-import logoTech4Rent from "@/assets/landing/logo-tech4rent.png";
+import logoWhite from "@/assets/landing/logo-tech4rent.png";
 
 const Footer = () => {
   const { companySettings } = useStore();
