@@ -120,7 +120,8 @@ const LandingV2 = () => {
                   <img 
                     src={item.icon} 
                     alt="" 
-                    className={`max-h-full max-w-full object-contain ${item.title === "MAIS AGILIDADE" ? "scale-115" : ""}`} 
+                    className="max-h-full max-w-full object-contain" 
+                    style={item.title === "MAIS AGILIDADE" ? { transform: 'scale(1.2)' } : {}}
                   />
                 </div>
                 <div>
