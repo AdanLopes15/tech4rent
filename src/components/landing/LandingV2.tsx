@@ -67,11 +67,11 @@ const LandingV2 = () => {
         <div className="absolute left-0 top-32 h-[420px] w-[260px] bg-[#1E88E5]/10 blur-[90px]" />
         <div className="absolute right-0 top-28 h-[460px] w-[320px] bg-[#43B02A]/10 blur-[100px]" />
 
-        <div className="relative z-10 mx-auto grid min-h-[720px] max-w-[1280px] items-center gap-12 px-6 py-16 lg:grid-cols-2">
+        <div className="relative z-10 mx-auto grid min-h-[500px] max-w-[1280px] items-center gap-12 px-6 py-12 lg:grid-cols-2">
           <div>
             <h1 className="text-5xl font-black uppercase leading-[1.05] md:text-7xl">
-              Tecnologia <br />
-              que <span className="text-[#43B02A]">move</span> <br />
+              Equipamentos <br />
+              que <span className="text-[#43B02A]">movem</span> <br />
               <span className="text-[#1E88E5]">resultados.</span>
             </h1>
             <p className="mt-7 max-w-[560px] text-lg leading-relaxed text-white/80 md:text-xl">
@@ -95,7 +95,7 @@ const LandingV2 = () => {
             </div>
           </div>
 
-          <div className="relative flex min-h-[520px] items-center justify-center sm:min-h-[640px] md:min-h-[760px] lg:min-h-[900px]">
+          <div className="relative flex min-h-[420px] items-center justify-center sm:min-h-[500px] md:min-h-[550px] lg:min-h-[600px]">
             <div className="absolute h-[300px] w-[300px] rounded-full border-4 border-[#1E88E5] shadow-[0_0_80px_rgba(30,136,229,0.7)] sm:h-[360px] sm:w-[360px] md:h-[400px] md:w-[400px] lg:h-[420px] lg:w-[420px]" />
             <div className="absolute h-[280px] w-[280px] rounded-full border-r-4 border-t-4 border-[#43B02A] shadow-[0_0_80px_rgba(67,176,42,0.5)] sm:h-[340px] sm:w-[340px] md:h-[380px] md:w-[380px] lg:h-[400px] lg:w-[400px]" />
             <img
@@ -109,7 +109,7 @@ const LandingV2 = () => {
         </div>
 
         {/* Barra de benefícios */}
-        <div className="relative z-10 mx-auto max-w-[1280px] px-6 pb-14">
+        <div className="relative z-10 mx-auto max-w-[1280px] px-6 pb-2">
           <div className="grid gap-5 rounded-2xl border border-white/10 bg-black/35 p-5 backdrop-blur-md md:grid-cols-4">
             {heroBenefits.map((item, i) => (
               <div
