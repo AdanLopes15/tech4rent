@@ -324,7 +324,7 @@ const LandingV2 = () => {
 
             <div className="relative flex w-full items-center justify-center overflow-hidden rounded-3xl border border-white/10 shadow-2xl min-h-[300px] bg-white/5">
               <img
-                src="/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png"
+                src={heroDevices}
                 alt="Tech4Rent Soluções"
                 className="max-w-full object-contain transition-transform duration-700 hover:scale-105"
               />
