@@ -117,7 +117,11 @@ const LandingV2 = () => {
                 className={`flex items-center gap-4 ${i < heroBenefits.length - 1 ? "md:border-r md:border-white/10 md:pr-4" : ""}`}
               >
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center">
-                  <img src={item.icon} alt="" className="max-h-full max-w-full object-contain" />
+                  <img 
+                    src={item.icon} 
+                    alt="" 
+                    className={`max-h-full max-w-full object-contain ${item.title === "MAIS AGILIDADE" ? "scale-115" : ""}`} 
+                  />
                 </div>
                 <div>
                   <h3 className="text-base font-black uppercase text-[#1E88E5]">{item.title}</h3>
