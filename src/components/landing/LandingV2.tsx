@@ -70,8 +70,8 @@ const LandingV2 = () => {
       .filter(item => item.published)
       .map(item => ({
         id: item.id,
-        name: item.name || item.title,
-        heroImageUrl: item.heroImageUrl || item.imageUrl,
+        name: item.name || item.title || "Equipamento",
+        heroImageUrl: item.heroImageUrl || item.imageUrl || "/placeholder.svg",
         items: item.specifications || item.tags?.map((t: any) => t.label) || ["Qualidade Garantida"],
         buttonLabel: "Solicitar Orçamento",
         show_on_home: !!item.show_on_home,
@@ -85,8 +85,8 @@ const LandingV2 = () => {
       .filter(e => !catalogEquipmentIds.has(e.id))
       .map(e => ({
         id: e.id,
-        name: e.name,
-        heroImageUrl: e.imageUrl || (e.imageUrls && e.imageUrls[0]),
+        name: e.name || "Equipamento",
+        heroImageUrl: e.imageUrl || (e.imageUrls && e.imageUrls[0]) || "/placeholder.svg",
         items: ["Pronto para operação", "Alta durabilidade"],
         buttonLabel: "Solicitar Orçamento",
         show_on_home: !!e.show_on_home,
@@ -98,12 +98,17 @@ const LandingV2 = () => {
     const filtered = combined.filter(p => p.show_on_landing || p.show_on_home);
 
     // 4. Fallback para estáticos se não houver nenhum marcado
-    return filtered.length > 0 ? filtered : staticProducts.map((p, i) => ({
-      ...p,
+    const final = filtered.length > 0 ? filtered : staticProducts.map((p, i) => ({
       id: `static-${i}`,
+      name: p.title,
       heroImageUrl: p.image,
-      buttonLabel: p.button
+      items: p.items,
+      buttonLabel: p.button,
+      show_on_home: true,
+      show_on_landing: true
     }));
+
+    return final;
   }, [catalogItems, equipments]);
   
   const WA = buildWa(companySettings?.phone);
@@ -121,11 +126,9 @@ const LandingV2 = () => {
   };
 
   // Determina os 4 produtos visíveis no carrossel
-  const visibleProducts = showcaseProducts.length > 0 
-    ? showcaseProducts.length <= 4 
+  const visibleProducts = showcaseProducts.length <= 4 
       ? showcaseProducts 
-      : [...showcaseProducts, ...showcaseProducts].slice(currentIndex, currentIndex + 4)
-    : [];
+      : [...showcaseProducts, ...showcaseProducts].slice(currentIndex, currentIndex + 4);
 
   return (
     <div className="bg-[#05070D] text-white font-sans">
@@ -229,41 +232,39 @@ const LandingV2 = () => {
             )}
 
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4 overflow-hidden">
-              {visibleProducts.length > 0 && (
-                visibleProducts.map((p, idx) => (
-                  <article
-                    key={`${p.id}-${idx}`}
-                    className="group flex min-h-[520px] flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition duration-300 hover:-translate-y-2 hover:border-[#1E88E5]/70 hover:shadow-[0_0_40px_rgba(30,136,229,0.18)]"
+              {visibleProducts.map((p, idx) => (
+                <article
+                  key={`${p.id}-${idx}`}
+                  className="group flex min-h-[520px] flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition duration-300 hover:-translate-y-2 hover:border-[#1E88E5]/70 hover:shadow-[0_0_40px_rgba(30,136,229,0.18)]"
+                >
+                  <div className="flex h-[220px] items-center justify-center">
+                    <img
+                      src={p.heroImageUrl}
+                      alt={p.name}
+                      className="max-h-[210px] w-full object-contain transition duration-300 group-hover:scale-105"
+                    />
+                  </div>
+                  <h3 className="mt-6 text-xl font-black uppercase">{p.name}</h3>
+                  <ul className="mt-5 space-y-3">
+                    {(p.items || []).slice(0, 4).map((it: any, i: number) => (
+                      <li key={i} className="flex items-center gap-3 text-sm text-white/80">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full border border-[#43B02A] text-xs text-[#43B02A]">
+                          ✓
+                        </span>
+                        {typeof it === 'string' ? it : it.label || it.value}
+                      </li>
+                    ))}
+                  </ul>
+                  <a
+                    href={WA}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-auto block rounded-lg border border-[#43B02A] px-5 py-3 text-center text-sm font-black uppercase text-[#43B02A] transition hover:bg-[#43B02A] hover:text-white"
                   >
-                    <div className="flex h-[220px] items-center justify-center">
-                      <img
-                        src={p.heroImageUrl || p.image || "/placeholder.svg"}
-                        alt={p.name || p.title}
-                        className="max-h-[210px] w-full object-contain transition duration-300 group-hover:scale-105"
-                      />
-                    </div>
-                    <h3 className="mt-6 text-xl font-black uppercase">{p.name || p.title}</h3>
-                    <ul className="mt-5 space-y-3">
-                      {(p.items || []).slice(0, 4).map((it: any, i: number) => (
-                        <li key={i} className="flex items-center gap-3 text-sm text-white/80">
-                          <span className="flex h-5 w-5 items-center justify-center rounded-full border border-[#43B02A] text-xs text-[#43B02A]">
-                            ✓
-                          </span>
-                          {typeof it === 'string' ? it : it.label || it.value}
-                        </li>
-                      ))}
-                    </ul>
-                    <a
-                      href={WA}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-auto block rounded-lg border border-[#43B02A] px-5 py-3 text-center text-sm font-black uppercase text-[#43B02A] transition hover:bg-[#43B02A] hover:text-white"
-                    >
-                      {p.buttonLabel || p.button || "Solicitar Orçamento"}
-                    </a>
-                  </article>
-                ))
-              )}
+                    {p.buttonLabel}
+                  </a>
+                </article>
+              ))}
             </div>
           </div>
         </div>
