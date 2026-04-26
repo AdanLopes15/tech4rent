@@ -59,6 +59,7 @@ const clientStats: Array<[string, string]> = [
 const LandingV2 = () => {
   const { companySettings, catalogItems, equipments, fetchAllData } = useStore();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   
   useEffect(() => {
     fetchAllData(true);
@@ -110,18 +111,32 @@ const LandingV2 = () => {
 
     return final;
   }, [catalogItems, equipments]);
+
+  // Carrossel Automático
+  useEffect(() => {
+    if (showcaseProducts.length > 4 && !isPaused) {
+      const interval = setInterval(() => {
+        setCurrentIndex((prev) => (prev + 1) % showcaseProducts.length);
+      }, 4000); // 4 segundos
+      return () => clearInterval(interval);
+    }
+  }, [showcaseProducts.length, isPaused]);
   
   const WA = buildWa(companySettings?.phone);
 
   const nextSlide = () => {
     if (showcaseProducts.length > 4) {
       setCurrentIndex((prev) => (prev + 1) % showcaseProducts.length);
+      setIsPaused(true);
+      setTimeout(() => setIsPaused(false), 5000);
     }
   };
 
   const prevSlide = () => {
     if (showcaseProducts.length > 4) {
       setCurrentIndex((prev) => (prev - 1 + showcaseProducts.length) % showcaseProducts.length);
+      setIsPaused(true);
+      setTimeout(() => setIsPaused(false), 5000);
     }
   };
 
@@ -213,7 +228,11 @@ const LandingV2 = () => {
           </p>
           <h2 className="mt-3 text-center text-4xl font-black uppercase md:text-5xl">Vitrine de produtos</h2>
 
-          <div className="relative mt-12 group">
+          <div 
+            className="relative mt-12 group"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+          >
             {showcaseProducts.length > 4 && (
               <>
                 <button 
@@ -235,7 +254,7 @@ const LandingV2 = () => {
               {visibleProducts.map((p, idx) => (
                 <article
                   key={`${p.id}-${idx}`}
-                  className="group flex min-h-[520px] flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition duration-300 hover:-translate-y-2 hover:border-[#1E88E5]/70 hover:shadow-[0_0_40px_rgba(30,136,229,0.18)]"
+                  className="group flex min-h-[520px] flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition-all duration-500 hover:-translate-y-2 hover:border-[#1E88E5]/70 hover:shadow-[0_0_40px_rgba(30,136,229,0.18)]"
                 >
                   <div className="flex h-[220px] items-center justify-center">
                     <img
