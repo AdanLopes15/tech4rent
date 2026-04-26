@@ -1,5 +1,5 @@
 //src/components/landing/Navbar.tsx
-import logoWhite from "@/assets/landing/logo-tech4rent.png";
+import logoWhite from "/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png";
 
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
