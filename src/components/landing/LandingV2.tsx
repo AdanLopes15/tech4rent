@@ -109,7 +109,7 @@ const LandingV2 = () => {
         </div>
 
         {/* Barra de benefícios */}
-        <div className="relative z-10 mx-auto max-w-[1280px] px-6 pb-14">
+        <div className="relative z-10 mx-auto max-w-[1280px] px-6 pb-2">
           <div className="grid gap-5 rounded-2xl border border-white/10 bg-black/35 p-5 backdrop-blur-md md:grid-cols-4">
             {heroBenefits.map((item, i) => (
               <div
