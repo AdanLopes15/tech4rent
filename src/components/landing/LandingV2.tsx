@@ -323,11 +323,11 @@ const LandingV2 = () => {
               </div>
             </div>
 
-            <div className="relative flex w-full items-center justify-center overflow-hidden rounded-3xl border border-white/10 shadow-2xl bg-[#05070D]">
+            <div className="relative flex w-full items-center justify-center">
               <img
                 src={quemSomosImg}
                 alt="Tech4Rent - Tecnologia que move negócios"
-                className="w-full h-auto object-contain transition-transform duration-700 hover:scale-105"
+                className="w-full h-auto object-contain scale-110 lg:scale-125 transition-transform duration-700 hover:scale-[1.32]"
               />
             </div>
           </div>
