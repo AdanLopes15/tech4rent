@@ -203,7 +203,7 @@ const LandingV2 = () => {
                 key={item.title}
                 className={`flex items-center gap-4 ${i < heroBenefits.length - 1 ? "md:border-r md:border-white/10 md:pr-4" : ""}`}
               >
-                <div className={`flex shrink-0 items-center justify-center ${item.title === "MAIS AGILIDADE" ? "h-[100px] w-[100px]" : "h-14 w-14"}`}>
+                <div className="flex shrink-0 items-center justify-center h-16 w-16">
                   <img 
                     src={item.icon} 
                     alt="" 
@@ -330,8 +330,8 @@ const LandingV2 = () => {
                 >
                   <div className="absolute -right-4 -top-4 h-24 w-24 bg-[#1E88E5]/10 blur-[40px] transition-all group-hover:bg-[#1E88E5]/20" />
                   
-                  <div className="relative mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#1E88E5]/10 text-[#1E88E5]">
-                    <img src={icon} alt="" className="h-10 w-10 object-contain filter brightness-0 invert" style={{ filter: 'invert(44%) sepia(87%) saturate(1469%) hue-rotate(189deg) brightness(97%) contrast(92%)' }} />
+                  <div className="relative mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-transparent text-[#1E88E5]">
+                    <img src={icon} alt="" className="h-16 w-16 object-contain" />
                   </div>
                   
                   <h3 className="text-xl font-black uppercase tracking-tight mb-3 text-white">{title}</h3>
