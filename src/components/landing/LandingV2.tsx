@@ -45,9 +45,8 @@ const aboutItems: Array<[string, string, string]> = [
 
 const benefitsItems: Array<[string, string, string]> = [
   ["AGILIDADE", "Processos mais rápidos e automatizados.", iconAgilidade],
-  ["PRECISÃO", "Redução de erros e retrabalhos.", iconErros],
   ["SEGURANÇA", "Equipamentos resistentes para o dia a dia.", iconSeguranca],
-  ["ESCALABILIDADE", "Soluções prontas para acompanhar seu crescimento.", iconResultados],
+  ["RESULTADOS", "Soluções que elevam o desempenho.", iconResultados],
 ];
 
 const clientStats: Array<[string, string]> = [
