@@ -1,4 +1,5 @@
 //src/components/admin/AdminSidebar.tsx
+import logoTech4Rent from "@/assets/landing/logo-tech4rent.png";
 
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -181,8 +182,8 @@ const AdminSidebar = () => {
     >
       <div className="flex items-center justify-between h-16 px-4 border-b border-sidebar-border">
         {!collapsed && (
-          <Link to="/admin" className="text-lg font-bold tracking-tight hover:opacity-80 transition-opacity">
-            <span className="text-sidebar-primary">T4R</span> Admin
+          <Link to="/admin" className="hover:opacity-80 transition-opacity">
+            <img src={logoTech4Rent} alt="Tech4Rent" className="h-8 object-contain" />
           </Link>
         )}
         <button

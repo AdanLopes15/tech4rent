@@ -9,7 +9,13 @@ const AdminLayout = () => {
   const [isDark, setIsDark] = useState(true);
 
   const toggleTheme = () => {
-    setIsDark((prev) => !prev);
+    const newIsDark = !isDark;
+    setIsDark(newIsDark);
+    if (newIsDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
   };
 
   useEffect(() => {

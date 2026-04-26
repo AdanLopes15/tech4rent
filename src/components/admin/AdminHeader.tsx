@@ -134,132 +134,142 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
   };
 
   return (
-    <header className="h-14 border-b border-border bg-card flex items-center justify-end px-6 gap-2">
-      {/* Notifications */}
-      <div ref={notifRef} className="relative">
+    <header className="h-14 border-b border-border bg-card flex items-center justify-between px-6 gap-2">
+      <div className="flex items-center gap-2">
+        <img 
+          src="/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png" 
+          alt="Tech4Rent Logo" 
+          className="h-8 object-contain"
+        />
+      </div>
+      
+      <div className="flex items-center gap-2">
+        {/* Notifications */}
+        <div ref={notifRef} className="relative">
+          <button
+            onClick={() => {
+              setNotifOpen(!notifOpen);
+              setUserMenuOpen(false);
+            }}
+            className="relative p-2 rounded-lg hover:bg-muted transition-colors"
+          >
+            <Bell className="h-5 w-5 text-muted-foreground" />
+            {notifications.length > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[11px] font-bold flex items-center justify-center px-1">
+                {notifications.length}
+              </span>
+            )}
+          </button>
+          {notifOpen && (
+            <div className="absolute right-0 top-12 w-80 rounded-lg border border-border bg-card shadow-xl z-50">
+              <div className="p-3 border-b border-border flex items-center justify-between">
+                <span className="text-sm font-semibold text-foreground">Notificações</span>
+                {notifications.length > 0 && (
+                  <button
+                    onClick={handleClearAll}
+                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors"
+                    title="Limpar todas"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Limpar
+                  </button>
+                )}
+              </div>
+              <div className="max-h-64 overflow-y-auto">
+                {notifications.length === 0 ? (
+                  <div className="px-3 py-6 text-center text-sm text-muted-foreground">
+                    Nenhuma notificação
+                  </div>
+                ) : (
+                  notifications.map((n) => (
+                    <div
+                      key={n.id}
+                      onClick={() => handleNotificationClick(n)}
+                      className="px-3 py-2.5 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-0"
+                    >
+                      <p className="text-sm text-foreground">{n.text}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{n.time}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Theme Toggle */}
         <button
-          onClick={() => {
-            setNotifOpen(!notifOpen);
-            setUserMenuOpen(false);
-          }}
-          className="relative p-2 rounded-lg hover:bg-muted transition-colors"
+          onClick={onToggleTheme}
+          className="p-2 rounded-lg hover:bg-muted transition-colors"
+          title={isDark ? "Modo claro" : "Modo escuro"}
         >
-          <Bell className="h-5 w-5 text-muted-foreground" />
-          {notifications.length > 0 && (
-            <span className="absolute -top-1 -right-1 min-w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[11px] font-bold flex items-center justify-center px-1">
-              {notifications.length}
-            </span>
+          {isDark ? (
+            <Sun className="h-5 w-5 text-muted-foreground" />
+          ) : (
+            <Moon className="h-5 w-5 text-muted-foreground" />
           )}
         </button>
-        {notifOpen && (
-          <div className="absolute right-0 top-12 w-80 rounded-lg border border-border bg-card shadow-xl z-50">
-            <div className="p-3 border-b border-border flex items-center justify-between">
-              <span className="text-sm font-semibold text-foreground">Notificações</span>
-              {notifications.length > 0 && (
-                <button
-                  onClick={handleClearAll}
-                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors"
-                  title="Limpar todas"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  Limpar
-                </button>
-              )}
-            </div>
-            <div className="max-h-64 overflow-y-auto">
-              {notifications.length === 0 ? (
-                <div className="px-3 py-6 text-center text-sm text-muted-foreground">
-                  Nenhuma notificação
-                </div>
+
+        {/* User Menu */}
+        <div ref={userRef} className="relative">
+          <button
+            onClick={() => {
+              setUserMenuOpen(!userMenuOpen);
+              setNotifOpen(false);
+            }}
+            className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted transition-colors"
+          >
+            <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
               ) : (
-                notifications.map((n) => (
-                  <div
-                    key={n.id}
-                    onClick={() => handleNotificationClick(n)}
-                    className="px-3 py-2.5 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-0"
-                  >
-                    <p className="text-sm text-foreground">{n.text}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{n.time}</p>
-                  </div>
-                ))
+                <User className="h-4 w-4 text-primary" />
               )}
             </div>
-          </div>
-        )}
-      </div>
-
-      {/* Theme Toggle */}
-      <button
-        onClick={onToggleTheme}
-        className="p-2 rounded-lg hover:bg-muted transition-colors"
-        title={isDark ? "Modo claro" : "Modo escuro"}
-      >
-        {isDark ? (
-          <Sun className="h-5 w-5 text-muted-foreground" />
-        ) : (
-          <Moon className="h-5 w-5 text-muted-foreground" />
-        )}
-      </button>
-
-      {/* User Menu */}
-      <div ref={userRef} className="relative">
-        <button
-          onClick={() => {
-            setUserMenuOpen(!userMenuOpen);
-            setNotifOpen(false);
-          }}
-          className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted transition-colors"
-        >
-          <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
-            ) : (
-              <User className="h-4 w-4 text-primary" />
-            )}
-          </div>
-          <span className="text-sm font-medium text-foreground hidden sm:block">{displayName}</span>
-        </button>
-        {userMenuOpen && (
-          <div className="absolute right-0 top-12 w-52 rounded-lg border border-border bg-card shadow-xl z-50">
-            <div className="p-3 border-b border-border">
-              <p className="text-sm font-semibold text-foreground">Minha Conta</p>
+            <span className="text-sm font-medium text-foreground hidden sm:block">{displayName}</span>
+          </button>
+          {userMenuOpen && (
+            <div className="absolute right-0 top-12 w-52 rounded-lg border border-border bg-card shadow-xl z-50">
+              <div className="p-3 border-b border-border">
+                <p className="text-sm font-semibold text-foreground">Minha Conta</p>
+              </div>
+              <div className="py-1">
+                <button
+                  onClick={() => {
+                    navigate("/admin/perfil");
+                    setUserMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 w-full px-3 py-2 text-sm text-foreground hover:bg-muted/50 transition-colors"
+                >
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  Meu Perfil
+                </button>
+                <button
+                  onClick={() => {
+                    navigate("/admin/configuracoes");
+                    setUserMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 w-full px-3 py-2 text-sm text-foreground hover:bg-muted/50 transition-colors"
+                >
+                  <Settings className="h-4 w-4 text-muted-foreground" />
+                  Configurações
+                </button>
+              </div>
+              <div className="border-t border-border py-1">
+                <button
+                  onClick={async () => {
+                    await signOut();
+                    navigate("/");
+                  }}
+                  className="flex items-center gap-3 w-full px-3 py-2 text-sm text-destructive hover:bg-muted/50 transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sair
+                </button>
+              </div>
             </div>
-            <div className="py-1">
-              <button
-                onClick={() => {
-                  navigate("/admin/perfil");
-                  setUserMenuOpen(false);
-                }}
-                className="flex items-center gap-3 w-full px-3 py-2 text-sm text-foreground hover:bg-muted/50 transition-colors"
-              >
-                <User className="h-4 w-4 text-muted-foreground" />
-                Meu Perfil
-              </button>
-              <button
-                onClick={() => {
-                  navigate("/admin/configuracoes");
-                  setUserMenuOpen(false);
-                }}
-                className="flex items-center gap-3 w-full px-3 py-2 text-sm text-foreground hover:bg-muted/50 transition-colors"
-              >
-                <Settings className="h-4 w-4 text-muted-foreground" />
-                Configurações
-              </button>
-            </div>
-            <div className="border-t border-border py-1">
-              <button
-                onClick={async () => {
-                  await signOut();
-                  navigate("/");
-                }}
-                className="flex items-center gap-3 w-full px-3 py-2 text-sm text-destructive hover:bg-muted/50 transition-colors"
-              >
-                <LogOut className="h-4 w-4" />
-                Sair
-              </button>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </header>
   );
