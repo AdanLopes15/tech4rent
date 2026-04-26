@@ -322,13 +322,15 @@ const LandingV2 = () => {
               </div>
             </div>
 
-            <div className="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-3xl border border-white/10 shadow-2xl">
+            <div className="relative flex w-full items-center justify-center overflow-hidden rounded-3xl border border-white/10 shadow-2xl min-h-[300px] bg-white/5">
               <img
                 src="/lovable-uploads/47746522-0d50-4820-8e10-9c2999c07153.png"
                 alt="Tech4Rent Soluções"
-                className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+                className="max-w-full object-contain transition-transform duration-700 hover:scale-105"
+                onLoad={(e) => console.log('Image loaded successfully:', e.currentTarget.src)}
+                onError={(e) => console.log('Image failed to load:', e.currentTarget.src)}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
             </div>
           </div>
 
