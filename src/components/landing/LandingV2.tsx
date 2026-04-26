@@ -99,9 +99,9 @@ const LandingV2 = () => {
             <div className="absolute h-[71%] w-[71%] rounded-full border-4 border-[#1E88E5] shadow-[0_0_80px_rgba(30,136,229,0.7)]" />
             <div className="absolute h-[67%] w-[67%] rounded-full border-r-4 border-t-4 border-[#43B02A] shadow-[0_0_80px_rgba(67,176,42,0.5)]" />
             <img
-              src={prodColetor}
-              alt="Coletor TC60 Tech4Rent"
-              className="relative z-10 w-full max-w-[80%] object-contain drop-shadow-[0_25px_40px_rgba(0,0,0,0.55)] animate-[float_5s_ease-in-out_infinite]"
+              src={heroDevices}
+              alt="Equipamentos Tech4Rent"
+              className="relative z-10 w-full max-w-full object-contain drop-shadow-[0_25px_40px_rgba(0,0,0,0.55)] animate-[float_5s_ease-in-out_infinite]"
             />
           </div>
 
