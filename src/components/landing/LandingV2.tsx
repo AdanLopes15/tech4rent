@@ -64,7 +64,7 @@ const LandingV2 = () => {
     fetchAllData(true);
   }, [fetchAllData]);
 
-  const showcaseProducts = catalogItems.filter(item => item.show_on_landing === true);
+  const showcaseProducts = (catalogItems || []).filter(item => item.show_on_landing === true || item.show_on_home === true);
   
   const WA = buildWa(companySettings?.phone);
 
