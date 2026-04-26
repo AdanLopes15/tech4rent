@@ -15,6 +15,7 @@ import prodLeitor from "@/assets/landing/prod-leitor.png";
 import prodImpressora from "@/assets/landing/prod-impressora.png";
 import prodEtiquetas from "@/assets/landing/prod-etiquetas.png";
 import mapaBrasil from "@/assets/landing/mapa-brasil.png";
+import quemSomosImg from "@/assets/landing/quem-somos-tech4rent.png";
 
 const buildWa = (phone?: string, msg = "Olá, gostaria de falar com um especialista.") => {
   const d = phone?.replace(/\D/g, "") || "5511945504752";
