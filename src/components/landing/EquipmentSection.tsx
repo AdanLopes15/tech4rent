@@ -1,6 +1,6 @@
 //src/components/landing/EquipmentSection.tsx
 
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, PackageSearch } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useStore } from "@/store";
 import imgColetor from "@/assets/landing/prod-coletor.png";
@@ -14,7 +14,7 @@ const buildWhatsAppUrl = (phone?: string, product?: string) => {
   return digits ? `https://wa.me/55${digits}?text=${encodeURIComponent(message)}` : "#contato";
 };
 
-const products = [
+const staticProducts = [
   {
     image: imgColetor,
     name: "COLETOR TC60",
@@ -54,7 +54,22 @@ const Check = () => (
 );
 
 const EquipmentSection = () => {
-  const { companySettings } = useStore();
+  const { companySettings, equipments, catalogItems } = useStore();
+
+  // Filtrar produtos que devem aparecer na home
+  const featuredProducts = (catalogItems || [])
+    .filter((c: any) => (c.show_on_home || c.show_on_landing) && c.published)
+    .map((c: any) => ({
+      image: c.heroImageUrl || c.imageUrl || "https://placehold.co/400x400.png",
+      name: c.name,
+      features: c.tags?.map((t: any) => t.label).slice(0, 4) || ["Qualidade Garantida", "Suporte Técnico"],
+      cta: "SOLICITAR ORÇAMENTO",
+      variant: "outline" as const,
+      isCatalog: true,
+      id: c.id
+    }));
+
+  const productsToShow = featuredProducts.length > 0 ? featuredProducts : staticProducts;
 
   return (
     <section id="equipamentos" className="bg-background py-20">
@@ -68,9 +83,9 @@ const EquipmentSection = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {products.map((p) => (
+          {productsToShow.map((p, idx) => (
             <article
-              key={p.name}
+              key={p.name + idx}
               className="flex min-h-[460px] flex-col rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-1 hover:border-primary/40"
             >
               <div className="h-[200px] overflow-hidden rounded-xl bg-[hsl(var(--surface))]">
@@ -80,7 +95,7 @@ const EquipmentSection = () => {
               <h3 className="mt-5 text-base font-extrabold uppercase tracking-tight text-foreground">{p.name}</h3>
 
               <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-                {p.features.map((f) => (
+                {p.features.map((f: string) => (
                   <li key={f} className="flex items-center gap-2">
                     <Check /> {f}
                   </li>
@@ -106,6 +121,16 @@ const EquipmentSection = () => {
             </article>
           ))}
         </div>
+        
+        {featuredProducts.length === 0 && (
+          <div className="mt-12 rounded-xl border border-dashed border-border p-8 text-center bg-muted/20">
+            <PackageSearch className="mx-auto h-12 w-12 text-muted-foreground/50" />
+            <h3 className="mt-4 text-lg font-bold">Nenhum produto em destaque configurado</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Acesse o painel administrativo em <strong>Catálogo do Site</strong> e marque "Exibir na Vitrine" para mostrar produtos reais aqui.
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );
