@@ -1,7 +1,7 @@
 // src/components/landing/LandingV2.tsx
 // Landing recriada conforme o código de referência enviado pelo cliente.
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useStore } from "@/store";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import heroDevices from "@/assets/landing/devices-only.png";
@@ -57,14 +57,23 @@ const clientStats: Array<[string, string]> = [
 ];
 
 const LandingV2 = () => {
-  const { companySettings, catalogItems, fetchAllData } = useStore();
+  const { companySettings, catalogItems, equipments, fetchAllData } = useStore();
   const [currentIndex, setCurrentIndex] = useState(0);
   
   useEffect(() => {
     fetchAllData(true);
   }, [fetchAllData]);
 
-  const showcaseProducts = (catalogItems || []).filter(item => item.show_on_landing === true || item.show_on_home === true);
+  const showcaseProducts = useMemo(() => {
+    const fromCatalog = (catalogItems || []).filter(item => item.published && (item.show_on_landing === true || item.show_on_home === true));
+    const catalogEquipmentIds = new Set(fromCatalog.map(item => item.equipmentId).filter(Boolean));
+    
+    const fromEquipments = (equipments || []).filter(e => 
+      !catalogEquipmentIds.has(e.id) && (e.show_on_landing === true || e.show_on_home === true)
+    );
+    
+    return [...fromCatalog, ...fromEquipments];
+  }, [catalogItems, equipments]);
   
   const WA = buildWa(companySettings?.phone);
 
