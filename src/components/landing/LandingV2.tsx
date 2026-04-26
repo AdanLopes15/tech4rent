@@ -322,13 +322,13 @@ const LandingV2 = () => {
               </div>
             </div>
 
-            <div className="relative flex aspect-square w-full items-center justify-center">
-              <div className="absolute h-[80%] w-[80%] rounded-full border-4 border-[#1E88E5]/30 blur-sm" />
+            <div className="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-3xl border border-white/10 shadow-2xl">
               <img
-                src={heroDevices}
-                alt="Equipamentos Tech4Rent"
-                className="relative z-10 w-full max-w-full object-contain drop-shadow-[0_25px_40px_rgba(0,0,0,0.55)]"
+                src="/lovable-uploads/47746522-0d50-4820-8e10-9c2999c07153.png"
+                alt="Tech4Rent Soluções"
+                className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
             </div>
           </div>
 
