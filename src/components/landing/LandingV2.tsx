@@ -322,22 +322,13 @@ const LandingV2 = () => {
               </div>
             </div>
 
-            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2">
-              {aboutItems.map(([title, text, icon], idx) => (
-                <div 
-                  key={title} 
-                  className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-8 transition-all duration-500 hover:-translate-y-2 hover:bg-white/[0.06] hover:border-[#1E88E5]/50 ${idx % 2 !== 0 ? 'sm:translate-y-8' : ''}`}
-                >
-                  <div className="absolute -right-4 -top-4 h-24 w-24 bg-[#1E88E5]/10 blur-[40px] transition-all group-hover:bg-[#1E88E5]/20" />
-                  
-                  <div className="relative mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-transparent text-[#1E88E5]">
-                    <img src={icon} alt="" className="h-full w-full object-contain" />
-                  </div>
-                  
-                  <h3 className="text-xl font-black uppercase tracking-tight mb-3 text-white">{title}</h3>
-                  <p className="text-white/60 leading-relaxed">{text}</p>
-                </div>
-              ))}
+            <div className="relative flex aspect-square w-full items-center justify-center">
+              <div className="absolute h-[80%] w-[80%] rounded-full border-4 border-[#1E88E5]/30 blur-sm" />
+              <img
+                src={heroDevices}
+                alt="Equipamentos Tech4Rent"
+                className="relative z-10 w-full max-w-full object-contain drop-shadow-[0_25px_40px_rgba(0,0,0,0.55)]"
+              />
             </div>
           </div>
 
