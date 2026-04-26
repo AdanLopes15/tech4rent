@@ -322,22 +322,13 @@ const LandingV2 = () => {
               </div>
             </div>
 
-            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2">
-              {aboutItems.map(([title, text, icon], idx) => (
-                <div 
-                  key={title} 
-                  className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-8 transition-all duration-500 hover:-translate-y-2 hover:bg-white/[0.06] hover:border-[#1E88E5]/50 ${idx % 2 !== 0 ? 'sm:translate-y-8' : ''}`}
-                >
-                  <div className="absolute -right-4 -top-4 h-24 w-24 bg-[#1E88E5]/10 blur-[40px] transition-all group-hover:bg-[#1E88E5]/20" />
-                  
-                  <div className="relative mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-transparent text-[#1E88E5]">
-                    <img src={icon} alt="" className="h-full w-full object-contain" />
-                  </div>
-                  
-                  <h3 className="text-xl font-black uppercase tracking-tight mb-3 text-white">{title}</h3>
-                  <p className="text-white/60 leading-relaxed">{text}</p>
-                </div>
-              ))}
+            <div className="relative flex aspect-square w-full items-center justify-center">
+              <div className="absolute h-[80%] w-[80%] rounded-full border-4 border-[#1E88E5]/30 blur-sm" />
+              <img
+                src={heroDevices}
+                alt="Equipamentos Tech4Rent"
+                className="relative z-10 w-full max-w-full object-contain drop-shadow-[0_25px_40px_rgba(0,0,0,0.55)]"
+              />
             </div>
           </div>
 
@@ -352,32 +343,7 @@ const LandingV2 = () => {
         </div>
       </section>
 
-      {/* ABRANGÊNCIA */}
-      <section id="abrangencia" className="border-t border-white/10 px-6 py-20">
-        <div className="mx-auto grid max-w-[1280px] items-center gap-12 lg:grid-cols-2">
-          <div>
-            <p className="text-sm font-black uppercase tracking-[0.25em] text-[#43B02A]">Abrangência</p>
-            <h2 className="mt-4 text-4xl font-black uppercase md:text-5xl">
-              Atendemos <br /> todo o Brasil
-            </h2>
-            <p className="mt-6 max-w-[520px] text-white/75">
-              Estrutura preparada para atender operações logísticas em qualquer região do país, com entrega rápida e suporte especializado.
-            </p>
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              <MiniItem title="Atendimento nacional" color="#1E88E5" />
-              <MiniItem title="Entrega rápida" color="#43B02A" />
-              <MiniItem title="Suporte especializado" color="#FF9A00" />
-            </div>
-          </div>
-          <div className="flex justify-center">
-            <img
-              src={mapaBrasil}
-              alt="Atendimento Tech4Rent em todo o Brasil"
-              className="max-h-[820px] w-full max-w-[1020px] object-contain drop-shadow-[0_0_40px_rgba(30,136,229,0.35)]"
-            />
-          </div>
-        </div>
-      </section>
+      {/* A seção de Abrangência foi removida conforme solicitação */}
 
       {/* SOBRE OS EQUIPAMENTOS */}
       <section id="equipamentos" className="border-t border-white/10 px-6 py-20">
