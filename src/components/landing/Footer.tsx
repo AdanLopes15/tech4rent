@@ -33,20 +33,20 @@ const Footer = () => {
 
           <div>
             <h3 className="mb-4 text-xs font-black uppercase tracking-widest">Navegação</h3>
-            <ul className="space-y-3 text-xs text-muted-foreground">
-              <li><a href="#produtos" className="transition-colors hover:text-foreground">Produtos</a></li>
-              <li><a href="#duvidas" className="transition-colors hover:text-foreground">Dúvidas</a></li>
-              <li><a href="#quem-somos" className="transition-colors hover:text-foreground">Sobre</a></li>
-              <li><a href="#contato" className="transition-colors hover:text-foreground">Contato</a></li>
+            <ul className="space-y-3 text-xs text-white/60">
+              <li><a href="#produtos" className="transition-colors hover:text-white">Produtos</a></li>
+              <li><a href="#duvidas" className="transition-colors hover:text-white">Dúvidas</a></li>
+              <li><a href="#quem-somos" className="transition-colors hover:text-white">Sobre</a></li>
+              <li><a href="#contato" className="transition-colors hover:text-white">Contato</a></li>
             </ul>
           </div>
 
           <div>
             <h3 className="mb-4 text-xs font-black uppercase tracking-widest">Institucional</h3>
-            <ul className="space-y-3 text-xs text-muted-foreground">
-              <li><a href="#quem-somos" className="transition-colors hover:text-foreground">Sobre a Tech4Rent</a></li>
-              <li><a href="#contato" className="transition-colors hover:text-foreground">Suporte e Contato</a></li>
-              <li><a href="#duvidas" className="transition-colors hover:text-foreground">Dúvidas Frequentes</a></li>
+            <ul className="space-y-3 text-xs text-white/60">
+              <li><a href="#quem-somos" className="transition-colors hover:text-white">Sobre a Tech4Rent</a></li>
+              <li><a href="#contato" className="transition-colors hover:text-white">Suporte e Contato</a></li>
+              <li><a href="#duvidas" className="transition-colors hover:text-white">Dúvidas Frequentes</a></li>
             </ul>
           </div>
 
