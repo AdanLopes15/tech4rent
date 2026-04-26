@@ -91,6 +91,7 @@ const menuItems: MenuItem[] = [
       { icon: Globe, label: "Conteúdo da Home", path: "/admin/site-builder" },
       { icon: Globe, label: "Conteúdo de Contato", path: "/admin/site-builder/contato" },
       { icon: Globe, label: "Conteúdo de Sobre", path: "/admin/site-builder/sobre" },
+      { icon: Mail, label: "Contatos do Site", path: "/admin/contatos-site" },
       { icon: Settings, label: "Painel de Configurações", path: "/admin/configuracoes" },
       { icon: Users, label: "Usuários", path: "/admin/usuarios" },
     ],
