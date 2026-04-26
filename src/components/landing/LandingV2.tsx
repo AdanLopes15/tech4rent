@@ -65,6 +65,16 @@ const LandingV2 = () => {
     fetchAllData(true);
   }, [fetchAllData]);
 
+  // Carrossel Automático
+  useEffect(() => {
+    if (showcaseProducts.length > 4 && !isPaused) {
+      const interval = setInterval(() => {
+        setCurrentIndex((prev) => (prev + 1) % showcaseProducts.length);
+      }, 3000); // 3 segundos
+      return () => clearInterval(interval);
+    }
+  }, [showcaseProducts.length, isPaused]);
+
   const showcaseProducts = useMemo(() => {
     // 1. Itens publicados do catálogo
     const fromCatalog = (catalogItems || [])
