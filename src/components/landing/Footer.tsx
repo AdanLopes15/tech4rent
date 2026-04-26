@@ -1,5 +1,5 @@
 //src/components/landing/Footer.tsx
-import logoWhite from "/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png";
+const logoWhite = "/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png";
 
 import { Clock, Instagram, Linkedin, Lock, Mail, MapPin, Phone, Youtube } from "lucide-react";
 import { Link } from "react-router-dom";
