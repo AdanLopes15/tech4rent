@@ -334,6 +334,7 @@ type Actions = {
     date: Date,
     description?: string,
   ) => Promise<void>;
+  addSiteContact: (data: any) => Promise<void>;
   updateSiteContact: (contactId: string, data: any) => Promise<void>;
   deleteSiteContact: (contactId: string) => Promise<void>;
   addCostCenter: (costCenter: any) => Promise<void>;
@@ -2175,6 +2176,45 @@ const useStore = create<State & Actions>((set, get) => {
 
       await batch.commit();
       await get().fetchAllData();
+    },
+
+    addSiteContact: async (data: any) => {
+      const docRef = await addDoc(collection(db, "siteContacts"), {
+        ...data,
+        createdAt: serverTimestamp(),
+        status: "Pendente",
+      });
+      
+      const newContact = { 
+        id: docRef.id, 
+        ...data, 
+        status: "Pendente", 
+        createdAt: new Date().toISOString() 
+      };
+
+      // Add notification
+      const notificationRef = doc(collection(db, "notifications"));
+      await setDoc(notificationRef, {
+        message: `Novo contato via site: ${data.name || data.nome}`,
+        type: "new_contact",
+        entityId: docRef.id,
+        link: "/admin/catalogo-site", // Onde os contatos costumam ser vistos
+        createdAt: serverTimestamp(),
+        read: false,
+      });
+
+      set((state) => ({ 
+        siteContacts: [...state.siteContacts, newContact],
+        notifications: [
+          {
+            id: notificationRef.id,
+            message: `Novo contato via site: ${data.name || data.nome}`,
+            type: "new_contact",
+            createdAt: new Date(),
+          },
+          ...state.notifications
+        ]
+      }));
     },
 
     updateSiteContact: async (contactId, data) => {
