@@ -19,16 +19,16 @@ const Footer = () => {
   ].filter(Boolean).join(", ");
 
   return (
-    <footer className="bg-card pt-12 text-foreground border-t border-border">
+    <footer className="bg-[#05070D] pt-12 text-white border-t border-white/10">
       <div className="container max-w-5xl">
         <div className="grid gap-12 py-8 md:grid-cols-4">
           <div className="space-y-7">
             <img
-              src={logoTech4Rent}
+              src={logoWhite}
               alt="Logo da Tech4Rent"
               className="h-12 w-auto max-w-44 object-contain"
             />
-            <p className="text-xs leading-relaxed text-muted-foreground">Coletores, leitores, tablets e equipamentos para logística e operação.</p>
+            <p className="text-xs leading-relaxed text-white/60">Coletores, leitores, tablets e equipamentos para logística e operação.</p>
           </div>
 
           <div>
