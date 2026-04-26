@@ -9,6 +9,7 @@ import {
   FileText,
   ShoppingCart,
   DollarSign,
+  Mail,
   Settings,
   ChevronLeft,
   ChevronRight,
