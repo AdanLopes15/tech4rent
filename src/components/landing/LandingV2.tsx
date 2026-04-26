@@ -359,25 +359,20 @@ const LandingV2 = () => {
             </h2>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-3">
-            {benefitsItems.map(([title, text, icon]) => (
-              <div 
-                key={title} 
-                className="group relative flex flex-col items-center rounded-3xl border border-white/10 bg-white/[0.03] p-10 text-center transition-all duration-500 hover:-translate-y-2 hover:border-[#1E88E5]/50 hover:bg-white/[0.06] hover:shadow-[0_20px_40px_rgba(30,136,229,0.15)]"
+          <div className="grid gap-8 rounded-3xl border border-white/10 bg-white/[0.04] p-10 backdrop-blur-md md:grid-cols-3 md:gap-0 md:p-12">
+            {benefitsItems.map(([title, text, icon], i) => (
+              <div
+                key={title}
+                className={`flex flex-col items-center text-center px-4 md:px-10 ${
+                  i < benefitsItems.length - 1 ? "md:border-r md:border-white/10" : ""
+                }`}
               >
-                <div className="absolute -top-1 px-4 py-1 text-[10px] font-black uppercase tracking-widest text-[#1E88E5] opacity-0 transition-opacity group-hover:opacity-100">
-                  Tech4Rent Premium
+                <div className="mb-6 flex h-24 w-24 items-center justify-center">
+                  <img src={icon} alt="" className="max-h-full max-w-full object-contain" />
                 </div>
-                
-                <div className="relative mb-8 flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-white/10 to-transparent p-4 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3">
-                  <img src={icon} alt="" className="h-full w-full object-contain" />
-                  <div className="absolute inset-0 bg-[#1E88E5]/20 blur-2xl opacity-0 transition-opacity group-hover:opacity-100" />
-                </div>
-
-                <h3 className="text-xl font-black uppercase tracking-wide text-white mb-4">{title}</h3>
-                <p className="text-base text-white/60 leading-relaxed">{text}</p>
-                
-                <div className="mt-8 h-1 w-12 rounded-full bg-[#43B02A]/30 transition-all duration-500 group-hover:w-20 group-hover:bg-[#43B02A]" />
+                <h3 className="text-xl font-black uppercase tracking-wide text-white mb-3">{title}</h3>
+                <p className="text-base text-white/65 leading-relaxed">{text}</p>
+                <div className="mt-6 h-1 w-12 rounded-full bg-[#43B02A]/40" />
               </div>
             ))}
           </div>
