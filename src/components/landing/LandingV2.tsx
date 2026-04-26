@@ -243,27 +243,62 @@ const LandingV2 = () => {
       </section>
 
       {/* QUEM SOMOS */}
-      <section id="quem-somos" className="border-t border-white/10 px-6 py-20">
-        <div className="mx-auto grid max-w-[1280px] gap-12 lg:grid-cols-[0.9fr_1.4fr]">
-          <div>
-            <p className="text-sm font-black uppercase tracking-[0.25em] text-[#43B02A]">Quem somos</p>
-            <h2 className="mt-4 text-4xl font-black uppercase md:text-5xl">
-              Quem é a <br />
-              Tech<span className="text-[#43B02A]">4</span>Rent
-            </h2>
-            <p className="mt-6 text-white/75">
-              A Tech4Rent nasceu para simplificar e escalar operações logísticas através da tecnologia.
-            </p>
-            <p className="mt-4 text-white/75">
-              Atuamos com locação de equipamentos e soluções inteligentes que reduzem custos, aumentam produtividade e eliminam gargalos operacionais.
-            </p>
+      <section id="quem-somos" className="border-t border-white/10 px-6 py-24 bg-[#05070D]">
+        <div className="mx-auto max-w-[1280px]">
+          <div className="grid gap-16 lg:grid-cols-[0.8fr_1.2fr] items-center">
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.3em] text-[#43B02A] mb-4">SOBRE NÓS</p>
+              <h2 className="text-5xl md:text-6xl font-black uppercase leading-[1.1]">
+                QUEM É A <br />
+                <span className="text-white">TECH</span><span className="text-[#43B02A]">4</span><span className="text-white">RENT</span>
+              </h2>
+              <div className="mt-8 space-y-6 text-lg text-white/70 leading-relaxed max-w-[540px]">
+                <p>
+                  A <span className="text-white font-bold">Tech4Rent</span> nasceu com o propósito de transformar a forma como as empresas lidam com tecnologia operacional.
+                </p>
+                <p>
+                  Somos especialistas em <span className="text-[#1E88E5] font-bold">locação de equipamentos</span> e soluções inteligentes que conectam hardware de alta performance a processos mais ágeis e econômicos.
+                </p>
+                <p>
+                  Nossa missão é eliminar a burocracia e os altos custos de aquisição, permitindo que sua operação foque no que realmente importa: <span className="text-white font-bold">resultados extraordinários.</span>
+                </p>
+              </div>
+              <div className="mt-10">
+                <a
+                  href={WA}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-8 py-4 text-sm font-black uppercase text-white transition hover:bg-white/10 hover:border-white/40"
+                >
+                  Saiba mais sobre nós
+                </a>
+              </div>
+            </div>
+
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2">
+              {aboutItems.map(([title, text, icon], idx) => (
+                <div 
+                  key={title} 
+                  className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-8 transition-all duration-500 hover:-translate-y-2 hover:bg-white/[0.06] hover:border-[#1E88E5]/50 ${idx % 2 !== 0 ? 'sm:translate-y-8' : ''}`}
+                >
+                  <div className="absolute -right-4 -top-4 h-24 w-24 bg-[#1E88E5]/10 blur-[40px] transition-all group-hover:bg-[#1E88E5]/20" />
+                  
+                  <div className="relative mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#1E88E5]/10 text-[#1E88E5]">
+                    <img src={icon} alt="" className="h-10 w-10 object-contain filter brightness-0 invert" style={{ filter: 'invert(44%) sepia(87%) saturate(1469%) hue-rotate(189deg) brightness(97%) contrast(92%)' }} />
+                  </div>
+                  
+                  <h3 className="text-xl font-black uppercase tracking-tight mb-3 text-white">{title}</h3>
+                  <p className="text-white/60 leading-relaxed">{text}</p>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="grid gap-5 md:grid-cols-4">
-            {aboutItems.map(([title, text, icon]) => (
-              <div key={title} className="rounded-2xl border border-white/10 bg-white/[0.035] p-6 text-center">
-                <img src={icon} alt="" className="mx-auto h-20 w-20 object-contain" />
-                <h3 className="mt-4 font-black uppercase">{title}</h3>
-                <p className="mt-2 text-sm text-white/65">{text}</p>
+
+          <div className="mt-24 grid grid-cols-2 md:grid-cols-4 gap-8 py-12 border-y border-white/5">
+            {clientStats.map(([value, label]) => (
+              <div key={label} className="text-center">
+                <div className="text-4xl md:text-5xl font-black text-[#1E88E5] mb-2">{value}</div>
+                <div className="text-xs font-bold uppercase tracking-widest text-white/40">{label}</div>
               </div>
             ))}
           </div>
