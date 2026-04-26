@@ -330,8 +330,8 @@ const LandingV2 = () => {
                 >
                   <div className="absolute -right-4 -top-4 h-24 w-24 bg-[#1E88E5]/10 blur-[40px] transition-all group-hover:bg-[#1E88E5]/20" />
                   
-                  <div className="relative mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-transparent text-[#1E88E5]">
-                    <img src={icon} alt="" className="h-16 w-16 object-contain" />
+                  <div className="relative mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-transparent text-[#1E88E5]">
+                    <img src={icon} alt="" className="h-full w-full object-contain" />
                   </div>
                   
                   <h3 className="text-xl font-black uppercase tracking-tight mb-3 text-white">{title}</h3>
