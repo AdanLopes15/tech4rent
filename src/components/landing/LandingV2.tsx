@@ -187,7 +187,7 @@ const LandingV2 = () => {
             <div className="absolute h-[71%] w-[71%] rounded-full border-4 border-[#1E88E5] shadow-[0_0_80px_rgba(30,136,229,0.7)]" />
             <div className="absolute h-[67%] w-[67%] rounded-full border-r-4 border-t-4 border-[#43B02A] shadow-[0_0_80px_rgba(67,176,42,0.5)]" />
             <img
-              src="/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png"
+              src={heroDevices}
               alt="Equipamentos Tech4Rent"
               className="relative z-10 w-full max-w-full object-contain drop-shadow-[0_25px_40px_rgba(0,0,0,0.55)] animate-[float_5s_ease-in-out_infinite]"
             />
@@ -323,13 +323,12 @@ const LandingV2 = () => {
               </div>
             </div>
 
-            <div className="relative flex w-full items-center justify-center overflow-hidden rounded-3xl border border-white/10 shadow-2xl min-h-[300px] bg-white/5">
+            <div className="relative flex w-full items-center justify-center overflow-hidden rounded-3xl border border-white/10 shadow-2xl bg-[#05070D]">
               <img
-                src={heroDevices}
-                alt="Tech4Rent Soluções"
-                className="max-w-full object-contain transition-transform duration-700 hover:scale-105"
+                src={quemSomosImg}
+                alt="Tech4Rent - Tecnologia que move negócios"
+                className="w-full h-auto object-contain transition-transform duration-700 hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
             </div>
           </div>
 
