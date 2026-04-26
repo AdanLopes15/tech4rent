@@ -1,4 +1,5 @@
 //src/components/landing/Navbar.tsx
+import logoWhite from "/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png";
 
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -122,7 +123,7 @@ const Navbar = () => {
   };
 
   const linkClass = (active: boolean) =>
-    `rounded-md px-3 py-2 text-sm font-semibold transition-colors ${active ? "text-primary" : "text-foreground/70 hover:text-foreground"}`;
+    `rounded-md px-3 py-2 text-sm font-semibold transition-colors ${active ? "text-[#1E88E5]" : "text-white/70 hover:text-white"}`;
 
   // Links do menu agora rolam até as âncoras na home
   const menuLinks: Array<{ id: string; label: string }> = [
@@ -133,11 +134,11 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border bg-background/85 text-foreground backdrop-blur-md">
+    <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#05070D]/95 text-white backdrop-blur-md">
       <div className="container flex h-16 max-w-6xl items-center justify-between gap-6">
         <button onClick={() => goToHomeSection("hero")} className="flex min-w-0 items-center gap-3" aria-label="Voltar ao início">
           <img
-            src={logoTech4Rent}
+            src={logoWhite}
             alt="Logo da Tech4Rent"
             className="h-10 w-auto max-w-44 object-contain"
           />
@@ -156,7 +157,7 @@ const Navbar = () => {
             <button
               type="button"
               onClick={() => setIsLanguageOpen((open) => !open)}
-              className="flex h-10 items-center gap-2 rounded-md px-3 text-xs font-semibold text-foreground/70 transition-colors hover:text-foreground"
+              className="flex h-10 items-center gap-2 rounded-md px-3 text-xs font-semibold text-white/70 transition-colors hover:text-white"
               aria-expanded={isLanguageOpen}
               aria-label="Trocar idioma"
             >
@@ -179,12 +180,12 @@ const Navbar = () => {
               </div>
             )}
           </div>
-          <button onClick={() => goToHomeSection("contato")} className="inline-flex h-10 items-center gap-2 rounded-full border border-success bg-transparent px-5 text-xs font-bold uppercase tracking-wider text-foreground transition-all hover:bg-success/10">
+          <button onClick={() => goToHomeSection("contato")} className="inline-flex h-10 items-center gap-2 rounded-full border border-[#43B02A] bg-transparent px-5 text-xs font-bold uppercase tracking-wider text-white transition-all hover:bg-[#43B02A]/10">
             <MessageCircle className="h-4 w-4 text-success" /> Fale Agora
           </button>
           <Link
             to="/login"
-            className="flex h-10 w-10 items-center justify-center rounded-md text-foreground/50 transition-colors hover:bg-muted hover:text-foreground"
+            className="flex h-10 w-10 items-center justify-center rounded-md text-white/50 transition-colors hover:bg-white/10 hover:text-white"
             aria-label="Área Restrita"
             title="Área Restrita"
           >
