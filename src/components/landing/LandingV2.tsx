@@ -1,7 +1,9 @@
 // src/components/landing/LandingV2.tsx
 // Landing recriada conforme o código de referência enviado pelo cliente.
 
+import { useState, useEffect } from "react";
 import { useStore } from "@/store";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import heroDevices from "@/assets/landing/devices-only.png";
 import warehouseBg from "@/assets/landing/hero-bg-warehouse.jpg";
 import iconAgilidade from "@/assets/landing/icon-agilidade.png";
@@ -55,8 +57,35 @@ const clientStats: Array<[string, string]> = [
 ];
 
 const LandingV2 = () => {
-  const { companySettings } = useStore();
+  const { companySettings, catalogItems, fetchAllData } = useStore();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  useEffect(() => {
+    fetchAllData(true);
+  }, [fetchAllData]);
+
+  const showcaseProducts = catalogItems.filter(item => item.show_on_landing === true);
+  
   const WA = buildWa(companySettings?.phone);
+
+  const nextSlide = () => {
+    if (showcaseProducts.length > 4) {
+      setCurrentIndex((prev) => (prev + 1) % showcaseProducts.length);
+    }
+  };
+
+  const prevSlide = () => {
+    if (showcaseProducts.length > 4) {
+      setCurrentIndex((prev) => (prev - 1 + showcaseProducts.length) % showcaseProducts.length);
+    }
+  };
+
+  // Determina os 4 produtos visíveis no carrossel
+  const visibleProducts = showcaseProducts.length > 0 
+    ? showcaseProducts.length <= 4 
+      ? showcaseProducts 
+      : [...showcaseProducts, ...showcaseProducts].slice(currentIndex, currentIndex + 4)
+    : [];
 
   return (
     <div className="bg-[#05070D] text-white font-sans">
@@ -141,40 +170,65 @@ const LandingV2 = () => {
           </p>
           <h2 className="mt-3 text-center text-4xl font-black uppercase md:text-5xl">Vitrine de produtos</h2>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-            {products.map((p) => (
-              <article
-                key={p.title}
-                className="group flex min-h-[520px] flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition duration-300 hover:-translate-y-2 hover:border-[#1E88E5]/70 hover:shadow-[0_0_40px_rgba(30,136,229,0.18)]"
-              >
-                <div className="flex h-[220px] items-center justify-center">
-                  <img
-                    src={p.image}
-                    alt={p.title}
-                    className="max-h-[210px] w-full object-contain transition duration-300 group-hover:scale-105"
-                  />
-                </div>
-                <h3 className="mt-6 text-xl font-black uppercase">{p.title}</h3>
-                <ul className="mt-5 space-y-3">
-                  {p.items.map((it) => (
-                    <li key={it} className="flex items-center gap-3 text-sm text-white/80">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full border border-[#43B02A] text-xs text-[#43B02A]">
-                        ✓
-                      </span>
-                      {it}
-                    </li>
-                  ))}
-                </ul>
-                <a
-                  href={WA}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-auto block rounded-lg border border-[#43B02A] px-5 py-3 text-center text-sm font-black uppercase text-[#43B02A] transition hover:bg-[#43B02A] hover:text-white"
+          <div className="relative mt-12 group">
+            {showcaseProducts.length > 4 && (
+              <>
+                <button 
+                  onClick={prevSlide}
+                  className="absolute -left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-[#1E88E5] p-2 text-white shadow-lg transition hover:scale-110 lg:-left-6"
                 >
-                  {p.button}
-                </a>
-              </article>
-            ))}
+                  <ChevronLeft className="h-6 w-6" />
+                </button>
+                <button 
+                  onClick={nextSlide}
+                  className="absolute -right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-[#1E88E5] p-2 text-white shadow-lg transition hover:scale-110 lg:-right-6"
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </button>
+              </>
+            )}
+
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4 overflow-hidden">
+              {visibleProducts.length > 0 ? (
+                visibleProducts.map((p, idx) => (
+                  <article
+                    key={`${p.id}-${idx}`}
+                    className="group flex min-h-[520px] flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition duration-300 hover:-translate-y-2 hover:border-[#1E88E5]/70 hover:shadow-[0_0_40px_rgba(30,136,229,0.18)]"
+                  >
+                    <div className="flex h-[220px] items-center justify-center">
+                      <img
+                        src={p.heroImageUrl || p.imageUrl || "/placeholder.svg"}
+                        alt={p.name || p.title}
+                        className="max-h-[210px] w-full object-contain transition duration-300 group-hover:scale-105"
+                      />
+                    </div>
+                    <h3 className="mt-6 text-xl font-black uppercase">{p.name || p.title}</h3>
+                    <ul className="mt-5 space-y-3">
+                      {(p.specifications || p.items || []).slice(0, 4).map((it: any, i: number) => (
+                        <li key={i} className="flex items-center gap-3 text-sm text-white/80">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full border border-[#43B02A] text-xs text-[#43B02A]">
+                            ✓
+                          </span>
+                          {typeof it === 'string' ? it : it.label || it.value}
+                        </li>
+                      ))}
+                    </ul>
+                    <a
+                      href={WA}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-auto block rounded-lg border border-[#43B02A] px-5 py-3 text-center text-sm font-black uppercase text-[#43B02A] transition hover:bg-[#43B02A] hover:text-white"
+                    >
+                      {p.buttonLabel || "Solicitar Orçamento"}
+                    </a>
+                  </article>
+                ))
+              ) : (
+                <div className="col-span-full py-20 text-center text-white/40 italic">
+                  Nenhum produto em destaque no momento.
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>
