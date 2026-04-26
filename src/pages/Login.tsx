@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import logoTech4Rent from "@/assets/landing/logo-tech4rent.png";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { sendPasswordResetEmail } from "firebase/auth";
@@ -84,8 +85,8 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
-          <CardTitle className="text-2xl font-bold tracking-tight">
-            <span className="text-primary">TECH4</span>RENT
+          <CardTitle className="flex justify-center">
+            <img src={logoTech4Rent} alt="Tech4Rent" className="h-10 object-contain" />
           </CardTitle>
           <CardDescription>Acesse a área restrita do sistema</CardDescription>
         </CardHeader>
