@@ -127,12 +127,16 @@ const LandingV2 = () => {
   const nextSlide = () => {
     if (showcaseProducts.length > 4) {
       setCurrentIndex((prev) => (prev + 1) % showcaseProducts.length);
+      setIsPaused(true);
+      setTimeout(() => setIsPaused(false), 5000);
     }
   };
 
   const prevSlide = () => {
     if (showcaseProducts.length > 4) {
       setCurrentIndex((prev) => (prev - 1 + showcaseProducts.length) % showcaseProducts.length);
+      setIsPaused(true);
+      setTimeout(() => setIsPaused(false), 5000);
     }
   };
 
