@@ -1,11 +1,10 @@
 //src/components/landing/Navbar.tsx
-const logoWhite = "/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png";
+import logoWhite from "@/assets/landing/logo-tech4rent.png";
 
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight, ChevronDown, Lock, Menu, MessageCircle, X } from "lucide-react";
 import { useStore } from "@/store";
-import logoTech4Rent from "@/assets/landing/logo-tech4rent.png";
 
 const languages = [
   { code: "pt", label: "BR Português" },
@@ -106,26 +105,9 @@ const Navbar = () => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const goToAboutSection = (id?: string) => {
-    setIsOpen(false);
-    navigate(id ? `/sobre#${id}` : "/sobre");
-    if (id) setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }), 80);
-  };
-
-  const goToProducts = () => {
-    setIsOpen(false);
-    navigate("/produtos");
-  };
-
-  const goToContact = () => {
-    setIsOpen(false);
-    navigate("/contato");
-  };
-
   const linkClass = (active: boolean) =>
     `rounded-md px-3 py-2 text-sm font-semibold transition-colors ${active ? "text-[#1E88E5]" : "text-white/70 hover:text-white"}`;
 
-  // Links do menu agora rolam até as âncoras na home
   const menuLinks: Array<{ id: string; label: string }> = [
     { id: "produtos", label: "Produtos" },
     { id: "duvidas", label: "Dúvidas" },
