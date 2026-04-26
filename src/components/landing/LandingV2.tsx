@@ -343,32 +343,7 @@ const LandingV2 = () => {
         </div>
       </section>
 
-      {/* ABRANGÊNCIA */}
-      <section id="abrangencia" className="border-t border-white/10 px-6 py-20">
-        <div className="mx-auto grid max-w-[1280px] items-center gap-12 lg:grid-cols-2">
-          <div>
-            <p className="text-sm font-black uppercase tracking-[0.25em] text-[#43B02A]">Abrangência</p>
-            <h2 className="mt-4 text-4xl font-black uppercase md:text-5xl">
-              Atendemos <br /> todo o Brasil
-            </h2>
-            <p className="mt-6 max-w-[520px] text-white/75">
-              Estrutura preparada para atender operações logísticas em qualquer região do país, com entrega rápida e suporte especializado.
-            </p>
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              <MiniItem title="Atendimento nacional" color="#1E88E5" />
-              <MiniItem title="Entrega rápida" color="#43B02A" />
-              <MiniItem title="Suporte especializado" color="#FF9A00" />
-            </div>
-          </div>
-          <div className="flex justify-center">
-            <img
-              src={mapaBrasil}
-              alt="Atendimento Tech4Rent em todo o Brasil"
-              className="max-h-[820px] w-full max-w-[1020px] object-contain drop-shadow-[0_0_40px_rgba(30,136,229,0.35)]"
-            />
-          </div>
-        </div>
-      </section>
+      {/* A seção de Abrangência foi removida conforme solicitação */}
 
       {/* SOBRE OS EQUIPAMENTOS */}
       <section id="equipamentos" className="border-t border-white/10 px-6 py-20">
