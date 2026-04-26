@@ -67,7 +67,7 @@ const LandingV2 = () => {
         <div className="absolute left-0 top-32 h-[420px] w-[260px] bg-[#1E88E5]/10 blur-[90px]" />
         <div className="absolute right-0 top-28 h-[460px] w-[320px] bg-[#43B02A]/10 blur-[100px]" />
 
-        <div className="relative z-10 mx-auto grid min-h-[720px] max-w-[1280px] items-center gap-12 px-6 py-16 lg:grid-cols-2">
+        <div className="relative z-10 mx-auto grid min-h-[500px] max-w-[1280px] items-center gap-12 px-6 py-12 lg:grid-cols-2">
           <div>
             <h1 className="text-5xl font-black uppercase leading-[1.05] md:text-7xl">
               Equipamentos <br />
