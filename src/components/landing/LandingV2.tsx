@@ -1,7 +1,7 @@
 // src/components/landing/LandingV2.tsx
 // Landing recriada conforme o código de referência enviado pelo cliente.
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useStore } from "@/store";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import heroDevices from "@/assets/landing/devices-only.png";
@@ -57,7 +57,7 @@ const clientStats: Array<[string, string]> = [
 ];
 
 const LandingV2 = () => {
-  const { companySettings, catalogItems, fetchAllData } = useStore();
+  const { companySettings, catalogItems, equipments, fetchAllData } = useStore();
   const [currentIndex, setCurrentIndex] = useState(0);
   
   useEffect(() => {
