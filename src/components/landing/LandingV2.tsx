@@ -10,6 +10,9 @@ import iconAgilidade from "@/assets/landing/icon-agilidade.png";
 import iconErros from "@/assets/landing/icon-erros.png";
 import iconSeguranca from "@/assets/landing/icon-seguranca.png";
 import iconResultados from "@/assets/landing/icon-resultados.png";
+import iconTech1 from "@/assets/landing/icon-tech-1.png";
+import iconTech2 from "@/assets/landing/icon-tech-2.png";
+import iconTech3 from "@/assets/landing/icon-tech-3.png";
 import prodColetor from "@/assets/landing/prod-coletor.png";
 import prodLeitor from "@/assets/landing/prod-leitor.png";
 import prodImpressora from "@/assets/landing/prod-impressora.png";
@@ -44,9 +47,9 @@ const aboutItems: Array<[string, string, string]> = [
 ];
 
 const benefitsItems: Array<[string, string, string]> = [
-  ["AGILIDADE", "Processos mais rápidos e automatizados.", iconAgilidade],
-  ["SEGURANÇA", "Equipamentos resistentes para o dia a dia.", iconSeguranca],
-  ["RESULTADOS", "Soluções que elevam o desempenho.", iconResultados],
+  ["AGILIDADE", "Processos mais rápidos e automatizados.", iconTech1],
+  ["SEGURANÇA", "Equipamentos resistentes para o dia a dia.", iconTech2],
+  ["RESULTADOS", "Soluções que elevam o desempenho.", iconTech3],
 ];
 
 const clientStats: Array<[string, string]> = [
