@@ -116,12 +116,11 @@ const LandingV2 = () => {
                 key={item.title}
                 className={`flex items-center gap-4 ${i < heroBenefits.length - 1 ? "md:border-r md:border-white/10 md:pr-4" : ""}`}
               >
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center">
+                <div className={`flex shrink-0 items-center justify-center ${item.title === "MAIS AGILIDADE" ? "h-[100px] w-[100px]" : "h-14 w-14"}`}>
                   <img 
                     src={item.icon} 
                     alt="" 
                     className="max-h-full max-w-full object-contain" 
-                    style={item.title === "MAIS AGILIDADE" ? { transform: 'scale(1.2)' } : {}}
                   />
                 </div>
                 <div>
