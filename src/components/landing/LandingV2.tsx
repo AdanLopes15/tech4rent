@@ -341,15 +341,40 @@ const LandingV2 = () => {
 
             {/* Formulário */}
             <form
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
                 const fd = new FormData(e.currentTarget);
-                const nome = fd.get("nome");
-                const email = fd.get("email");
-                const telefone = fd.get("telefone");
-                const mensagem = fd.get("mensagem");
-                const text = `Olá, sou ${nome}.%0AE-mail: ${email}%0ATelefone: ${telefone}%0A%0A${mensagem}`;
-                window.open(`${WA.split("?")[0]}?text=${text}`, "_blank");
+                const nome = fd.get("nome") as string;
+                const email = fd.get("email") as string;
+                const telefone = fd.get("telefone") as string;
+                const mensagem = fd.get("mensagem") as string;
+
+                try {
+                  // Envia para o admin do sistema
+                  await useStore.getState().addSiteContact({
+                    nome,
+                    email,
+                    telefone,
+                    mensagem,
+                    origem: "Landing Page V2"
+                  });
+
+                  import("sonner").then(({ toast }) => {
+                    toast.success("Sua mensagem foi enviada! Em breve vamos retornar o contato.");
+                  });
+
+                  // Limpa o formulário
+                  (e.target as HTMLFormElement).reset();
+
+                  // Opcional: mantém o comportamento do WhatsApp se desejado, 
+                  // mas a solicitação foca no admin agora.
+                  // const text = `Olá, sou ${nome}.%0AE-mail: ${email}%0ATelefone: ${telefone}%0A%0A${mensagem}`;
+                  // window.open(`${WA.split("?")[0]}?text=${text}`, "_blank");
+                } catch (error) {
+                  import("sonner").then(({ toast }) => {
+                    toast.error("Erro ao enviar mensagem. Tente novamente.");
+                  });
+                }
               }}
               className="grid gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-6"
             >
