@@ -13,6 +13,68 @@
 
 @layer base {
   :root {
+    /* Light theme — TECH4RENT */
+    --background: 214 33% 97%;
+    --surface: 214 33% 95%;
+    --foreground: 212 54% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 212 54% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 212 54% 11%;
+
+    --primary: 210 79% 51%;
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 210 79% 92%;
+
+    --secondary: 214 32% 91%;
+    --secondary-foreground: 212 54% 11%;
+
+    --muted: 214 32% 91%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 210 79% 96%;
+    --accent-foreground: 210 79% 51%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 108 62% 43%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 36 100% 50%;
+    --warning-foreground: 212 54% 11%;
+
+    --info: 210 79% 51%;
+    --info-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 210 79% 51%;
+
+    --radius: 1rem;
+
+    --shadow-card: 0 10px 30px -10px hsl(212 54% 11% / 0.1);
+    --shadow-card-hover: 0 20px 45px -15px hsl(210 79% 51% / 0.2);
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 212 54% 11%;
+    --sidebar-primary: 210 79% 51%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 214 32% 91%;
+    --sidebar-accent-foreground: 212 54% 11%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 210 79% 51%;
+
+    --chart-1: 210 79% 51%;
+    --chart-2: 108 62% 47%;
+    --chart-3: 36 100% 55%;
+    --chart-4: 217 91% 60%;
+    --chart-5: 0 84% 60%;
+  }
+
+  .dark {
     /* Dark theme — TECH4RENT */
     --background: 222 47% 5%;
     --surface: 222 40% 8%;
@@ -53,11 +115,6 @@
     --input: 222 30% 16%;
     --ring: 210 79% 51%;
 
-    --radius: 1rem;
-
-    --shadow-card: 0 10px 30px -10px hsl(0 0% 0% / 0.6);
-    --shadow-card-hover: 0 20px 45px -15px hsl(210 79% 51% / 0.35);
-
     --sidebar-background: 222 47% 5%;
     --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 210 79% 51%;
@@ -66,48 +123,6 @@
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 222 30% 16%;
     --sidebar-ring: 210 79% 51%;
-
-    --chart-1: 210 79% 51%;
-    --chart-2: 108 62% 47%;
-    --chart-3: 36 100% 55%;
-    --chart-4: 217 91% 60%;
-    --chart-5: 0 84% 60%;
-  }
-
-  .dark {
-    --background: 212 54% 6%;
-    --foreground: 210 40% 96%;
-    --card: 212 54% 9%;
-    --card-foreground: 210 40% 96%;
-    --popover: 212 54% 9%;
-    --popover-foreground: 210 40% 96%;
-    --primary: 210 79% 56%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 96%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 210 79% 18%;
-    --accent-foreground: 210 79% 80%;
-    --destructive: 0 63% 41%;
-    --destructive-foreground: 210 40% 98%;
-    --success: 108 62% 45%;
-    --success-foreground: 0 0% 100%;
-    --warning: 36 100% 55%;
-    --warning-foreground: 0 0% 0%;
-    --info: 210 79% 56%;
-    --info-foreground: 0 0% 100%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 210 79% 56%;
-    --sidebar-background: 212 54% 7%;
-    --sidebar-foreground: 210 40% 96%;
-    --sidebar-primary: 210 79% 56%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 212 54% 11%;
-    --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 217 33% 17%;
-    --sidebar-ring: 210 79% 56%;
   }
 }
 
