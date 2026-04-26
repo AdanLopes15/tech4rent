@@ -57,6 +57,8 @@ interface CatalogItemForm {
   kitItems?: KitItem[];
   // legado
   whatsBoxItems?: string[];
+  show_on_home?: boolean;
+  show_on_landing?: boolean;
 }
 
 interface Props {
@@ -111,6 +113,8 @@ const CatalogItemDialog = ({ open, onOpenChange, equipment, catalogItem }: Props
         })),
         specGroups: groups,
         kitItems: kit,
+        show_on_home: catalogItem.show_on_home ?? false,
+        show_on_landing: catalogItem.show_on_landing ?? false,
       });
     } else if (equipment) {
       setForm({
@@ -123,6 +127,8 @@ const CatalogItemDialog = ({ open, onOpenChange, equipment, catalogItem }: Props
         longDescription: equipment.description,
         heroImageUrl: equipment.imageUrl || equipment.imageUrls?.[0] || "",
         galleryUrls: Array.isArray(equipment.imageUrls) ? equipment.imageUrls : [],
+        show_on_home: equipment.show_on_home ?? false,
+        show_on_landing: equipment.show_on_landing ?? false,
       });
     }
     setFiles({});
@@ -232,6 +238,17 @@ const CatalogItemDialog = ({ open, onOpenChange, equipment, catalogItem }: Props
             <p className="text-xs text-muted-foreground">Quando desativado, o anúncio fica oculto no site.</p>
           </div>
           <Switch checked={form.published} onCheckedChange={(v) => setField("published", v)} />
+        </div>
+
+        <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3">
+          <div>
+            <Label className="text-sm font-semibold">Exibir na Vitrine da Página Inicial</Label>
+            <p className="text-xs text-muted-foreground">O produto aparecerá no carrossel de destaques da home.</p>
+          </div>
+          <Switch checked={form.show_on_home || form.show_on_landing} onCheckedChange={(v) => {
+            setField("show_on_home", v);
+            setField("show_on_landing", v);
+          }} />
         </div>
 
         <Tabs defaultValue="basico" className="mt-4">

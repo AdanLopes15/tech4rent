@@ -138,7 +138,7 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
     <header className="h-14 border-b border-border bg-card flex items-center justify-between px-6 gap-2">
       <div className="flex items-center gap-2">
         <img 
-          src={isDark ? "/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png" : logoTech4Rent} 
+          src={isDark ? "/lovable-uploads/67633215-6809-4361-9f93-134919597143.png" : logoTech4Rent} 
           alt="Tech4Rent Logo" 
           className="h-8 object-contain"
         />

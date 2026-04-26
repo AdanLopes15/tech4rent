@@ -65,14 +65,18 @@ const LandingV2 = () => {
   }, [fetchAllData]);
 
   const showcaseProducts = useMemo(() => {
-    const fromCatalog = (catalogItems || []).filter(item => item.published && (item.show_on_landing === true || item.show_on_home === true));
+    // Pegamos itens do catálogo que estão publicados
+    const fromCatalog = (catalogItems || []).filter(item => item.published);
     const catalogEquipmentIds = new Set(fromCatalog.map(item => item.equipmentId).filter(Boolean));
     
+    // Pegamos equipamentos que NÃO estão no catálogo mas estão marcados para aparecer na home
     const fromEquipments = (equipments || []).filter(e => 
       !catalogEquipmentIds.has(e.id) && (e.show_on_landing === true || e.show_on_home === true)
     );
     
-    return [...fromCatalog, ...fromEquipments];
+    // Combinamos e filtramos apenas os que devem aparecer na landing/home
+    const combined = [...fromCatalog, ...fromEquipments];
+    return combined.filter(p => p.show_on_landing === true || p.show_on_home === true);
   }, [catalogItems, equipments]);
   
   const WA = buildWa(companySettings?.phone);
