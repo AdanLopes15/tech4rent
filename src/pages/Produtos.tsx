@@ -63,11 +63,12 @@ const Produtos = () => {
 
   // Merge: catalog items publicados aparecem como "produtos enriquecidos"; equipamentos restantes (sem catalog) também aparecem
   const allProducts = useMemo(() => {
-    const publishedItems = (catalogItems || []).filter((c: any) => c.published || c.show_on_catalog);
+    const publishedItems = (catalogItems || []).filter((c: any) => c.published);
     const publishedEquipmentIds = new Set(publishedItems.map((c: any) => c.equipmentId).filter(Boolean));
 
     const fromCatalog = publishedItems.map((c: any) => ({
       id: `cat-${c.id}`,
+      equipmentId: c.equipmentId,
       __isCatalog: true,
       name: c.name,
       code: c.code,

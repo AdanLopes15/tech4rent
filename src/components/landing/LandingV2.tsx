@@ -64,7 +64,16 @@ const LandingV2 = () => {
     fetchAllData(true);
   }, [fetchAllData]);
 
-  const showcaseProducts = (catalogItems || []).filter(item => item.show_on_landing === true || item.show_on_home === true);
+  const showcaseProducts = useMemo(() => {
+    const fromCatalog = (catalogItems || []).filter(item => item.published && (item.show_on_landing === true || item.show_on_home === true));
+    const catalogEquipmentIds = new Set(fromCatalog.map(item => item.equipmentId).filter(Boolean));
+    
+    const fromEquipments = (equipments || []).filter(e => 
+      !catalogEquipmentIds.has(e.id) && (e.show_on_landing === true || e.show_on_home === true)
+    );
+    
+    return [...fromCatalog, ...fromEquipments];
+  }, [catalogItems, equipments]);
   
   const WA = buildWa(companySettings?.phone);
 
