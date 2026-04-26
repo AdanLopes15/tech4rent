@@ -117,7 +117,7 @@ const LandingV2 = () => {
     if (showcaseProducts.length > 4 && !isPaused) {
       const interval = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % showcaseProducts.length);
-      }, 3000); // 3 segundos
+      }, 4000); // 4 segundos
       return () => clearInterval(interval);
     }
   }, [showcaseProducts.length, isPaused]);
