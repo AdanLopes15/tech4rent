@@ -70,8 +70,8 @@ const LandingV2 = () => {
         <div className="relative z-10 mx-auto grid min-h-[720px] max-w-[1280px] items-center gap-12 px-6 py-16 lg:grid-cols-2">
           <div>
             <h1 className="text-5xl font-black uppercase leading-[1.05] md:text-7xl">
-              Tecnologia <br />
-              que <span className="text-[#43B02A]">move</span> <br />
+              Equipamentos <br />
+              que <span className="text-[#43B02A]">movem</span> <br />
               <span className="text-[#1E88E5]">resultados.</span>
             </h1>
             <p className="mt-7 max-w-[560px] text-lg leading-relaxed text-white/80 md:text-xl">
