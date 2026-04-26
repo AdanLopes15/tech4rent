@@ -37,7 +37,7 @@ const Navbar = () => {
   const { companySettings } = useStore();
 
   const fantasyName = companySettings?.fantasyName || companySettings?.name || "TECH4RENT";
-  const siteLogoUrl = companySettings?.siteLogoUrl || logoWhite;
+  const siteLogoUrl = companySettings?.siteLogoUrl && companySettings.siteLogoUrl !== "" ? companySettings.siteLogoUrl : logoWhite;
 
   const isPublicRoute = !location.pathname.startsWith("/admin") && !location.pathname.startsWith("/login");
 

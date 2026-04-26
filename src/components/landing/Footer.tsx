@@ -8,7 +8,7 @@ import { useStore } from "@/store";
 const Footer = () => {
   const { companySettings } = useStore();
   const fantasyName = companySettings?.fantasyName || companySettings?.name || "TECH4RENT";
-  const siteLogoUrl = companySettings?.siteLogoUrl || logoWhite;
+  const siteLogoUrl = companySettings?.siteLogoUrl && companySettings.siteLogoUrl !== "" ? companySettings.siteLogoUrl : logoWhite;
   const address = companySettings?.address;
   const fullAddress = [
     address?.logradouro,
