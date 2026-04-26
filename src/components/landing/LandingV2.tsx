@@ -359,24 +359,22 @@ const LandingV2 = () => {
             </h2>
           </div>
 
-          <div className="grid gap-6 rounded-2xl border border-white/10 bg-[#0A0F1C] p-6 md:grid-cols-3 md:gap-0 md:p-8">
+          <div className="grid gap-6 rounded-2xl border border-white/10 bg-[#0A0F1C] p-6 md:grid-cols-3 md:gap-0 md:p-6">
             {benefitsItems.map(([title, text, icon], i) => (
               <div
                 key={title}
-                className={`flex items-center gap-5 px-2 md:px-6 ${
+                className={`flex items-center gap-4 px-2 md:px-5 ${
                   i < benefitsItems.length - 1 ? "md:border-r md:border-white/10" : ""
                 }`}
               >
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center md:h-20 md:w-20">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center md:h-16 md:w-16">
                   <img src={icon} alt="" className="max-h-full max-w-full object-contain" />
                 </div>
-                <div className="flex items-center gap-5 flex-1 min-w-0">
-                  <h3 className="whitespace-pre-line text-lg md:text-xl font-black uppercase leading-tight tracking-wide text-white">
-                    {title}
-                  </h3>
-                  <div className="h-12 w-px bg-white/15 shrink-0" />
-                  <p className="text-sm md:text-base text-white/70 leading-snug">{text}</p>
-                </div>
+                <h3 className="whitespace-pre-line text-[15px] md:text-base font-black uppercase leading-tight tracking-wide text-white shrink-0">
+                  {title}
+                </h3>
+                <div className="h-10 w-px bg-white/15 shrink-0 mx-1" />
+                <p className="text-[13px] md:text-sm text-white/65 leading-snug flex-1">{text}</p>
               </div>
             ))}
           </div>
