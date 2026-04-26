@@ -2,7 +2,7 @@
 import logoWhite from "@/assets/landing/logo-tech4rent.png";
 
 import { Clock, Instagram, Linkedin, Lock, Mail, MapPin, Phone, Youtube } from "lucide-react";
-// ... keep existing code
+import { Link } from "react-router-dom";
 import { useStore } from "@/store";
 
 const Footer = () => {
