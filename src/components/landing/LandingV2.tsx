@@ -291,10 +291,17 @@ const LandingV2 = () => {
       </section>
 
       {/* QUEM SOMOS */}
-      <section id="quem-somos" className="border-t border-white/10 px-6 py-24 bg-[#05070D]">
-        <div className="mx-auto max-w-[1280px]">
+      <section id="quem-somos" className="relative overflow-hidden border-t border-white/10 px-6 py-24 bg-[#05070D]">
+        <img
+          src={quemSomosImg}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 right-0 h-full w-auto max-w-[70%] object-contain object-right opacity-30 lg:opacity-50"
+        />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#05070D] via-[#05070D]/80 to-transparent" />
+        <div className="relative mx-auto max-w-[1280px]">
           <div className="grid gap-16 lg:grid-cols-[0.8fr_1.2fr] items-center">
-            <div>
+            <div className="relative z-10">
               <p className="text-sm font-black uppercase tracking-[0.3em] text-[#43B02A] mb-4">SOBRE NÓS</p>
               <h2 className="text-5xl md:text-6xl font-black uppercase leading-[1.1]">
                 QUEM É A <br />
@@ -323,16 +330,10 @@ const LandingV2 = () => {
               </div>
             </div>
 
-            <div className="relative flex w-full items-center justify-center">
-              <img
-                src={quemSomosImg}
-                alt="Tech4Rent - Tecnologia que move negócios"
-                className="w-full h-auto object-contain scale-110 lg:scale-125 transition-transform duration-700 hover:scale-[1.32]"
-              />
-            </div>
+            <div className="hidden lg:block" />
           </div>
 
-          <div className="mt-24 grid grid-cols-2 md:grid-cols-4 gap-8 py-12 border-y border-white/5">
+          <div className="relative z-10 mt-24 grid grid-cols-2 md:grid-cols-4 gap-8 py-12 border-y border-white/5 bg-[#05070D]/70 backdrop-blur-sm rounded-2xl px-4">
             {clientStats.map(([value, label]) => (
               <div key={label} className="text-center">
                 <div className="text-4xl md:text-5xl font-black text-[#1E88E5] mb-2">{value}</div>
