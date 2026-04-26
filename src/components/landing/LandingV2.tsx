@@ -59,6 +59,7 @@ const clientStats: Array<[string, string]> = [
 const LandingV2 = () => {
   const { companySettings, catalogItems, equipments, fetchAllData } = useStore();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   
   useEffect(() => {
     fetchAllData(true);
