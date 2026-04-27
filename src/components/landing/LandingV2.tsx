@@ -1,9 +1,9 @@
 // src/components/landing/LandingV2.tsx
 // Landing recriada conforme o código de referência enviado pelo cliente.
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useStore } from "@/store";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Instagram, Linkedin, Youtube, MapPin, Phone, Mail, ShieldCheck, CheckCircle, Globe } from "lucide-react";
 import heroDevices from "@/assets/landing/devices-only.png";
 import warehouseBg from "@/assets/landing/hero-bg-warehouse.jpg";
 import iconAgilidade from "@/assets/landing/icon-agilidade.png";
