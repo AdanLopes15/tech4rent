@@ -33,9 +33,15 @@ type Props = {
 
 const EquipmentsBlock = ({ eyebrow, title, subtitle, maxItems = 3 }: Props) => {
   const { companySettings, equipments, catalogItems } = useStore();
-  const published = (catalogItems || []).filter((c: any) => c.published);
-  const usedIds = new Set(published.map((c: any) => c.equipmentId).filter(Boolean));
-  const fromCatalog = published.map((c: any) => ({
+
+  // Apenas itens publicados E marcados para aparecer na vitrine/home
+  const featuredCatalog = (catalogItems || []).filter(
+    (c: any) => c.published && (c.show_on_home || c.show_on_landing),
+  );
+  const usedEquipmentIds = new Set(
+    (catalogItems || []).map((c: any) => c.equipmentId).filter(Boolean),
+  );
+  const fromCatalog = featuredCatalog.map((c: any) => ({
     id: `cat-${c.id}`,
     name: c.name,
     code: c.code,
@@ -43,7 +49,10 @@ const EquipmentsBlock = ({ eyebrow, title, subtitle, maxItems = 3 }: Props) => {
     imageUrl: c.heroImageUrl,
     imageUrls: [c.heroImageUrl, ...(c.galleryUrls || [])].filter(Boolean),
   }));
-  const fromEquipments = (equipments || []).filter((e: any) => !usedIds.has(e.id));
+  // Equipamentos sem anúncio personalizado, mas marcados para aparecer na home
+  const fromEquipments = (equipments || []).filter(
+    (e: any) => !usedEquipmentIds.has(e.id) && (e.show_on_home || e.show_on_landing),
+  );
   const all = [...fromCatalog, ...fromEquipments].slice(0, maxItems);
 
   return (
