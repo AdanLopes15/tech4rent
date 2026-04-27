@@ -281,7 +281,7 @@ const LandingV2 = () => {
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
           >
-            {showcaseProducts.length > 4 && (
+            {filteredProducts.length > 4 && (
               <>
                 <button 
                   onClick={prevSlide}
