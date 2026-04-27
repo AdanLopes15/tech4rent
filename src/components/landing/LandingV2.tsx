@@ -143,13 +143,13 @@ const LandingV2 = () => {
 
   // Carrossel Automático
   useEffect(() => {
-    if (showcaseProducts.length > 4 && !isPaused) {
+    if (filteredProducts.length > 4 && !isPaused) {
       const interval = setInterval(() => {
-        setCurrentIndex((prev) => (prev + 1) % showcaseProducts.length);
+        setCurrentIndex((prev) => (prev + 1) % filteredProducts.length);
       }, 4000); // 4 segundos
       return () => clearInterval(interval);
     }
-  }, [showcaseProducts.length, isPaused]);
+  }, [filteredProducts.length, isPaused]);
   
   const WA = buildWa(companySettings?.phone);
 
