@@ -514,18 +514,65 @@ const LandingV2 = () => {
             Preencha o formulário ou venha nos visitar. Nossa equipe responde em até 24h úteis.
           </p>
 
-          <div className="mt-12 grid gap-8 lg:grid-cols-2">
+          <div className="mt-12 grid gap-8 lg:grid-cols-2 items-stretch">
             {/* Mapa */}
-            <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
+            <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] order-2 lg:order-1">
               <iframe
                 title="Localização Tech4Rent"
                 src="https://www.google.com/maps?q=Avenida+Paulista,+S%C3%A3o+Paulo,+SP&output=embed"
-                className="h-full min-h-[460px] w-full border-0"
+                className="h-[320px] lg:h-full lg:min-h-[420px] w-full border-0"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 allowFullScreen
               />
-      {/* FOOTER ENRIQUECIDO */}
+            </div>
+
+            {/* Formulário */}
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const fd = new FormData(e.currentTarget);
+                const nome = fd.get("nome") as string;
+                const email = fd.get("email") as string;
+                const telefone = fd.get("telefone") as string;
+                const mensagem = fd.get("mensagem") as string;
+                try {
+                  await useStore.getState().addSiteContact({ nome, email, telefone, mensagem, origem: "Landing Page V2" });
+                  import("sonner").then(({ toast }) => toast.success("Sua mensagem foi enviada! Em breve vamos retornar o contato."));
+                  (e.target as HTMLFormElement).reset();
+                } catch (error) {
+                  import("sonner").then(({ toast }) => toast.error("Erro ao enviar mensagem. Tente novamente."));
+                }
+              }}
+              className="grid gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-6 order-1 lg:order-2"
+            >
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block">
+                  <span className="text-xs font-bold uppercase tracking-wider text-white/60">Nome</span>
+                  <input name="nome" required className="mt-2 w-full rounded-lg border border-white/10 bg-black/30 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-[#43B02A] focus:outline-none" placeholder="Seu nome" />
+                </label>
+                <label className="block">
+                  <span className="text-xs font-bold uppercase tracking-wider text-white/60">Telefone</span>
+                  <input name="telefone" required className="mt-2 w-full rounded-lg border border-white/10 bg-black/30 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-[#43B02A] focus:outline-none" placeholder="(11) 99999-9999" />
+                </label>
+              </div>
+              <label className="block">
+                <span className="text-xs font-bold uppercase tracking-wider text-white/60">E-mail</span>
+                <input name="email" type="email" required className="mt-2 w-full rounded-lg border border-white/10 bg-black/30 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-[#43B02A] focus:outline-none" placeholder="seu@email.com" />
+              </label>
+              <label className="block">
+                <span className="text-xs font-bold uppercase tracking-wider text-white/60">Mensagem</span>
+                <textarea name="mensagem" required rows={4} className="mt-2 w-full rounded-lg border border-white/10 bg-black/30 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-[#43B02A] focus:outline-none resize-none" placeholder="Como podemos ajudar?" />
+              </label>
+              <button type="submit" className="mt-2 rounded-xl bg-[#43B02A] px-6 py-4 text-sm font-black uppercase text-white shadow-[0_0_30px_rgba(67,176,42,0.45)] transition hover:scale-[1.02]">
+                Enviar mensagem
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+
       <footer className="border-t border-white/10 bg-[#05070D] px-6 py-20 text-white/70">
         <div className="mx-auto max-w-[1280px]">
           <div className="grid gap-12 lg:grid-cols-4">
