@@ -525,7 +525,100 @@ const LandingV2 = () => {
                 referrerPolicy="no-referrer-when-downgrade"
                 allowFullScreen
               />
+      {/* FOOTER ENRIQUECIDO */}
+      <footer className="border-t border-white/10 bg-[#05070D] px-6 py-20 text-white/70">
+        <div className="mx-auto max-w-[1280px]">
+          <div className="grid gap-12 lg:grid-cols-4">
+            {/* Coluna 1: Logo e Descrição */}
+            <div className="lg:col-span-1">
+              <div className="flex items-center gap-2 mb-6">
+                <span className="text-2xl font-black uppercase tracking-tighter text-white">
+                  TECH<span className="text-[#43B02A]">4</span>RENT
+                </span>
+              </div>
+              <p className="text-sm leading-relaxed mb-8">
+                Líder em locação de equipamentos operacionais. Transformamos sua logística com tecnologia de ponta e suporte especializado em todo o Brasil.
+              </p>
+              <div className="flex gap-4">
+                <a href={companySettings?.instagramUrl || "#"} className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 border border-white/10 transition hover:bg-[#1E88E5] hover:text-white">
+                  <Instagram className="h-5 w-5" />
+                </a>
+                <a href={companySettings?.linkedinUrl || "#"} className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 border border-white/10 transition hover:bg-[#1E88E5] hover:text-white">
+                  <Linkedin className="h-5 w-5" />
+                </a>
+                <a href={companySettings?.youtubeUrl || "#"} className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 border border-white/10 transition hover:bg-[#1E88E5] hover:text-white">
+                  <Youtube className="h-5 w-5" />
+                </a>
+              </div>
             </div>
+
+            {/* Coluna 2: Links Rápidos */}
+            <div>
+              <h4 className="text-white font-black uppercase tracking-wider mb-6 text-sm">Navegação</h4>
+              <ul className="space-y-4 text-sm font-bold">
+                <li><a href="#inicio" className="hover:text-[#43B02A] transition">Home</a></li>
+                <li><a href="#produtos" className="hover:text-[#43B02A] transition">Produtos</a></li>
+                <li><a href="#quem-somos" className="hover:text-[#43B02A] transition">Sobre Nós</a></li>
+                <li><a href="#duvidas" className="hover:text-[#43B02A] transition">FAQ</a></li>
+                <li><a href="#contato" className="hover:text-[#43B02A] transition">Contato</a></li>
+              </ul>
+            </div>
+
+            {/* Coluna 3: Contato */}
+            <div>
+              <h4 className="text-white font-black uppercase tracking-wider mb-6 text-sm">Contato</h4>
+              <ul className="space-y-4 text-sm">
+                <li className="flex items-start gap-3">
+                  <MapPin className="h-5 w-5 text-[#43B02A] shrink-0" />
+                  <span>
+                    {companySettings?.address?.logradouro}, {companySettings?.address?.numero}<br />
+                    {companySettings?.address?.localidade} - {companySettings?.address?.uf}<br />
+                    CEP: {companySettings?.address?.cep}
+                  </span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <Phone className="h-5 w-5 text-[#43B02A] shrink-0" />
+                  <span>{companySettings?.phone}</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <Mail className="h-5 w-5 text-[#43B02A] shrink-0" />
+                  <span>{companySettings?.email}</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Coluna 4: Selos e Mapa Curto */}
+            <div>
+              <h4 className="text-white font-black uppercase tracking-wider mb-6 text-sm">Localização</h4>
+              <div className="h-32 w-full rounded-xl overflow-hidden border border-white/10 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all mb-6">
+                <iframe
+                  title="Localização Footer"
+                  src="https://www.google.com/maps?q=Avenida+Paulista,+S%C3%A3o+Paulo,+SP&output=embed"
+                  className="h-full w-full border-0"
+                  loading="lazy"
+                />
+              </div>
+              <div className="flex gap-4">
+                <div className="h-10 w-24 bg-white/5 border border-white/10 rounded flex items-center justify-center text-[10px] font-bold uppercase tracking-tighter opacity-50">
+                  Site Seguro
+                </div>
+                <div className="h-10 w-24 bg-white/5 border border-white/10 rounded flex items-center justify-center text-[10px] font-bold uppercase tracking-tighter opacity-50">
+                  Google Partner
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-bold uppercase tracking-[0.2em]">
+            <p>&copy; {new Date().getFullYear()} TECH4RENT. Todos os direitos reservados.</p>
+            <div className="flex gap-8">
+              <a href="#" className="hover:text-white transition">Privacidade</a>
+              <a href="#" className="hover:text-white transition">Termos</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
 
             {/* Formulário */}
             <form
