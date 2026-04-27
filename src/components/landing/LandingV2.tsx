@@ -426,32 +426,49 @@ const LandingV2 = () => {
         </div>
       </section>
 
-      {/* CLIENTES */}
-      <section id="clientes" className="border-t border-white/10 px-6 py-16">
+      {/* PROVA SOCIAL / LOGOS */}
+      <section id="clientes" className="border-t border-white/10 px-6 py-20 bg-[#080A12]">
         <div className="mx-auto max-w-[1280px]">
-          <p className="text-center text-sm font-black uppercase tracking-[0.25em] text-[#43B02A]">Clientes atendidos</p>
-          <h2 className="mt-3 text-center text-3xl font-black uppercase md:text-4xl">
-            Empresas que confiam na Tech<span className="text-[#43B02A]">4</span>Rent
-          </h2>
+          <div className="mb-12 text-center">
+            <p className="text-sm font-black uppercase tracking-[0.25em] text-[#43B02A] mb-2">Credibilidade</p>
+            <h2 className="text-3xl font-black uppercase md:text-4xl text-white">Empresas que confiam na Tech<span className="text-[#43B02A]">4</span>Rent</h2>
+          </div>
 
-          <div className="relative mt-10 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] py-8">
-            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-background to-transparent" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-background to-transparent" />
+          <div className="relative overflow-hidden py-4">
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-32 bg-gradient-to-r from-[#080A12] to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-32 bg-gradient-to-l from-[#080A12] to-transparent" />
 
-            <div className="flex w-max animate-[marquee_30s_linear_infinite] gap-16 px-8">
-              {[...Array(2)].map((_, dup) => (
-                <div key={dup} className="flex shrink-0 items-center gap-16">
-                  {["RPM", "SHOPEE", "MERCADO LIVRE", "MAGAZINE LUIZA", "DHL", "DAFITI", "GN SERVIÇOS"].map((brand) => (
-                    <span
+            <div className="flex w-max animate-[marquee_40s_linear_infinite] gap-16 px-8 items-center">
+              {[...Array(3)].map((_, dup) => (
+                <div key={dup} className="flex shrink-0 items-center gap-20">
+                  {["PELOG", "SHOPEE", "MERCADO LIVRE", "MAGAZINE LUIZA", "DHL", "DAFITI", "GN SERVIÇOS", "CEVA LOGISTICS", "VDC LOG"].map((brand) => (
+                    <div
                       key={`${dup}-${brand}`}
-                      className="whitespace-nowrap text-2xl font-black uppercase tracking-[0.18em] text-white/55 transition hover:text-white md:text-3xl"
+                      className="flex items-center gap-3 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-default group"
                     >
-                      {brand}
-                    </span>
+                      <span className="whitespace-nowrap text-xl font-black uppercase tracking-[0.15em] text-white/80 group-hover:text-[#1E88E5] md:text-2xl">
+                        {brand}
+                      </span>
+                    </div>
                   ))}
                 </div>
               ))}
             </div>
+          </div>
+
+          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+              { label: "Equipamentos Ativos", value: "10k+", icon: ShieldCheck },
+              { label: "Clientes Satisfeitos", value: "1.000+", icon: CheckCircle },
+              { label: "Anos de Experiência", value: "15+", icon: Globe },
+              { label: "Suporte 24/7", value: "FULL", icon: Phone },
+            ].map((stat) => (
+              <div key={stat.label} className="bg-white/[0.03] border border-white/5 rounded-2xl p-6 text-center hover:border-[#1E88E5]/30 transition-colors group">
+                <stat.icon className="w-8 h-8 text-[#1E88E5] mx-auto mb-4 group-hover:scale-110 transition-transform" />
+                <div className="text-3xl font-black text-white mb-1 tracking-tight">{stat.value}</div>
+                <div className="text-xs font-bold text-white/40 uppercase tracking-widest">{stat.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
