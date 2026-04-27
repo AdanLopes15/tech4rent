@@ -154,16 +154,16 @@ const LandingV2 = () => {
   const WA = buildWa(companySettings?.phone);
 
   const nextSlide = () => {
-    if (showcaseProducts.length > 4) {
-      setCurrentIndex((prev) => (prev + 1) % showcaseProducts.length);
+    if (filteredProducts.length > 4) {
+      setCurrentIndex((prev) => (prev + 1) % filteredProducts.length);
       setIsPaused(true);
       setTimeout(() => setIsPaused(false), 5000);
     }
   };
 
   const prevSlide = () => {
-    if (showcaseProducts.length > 4) {
-      setCurrentIndex((prev) => (prev - 1 + showcaseProducts.length) % showcaseProducts.length);
+    if (filteredProducts.length > 4) {
+      setCurrentIndex((prev) => (prev - 1 + filteredProducts.length) % filteredProducts.length);
       setIsPaused(true);
       setTimeout(() => setIsPaused(false), 5000);
     }
