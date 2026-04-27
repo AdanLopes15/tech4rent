@@ -170,9 +170,9 @@ const LandingV2 = () => {
   };
 
   // Determina os 4 produtos visíveis no carrossel
-  const visibleProducts = showcaseProducts.length <= 4 
-      ? showcaseProducts 
-      : [...showcaseProducts, ...showcaseProducts].slice(currentIndex, currentIndex + 4);
+  const visibleProducts = filteredProducts.length <= 4 
+      ? filteredProducts 
+      : [...filteredProducts, ...filteredProducts].slice(currentIndex, currentIndex + 4);
 
   return (
     <div className="bg-[#05070D] text-white font-sans">
