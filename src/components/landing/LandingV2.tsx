@@ -117,6 +117,30 @@ const LandingV2 = () => {
     return final;
   }, [catalogItems, equipments]);
 
+  const categories = useMemo(() => {
+    const cats = new Set(["Todos"]);
+    showcaseProducts.forEach(p => {
+      if (p.name.toLowerCase().includes("coletor") || p.name.toLowerCase().includes("pda")) cats.add("Coletores");
+      else if (p.name.toLowerCase().includes("leitor") || p.name.toLowerCase().includes("pistola")) cats.add("Leitores");
+      else if (p.name.toLowerCase().includes("impressora")) cats.add("Impressoras");
+      else if (p.name.toLowerCase().includes("etiqueta") || p.name.toLowerCase().includes("ribbon")) cats.add("Suprimentos");
+      else cats.add("Outros");
+    });
+    return Array.from(cats);
+  }, [showcaseProducts]);
+
+  const filteredProducts = useMemo(() => {
+    if (productFilter === "Todos") return showcaseProducts;
+    return showcaseProducts.filter(p => {
+      const name = p.name.toLowerCase();
+      if (productFilter === "Coletores") return name.includes("coletor") || name.includes("pda");
+      if (productFilter === "Leitores") return name.includes("leitor") || name.includes("pistola");
+      if (productFilter === "Impressoras") return name.includes("impressora");
+      if (productFilter === "Suprimentos") return name.includes("etiqueta") || name.includes("ribbon");
+      return !name.includes("coletor") && !name.includes("pda") && !name.includes("leitor") && !name.includes("pistola") && !name.includes("impressora") && !name.includes("etiqueta") && !name.includes("ribbon");
+    });
+  }, [showcaseProducts, productFilter]);
+
   // Carrossel Automático
   useEffect(() => {
     if (showcaseProducts.length > 4 && !isPaused) {
