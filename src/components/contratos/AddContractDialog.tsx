@@ -103,6 +103,17 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
   const updateItem = (index: number, field: keyof ContractItem, value: any) => {
     const updated = [...items];
     updated[index] = { ...updated[index], [field]: value };
+
+    // Auto-preencher valor sugerido ao selecionar equipamento (somente se ainda não foi alterado)
+    if (field === "equipmentId") {
+      const eq: any = equipments.find((e: any) => e.id === value);
+      if (eq && (!updated[index].unitPrice || updated[index].unitPrice === 0)) {
+        const suggested =
+          eq.rentalPrice ?? eq.monthlyPrice ?? eq.price ?? eq.salePrice ?? eq.value ?? 0;
+        updated[index].unitPrice = Number(suggested) || 0;
+      }
+    }
+
     setItems(updated);
   };
 
@@ -294,15 +305,15 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
             <div className="space-y-3">
               <Label className="font-semibold text-base">Itens do Contrato</Label>
               <div className="border rounded-lg p-4 space-y-3">
-                <div className="grid grid-cols-[1fr_70px_100px_100px_40px] gap-2 text-xs font-medium text-muted-foreground">
+                <div className="grid grid-cols-[1fr_70px_100px_120px_40px] gap-2 text-xs font-medium text-muted-foreground">
                   <span>Equipamento</span>
                   <span>Qtd.</span>
                   <span>Cobrança</span>
-                  <span>Valor</span>
+                  <span>Valor Negociado</span>
                   <span />
                 </div>
                 {items.map((item, idx) => (
-                  <div key={idx} className="grid grid-cols-[1fr_70px_100px_100px_40px] gap-2">
+                  <div key={idx} className="grid grid-cols-[1fr_70px_100px_120px_40px] gap-2">
                     <Select value={item.equipmentId} onValueChange={(v) => updateItem(idx, "equipmentId", v)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione" />
@@ -331,7 +342,14 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
                         <SelectItem value="Diário">Diário</SelectItem>
                       </SelectContent>
                     </Select>
-                    <div className="flex items-center text-sm">{formatCurrency(item.unitPrice)}</div>
+                    <Input
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      placeholder="0,00"
+                      value={item.unitPrice || ""}
+                      onChange={(e) => updateItem(idx, "unitPrice", Number(e.target.value))}
+                    />
                     <Button
                       type="button"
                       variant="destructive"
