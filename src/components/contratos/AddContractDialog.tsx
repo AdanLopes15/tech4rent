@@ -103,6 +103,17 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
   const updateItem = (index: number, field: keyof ContractItem, value: any) => {
     const updated = [...items];
     updated[index] = { ...updated[index], [field]: value };
+
+    // Auto-preencher valor sugerido ao selecionar equipamento (somente se ainda não foi alterado)
+    if (field === "equipmentId") {
+      const eq: any = equipments.find((e: any) => e.id === value);
+      if (eq && (!updated[index].unitPrice || updated[index].unitPrice === 0)) {
+        const suggested =
+          eq.rentalPrice ?? eq.monthlyPrice ?? eq.price ?? eq.salePrice ?? eq.value ?? 0;
+        updated[index].unitPrice = Number(suggested) || 0;
+      }
+    }
+
     setItems(updated);
   };
 
