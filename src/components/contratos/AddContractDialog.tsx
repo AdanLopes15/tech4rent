@@ -313,7 +313,7 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
                   <span />
                 </div>
                 {items.map((item, idx) => (
-                  <div key={idx} className="grid grid-cols-[1fr_70px_100px_100px_40px] gap-2">
+                  <div key={idx} className="grid grid-cols-[1fr_70px_100px_120px_40px] gap-2">
                     <Select value={item.equipmentId} onValueChange={(v) => updateItem(idx, "equipmentId", v)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione" />
@@ -342,7 +342,14 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
                         <SelectItem value="Diário">Diário</SelectItem>
                       </SelectContent>
                     </Select>
-                    <div className="flex items-center text-sm">{formatCurrency(item.unitPrice)}</div>
+                    <Input
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      placeholder="0,00"
+                      value={item.unitPrice || ""}
+                      onChange={(e) => updateItem(idx, "unitPrice", Number(e.target.value))}
+                    />
                     <Button
                       type="button"
                       variant="destructive"
