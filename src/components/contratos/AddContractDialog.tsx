@@ -305,11 +305,11 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
             <div className="space-y-3">
               <Label className="font-semibold text-base">Itens do Contrato</Label>
               <div className="border rounded-lg p-4 space-y-3">
-                <div className="grid grid-cols-[1fr_70px_100px_100px_40px] gap-2 text-xs font-medium text-muted-foreground">
+                <div className="grid grid-cols-[1fr_70px_100px_120px_40px] gap-2 text-xs font-medium text-muted-foreground">
                   <span>Equipamento</span>
                   <span>Qtd.</span>
                   <span>Cobrança</span>
-                  <span>Valor</span>
+                  <span>Valor Negociado</span>
                   <span />
                 </div>
                 {items.map((item, idx) => (
