@@ -566,8 +566,45 @@ export default function ProjetosTech4Zap() {
                       <span className="font-medium">{formatSafeDate(selectedClient.updatedAt)}</span>
                     </div>
                   </div>
-                </div>
-              </div>
+                 </div>
+               </div>
+
+               <div className="space-y-4">
+                 <h4 className="text-sm font-semibold flex items-center gap-2">
+                   <CreditCard className="h-4 w-4 text-primary" />
+                   Dados Mercado Pago
+                 </h4>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                   <div className="space-y-2">
+                     <div className="flex justify-between border-b pb-1">
+                       <span className="text-muted-foreground">Pagador:</span>
+                       <span className="font-medium">{clientSummary?.mpData?.payerName}</span>
+                     </div>
+                     <div className="flex justify-between border-b pb-1">
+                       <span className="text-muted-foreground">ID do Pagador:</span>
+                       <span className="font-mono text-[10px]">{clientSummary?.mpData?.payerId}</span>
+                     </div>
+                     <div className="flex justify-between border-b pb-1">
+                       <span className="text-muted-foreground">Método de Pagamento:</span>
+                       <span className="font-medium">{clientSummary?.mpData?.paymentMethod}</span>
+                     </div>
+                   </div>
+                   <div className="space-y-2">
+                     <div className="flex justify-between border-b pb-1">
+                       <span className="text-muted-foreground">Última Cobrança:</span>
+                       <span className="font-medium">{formatSafeDate(clientSummary?.mpData?.lastChargedDate)}</span>
+                     </div>
+                     <div className="flex justify-between border-b pb-1">
+                       <span className="text-muted-foreground">Valor da Última Cobrança:</span>
+                       <span className="font-medium">{formatCurrency(clientSummary?.mpData?.lastChargedAmount || 0)}</span>
+                     </div>
+                     <div className="flex justify-between border-b pb-1">
+                       <span className="text-muted-foreground">Próxima Cobrança:</span>
+                       <span className="font-medium text-blue-600 dark:text-blue-400">{formatSafeDate(clientSummary?.mpData?.nextPaymentDate)}</span>
+                     </div>
+                   </div>
+                 </div>
+               </div>
 
               <div className="space-y-4">
                 <h4 className="text-sm font-semibold flex items-center gap-2">
