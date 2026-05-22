@@ -1056,6 +1056,7 @@ const useStore = create<State & Actions>((set, get) => {
             ...mapDoc(d),
             createdAt: d.data().createdAt as Timestamp,
           }));
+          newState.tech4zapSubscriptions = tech4zapSnap.docs.map(mapDoc);
         }
 
         set(newState as State);
