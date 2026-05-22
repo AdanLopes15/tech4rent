@@ -1,13 +1,36 @@
-import { useMemo } from "react";
-import { useStore } from "@/store";
+import { useMemo, useState, useEffect } from "react";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Globe, Users, DollarSign, Package } from "lucide-react";
+import { Globe, Users, DollarSign, Package, Loader2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
 export default function ProjetosVisaoGeral() {
-  const { clients, revenues } = useStore();
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<{ clients: any[]; revenues: any[] }>({ clients: [], revenues: [] });
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [clientsSnapshot, revenuesSnapshot] = await Promise.all([
+          getDocs(collection(db, "clients")),
+          getDocs(collection(db, "revenues"))
+        ]);
+
+        const clientsData = clientsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const revenuesData = revenuesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        setData({ clients: clientsData, revenues: revenuesData });
+      } catch (error) {
+        console.error("Error fetching project data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
 
   const projectStats = useMemo(() => {
     const projects = new Map<string, { name: string; clientsCount: number; revenuesTotal: number }>();
@@ -26,7 +49,7 @@ export default function ProjetosVisaoGeral() {
       String(item?.id || "").startsWith("tech4zap-");
 
     // Count clients per project
-    clients.forEach((client) => {
+    data.clients.forEach((client) => {
       const pId = isTech4ZapItem(client) ? "tech4zap" : client.projectId;
       if (pId) {
         const stats = projects.get(pId) || { 
@@ -40,7 +63,7 @@ export default function ProjetosVisaoGeral() {
     });
 
     // Sum revenues per project
-    revenues.forEach((rev) => {
+    data.revenues.forEach((rev) => {
       const pId = isTech4ZapItem(rev) ? "tech4zap" : rev.projectId;
       if (pId && rev.status !== "cancelado") {
         const stats = projects.get(pId) || { 
@@ -60,10 +83,18 @@ export default function ProjetosVisaoGeral() {
         ...stats
       }))
       .filter(p => p.id === "tech4zap" || p.clientsCount > 0 || p.revenuesTotal > 0);
-  }, [clients, revenues]);
+  }, [data]);
 
   const totalRevenues = projectStats.reduce((acc, curr) => acc + curr.revenuesTotal, 0);
   const totalClients = projectStats.reduce((acc, curr) => acc + curr.clientsCount, 0);
+
+  if (loading) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
