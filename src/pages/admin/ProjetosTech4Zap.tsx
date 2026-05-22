@@ -382,6 +382,8 @@ export default function ProjetosTech4Zap() {
                       <TableHead>Valor</TableHead>
                       <TableHead>Início</TableHead>
                       <TableHead>Próx. Venc.</TableHead>
+                      <TableHead>Pagador MP</TableHead>
+                      <TableHead>Próxima Cobrança MP</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
