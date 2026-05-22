@@ -199,7 +199,7 @@ export default function ProjetosTech4Zap() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">MRR Estimado</CardTitle>
+            <CardTitle className="text-sm font-medium">MRR Estimado </CardTitle>
             <DollarSign className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
@@ -348,8 +348,8 @@ export default function ProjetosTech4Zap() {
         <TabsContent value="subscriptions" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Assinaturas de SaaS</CardTitle>
-              <CardDescription>Gestão de assinaturas do Tech4Zap.</CardDescription>
+              <CardTitle>Assinaturas</CardTitle>
+              <CardDescription>Assinaturas SaaS</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="rounded-md border">
@@ -367,7 +367,9 @@ export default function ProjetosTech4Zap() {
                     {tech4zapData.subscriptions.length > 0 ? (
                       tech4zapData.subscriptions.map((sub) => (
                         <TableRow key={sub.id}>
-                          <TableCell className="font-medium">{sub.clientName || sub.customerName || "Cliente"}</TableCell>
+                          <TableCell className="font-medium">
+                            {sub.companyName || sub.clientName || tech4zapData.clients.find(c => c.id === sub.clientId)?.razaoSocial || "—"}
+                          </TableCell>
                           <TableCell>{sub.planName || "Pro"}</TableCell>
                           <TableCell>{formatCurrency(sub.amount || sub.valorTotal || sub.planAmount || 0)}</TableCell>
                           <TableCell>
@@ -375,7 +377,7 @@ export default function ProjetosTech4Zap() {
                           </TableCell>
                           <TableCell>
                             <Badge variant={(sub.status === "ativo" || sub.isActive === true) ? "default" : "secondary"}>
-                              {sub.status || (sub.isActive ? "ativo" : "pendente")}
+                              {(sub.status || (sub.isActive ? "ativo" : "pendente")).charAt(0).toUpperCase() + (sub.status || (sub.isActive ? "ativo" : "pendente")).slice(1)}
                             </Badge>
                           </TableCell>
                         </TableRow>
@@ -427,7 +429,7 @@ export default function ProjetosTech4Zap() {
                                 rev.status === "cancelado" ? "destructive" : "secondary"
                               }
                             >
-                              {rev.status}
+                              {(rev.status || "").charAt(0).toUpperCase() + (rev.status || "").slice(1)}
                             </Badge>
                           </TableCell>
                         </TableRow>
@@ -495,7 +497,7 @@ export default function ProjetosTech4Zap() {
                   </h4>
                   <div className="grid grid-cols-1 gap-2 text-sm">
                     <div className="flex justify-between border-b pb-1">
-                      <span className="text-muted-foreground flex items-center gap-1"><Hash className="h-3 w-3" /> Tech4Zap ID:</span>
+                      <span className="text-muted-foreground flex items-center gap-1"><Hash className="h-3 w-3" /> ID no Tech4Zap:</span>
                       <span className="font-mono text-[10px]">{selectedClient.tech4zapCompanyId || "—"}</span>
                     </div>
                     <div className="flex justify-between border-b pb-1">
