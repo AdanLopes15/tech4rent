@@ -14,32 +14,48 @@ export default function ProjetosTech4Zap() {
   const [activeTab, setActiveTab] = useState("overview");
 
   const tech4zapData = useMemo(() => {
-    const isTech4Zap = (doc: any) => 
-      doc.projectId === "tech4zap" || 
-      doc.source === "tech4zap" || 
-      doc.origin === "Tech4Zap" || 
-      String(doc.id || "").startsWith("tech4zap-");
+    const isTech4ZapItem = (item: any) => 
+      item?.projectId === "tech4zap" || 
+      item?.source === "tech4zap" || 
+      item?.origin === "Tech4Zap" || 
+      String(item?.id || "").startsWith("tech4zap-");
 
-    const filteredClients = clients.filter(isTech4Zap);
-    const filteredRevenues = revenues.filter(isTech4Zap);
-    const filteredSubscriptions = tech4zapSubscriptions.filter(isTech4Zap);
+    const filteredClients = clients.filter(isTech4ZapItem);
+    const filteredRevenues = revenues.filter(isTech4ZapItem);
+    const filteredSubscriptions = tech4zapSubscriptions.filter(isTech4ZapItem);
+
+    const getRevenueValue = (revenue: any) => Number(revenue.valorTotal || revenue.amount || 0);
 
     const totalRevenue = filteredRevenues
       .filter(r => r.status !== "cancelado")
-      .reduce((acc, curr) => acc + Number(curr.valorTotal || curr.amount || 0), 0);
+      .reduce((acc, curr) => acc + getRevenueValue(curr), 0);
 
-    // More accurate MRR: sum of active subscriptions
-    const activeMRR = filteredSubscriptions
-      .filter(s => s.status === "ativo" || s.isActive === true)
-      .reduce((acc, curr) => acc + Number(curr.amount || curr.valorTotal || 0), 0);
+    const pendingRevenue = filteredRevenues
+      .filter(r => r.status === "pendente")
+      .reduce((acc, curr) => acc + getRevenueValue(curr), 0);
+
+    // More accurate MRR: sum of active/pending tech4zap revenues
+    const activeMRR = filteredRevenues
+      .filter(r => (r.status === "pendente" || r.status === "recebido" || r.status === "ativo") && r.status !== "cancelado")
+      .reduce((acc, curr) => acc + getRevenueValue(curr), 0);
+
+    console.log("Tech4Zap Debug:", {
+      clients: clients.length,
+      revenues: revenues.length,
+      tech4zapSubscriptions: tech4zapSubscriptions.length,
+      tech4zapClients: filteredClients.length,
+      tech4zapRevenues: filteredRevenues.length,
+      tech4zapSubscriptionsFiltered: filteredSubscriptions.length
+    });
 
     return {
       clients: filteredClients,
       revenues: filteredRevenues,
       subscriptions: filteredSubscriptions,
       totalRevenue,
-      activeMRR: activeMRR || (totalRevenue / 12),
-      activeClientsCount: filteredClients.filter(c => c.status === "ativo").length
+      pendingRevenue,
+      activeMRR: activeMRR,
+      activeClientsCount: filteredClients.length
     };
   }, [clients, revenues, tech4zapSubscriptions]);
 
@@ -77,7 +93,7 @@ export default function ProjetosTech4Zap() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">MRREstimado</CardTitle>
+            <CardTitle className="text-sm font-medium">MRR Estimado</CardTitle>
             <DollarSign className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
