@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, DollarSign, Package, CreditCard, Loader2 } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Users, DollarSign, Package, CreditCard, Loader2, Calendar, FileText, Smartphone, Mail, Hash, Activity } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -37,6 +38,8 @@ const getTime = (value: any): number => {
 export default function ProjetosTech4Zap() {
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
+  const [selectedClient, setSelectedClient] = useState<any>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [data, setData] = useState<{
     clients: any[];
     revenues: any[];
@@ -123,6 +126,36 @@ export default function ProjetosTech4Zap() {
       pendingRevenues
     };
   }, [data]);
+
+  const clientSummary = useMemo(() => {
+    if (!selectedClient) return null;
+    
+    const clientRevenues = tech4zapData.revenues.filter(r => 
+      r.clientId === selectedClient.id || 
+      (selectedClient.tech4zapCompanyId && r.tech4zapCompanyId === selectedClient.tech4zapCompanyId)
+    );
+
+    const getValue = (item: any) => Number(item?.valorTotal || item?.amount || 0);
+    
+    const total = clientRevenues.reduce((acc, curr) => acc + getValue(curr), 0);
+    const received = clientRevenues
+      .filter(r => r.status === "recebido")
+      .reduce((acc, curr) => acc + getValue(curr), 0);
+    const pending = clientRevenues
+      .filter(r => r.status === "pendente")
+      .reduce((acc, curr) => acc + getValue(curr), 0);
+    
+    const nextDueDate = clientRevenues
+      .filter(r => r.status === "pendente" && r.dueDate)
+      .sort((a, b) => getTime(a.dueDate) - getTime(b.dueDate))[0]?.dueDate;
+
+    return {
+      total,
+      received,
+      pending,
+      nextDueDate
+    };
+  }, [selectedClient, tech4zapData.revenues]);
 
   if (loading) {
     return (
@@ -285,7 +318,16 @@ export default function ProjetosTech4Zap() {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
-                            <Badge variant="outline" className="cursor-pointer">Ver</Badge>
+                            <Badge 
+                              variant="outline" 
+                              className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                              onClick={() => {
+                                setSelectedClient(client);
+                                setIsDialogOpen(true);
+                              }}
+                            >
+                              Ver
+                            </Badge>
                           </TableCell>
                         </TableRow>
                       ))
@@ -404,6 +446,114 @@ export default function ProjetosTech4Zap() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-3xl overflow-y-auto max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle>Detalhes do Cliente - Tech4Zap</DialogTitle>
+            <DialogDescription>Informações detalhadas e resumo financeiro do cliente.</DialogDescription>
+          </DialogHeader>
+
+          {selectedClient && (
+            <div className="flex flex-col gap-6 py-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h4 className="text-sm font-semibold flex items-center gap-2">
+                    <Users className="h-4 w-4 text-primary" />
+                    Informações Básicas
+                  </h4>
+                  <div className="grid grid-cols-1 gap-2 text-sm">
+                    <div className="flex justify-between border-b pb-1">
+                      <span className="text-muted-foreground flex items-center gap-1"><Users className="h-3 w-3" /> Nome:</span>
+                      <span className="font-medium">{selectedClient.razaoSocial || selectedClient.name || "—"}</span>
+                    </div>
+                    <div className="flex justify-between border-b pb-1">
+                      <span className="text-muted-foreground flex items-center gap-1"><Mail className="h-3 w-3" /> Email:</span>
+                      <span className="font-medium">{selectedClient.email || "—"}</span>
+                    </div>
+                    <div className="flex justify-between border-b pb-1">
+                      <span className="text-muted-foreground flex items-center gap-1"><Smartphone className="h-3 w-3" /> Telefone:</span>
+                      <span className="font-medium">{selectedClient.telefone || selectedClient.phone || "—"}</span>
+                    </div>
+                    <div className="flex justify-between border-b pb-1">
+                      <span className="text-muted-foreground flex items-center gap-1"><FileText className="h-3 w-3" /> Documento:</span>
+                      <span className="font-medium">{selectedClient.cnpj || selectedClient.cpf || selectedClient.document || "—"}</span>
+                    </div>
+                    <div className="flex justify-between border-b pb-1">
+                      <span className="text-muted-foreground flex items-center gap-1"><Activity className="h-3 w-3" /> Status:</span>
+                      <Badge variant={selectedClient.status === "ativo" ? "default" : "secondary"}>
+                        {selectedClient.status || "ativo"}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="text-sm font-semibold flex items-center gap-2">
+                    <Package className="h-4 w-4 text-primary" />
+                    Origem & Integração
+                  </h4>
+                  <div className="grid grid-cols-1 gap-2 text-sm">
+                    <div className="flex justify-between border-b pb-1">
+                      <span className="text-muted-foreground flex items-center gap-1"><Hash className="h-3 w-3" /> Tech4Zap ID:</span>
+                      <span className="font-mono text-[10px]">{selectedClient.tech4zapCompanyId || "—"}</span>
+                    </div>
+                    <div className="flex justify-between border-b pb-1">
+                      <span className="text-muted-foreground">Projeto:</span>
+                      <span className="font-medium">{selectedClient.projectName || "Tech4Zap"} ({selectedClient.projectId || "tech4zap"})</span>
+                    </div>
+                    <div className="flex justify-between border-b pb-1">
+                      <span className="text-muted-foreground">Origem/Fonte:</span>
+                      <span className="font-medium">{selectedClient.origin || "Tech4Zap"} / {selectedClient.source || "tech4zap"}</span>
+                    </div>
+                    <div className="flex justify-between border-b pb-1">
+                      <span className="text-muted-foreground flex items-center gap-1"><Calendar className="h-3 w-3" /> Criado em:</span>
+                      <span className="font-medium">{formatSafeDate(selectedClient.createdAt)}</span>
+                    </div>
+                    <div className="flex justify-between border-b pb-1">
+                      <span className="text-muted-foreground flex items-center gap-1"><Calendar className="h-3 w-3" /> Atualizado:</span>
+                      <span className="font-medium">{formatSafeDate(selectedClient.updatedAt)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-primary" />
+                  Resumo Financeiro (Tech4Zap)
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <Card className="bg-muted/30">
+                    <CardContent className="p-3">
+                      <p className="text-[10px] uppercase text-muted-foreground font-bold">Total</p>
+                      <p className="text-lg font-bold">{formatCurrency(clientSummary?.total || 0)}</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-green-50/50 dark:bg-green-950/20">
+                    <CardContent className="p-3">
+                      <p className="text-[10px] uppercase text-green-600 dark:text-green-400 font-bold">Recebido</p>
+                      <p className="text-lg font-bold text-green-700 dark:text-green-300">{formatCurrency(clientSummary?.received || 0)}</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-amber-50/50 dark:bg-amber-950/20">
+                    <CardContent className="p-3">
+                      <p className="text-[10px] uppercase text-amber-600 dark:text-amber-400 font-bold">Pendente</p>
+                      <p className="text-lg font-bold text-amber-700 dark:text-amber-300">{formatCurrency(clientSummary?.pending || 0)}</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-blue-50/50 dark:bg-blue-950/20">
+                    <CardContent className="p-3">
+                      <p className="text-[10px] uppercase text-blue-600 dark:text-blue-400 font-bold">Próx. Venc.</p>
+                      <p className="text-sm font-bold pt-1">{formatSafeDate(clientSummary?.nextDueDate)}</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
