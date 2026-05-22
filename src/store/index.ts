@@ -837,6 +837,7 @@ const useStore = create<State & Actions>((set, get) => {
     systemUsers: [],
     siteContacts: [],
     notifications: [],
+    tech4zapSubscriptions: [],
     companySettings: initialCompanySettings,
     homePage: { draft: [], published: [] },
     sitePages: {},
@@ -1016,6 +1017,7 @@ const useStore = create<State & Actions>((set, get) => {
             systemUsersSnap,
             siteContactsSnap,
             notificationsSnap,
+            tech4zapSnap,
           ] = otherSnaps;
 
           newState.clients = clientsSnap.docs.map((d) => normalizeClientData(mapDoc(d)));
