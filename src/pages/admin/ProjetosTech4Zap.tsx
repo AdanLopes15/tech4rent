@@ -348,8 +348,8 @@ export default function ProjetosTech4Zap() {
         <TabsContent value="subscriptions" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Assinaturas de SaaS</CardTitle>
-              <CardDescription>Gestão de assinaturas do Tech4Zap.</CardDescription>
+              <CardTitle>Assinaturas</CardTitle>
+              <CardDescription>Assinaturas SaaS</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="rounded-md border">
