@@ -426,7 +426,9 @@ export default function ProjetosTech4Zap() {
                     <TableRow>
                       <TableHead>Vencimento</TableHead>
                       <TableHead>Cliente</TableHead>
+                      <TableHead>Descrição</TableHead>
                       <TableHead>Valor</TableHead>
+                      <TableHead>Forma Pagto.</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -437,8 +439,10 @@ export default function ProjetosTech4Zap() {
                           <TableCell>
                             {formatSafeDate(rev.dueDate)}
                           </TableCell>
-                          <TableCell className="font-medium">{rev.clientName || "Cliente"}</TableCell>
+                          <TableCell className="font-medium">{rev.clientName || "—"}</TableCell>
+                          <TableCell className="text-xs">{rev.description || "—"}</TableCell>
                           <TableCell className="font-bold">{formatCurrency(rev.valorTotal || rev.amount || 0)}</TableCell>
+                          <TableCell className="text-xs">{rev.paymentMethod || rev.source || "—"}</TableCell>
                           <TableCell>
                             <Badge 
                               variant={
