@@ -10,6 +10,30 @@ import { formatCurrency } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+const toSafeDate = (value: any): Date | null => {
+  if (!value) return null;
+  if (value?.toDate && typeof value.toDate === "function") {
+    const date = value.toDate();
+    return isNaN(date.getTime()) ? null : date;
+  }
+  if (value instanceof Date) {
+    return isNaN(value.getTime()) ? null : value;
+  }
+  const date = new Date(value);
+  return isNaN(date.getTime()) ? null : date;
+};
+
+const formatSafeDate = (value: any): string => {
+  const date = toSafeDate(value);
+  if (!date) return "—";
+  return format(date, "dd/MM/yyyy", { locale: ptBR });
+};
+
+const getTime = (value: any): number => {
+  const date = toSafeDate(value);
+  return date ? date.getTime() : 0;
+};
+
 export default function ProjetosTech4Zap() {
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
@@ -180,12 +204,14 @@ export default function ProjetosTech4Zap() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {tech4zapData.subscriptions.slice(0, 5).map((sub) => (
+                  {tech4zapData.subscriptions
+                    .sort((a, b) => getTime(b.createdAt) - getTime(a.createdAt))
+                    .slice(0, 5).map((sub) => (
                     <div key={sub.id} className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0">
                       <div>
                         <p className="font-medium">{sub.clientName || sub.customerName || "Cliente"}</p>
                         <p className="text-xs text-muted-foreground">
-                          {sub.planName || "Plano Pro"} • {sub.createdAt ? format(new Date(sub.createdAt), "dd/MM/yyyy") : "—"}
+                          {sub.planName || "Plano Pro"} • {formatSafeDate(sub.createdAt)}
                         </p>
                       </div>
                       <Badge variant={(sub.status === "ativo" || sub.isActive === true) ? "default" : "secondary"}>
@@ -208,13 +234,14 @@ export default function ProjetosTech4Zap() {
               <CardContent>
                 <div className="space-y-4">
                   {tech4zapData.pendingRevenues
+                    .sort((a, b) => getTime(a.dueDate) - getTime(b.dueDate))
                     .slice(0, 5)
                     .map((rev) => (
                       <div key={rev.id} className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0">
                         <div>
                           <p className="font-medium">{rev.clientName || "Cliente"}</p>
                           <p className="text-xs text-muted-foreground">
-                            Vencimento: {rev.dueDate ? format(new Date(rev.dueDate), "dd/MM/yyyy") : "—"}
+                            Vencimento: {formatSafeDate(rev.dueDate)}
                           </p>
                         </div>
                         <p className="font-bold">{formatCurrency(rev.valorTotal || rev.amount || 0)}</p>
@@ -302,7 +329,7 @@ export default function ProjetosTech4Zap() {
                           <TableCell>{sub.planName || "Pro"}</TableCell>
                           <TableCell>{formatCurrency(sub.amount || sub.valorTotal || sub.planAmount || 0)}</TableCell>
                           <TableCell>
-                            {sub.createdAt ? format(new Date(sub.createdAt), "dd/MM/yyyy") : "—"}
+                            {formatSafeDate(sub.createdAt)}
                           </TableCell>
                           <TableCell>
                             <Badge variant={(sub.status === "ativo" || sub.isActive === true) ? "default" : "secondary"}>
@@ -347,7 +374,7 @@ export default function ProjetosTech4Zap() {
                       tech4zapData.revenues.map((rev) => (
                         <TableRow key={rev.id}>
                           <TableCell>
-                            {rev.dueDate ? format(new Date(rev.dueDate), "dd/MM/yyyy") : "—"}
+                            {formatSafeDate(rev.dueDate)}
                           </TableCell>
                           <TableCell className="font-medium">{rev.clientName || "Cliente"}</TableCell>
                           <TableCell className="font-bold">{formatCurrency(rev.valorTotal || rev.amount || 0)}</TableCell>
