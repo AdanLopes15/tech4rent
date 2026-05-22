@@ -367,7 +367,9 @@ export default function ProjetosTech4Zap() {
                     {tech4zapData.subscriptions.length > 0 ? (
                       tech4zapData.subscriptions.map((sub) => (
                         <TableRow key={sub.id}>
-                          <TableCell className="font-medium">{sub.clientName || sub.customerName || "Cliente"}</TableCell>
+                          <TableCell className="font-medium">
+                            {sub.companyName || sub.clientName || tech4zapData.clients.find(c => c.id === sub.clientId)?.razaoSocial || "—"}
+                          </TableCell>
                           <TableCell>{sub.planName || "Pro"}</TableCell>
                           <TableCell>{formatCurrency(sub.amount || sub.valorTotal || sub.planAmount || 0)}</TableCell>
                           <TableCell>
@@ -375,7 +377,7 @@ export default function ProjetosTech4Zap() {
                           </TableCell>
                           <TableCell>
                             <Badge variant={(sub.status === "ativo" || sub.isActive === true) ? "default" : "secondary"}>
-                              {sub.status || (sub.isActive ? "ativo" : "pendente")}
+                              {(sub.status || (sub.isActive ? "ativo" : "pendente")).charAt(0).toUpperCase() + (sub.status || (sub.isActive ? "ativo" : "pendente")).slice(1)}
                             </Badge>
                           </TableCell>
                         </TableRow>
