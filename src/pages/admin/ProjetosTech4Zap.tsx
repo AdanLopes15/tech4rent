@@ -14,21 +14,23 @@ export default function ProjetosTech4Zap() {
   const [activeTab, setActiveTab] = useState("overview");
 
   const tech4zapData = useMemo(() => {
-    const filteredClients = clients.filter(c => c.projectId === "tech4zap");
-    const filteredRevenues = revenues.filter(r => r.projectId === "tech4zap");
-    const filteredSubscriptions = tech4zapSubscriptions.filter(s => s.projectId === "tech4zap" || !s.projectId); // tech4zapSubscriptions is usually project specific anyway
+    const isTech4Zap = (doc: any) => 
+      doc.projectId === "tech4zap" || 
+      doc.source === "tech4zap" || 
+      doc.origin === "Tech4Zap" || 
+      String(doc.id || "").startsWith("tech4zap-");
+
+    const filteredClients = clients.filter(isTech4Zap);
+    const filteredRevenues = revenues.filter(isTech4Zap);
+    const filteredSubscriptions = tech4zapSubscriptions.filter(isTech4Zap);
 
     const totalRevenue = filteredRevenues
       .filter(r => r.status !== "cancelado")
-      .reduce((acc, curr) => acc + Number(curr.valorTotal || 0), 0);
+      .reduce((acc, curr) => acc + Number(curr.valorTotal || curr.amount || 0), 0);
 
-    const mrr = filteredRevenues
-      .filter(r => r.status !== "cancelado" && r.status === "recebido") // Simple MRR based on last received
-      .reduce((acc, curr) => acc + Number(curr.valorTotal || 0), 0) / 12; // This is a placeholder logic for MRR
-
-    // More accurate MRR: sum of active subscriptions if amount is present
+    // More accurate MRR: sum of active subscriptions
     const activeMRR = filteredSubscriptions
-      .filter(s => s.status === "ativo")
+      .filter(s => s.status === "ativo" || s.isActive === true)
       .reduce((acc, curr) => acc + Number(curr.amount || curr.valorTotal || 0), 0);
 
     return {
@@ -36,7 +38,7 @@ export default function ProjetosTech4Zap() {
       revenues: filteredRevenues,
       subscriptions: filteredSubscriptions,
       totalRevenue,
-      activeMRR: activeMRR || (totalRevenue / 12), // Fallback if no specific amount in subs
+      activeMRR: activeMRR || (totalRevenue / 12),
       activeClientsCount: filteredClients.filter(c => c.status === "ativo").length
     };
   }, [clients, revenues, tech4zapSubscriptions]);
@@ -121,8 +123,8 @@ export default function ProjetosTech4Zap() {
                           {sub.planName || "Plano Pro"} • {sub.createdAt ? format(new Date(sub.createdAt), "dd/MM/yyyy") : "—"}
                         </p>
                       </div>
-                      <Badge variant={sub.status === "ativo" ? "default" : "secondary"}>
-                        {sub.status || "pendente"}
+                      <Badge variant={(sub.status === "ativo" || sub.isActive === true) ? "default" : "secondary"}>
+                        {sub.status || (sub.isActive ? "ativo" : "pendente")}
                       </Badge>
                     </div>
                   ))}
@@ -151,7 +153,7 @@ export default function ProjetosTech4Zap() {
                             Vencimento: {rev.dueDate ? format(new Date(rev.dueDate), "dd/MM/yyyy") : "—"}
                           </p>
                         </div>
-                        <p className="font-bold">{formatCurrency(rev.valorTotal)}</p>
+                        <p className="font-bold">{formatCurrency(rev.valorTotal || rev.amount || 0)}</p>
                       </div>
                     ))}
                   {tech4zapData.revenues.filter(r => r.status === "pendente").length === 0 && (
@@ -239,8 +241,8 @@ export default function ProjetosTech4Zap() {
                             {sub.createdAt ? format(new Date(sub.createdAt), "dd/MM/yyyy") : "—"}
                           </TableCell>
                           <TableCell>
-                            <Badge variant={sub.status === "ativo" ? "default" : "secondary"}>
-                              {sub.status || "pendente"}
+                            <Badge variant={(sub.status === "ativo" || sub.isActive === true) ? "default" : "secondary"}>
+                              {sub.status || (sub.isActive ? "ativo" : "pendente")}
                             </Badge>
                           </TableCell>
                         </TableRow>
@@ -284,7 +286,7 @@ export default function ProjetosTech4Zap() {
                             {rev.dueDate ? format(new Date(rev.dueDate), "dd/MM/yyyy") : "—"}
                           </TableCell>
                           <TableCell className="font-medium">{rev.clientName || "Cliente"}</TableCell>
-                          <TableCell className="font-bold">{formatCurrency(rev.valorTotal)}</TableCell>
+                          <TableCell className="font-bold">{formatCurrency(rev.valorTotal || rev.amount || 0)}</TableCell>
                           <TableCell>
                             <Badge 
                               variant={
