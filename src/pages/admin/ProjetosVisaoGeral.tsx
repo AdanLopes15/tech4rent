@@ -12,36 +12,54 @@ export default function ProjetosVisaoGeral() {
   const projectStats = useMemo(() => {
     const projects = new Map<string, { name: string; clientsCount: number; revenuesTotal: number }>();
 
+    // Initial project to ensure it's always visible even if empty
+    projects.set("tech4zap", {
+      name: "Tech4Zap",
+      clientsCount: 0,
+      revenuesTotal: 0
+    });
+
+    const isTech4Zap = (doc: any) => 
+      doc.projectId === "tech4zap" || 
+      doc.source === "tech4zap" || 
+      doc.origin === "Tech4Zap" || 
+      String(doc.id || "").startsWith("tech4zap-");
+
     // Count clients per project
     clients.forEach((client) => {
-      if (client.projectId) {
-        const stats = projects.get(client.projectId) || { 
-          name: client.projectName || client.projectId, 
+      const pId = isTech4Zap(client) ? "tech4zap" : client.projectId;
+      if (pId) {
+        const stats = projects.get(pId) || { 
+          name: client.projectName || pId, 
           clientsCount: 0, 
           revenuesTotal: 0 
         };
         stats.clientsCount++;
-        projects.set(client.projectId, stats);
+        projects.set(pId, stats);
       }
     });
 
     // Sum revenues per project
     revenues.forEach((rev) => {
-      if (rev.projectId && rev.status !== "cancelado") {
-        const stats = projects.get(rev.projectId) || { 
-          name: rev.projectName || rev.projectId, 
+      const pId = isTech4Zap(rev) ? "tech4zap" : rev.projectId;
+      if (pId && rev.status !== "cancelado") {
+        const stats = projects.get(pId) || { 
+          name: rev.projectName || pId, 
           clientsCount: 0, 
           revenuesTotal: 0 
         };
-        stats.revenuesTotal += Number(rev.valorTotal || 0);
-        projects.set(rev.projectId, stats);
+        const value = Number(rev.valorTotal || rev.amount || 0);
+        stats.revenuesTotal += value;
+        projects.set(pId, stats);
       }
     });
 
-    return Array.from(projects.entries()).map(([id, stats]) => ({
-      id,
-      ...stats
-    }));
+    return Array.from(projects.entries())
+      .map(([id, stats]) => ({
+        id,
+        ...stats
+      }))
+      .filter(p => p.id === "tech4zap" || p.clientsCount > 0 || p.revenuesTotal > 0);
   }, [clients, revenues]);
 
   const totalRevenues = projectStats.reduce((acc, curr) => acc + curr.revenuesTotal, 0);
