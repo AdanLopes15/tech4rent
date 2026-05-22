@@ -259,6 +259,7 @@ type State = {
   systemUsers: any[];
   siteContacts: any[];
   notifications: any[];
+  tech4zapSubscriptions: any[];
   companySettings: CompanySettings;
   smtpSettings: SmtpSettings;
   rentalClauses: Clause[];
@@ -836,6 +837,7 @@ const useStore = create<State & Actions>((set, get) => {
     systemUsers: [],
     siteContacts: [],
     notifications: [],
+    tech4zapSubscriptions: [],
     companySettings: initialCompanySettings,
     homePage: { draft: [], published: [] },
     sitePages: {},
@@ -979,7 +981,9 @@ const useStore = create<State & Actions>((set, get) => {
             getDocs(collection(db, "users")),
             getDocs(collection(db, "siteContacts")),
             getDocs(query(collection(db, "notifications"), orderBy("createdAt", "desc"), limit(10))),
+            getDocs(collection(db, "tech4zapSubscriptions")),
           ])) as [
+            QuerySnapshot<DocumentData>,
             QuerySnapshot<DocumentData>,
             QuerySnapshot<DocumentData>,
             QuerySnapshot<DocumentData>,
@@ -1013,6 +1017,7 @@ const useStore = create<State & Actions>((set, get) => {
             systemUsersSnap,
             siteContactsSnap,
             notificationsSnap,
+            tech4zapSnap,
           ] = otherSnaps;
 
           newState.clients = clientsSnap.docs.map((d) => normalizeClientData(mapDoc(d)));
@@ -1051,6 +1056,7 @@ const useStore = create<State & Actions>((set, get) => {
             ...mapDoc(d),
             createdAt: d.data().createdAt as Timestamp,
           }));
+          newState.tech4zapSubscriptions = tech4zapSnap.docs.map(mapDoc);
         }
 
         set(newState as State);

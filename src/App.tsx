@@ -46,6 +46,8 @@ import CentroCusto from "./pages/admin/CentroCusto";
 import Bancos from "./pages/admin/Bancos";
 import Usuarios from "./pages/admin/Usuarios";
 import ContatosSite from "./pages/admin/ContatosSite";
+import ProjetosVisaoGeral from "./pages/admin/ProjetosVisaoGeral";
+import ProjetosTech4Zap from "./pages/admin/ProjetosTech4Zap";
 
 const queryClient = new QueryClient();
 
@@ -117,6 +119,8 @@ const App = () => (
               <Route path="financeiro/bancos" element={<Bancos />} />
               <Route path="usuarios" element={<Usuarios />} />
               <Route path="contatos-site" element={<ContatosSite />} />
+              <Route path="projetos" element={<ProjetosVisaoGeral />} />
+              <Route path="projetos/tech4zap" element={<ProjetosTech4Zap />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
