@@ -19,15 +19,15 @@ export default function ProjetosVisaoGeral() {
       revenuesTotal: 0
     });
 
-    const isTech4Zap = (doc: any) => 
-      doc.projectId === "tech4zap" || 
-      doc.source === "tech4zap" || 
-      doc.origin === "Tech4Zap" || 
-      String(doc.id || "").startsWith("tech4zap-");
+    const isTech4ZapItem = (item: any) => 
+      item?.projectId === "tech4zap" || 
+      item?.source === "tech4zap" || 
+      item?.origin === "Tech4Zap" || 
+      String(item?.id || "").startsWith("tech4zap-");
 
     // Count clients per project
     clients.forEach((client) => {
-      const pId = isTech4Zap(client) ? "tech4zap" : client.projectId;
+      const pId = isTech4ZapItem(client) ? "tech4zap" : client.projectId;
       if (pId) {
         const stats = projects.get(pId) || { 
           name: client.projectName || pId, 
@@ -41,7 +41,7 @@ export default function ProjetosVisaoGeral() {
 
     // Sum revenues per project
     revenues.forEach((rev) => {
-      const pId = isTech4Zap(rev) ? "tech4zap" : rev.projectId;
+      const pId = isTech4ZapItem(rev) ? "tech4zap" : rev.projectId;
       if (pId && rev.status !== "cancelado") {
         const stats = projects.get(pId) || { 
           name: rev.projectName || pId, 
