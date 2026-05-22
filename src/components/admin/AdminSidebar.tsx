@@ -86,6 +86,14 @@ const menuItems: MenuItem[] = [
     ],
   },
   {
+    icon: Globe,
+    label: "Projetos",
+    children: [
+      { icon: Eye, label: "Visão Geral", path: "/admin/projetos" },
+      { icon: Package, label: "Tech4Zap", path: "/admin/projetos/tech4zap" },
+    ],
+  },
+  {
     icon: Settings,
     label: "Configurações",
     children: [
