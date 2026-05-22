@@ -429,7 +429,7 @@ export default function ProjetosTech4Zap() {
                                 rev.status === "cancelado" ? "destructive" : "secondary"
                               }
                             >
-                              {rev.status}
+                              {(rev.status || "").charAt(0).toUpperCase() + (rev.status || "").slice(1)}
                             </Badge>
                           </TableCell>
                         </TableRow>
