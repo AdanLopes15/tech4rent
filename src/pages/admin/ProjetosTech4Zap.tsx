@@ -497,7 +497,7 @@ export default function ProjetosTech4Zap() {
                   </h4>
                   <div className="grid grid-cols-1 gap-2 text-sm">
                     <div className="flex justify-between border-b pb-1">
-                      <span className="text-muted-foreground flex items-center gap-1"><Hash className="h-3 w-3" /> Tech4Zap ID:</span>
+                      <span className="text-muted-foreground flex items-center gap-1"><Hash className="h-3 w-3" /> ID no Tech4Zap:</span>
                       <span className="font-mono text-[10px]">{selectedClient.tech4zapCompanyId || "—"}</span>
                     </div>
                     <div className="flex justify-between border-b pb-1">
