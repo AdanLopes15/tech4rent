@@ -302,6 +302,8 @@ export default function ProjetosTech4Zap() {
                     <TableRow>
                       <TableHead>Nome</TableHead>
                       <TableHead>Email</TableHead>
+                      <TableHead>Telefone</TableHead>
+                      <TableHead>Documento</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
@@ -310,8 +312,10 @@ export default function ProjetosTech4Zap() {
                     {tech4zapData.clients.length > 0 ? (
                       tech4zapData.clients.map((client) => (
                         <TableRow key={client.id}>
-                          <TableCell className="font-medium">{client.razaoSocial || client.name}</TableCell>
+                          <TableCell className="font-medium">{client.razaoSocial || client.name || "—"}</TableCell>
                           <TableCell>{client.email || "—"}</TableCell>
+                          <TableCell>{client.telefone || client.phone || "—"}</TableCell>
+                          <TableCell>{client.cnpj || client.cpf || client.document || "—"}</TableCell>
                           <TableCell>
                             <Badge variant={client.status === "ativo" ? "default" : "secondary"}>
                               {client.status || "ativo"}
