@@ -135,6 +135,11 @@ export default function ProjetosTech4Zap() {
       (selectedClient.tech4zapCompanyId && r.tech4zapCompanyId === selectedClient.tech4zapCompanyId)
     );
 
+    const clientSubscription = tech4zapData.subscriptions.find(s => 
+      s.clientId === selectedClient.id || 
+      (selectedClient.tech4zapCompanyId && s.tech4zapCompanyId === selectedClient.tech4zapCompanyId)
+    );
+
     const getValue = (item: any) => Number(item?.valorTotal || item?.amount || 0);
     
     const total = clientRevenues.reduce((acc, curr) => acc + getValue(curr), 0);
@@ -149,13 +154,24 @@ export default function ProjetosTech4Zap() {
       .filter(r => r.status === "pendente" && r.dueDate)
       .sort((a, b) => getTime(a.dueDate) - getTime(b.dueDate))[0]?.dueDate;
 
+    // Buscar dados do Mercado Pago na assinatura ou na receita
+    const mpData = {
+      payerId: clientSubscription?.mpPayerId || clientRevenues[0]?.mpPayerId || "—",
+      payerName: clientSubscription?.mpPayerName || clientRevenues[0]?.mpPayerName || "—",
+      paymentMethod: clientSubscription?.mpPaymentMethod || clientRevenues[0]?.mpPaymentMethod || "—",
+      lastChargedDate: clientSubscription?.mpLastChargedDate || clientRevenues[0]?.mpLastChargedDate || null,
+      lastChargedAmount: clientSubscription?.mpLastChargedAmount || clientRevenues[0]?.mpLastChargedAmount || 0,
+      nextPaymentDate: clientSubscription?.mpNextPaymentDate || clientRevenues[0]?.mpNextPaymentDate || null,
+    };
+
     return {
       total,
       received,
       pending,
-      nextDueDate
+      nextDueDate,
+      mpData
     };
-  }, [selectedClient, tech4zapData.revenues]);
+  }, [selectedClient, tech4zapData.revenues, tech4zapData.subscriptions]);
 
   if (loading) {
     return (
