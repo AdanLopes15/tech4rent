@@ -135,6 +135,11 @@ export default function ProjetosTech4Zap() {
       (selectedClient.tech4zapCompanyId && r.tech4zapCompanyId === selectedClient.tech4zapCompanyId)
     );
 
+    const clientSubscription = tech4zapData.subscriptions.find(s => 
+      s.clientId === selectedClient.id || 
+      (selectedClient.tech4zapCompanyId && s.tech4zapCompanyId === selectedClient.tech4zapCompanyId)
+    );
+
     const getValue = (item: any) => Number(item?.valorTotal || item?.amount || 0);
     
     const total = clientRevenues.reduce((acc, curr) => acc + getValue(curr), 0);
@@ -149,13 +154,24 @@ export default function ProjetosTech4Zap() {
       .filter(r => r.status === "pendente" && r.dueDate)
       .sort((a, b) => getTime(a.dueDate) - getTime(b.dueDate))[0]?.dueDate;
 
+    // Buscar dados do Mercado Pago na assinatura ou na receita
+    const mpData = {
+      payerId: clientSubscription?.mpPayerId || clientRevenues[0]?.mpPayerId || "—",
+      payerName: clientSubscription?.mpPayerName || clientRevenues[0]?.mpPayerName || "—",
+      paymentMethod: clientSubscription?.mpPaymentMethod || clientRevenues[0]?.mpPaymentMethod || "—",
+      lastChargedDate: clientSubscription?.mpLastChargedDate || clientRevenues[0]?.mpLastChargedDate || null,
+      lastChargedAmount: clientSubscription?.mpLastChargedAmount || clientRevenues[0]?.mpLastChargedAmount || 0,
+      nextPaymentDate: clientSubscription?.mpNextPaymentDate || clientRevenues[0]?.mpNextPaymentDate || null,
+    };
+
     return {
       total,
       received,
       pending,
-      nextDueDate
+      nextDueDate,
+      mpData
     };
-  }, [selectedClient, tech4zapData.revenues]);
+  }, [selectedClient, tech4zapData.revenues, tech4zapData.subscriptions]);
 
   if (loading) {
     return (
@@ -366,6 +382,8 @@ export default function ProjetosTech4Zap() {
                       <TableHead>Valor</TableHead>
                       <TableHead>Início</TableHead>
                       <TableHead>Próx. Venc.</TableHead>
+                      <TableHead>Pagador MP</TableHead>
+                      <TableHead>Próxima Cobrança MP</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -388,9 +406,15 @@ export default function ProjetosTech4Zap() {
                             <TableCell>
                               {formatSafeDate(sub.createdAt)}
                             </TableCell>
-                            <TableCell>
-                              {formatSafeDate(sub.nextDueDate || sub.dueDate)}
-                            </TableCell>
+                             <TableCell>
+                               {formatSafeDate(sub.nextDueDate || sub.dueDate)}
+                             </TableCell>
+                             <TableCell className="text-xs">
+                               {sub.mpPayerName || "—"}
+                             </TableCell>
+                             <TableCell>
+                               {formatSafeDate(sub.mpNextPaymentDate)}
+                             </TableCell>
                             <TableCell>
                               <Badge variant={(sub.status === "ativo" || sub.isActive === true) ? "default" : "secondary"}>
                                 {(sub.status || (sub.isActive ? "ativo" : "pendente")).charAt(0).toUpperCase() + (sub.status || (sub.isActive ? "ativo" : "pendente")).slice(1)}
@@ -428,8 +452,10 @@ export default function ProjetosTech4Zap() {
                       <TableHead>Cliente</TableHead>
                       <TableHead>Descrição</TableHead>
                       <TableHead>Valor</TableHead>
-                      <TableHead>Forma Pagto.</TableHead>
-                      <TableHead>Status</TableHead>
+                       <TableHead>Forma Pagto.</TableHead>
+                       <TableHead>Método MP</TableHead>
+                       <TableHead>Última Cobrança MP</TableHead>
+                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -442,7 +468,9 @@ export default function ProjetosTech4Zap() {
                           <TableCell className="font-medium">{rev.clientName || "—"}</TableCell>
                           <TableCell className="text-xs">{rev.description || "—"}</TableCell>
                           <TableCell className="font-bold">{formatCurrency(rev.valorTotal || rev.amount || 0)}</TableCell>
-                          <TableCell className="text-xs">{rev.paymentMethod || rev.source || "—"}</TableCell>
+                           <TableCell className="text-xs">{rev.paymentMethod || rev.source || "—"}</TableCell>
+                           <TableCell className="text-xs">{rev.mpPaymentMethod || "—"}</TableCell>
+                           <TableCell>{formatSafeDate(rev.mpLastChargedDate)}</TableCell>
                           <TableCell>
                             <Badge 
                               variant={
@@ -538,8 +566,45 @@ export default function ProjetosTech4Zap() {
                       <span className="font-medium">{formatSafeDate(selectedClient.updatedAt)}</span>
                     </div>
                   </div>
-                </div>
-              </div>
+                 </div>
+               </div>
+
+               <div className="space-y-4">
+                 <h4 className="text-sm font-semibold flex items-center gap-2">
+                   <CreditCard className="h-4 w-4 text-primary" />
+                   Dados Mercado Pago
+                 </h4>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                   <div className="space-y-2">
+                     <div className="flex justify-between border-b pb-1">
+                       <span className="text-muted-foreground">Pagador:</span>
+                       <span className="font-medium">{clientSummary?.mpData?.payerName}</span>
+                     </div>
+                     <div className="flex justify-between border-b pb-1">
+                       <span className="text-muted-foreground">ID do Pagador:</span>
+                       <span className="font-mono text-[10px]">{clientSummary?.mpData?.payerId}</span>
+                     </div>
+                     <div className="flex justify-between border-b pb-1">
+                       <span className="text-muted-foreground">Método de Pagamento:</span>
+                       <span className="font-medium">{clientSummary?.mpData?.paymentMethod}</span>
+                     </div>
+                   </div>
+                   <div className="space-y-2">
+                     <div className="flex justify-between border-b pb-1">
+                       <span className="text-muted-foreground">Última Cobrança:</span>
+                       <span className="font-medium">{formatSafeDate(clientSummary?.mpData?.lastChargedDate)}</span>
+                     </div>
+                     <div className="flex justify-between border-b pb-1">
+                       <span className="text-muted-foreground">Valor da Última Cobrança:</span>
+                       <span className="font-medium">{formatCurrency(clientSummary?.mpData?.lastChargedAmount || 0)}</span>
+                     </div>
+                     <div className="flex justify-between border-b pb-1">
+                       <span className="text-muted-foreground">Próxima Cobrança:</span>
+                       <span className="font-medium text-blue-600 dark:text-blue-400">{formatSafeDate(clientSummary?.mpData?.nextPaymentDate)}</span>
+                     </div>
+                   </div>
+                 </div>
+               </div>
 
               <div className="space-y-4">
                 <h4 className="text-sm font-semibold flex items-center gap-2">
