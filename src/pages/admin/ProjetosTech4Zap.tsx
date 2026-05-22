@@ -452,8 +452,10 @@ export default function ProjetosTech4Zap() {
                       <TableHead>Cliente</TableHead>
                       <TableHead>Descrição</TableHead>
                       <TableHead>Valor</TableHead>
-                      <TableHead>Forma Pagto.</TableHead>
-                      <TableHead>Status</TableHead>
+                       <TableHead>Forma Pagto.</TableHead>
+                       <TableHead>Método MP</TableHead>
+                       <TableHead>Última Cobrança MP</TableHead>
+                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
