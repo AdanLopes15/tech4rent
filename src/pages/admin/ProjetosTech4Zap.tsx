@@ -406,9 +406,15 @@ export default function ProjetosTech4Zap() {
                             <TableCell>
                               {formatSafeDate(sub.createdAt)}
                             </TableCell>
-                            <TableCell>
-                              {formatSafeDate(sub.nextDueDate || sub.dueDate)}
-                            </TableCell>
+                             <TableCell>
+                               {formatSafeDate(sub.nextDueDate || sub.dueDate)}
+                             </TableCell>
+                             <TableCell className="text-xs">
+                               {sub.mpPayerName || "—"}
+                             </TableCell>
+                             <TableCell>
+                               {formatSafeDate(sub.mpNextPaymentDate)}
+                             </TableCell>
                             <TableCell>
                               <Badge variant={(sub.status === "ativo" || sub.isActive === true) ? "default" : "secondary"}>
                                 {(sub.status || (sub.isActive ? "ativo" : "pendente")).charAt(0).toUpperCase() + (sub.status || (sub.isActive ? "ativo" : "pendente")).slice(1)}
