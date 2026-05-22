@@ -361,31 +361,44 @@ export default function ProjetosTech4Zap() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Cliente</TableHead>
+                      <TableHead>Email</TableHead>
                       <TableHead>Plano</TableHead>
                       <TableHead>Valor</TableHead>
                       <TableHead>Início</TableHead>
+                      <TableHead>Próx. Venc.</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {tech4zapData.subscriptions.length > 0 ? (
-                      tech4zapData.subscriptions.map((sub) => (
-                        <TableRow key={sub.id}>
-                          <TableCell className="font-medium">
-                            {sub.companyName || sub.clientName || tech4zapData.clients.find(c => c.id === sub.clientId)?.razaoSocial || "—"}
-                          </TableCell>
-                          <TableCell>{sub.planName || "Pro"}</TableCell>
-                          <TableCell>{formatCurrency(sub.amount || sub.valorTotal || sub.planAmount || 0)}</TableCell>
-                          <TableCell>
-                            {formatSafeDate(sub.createdAt)}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={(sub.status === "ativo" || sub.isActive === true) ? "default" : "secondary"}>
-                              {(sub.status || (sub.isActive ? "ativo" : "pendente")).charAt(0).toUpperCase() + (sub.status || (sub.isActive ? "ativo" : "pendente")).slice(1)}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))
+                      tech4zapData.subscriptions.map((sub) => {
+                        const relatedClient = tech4zapData.clients.find(c => 
+                          c.id === sub.clientId || 
+                          (sub.tech4zapCompanyId && c.tech4zapCompanyId === sub.tech4zapCompanyId)
+                        );
+                        
+                        return (
+                          <TableRow key={sub.id}>
+                            <TableCell className="font-medium">
+                              {sub.companyName || sub.clientName || relatedClient?.razaoSocial || relatedClient?.name || "—"}
+                            </TableCell>
+                            <TableCell>{sub.email || relatedClient?.email || "—"}</TableCell>
+                            <TableCell>{sub.planName || "Pro"}</TableCell>
+                            <TableCell>{formatCurrency(sub.amount || sub.valorTotal || sub.planAmount || 0)}</TableCell>
+                            <TableCell>
+                              {formatSafeDate(sub.createdAt)}
+                            </TableCell>
+                            <TableCell>
+                              {formatSafeDate(sub.nextDueDate || sub.dueDate)}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={(sub.status === "ativo" || sub.isActive === true) ? "default" : "secondary"}>
+                                {(sub.status || (sub.isActive ? "ativo" : "pendente")).charAt(0).toUpperCase() + (sub.status || (sub.isActive ? "ativo" : "pendente")).slice(1)}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
                     ) : (
                       <TableRow>
                         <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
