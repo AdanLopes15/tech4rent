@@ -1,17 +1,69 @@
-import { useMemo, useState } from "react";
-import { useStore } from "@/store";
+import { useMemo, useState, useEffect } from "react";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, DollarSign, Package, CreditCard } from "lucide-react";
+import { Users, DollarSign, Package, CreditCard, Loader2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export default function ProjetosTech4Zap() {
-  const { clients, revenues, tech4zapSubscriptions } = useStore();
   const [activeTab, setActiveTab] = useState("overview");
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<{
+    clients: any[];
+    revenues: any[];
+    subscriptions: any[];
+  }>({
+    clients: [],
+    revenues: [],
+    subscriptions: [],
+  });
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [clientsSnapshot, revenuesSnapshot, subscriptionsSnapshot] = await Promise.all([
+          getDocs(collection(db, "clients")),
+          getDocs(collection(db, "revenues")),
+          getDocs(collection(db, "tech4zapSubscriptions"))
+        ]);
+
+        const clientsData = clientsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const revenuesData = revenuesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const subscriptionsData = subscriptionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        setData({
+          clients: clientsData,
+          revenues: revenuesData,
+          subscriptions: subscriptionsData
+        });
+
+        const isTech4ZapItem = (item: any) => 
+          item?.projectId === "tech4zap" || 
+          item?.source === "tech4zap" || 
+          item?.origin === "Tech4Zap" || 
+          String(item?.id || "").startsWith("tech4zap-");
+
+        console.log("Tech4Zap Direct Fetch Debug:", {
+          clientsData: clientsData.length,
+          revenuesData: revenuesData.length,
+          subscriptionsData: subscriptionsData.length,
+          tech4zapClients: clientsData.filter(isTech4ZapItem).length,
+          tech4zapRevenues: revenuesData.filter(isTech4ZapItem).length,
+          tech4zapSubscriptions: subscriptionsData.filter(isTech4ZapItem).length
+        });
+      } catch (error) {
+        console.error("Error fetching Tech4Zap data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
 
   const tech4zapData = useMemo(() => {
     const isTech4ZapItem = (item: any) => 
@@ -20,44 +72,41 @@ export default function ProjetosTech4Zap() {
       item?.origin === "Tech4Zap" || 
       String(item?.id || "").startsWith("tech4zap-");
 
-    const filteredClients = clients.filter(isTech4ZapItem);
-    const filteredRevenues = revenues.filter(isTech4ZapItem);
-    const filteredSubscriptions = tech4zapSubscriptions.filter(isTech4ZapItem);
+    const filteredClients = data.clients.filter(isTech4ZapItem);
+    const filteredRevenues = data.revenues.filter(isTech4ZapItem);
+    const filteredSubscriptions = data.subscriptions.filter(isTech4ZapItem);
 
-    const getRevenueValue = (revenue: any) => Number(revenue.valorTotal || revenue.amount || 0);
+    const getValue = (item: any) => Number(item?.valorTotal || item?.amount || item?.planAmount || 0);
 
     const totalRevenue = filteredRevenues
       .filter(r => r.status !== "cancelado")
-      .reduce((acc, curr) => acc + getRevenueValue(curr), 0);
+      .reduce((acc, curr) => acc + getValue(curr), 0);
 
-    const pendingRevenue = filteredRevenues
-      .filter(r => r.status === "pendente")
-      .reduce((acc, curr) => acc + getRevenueValue(curr), 0);
-
-    // More accurate MRR: sum of active/pending tech4zap revenues
     const activeMRR = filteredRevenues
       .filter(r => (r.status === "pendente" || r.status === "recebido" || r.status === "ativo") && r.status !== "cancelado")
-      .reduce((acc, curr) => acc + getRevenueValue(curr), 0);
+      .reduce((acc, curr) => acc + getValue(curr), 0);
 
-    console.log("Tech4Zap Debug:", {
-      clients: clients.length,
-      revenues: revenues.length,
-      tech4zapSubscriptions: tech4zapSubscriptions.length,
-      tech4zapClients: filteredClients.length,
-      tech4zapRevenues: filteredRevenues.length,
-      tech4zapSubscriptionsFiltered: filteredSubscriptions.length
-    });
+    const activeSubscriptions = filteredSubscriptions.filter(s => s.status === "ativo" || s.isActive === true);
+    const pendingRevenues = filteredRevenues.filter(r => r.status === "pendente");
 
     return {
       clients: filteredClients,
       revenues: filteredRevenues,
       subscriptions: filteredSubscriptions,
       totalRevenue,
-      pendingRevenue,
-      activeMRR: activeMRR,
-      activeClientsCount: filteredClients.length
+      activeMRR,
+      activeSubscriptions,
+      pendingRevenues
     };
-  }, [clients, revenues, tech4zapSubscriptions]);
+  }, [data]);
+
+  if (loading) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -76,7 +125,7 @@ export default function ProjetosTech4Zap() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{tech4zapData.clients.length}</div>
-            <p className="text-xs text-muted-foreground">{tech4zapData.activeClientsCount} ativos</p>
+            <p className="text-xs text-muted-foreground">Total vinculados</p>
           </CardContent>
         </Card>
 
@@ -87,7 +136,7 @@ export default function ProjetosTech4Zap() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{tech4zapData.subscriptions.length}</div>
-            <p className="text-xs text-muted-foreground">Contratos de SaaS</p>
+            <p className="text-xs text-muted-foreground">{tech4zapData.activeSubscriptions.length} ativas</p>
           </CardContent>
         </Card>
 
@@ -158,8 +207,7 @@ export default function ProjetosTech4Zap() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {tech4zapData.revenues
-                    .filter(r => r.status === "pendente")
+                  {tech4zapData.pendingRevenues
                     .slice(0, 5)
                     .map((rev) => (
                       <div key={rev.id} className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0">
@@ -172,7 +220,7 @@ export default function ProjetosTech4Zap() {
                         <p className="font-bold">{formatCurrency(rev.valorTotal || rev.amount || 0)}</p>
                       </div>
                     ))}
-                  {tech4zapData.revenues.filter(r => r.status === "pendente").length === 0 && (
+                  {tech4zapData.pendingRevenues.length === 0 && (
                     <p className="text-center text-muted-foreground py-4 text-sm">Nenhuma receita pendente.</p>
                   )}
                 </div>
@@ -252,7 +300,7 @@ export default function ProjetosTech4Zap() {
                         <TableRow key={sub.id}>
                           <TableCell className="font-medium">{sub.clientName || sub.customerName || "Cliente"}</TableCell>
                           <TableCell>{sub.planName || "Pro"}</TableCell>
-                          <TableCell>{formatCurrency(sub.amount || sub.valorTotal || 0)}</TableCell>
+                          <TableCell>{formatCurrency(sub.amount || sub.valorTotal || sub.planAmount || 0)}</TableCell>
                           <TableCell>
                             {sub.createdAt ? format(new Date(sub.createdAt), "dd/MM/yyyy") : "—"}
                           </TableCell>
