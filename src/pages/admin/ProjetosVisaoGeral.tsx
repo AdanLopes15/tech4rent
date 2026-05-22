@@ -6,6 +6,32 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Globe, Users, DollarSign, Package, Loader2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+
+const toSafeDate = (value: any): Date | null => {
+  if (!value) return null;
+  if (value?.toDate && typeof value.toDate === "function") {
+    const date = value.toDate();
+    return isNaN(date.getTime()) ? null : date;
+  }
+  if (value instanceof Date) {
+    return isNaN(value.getTime()) ? null : value;
+  }
+  const date = new Date(value);
+  return isNaN(date.getTime()) ? null : date;
+};
+
+const formatSafeDate = (value: any): string => {
+  const date = toSafeDate(value);
+  if (!date) return "—";
+  return format(date, "dd/MM/yyyy", { locale: ptBR });
+};
+
+const getTime = (value: any): number => {
+  const date = toSafeDate(value);
+  return date ? date.getTime() : 0;
+};
 
 export default function ProjetosVisaoGeral() {
   const [loading, setLoading] = useState(true);
