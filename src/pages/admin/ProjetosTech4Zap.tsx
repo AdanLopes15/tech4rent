@@ -468,7 +468,9 @@ export default function ProjetosTech4Zap() {
                           <TableCell className="font-medium">{rev.clientName || "—"}</TableCell>
                           <TableCell className="text-xs">{rev.description || "—"}</TableCell>
                           <TableCell className="font-bold">{formatCurrency(rev.valorTotal || rev.amount || 0)}</TableCell>
-                          <TableCell className="text-xs">{rev.paymentMethod || rev.source || "—"}</TableCell>
+                           <TableCell className="text-xs">{rev.paymentMethod || rev.source || "—"}</TableCell>
+                           <TableCell className="text-xs">{rev.mpPaymentMethod || "—"}</TableCell>
+                           <TableCell>{formatSafeDate(rev.mpLastChargedDate)}</TableCell>
                           <TableCell>
                             <Badge 
                               variant={
