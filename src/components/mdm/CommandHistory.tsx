@@ -45,7 +45,12 @@ export const CommandHistory = ({ commands }: { commands: DeviceCommand[] }) => {
             commands.map((cmd) => (
               <TableRow key={cmd.id}>
                 <TableCell className="font-bold text-slate-700">{cmd.command}</TableCell>
-                <TableCell>{getStatusBadge(cmd.status)}</TableCell>
+                <TableCell>
+                  <div>
+                    {getStatusBadge(cmd.status)}
+                    {cmd.error && <p className="text-[10px] text-red-500 mt-1">{cmd.error}</p>}
+                  </div>
+                </TableCell>
                 <TableCell className="text-xs font-mono max-w-xs truncate">
                   {cmd.payload ? JSON.stringify(cmd.payload) : '—'}
                 </TableCell>
