@@ -212,15 +212,14 @@ export default function Dashboard() {
                   />
                 </div>
               </div>
-            </div>
-          </CardContent>
 
-            <div className="pt-4 border-t border-slate-50">
-              <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-2xl border border-orange-100">
-                <Clock className="text-orange-500 shrink-0" size={24} />
-                <div>
-                  <p className="text-xs font-bold text-orange-600 uppercase tracking-widest">Tempo Médio de Atividade</p>
-                  <p className="text-lg font-black text-slate-900 tracking-tight">99.8%</p>
+              <div className="pt-4 border-t border-slate-50">
+                <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-2xl border border-orange-100">
+                  <Clock className="text-orange-500 shrink-0" size={24} />
+                  <div>
+                    <p className="text-xs font-bold text-orange-600 uppercase tracking-widest">Tempo Médio de Atividade</p>
+                    <p className="text-lg font-black text-slate-900 tracking-tight">99.8%</p>
+                  </div>
                 </div>
               </div>
             </div>
