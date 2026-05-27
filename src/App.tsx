@@ -52,6 +52,8 @@ import { MDMSidebar } from "./components/mdm/Sidebar";
 import MDMDashboard from "./pages/mdm/Dashboard";
 import MDMDevices from "./pages/mdm/Devices";
 import MDMDeviceDetails from "./pages/mdm/DeviceDetails";
+import MDMCommands from "./pages/mdm/Commands";
+import MDMLocations from "./pages/mdm/Locations";
 
 const queryClient = new QueryClient();
 
@@ -148,6 +150,22 @@ const App = () => (
                   <MDMSidebar />
                   <main className="flex-1 p-8 overflow-auto">
                     <MDMDeviceDetails />
+                  </main>
+                </div>
+              } />
+              <Route path="mdm/commands" element={
+                <div className="flex bg-slate-50 min-h-screen">
+                  <MDMSidebar />
+                  <main className="flex-1 p-8 overflow-auto">
+                    <MDMCommands />
+                  </main>
+                </div>
+              } />
+              <Route path="mdm/locations" element={
+                <div className="flex bg-slate-50 min-h-screen">
+                  <MDMSidebar />
+                  <main className="flex-1 p-8 overflow-auto">
+                    <MDMLocations />
                   </main>
                 </div>
               } />
