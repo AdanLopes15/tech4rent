@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { Smartphone } from "lucide-react";
 
 type MenuChild = { icon: React.ElementType; label: string; path: string };
 type MenuItem = {
@@ -91,6 +92,7 @@ const menuItems: MenuItem[] = [
     children: [
       { icon: Eye, label: "Visão Geral", path: "/admin/projetos" },
       { icon: Package, label: "Tech4Zap", path: "/admin/projetos/tech4zap" },
+      { icon: Smartphone, label: "Tech4Rent MDM", path: "/mdm/dashboard" },
     ],
   },
   {
