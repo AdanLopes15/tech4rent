@@ -32,7 +32,8 @@ import {
   Navigation,
   Lock,
   Tablet,
-  Barcode
+  Barcode,
+  ExternalLink
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
