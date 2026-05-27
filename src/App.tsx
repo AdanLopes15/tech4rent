@@ -48,6 +48,10 @@ import Usuarios from "./pages/admin/Usuarios";
 import ContatosSite from "./pages/admin/ContatosSite";
 import ProjetosVisaoGeral from "./pages/admin/ProjetosVisaoGeral";
 import ProjetosTech4Zap from "./pages/admin/ProjetosTech4Zap";
+import { MDMSidebar } from "./components/mdm/Sidebar";
+import MDMDashboard from "./pages/mdm/Dashboard";
+import MDMDevices from "./pages/mdm/Devices";
+import MDMDeviceDetails from "./pages/mdm/DeviceDetails";
 
 const queryClient = new QueryClient();
 
@@ -121,12 +125,30 @@ const App = () => (
               <Route path="contatos-site" element={<ContatosSite />} />
               <Route path="projetos" element={<ProjetosVisaoGeral />} />
               <Route path="projetos/tech4zap" element={<ProjetosTech4Zap />} />
+              
+              {/* Tech4Rent MDM Routes */}
               <Route path="mdm/dashboard" element={
-                <div className="flex">
+                <div className="flex bg-slate-50 min-h-screen">
                   <MDMSidebar />
-                  <div className="flex-1">
-                    <Dashboard />
-                  </div>
+                  <main className="flex-1 p-8 overflow-auto">
+                    <MDMDashboard />
+                  </main>
+                </div>
+              } />
+              <Route path="mdm/devices" element={
+                <div className="flex bg-slate-50 min-h-screen">
+                  <MDMSidebar />
+                  <main className="flex-1 p-8 overflow-auto">
+                    <MDMDevices />
+                  </main>
+                </div>
+              } />
+              <Route path="mdm/devices/:id" element={
+                <div className="flex bg-slate-50 min-h-screen">
+                  <MDMSidebar />
+                  <main className="flex-1 p-8 overflow-auto">
+                    <MDMDeviceDetails />
+                  </main>
                 </div>
               } />
             </Route>
