@@ -121,6 +121,14 @@ const App = () => (
               <Route path="contatos-site" element={<ContatosSite />} />
               <Route path="projetos" element={<ProjetosVisaoGeral />} />
               <Route path="projetos/tech4zap" element={<ProjetosTech4Zap />} />
+              <Route path="mdm/dashboard" element={
+                <div className="flex">
+                  <MDMSidebar />
+                  <div className="flex-1">
+                    <Dashboard />
+                  </div>
+                </div>
+              } />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
