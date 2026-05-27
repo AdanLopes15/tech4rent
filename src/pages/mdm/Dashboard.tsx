@@ -171,36 +171,49 @@ export default function Dashboard() {
         <Card className="border-slate-200 shadow-sm flex flex-col">
           <CardHeader className="bg-white border-b border-slate-50 py-4">
             <CardTitle className="text-xl flex items-center gap-2">
-              <CheckCircle2 size={20} className="text-orange-500" /> Saúde da Frota
+              <CheckCircle2 size={20} className="text-orange-500" /> Distribuição de Status
             </CardTitle>
-            <CardDescription>KPIs de disponibilidade</CardDescription>
+            <CardDescription>Saúde geral da frota</CardDescription>
           </CardHeader>
-          <CardContent className="flex-1 p-6 space-y-8">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm font-bold uppercase tracking-widest text-slate-500">
-                <span>Disponibilidade Online</span>
-                <span className="text-slate-900">{data ? Math.round((data.onlineDevices / data.totalDevices) * 100) : 0}%</span>
-              </div>
-              <div className="h-3 bg-slate-100 rounded-full overflow-hidden border border-slate-200 p-0.5">
-                <div 
-                  className="h-full bg-green-500 rounded-full transition-all duration-1000"
-                  style={{ width: `${data ? (data.onlineDevices / data.totalDevices) * 100 : 0}%` }}
-                />
+          <CardContent className="flex-1 p-6 flex flex-col items-center justify-center">
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'Online', value: data?.onlineDevices || 0 },
+                      { name: 'Offline', value: data?.offlineDevices || 0 },
+                    ]}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    <Cell fill="#22c55e" />
+                    <Cell fill="#94a3b8" />
+                  </Pie>
+                  <RechartsTooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            
+            <div className="w-full space-y-4 mt-4">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm font-bold uppercase tracking-widest text-slate-500">
+                  <span>Disponibilidade</span>
+                  <span className="text-slate-900">{data ? Math.round((data.onlineDevices / data.totalDevices) * 100) : 0}%</span>
+                </div>
+                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-green-500 transition-all duration-1000"
+                    style={{ width: `${data ? (data.onlineDevices / data.totalDevices) * 100 : 0}%` }}
+                  />
+                </div>
               </div>
             </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm font-bold uppercase tracking-widest text-slate-500">
-                <span>Segurança (Bloqueados)</span>
-                <span className="text-slate-900">{data ? Math.round((data.blockedDevices / data.totalDevices) * 100) : 0}%</span>
-              </div>
-              <div className="h-3 bg-slate-100 rounded-full overflow-hidden border border-slate-200 p-0.5">
-                <div 
-                  className="h-full bg-orange-500 rounded-full transition-all duration-1000"
-                  style={{ width: `${data ? (data.blockedDevices / data.totalDevices) * 100 : 0}%` }}
-                />
-              </div>
-            </div>
+          </CardContent>
 
             <div className="pt-4 border-t border-slate-50">
               <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-2xl border border-orange-100">
