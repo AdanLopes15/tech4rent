@@ -128,48 +128,22 @@ const App = () => (
               <Route path="contatos-site" element={<ContatosSite />} />
               <Route path="projetos" element={<ProjetosVisaoGeral />} />
               <Route path="projetos/tech4zap" element={<ProjetosTech4Zap />} />
-              
-              {/* Tech4Rent MDM Routes */}
-              <Route path="mdm/dashboard" element={
-                <div className="flex bg-slate-50 min-h-screen">
-                  <MDMSidebar />
-                  <main className="flex-1 p-8 overflow-auto">
-                    <MDMDashboard />
-                  </main>
-                </div>
-              } />
-              <Route path="mdm/devices" element={
-                <div className="flex bg-slate-50 min-h-screen">
-                  <MDMSidebar />
-                  <main className="flex-1 p-8 overflow-auto">
-                    <MDMDevices />
-                  </main>
-                </div>
-              } />
-              <Route path="mdm/devices/:id" element={
-                <div className="flex bg-slate-50 min-h-screen">
-                  <MDMSidebar />
-                  <main className="flex-1 p-8 overflow-auto">
-                    <MDMDeviceDetails />
-                  </main>
-                </div>
-              } />
-              <Route path="mdm/commands" element={
-                <div className="flex bg-slate-50 min-h-screen">
-                  <MDMSidebar />
-                  <main className="flex-1 p-8 overflow-auto">
-                    <MDMCommands />
-                  </main>
-                </div>
-              } />
-              <Route path="mdm/locations" element={
-                <div className="flex bg-slate-50 min-h-screen">
-                  <MDMSidebar />
-                  <main className="flex-1 p-8 overflow-auto">
-                    <MDMLocations />
-                  </main>
-                </div>
-              } />
+            </Route>
+
+            {/* Tech4Rent MDM Routes */}
+            <Route
+              path="/mdm"
+              element={
+                <ProtectedRoute>
+                  <MDMLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="dashboard" element={<MDMDashboard />} />
+              <Route path="devices" element={<MDMDevices />} />
+              <Route path="devices/:id" element={<MDMDeviceDetails />} />
+              <Route path="commands" element={<MDMCommands />} />
+              <Route path="locations" element={<MDMLocations />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
