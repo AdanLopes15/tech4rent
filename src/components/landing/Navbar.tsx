@@ -120,10 +120,9 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#05070D]/95 text-white backdrop-blur-md">
       <div className="container flex h-16 max-w-6xl items-center justify-between gap-6">
         <button onClick={() => goToHomeSection("hero")} className="flex min-w-0 items-center gap-3" aria-label="Voltar ao início">
-          <img
-            src={siteLogoUrl}
-            alt="Logo da Tech4Rent"
-            className="h-10 w-auto max-w-44 object-contain"
+          <CompanyLogo 
+            isDark={true} 
+            className="h-10 w-auto max-w-44" 
           />
         </button>
 
