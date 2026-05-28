@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import { format } from "date-fns";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
-import { formatCurrency, cn } from "@/lib/utils";
+import { formatCurrency, cn, formatAddress } from "@/lib/utils";
 import { generateQuotePDF } from "@/lib/pdf-utils";
 import html2pdf from "html2pdf.js";
 import { 
@@ -883,7 +883,7 @@ export default function Orcamentos() {
                         return (
                           <>
                             <span>Documento: {client?.cnpj || client?.cpf || "—"}</span>
-                            <span>{client?.address || client?.endereco || "—"}</span>
+                            <span>{formatAddress(client?.address || client?.endereco)}</span>
                           </>
                         );
                       })()}
