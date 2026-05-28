@@ -789,10 +789,38 @@ export default function Orcamentos() {
               />
 
               <DocumentSection title="CLIENTE">
-                <div className="flex flex-col gap-1">
-                  <span className="text-lg font-bold text-[#1a1a1a]">
-                    {getClientName(quoteForDownload.clientId, quoteForDownload.clientName)}
-                  </span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-12">
+                  <div className="flex flex-col">
+                    <span className="text-xs text-[#666666] uppercase">Razão Social</span>
+                    <span className="text-sm font-bold text-[#1a1a1a]">
+                      {getClientName(quoteForDownload.clientId, quoteForDownload.clientName)}
+                    </span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs text-[#666666] uppercase">CNPJ/CPF</span>
+                    <span className="text-sm font-bold text-[#1a1a1a]">
+                      {clients.find((c: any) => c.id === quoteForDownload.clientId)?.cnpj || 
+                       clients.find((c: any) => c.id === quoteForDownload.clientId)?.cpf || 
+                       "—"}
+                    </span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs text-[#666666] uppercase">Pessoa de Contato</span>
+                    <span className="text-sm font-bold text-[#1a1a1a]">
+                      {clients.find((c: any) => c.id === quoteForDownload.clientId)?.contato || 
+                       clients.find((c: any) => c.id === quoteForDownload.clientId)?.contactPerson || 
+                       "—"}
+                    </span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs text-[#666666] uppercase">Telefone / WhatsApp</span>
+                    <span className="text-sm font-bold text-[#1a1a1a]">
+                      {clients.find((c: any) => c.id === quoteForDownload.clientId)?.telefone || 
+                       clients.find((c: any) => c.id === quoteForDownload.clientId)?.phone || 
+                       clients.find((c: any) => c.id === quoteForDownload.clientId)?.whatsapp || 
+                       "—"}
+                    </span>
+                  </div>
                 </div>
               </DocumentSection>
 
