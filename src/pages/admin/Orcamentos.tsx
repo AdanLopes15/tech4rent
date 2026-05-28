@@ -95,6 +95,36 @@ export default function Orcamentos() {
 
   const [locacaoOpen, setLocacaoOpen] = useState(true);
   const [vendaOpen, setVendaOpen] = useState(true);
+  const handleDownloadPDFAsFile = async (ref: React.RefObject<HTMLDivElement>, filename: string) => {
+    if (!ref.current) return;
+
+    const element = ref.current;
+    const opt = {
+      margin: 0,
+      filename: `${filename}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { 
+        scale: 2, 
+        useCORS: true, 
+        letterRendering: true,
+        backgroundColor: '#ffffff'
+      },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    try {
+      toast({ title: "Gerando PDF...", description: "Por favor, aguarde um momento." });
+      await html2pdf().set(opt).from(element).save();
+      toast({ title: "PDF gerado com sucesso!" });
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      toast({ 
+        title: "Erro ao gerar PDF", 
+        description: "Houve um problema ao gerar o arquivo. Tente usar a opção de imprimir.",
+        variant: "destructive" 
+      });
+    }
+  };
 
   const handlePrintDocument = (ref: React.RefObject<HTMLDivElement>) => {
     if (!ref.current) return;
@@ -108,56 +138,60 @@ export default function Orcamentos() {
           <head>
             <title>Tech4Rent - Documento</title>
             <script src="https://cdn.tailwindcss.com"></script>
-            <script>
-              tailwind.config = {
-                theme: {
-                  extend: {
-                    colors: {
-                      primary: {
-                        DEFAULT: '#f97316',
-                        foreground: '#ffffff',
-                      },
-                    }
-                  }
-                }
-              }
-            </script>
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
             <style>
-              @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-              
               body { 
                 font-family: 'Inter', sans-serif;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+                margin: 0;
+                padding: 0;
+                background-color: white;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
               }
               
               @page {
                 size: A4;
-                margin: 0;
+                margin: 10mm;
               }
 
               @media print {
-                body {
-                  margin: 0;
-                  padding: 0;
+                .no-print { display: none !important; }
+                body { margin: 0; }
+                /* Garante que cores de fundo e bordas apareçam */
+                * {
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
                 }
-                .no-print {
-                  display: none;
-                }
+              }
+
+              /* Ajustes para evitar cortes de letras */
+              * {
+                box-sizing: border-box;
+                overflow: visible !important;
+              }
+              
+              table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+              }
+              
+              img {
+                max-width: 100%;
               }
             </style>
           </head>
-          <body class="bg-white">
-            <div class="p-0">
+          <body>
+            <div class="print-container">
               ${content}
             </div>
             <script>
-              // Wait for Tailwind to process and fonts to load
               window.onload = function() {
+                // Pequeno delay para garantir que imagens e fontes carreguem
                 setTimeout(() => {
                   window.print();
                   window.onafterprint = function() { window.close(); };
-                }, 500);
+                }, 800);
               };
             </script>
           </body>
@@ -165,6 +199,7 @@ export default function Orcamentos() {
       `);
       printWindow.document.close();
     }
+  };
   };
 
   const normalizeStatus = (status?: string) => {
