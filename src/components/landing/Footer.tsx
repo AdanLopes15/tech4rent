@@ -23,10 +23,9 @@ const Footer = () => {
       <div className="container max-w-5xl">
         <div className="grid gap-12 py-8 md:grid-cols-4">
           <div className="space-y-7">
-            <img
-              src={siteLogoUrl}
-              alt="Logo da Tech4Rent"
-              className="h-12 w-auto max-w-44 object-contain"
+            <CompanyLogo 
+              isDark={true} 
+              className="h-12 w-auto max-w-44" 
             />
             <p className="text-xs leading-relaxed text-white/60">Coletores, leitores, tablets e equipamentos para logística e operação.</p>
           </div>
