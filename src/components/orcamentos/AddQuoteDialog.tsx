@@ -386,10 +386,7 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
         toast({ title: "Orçamento criado com sucesso!" });
       }
 
-      // Gerar PDF automaticamente ao criar/editar se for locação (ou ambos, conforme pedido)
-      const { companySettings, equipments: allEquipments } = useStore.getState();
-      const fullQuote = { ...data, id: quoteId };
-      generateQuotePDF(fullQuote, client, companySettings, allEquipments);
+      // O PDF pode ser baixado manualmente na lista de orçamentos após a criação/edição.
 
       onOpenChange(false);
     } catch (err: any) {
