@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Timestamp } from "firebase/firestore";
 import { formatCurrency } from "@/lib/utils";
+import { CompanyLogo } from "../admin/CompanyLogo";
 import { useToast } from "@/hooks/use-toast";
 
 interface ViewContractDialogProps {
