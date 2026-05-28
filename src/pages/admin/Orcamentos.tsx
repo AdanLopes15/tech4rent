@@ -69,6 +69,7 @@ export default function Orcamentos() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingQuote, setEditingQuote] = useState<any>(null);
   const [viewingQuote, setViewingQuote] = useState<any>(null);
+  const [quoteForDownload, setQuoteForDownload] = useState<any>(null);
 
   const [clientFilter, setClientFilter] = useState("todos");
   const [statusFilter, setStatusFilter] = useState("todos");
@@ -232,6 +233,10 @@ export default function Orcamentos() {
   };
 
   const handleDownloadPDF = (quote: any) => {
+    setQuoteForDownload(quote);
+  };
+
+  const confirmDownloadPDF = (quote: any) => {
     const { companySettings, clients, equipments } = useStore.getState();
     const client = clients.find((c: any) => c.id === quote.clientId);
     generateQuotePDF(quote, client, companySettings, equipments);
@@ -578,6 +583,107 @@ export default function Orcamentos() {
 
             <AlertDialogFooter>
               <AlertDialogCancel onClick={() => setViewingQuote(null)}>Fechar</AlertDialogCancel>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+
+      {quoteForDownload && (
+        <AlertDialog open={!!quoteForDownload} onOpenChange={() => setQuoteForDownload(null)}>
+          <AlertDialogContent className="max-w-3xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Pré-visualização do Orçamento {quoteForDownload.id}</AlertDialogTitle>
+              <AlertDialogDescription>Confira os dados antes de gerar o PDF.</AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <div className="space-y-4 max-h-[70vh] overflow-y-auto text-sm p-4 border rounded-md">
+              <div className="flex justify-between items-start border-b pb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-primary">TECH4RENT</h3>
+                  <p className="text-xs text-muted-foreground">Orçamento de {quoteForDownload.budgetType === "locacao" ? "Locação" : "Venda"}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold">Nº {quoteForDownload.id}</p>
+                  <p className="text-xs text-muted-foreground">{formatDate(quoteForDownload.createdAt)}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+                <div>
+                  <h4 className="font-semibold text-xs uppercase text-muted-foreground mb-2">Dados do Cliente</h4>
+                  <p className="font-medium">{getClientName(quoteForDownload.clientId, quoteForDownload.clientName)}</p>
+                  <p className="text-xs text-muted-foreground">ID do Cliente: {quoteForDownload.clientId}</p>
+                </div>
+                {quoteForDownload.budgetType === "locacao" && (
+                  <div>
+                    <h4 className="font-semibold text-xs uppercase text-muted-foreground mb-2">Período do Contrato</h4>
+                    <p className="font-medium">
+                      {formatDate(quoteForDownload.startDate)} até {formatDate(quoteForDownload.endDate)}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-xs uppercase text-muted-foreground mb-2">Itens do Orçamento</h4>
+                <div className="border rounded-md overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/50">
+                        <TableHead className="h-8 text-xs">Equipamento</TableHead>
+                        <TableHead className="h-8 text-xs text-center">Qtd</TableHead>
+                        <TableHead className="h-8 text-xs text-right">Unitário</TableHead>
+                        <TableHead className="h-8 text-xs text-right">Total</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {(quoteForDownload.items || []).map((item: any, index: number) => {
+                        const equipment = (useStore.getState().equipments || []).find(
+                          (eq: any) => eq.id === item.equipmentId,
+                        );
+                        return (
+                          <TableRow key={index}>
+                            <TableCell className="py-2 text-xs">{equipment?.name || "Equipamento"}</TableCell>
+                            <TableCell className="py-2 text-xs text-center">{item.quantity}</TableCell>
+                            <TableCell className="py-2 text-xs text-right">{formatCurrency(Number(item.unitPrice || 0))}</TableCell>
+                            <TableCell className="py-2 text-xs text-right font-medium">
+                              {formatCurrency(Number(item.quantity || 0) * Number(item.unitPrice || 0))}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+
+              {quoteForDownload.observations && (
+                <div>
+                  <h4 className="font-semibold text-xs uppercase text-muted-foreground mb-1">Observações</h4>
+                  <p className="text-xs border p-2 rounded bg-muted/30">{quoteForDownload.observations}</p>
+                </div>
+              )}
+
+              <div className="flex flex-col gap-2 pt-4 border-t">
+                {quoteForDownload.budgetType === "locacao" && (
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Valor Mensal:</span>
+                    <span className="font-semibold">{formatCurrency(Number(quoteForDownload.totalValue || 0))}</span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center text-base font-bold text-primary">
+                  <span>VALOR TOTAL:</span>
+                  <span>{formatCurrency(Number(quoteForDownload.totalValue || 0))}</span>
+                </div>
+              </div>
+            </div>
+
+            <AlertDialogFooter className="flex flex-row gap-2 justify-end">
+              <AlertDialogCancel onClick={() => setQuoteForDownload(null)}>Cancelar</AlertDialogCancel>
+              <Button onClick={() => confirmDownloadPDF(quoteForDownload)}>
+                <FileDown className="mr-2 h-4 w-4" />
+                Gerar e Baixar PDF
+              </Button>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
