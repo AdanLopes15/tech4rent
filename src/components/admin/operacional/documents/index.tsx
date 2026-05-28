@@ -36,9 +36,8 @@ export const DocumentContainer = ({ children, className }: DocumentContainerProp
       {children}
     </div>
   );
-
-  );
 };
+
 
 interface DocumentHeaderProps {
   title: string;
