@@ -743,112 +743,97 @@ export default function Orcamentos() {
         </AlertDialog>
       )}
 
-      {quoteForDownload && (
-        <AlertDialog open={!!quoteForDownload} onOpenChange={(open) => {
-          if (!open) setQuoteForDownload(null);
-        }}>
-          <AlertDialogContent className="max-w-4xl p-0 overflow-hidden border-none">
-            <AlertDialogHeader className="bg-[#333333] p-4">
-              <AlertDialogTitle className="text-white">Visualizar Orçamento - {quoteForDownload.id}</AlertDialogTitle>
-              <AlertDialogDescription className="sr-only">Confira os dados antes de imprimir.</AlertDialogDescription>
-            </AlertDialogHeader>
+      {/* Conteúdo Invisível para Impressão de Orçamentos */}
+      <div className="sr-only">
+        <div ref={quotePrintRef}>
+          {quoteForDownload && (
+            <DocumentContainer>
+              <DocumentHeader 
+                title="ORÇAMENTO" 
+                documentNumber={quoteForDownload.id} 
+                date={formatDate(quoteForDownload.createdAt)} 
+              />
 
-            <div ref={quotePrintRef} className="max-h-[70vh] overflow-y-auto bg-[#333333] p-4 md:p-12">
-              <DocumentContainer>
-                <DocumentHeader 
-                  title="ORÇAMENTO" 
-                  documentNumber={quoteForDownload.id} 
-                  date={formatDate(quoteForDownload.createdAt)} 
-                />
+              <DocumentSection title="CLIENTE">
+                <div className="flex flex-col gap-1">
+                  <span className="text-lg font-bold text-[#1a1a1a]">
+                    {getClientName(quoteForDownload.clientId, quoteForDownload.clientName)}
+                  </span>
+                </div>
+              </DocumentSection>
 
-                <DocumentSection title="CLIENTE">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-lg font-bold text-[#1a1a1a]">
-                      {getClientName(quoteForDownload.clientId, quoteForDownload.clientName)}
-                    </span>
-                  </div>
-                </DocumentSection>
-
-                <DocumentSection title="ITENS DO ORÇAMENTO">
-                  <DocumentTable 
-                    headers={["Equipamento", "Qtd.", "Vl. Unit.", "Total"]}
-                    alignments={["left", "center", "right", "right"]}
-                    rows={(quoteForDownload.items || []).map((item: any) => {
-                      const equipment = (useStore.getState().equipments || []).find(
-                        (eq: any) => eq.id === item.equipmentId
-                      );
-                      
-                      return [
-                        <div key={item.equipmentId} className="flex items-start gap-4">
-                          {equipment?.imageUrl && (
-                            <img src={equipment.imageUrl} alt={equipment.name} className="w-16 h-16 object-contain border border-[#e5e5e5] rounded" />
-                          )}
-                          <div className="flex flex-col">
-                            <span className="font-bold text-[#1a1a1a]">{equipment?.name || "Equipamento"}</span>
-                            {equipment?.description && (
-                              <span className="text-[10px] text-[#666666] leading-tight max-w-[300px] mt-1">
-                                {equipment.description}
-                              </span>
-                            )}
-                          </div>
-                        </div>,
-                        item.quantity.toString(),
-                        formatCurrency(Number(item.unitPrice || 0)),
-                        <span key="total" className="font-bold">{formatCurrency(Number(item.quantity || 0) * Number(item.unitPrice || 0))}</span>
-                      ];
-                    })}
-                  />
-                  
-                  <div className="flex justify-end mt-4">
-                    <div className="flex flex-col items-end gap-1">
-                      <div className="flex justify-between w-64">
-                        <span className="text-sm font-bold text-[#666666]">Total do Orçamento</span>
-                        <span className="text-base font-bold text-[#1a1a1a]">{formatCurrency(Number(quoteForDownload.totalValue || 0))}</span>
-                      </div>
-                    </div>
-                  </div>
-                </DocumentSection>
-
-                <DocumentSection title="TERMOS E CONDIÇÕES">
-                  <div className="flex flex-col gap-4">
-                    <div>
-                      <p className="font-bold text-[#1a1a1a] mb-1 text-sm">Período de locação:</p>
-                      <p className="text-sm text-[#333333]">
-                        {quoteForDownload.budgetType === "locacao" 
-                          ? `${formatDate(quoteForDownload.startDate)} a ${formatDate(quoteForDownload.endDate)}.` 
-                          : quoteForDownload.prazoEntrega || "Prazo imediato."}
-                      </p>
-                    </div>
+              <DocumentSection title="ITENS DO ORÇAMENTO">
+                <DocumentTable 
+                  headers={["Equipamento", "Qtd.", "Vl. Unit.", "Total"]}
+                  alignments={["left", "center", "right", "right"]}
+                  rows={(quoteForDownload.items || []).map((item: any) => {
+                    const equipment = (useStore.getState().equipments || []).find(
+                      (eq: any) => eq.id === item.equipmentId
+                    );
                     
-                    <div>
-                      <p className="font-bold text-[#1a1a1a] mb-1 text-sm">Informações Fiscais:</p>
-                      <p className="text-sm text-[#333333]">
-                        {quoteForDownload.informacoesFiscais || quoteForDownload.fiscalInfo || "Nenhuma informação fiscal fornecida."}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="font-bold text-[#1a1a1a] mb-1 text-sm">Observações Gerais:</p>
-                      <p className="text-sm text-[#333333]">
-                        {quoteForDownload.observations || "Nenhuma observação fornecida."}
-                      </p>
+                    return [
+                      <div key={item.equipmentId} className="flex items-start gap-4">
+                        {equipment?.imageUrl && (
+                          <img src={equipment.imageUrl} alt={equipment.name} className="w-16 h-16 object-contain border border-[#e5e5e5] rounded" />
+                        )}
+                        <div className="flex flex-col">
+                          <span className="font-bold text-[#1a1a1a]">{equipment?.name || "Equipamento"}</span>
+                          {equipment?.description && (
+                            <span className="text-[10px] text-[#666666] leading-tight max-w-[300px] mt-1">
+                              {equipment.description}
+                            </span>
+                          )}
+                        </div>
+                      </div>,
+                      item.quantity.toString(),
+                      formatCurrency(Number(item.unitPrice || 0)),
+                      <span key="total" className="font-bold">{formatCurrency(Number(item.quantity || 0) * Number(item.unitPrice || 0))}</span>
+                    ];
+                  })}
+                />
+                
+                <div className="flex justify-end mt-4">
+                  <div className="flex flex-col items-end gap-1">
+                    <div className="flex justify-between w-64">
+                      <span className="text-sm font-bold text-[#666666]">Total do Orçamento</span>
+                      <span className="text-base font-bold text-[#1a1a1a]">{formatCurrency(Number(quoteForDownload.totalValue || 0))}</span>
                     </div>
                   </div>
-                </DocumentSection>
+                </div>
+              </DocumentSection>
 
-                <DocumentFooter />
-              </DocumentContainer>
-            </div>
+              <DocumentSection title="TERMOS E CONDIÇÕES">
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <p className="font-bold text-[#1a1a1a] mb-1 text-sm">Período de locação:</p>
+                    <p className="text-sm text-[#333333]">
+                      {quoteForDownload.budgetType === "locacao" 
+                        ? `${formatDate(quoteForDownload.startDate)} a ${formatDate(quoteForDownload.endDate)}.` 
+                        : quoteForDownload.prazoEntrega || "Prazo imediato."}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <p className="font-bold text-[#1a1a1a] mb-1 text-sm">Informações Fiscais:</p>
+                    <p className="text-sm text-[#333333]">
+                      {quoteForDownload.informacoesFiscais || quoteForDownload.fiscalInfo || "Nenhuma informação fiscal fornecida."}
+                    </p>
+                  </div>
 
-            <AlertDialogFooter className="bg-[#f5f5f5] p-4 flex flex-row gap-2 justify-end">
-              <Button variant="outline" type="button" onClick={() => handlePrintDocument(quotePrintRef)}>
-                Imprimir / Salvar PDF
-              </Button>
-              <AlertDialogCancel className="mt-0" onClick={() => setQuoteForDownload(null)}>Fechar</AlertDialogCancel>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+                  <div>
+                    <p className="font-bold text-[#1a1a1a] mb-1 text-sm">Observações Gerais:</p>
+                    <p className="text-sm text-[#333333]">
+                      {quoteForDownload.observations || "Nenhuma observação fornecida."}
+                    </p>
+                  </div>
+                </div>
+              </DocumentSection>
+
+              <DocumentFooter />
+            </DocumentContainer>
+          )}
+        </div>
+      </div>
 
       {quoteForApproval && (
         <AlertDialog open={!!quoteForApproval} onOpenChange={(open) => {
