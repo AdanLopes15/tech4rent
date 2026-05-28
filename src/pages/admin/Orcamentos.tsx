@@ -199,8 +199,8 @@ export default function Orcamentos() {
       `);
       printWindow.document.close();
     }
-    }
   };
+
 
   const normalizeStatus = (status?: string) => {
     if (!status) return "Pendente";
