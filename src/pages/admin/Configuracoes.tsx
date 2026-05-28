@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import ClausulasEditor, { defaultVendaClauses } from "@/components/admin/ClausulasEditor";
 import ImageUploadField from "@/components/admin/ImageUploadField";
 import { useStore } from "@/store";
+import { CompanyLogo } from "@/components/admin/CompanyLogo";
 
 const formatPhone = (value: string) => {
   const digits = value.replace(/\D/g, "");
