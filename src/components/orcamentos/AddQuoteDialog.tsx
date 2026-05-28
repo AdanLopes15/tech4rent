@@ -217,15 +217,8 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
   }, [budgetType, open, isEditing]);
 
   const totalValue = useMemo(() => {
-    const subtotal = items.reduce((acc, item) => acc + item.quantity * item.unitPrice, 0);
-
-    if (budgetType === "locacao" && startDate && endDate && isAfter(endDate, startDate)) {
-      const months = differenceInMonths(endDate, startDate) || 1;
-      return subtotal * months;
-    }
-
-    return subtotal;
-  }, [items, budgetType, startDate, endDate]);
+    return items.reduce((acc, item) => acc + item.quantity * item.unitPrice, 0);
+  }, [items]);
 
   const addItem = () => {
     setItems((prev) => [
