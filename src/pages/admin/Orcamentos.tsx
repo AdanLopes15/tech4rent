@@ -685,10 +685,10 @@ export default function Orcamentos() {
             </div>
 
             <AlertDialogFooter className="flex flex-row gap-2 justify-end">
-              <AlertDialogCancel onClick={() => setQuoteForDownload(null)}>Cancelar</AlertDialogCancel>
+              <AlertDialogCancel onClick={() => setQuoteForDownload(null)}>Fechar</AlertDialogCancel>
               <Button onClick={() => confirmDownloadPDF(quoteForDownload)}>
                 <FileDown className="mr-2 h-4 w-4" />
-                Gerar e Baixar PDF
+                Imprimir / Baixar PDF
               </Button>
             </AlertDialogFooter>
           </AlertDialogContent>
