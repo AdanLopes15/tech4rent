@@ -899,7 +899,10 @@ export default function Orcamentos() {
                 </>
               ) : (
                 <>
-                  <AlertDialogCancel type="button" onClick={() => setQuoteForApproval(null)}>Cancelar</AlertDialogCancel>
+                  <AlertDialogCancel type="button" onClick={() => {
+                    setQuoteForApproval(null);
+                    setIsContractGenerated(false);
+                  }}>Cancelar</AlertDialogCancel>
                   <Button 
                     type="button"
                     className="bg-green-600 hover:bg-green-700 text-white" 
