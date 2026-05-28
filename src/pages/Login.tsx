@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import logoTech4Rent from "@/assets/landing/logo-tech4rent.png";
+import { CompanyLogo } from "@/components/admin/CompanyLogo";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { sendPasswordResetEmail } from "firebase/auth";
