@@ -181,11 +181,14 @@ export const DocumentSummary = ({ items }: DocumentSummaryProps) => {
 };
 
 export const SignatureBlock = ({ clientName }: { clientName?: string }) => {
+  const { companySettings } = useStore();
+  const displayCompanyName = companySettings?.name || "TECH4RENT";
+
   return (
     <div className="grid grid-cols-2 gap-16 mt-20 print:break-inside-avoid">
       <div className="flex flex-col items-center gap-2">
         <div className="w-full border-b border-[#1a1a1a]"></div>
-        <span className="text-[10px] font-bold uppercase text-[#1a1a1a]">TECH4RENT</span>
+        <span className="text-[10px] font-bold uppercase text-[#1a1a1a]">{displayCompanyName}</span>
         <span className="text-[10px] text-[#666666]">(Assinatura do Locador/Entregador)</span>
       </div>
       <div className="flex flex-col items-center gap-2">
