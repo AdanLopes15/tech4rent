@@ -932,7 +932,7 @@ export default function Orcamentos() {
                   <DocumentSection title="VALOR E CONDIÇÕES">
                     <div className="flex flex-col gap-2">
                       <p>
-                        O valor total da locação é de <span className="font-bold">{formatCurrency(Number(quoteForApproval.totalValue || 0))}</span>, a ser pago em <span className="font-bold">{quoteForApproval.paymentMethods?.[0]?.installments || 1} parcela(s)</span> de <span className="font-bold">{formatCurrency(Number(quoteForApproval.totalValue || 0) / (quoteForApproval.paymentMethods?.[0]?.installments || 1))}</span>.
+                        O valor total mensal da locação é de <span className="font-bold">{formatCurrency(Number(quoteForApproval.totalValue || 0))}</span>, a ser pago em <span className="font-bold">{quoteForApproval.paymentMethods?.[0]?.installments || 1} parcela(s)</span> de <span className="font-bold">{formatCurrency(Number(quoteForApproval.totalValue || 0) / (quoteForApproval.paymentMethods?.[0]?.installments || 1))}</span>.
                       </p>
                       <div className="text-xs text-[#666666]">
                         <p>Primeiro vencimento em: {formatDate(quoteForApproval.startDate)}</p>
