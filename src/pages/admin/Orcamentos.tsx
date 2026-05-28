@@ -836,12 +836,12 @@ export default function Orcamentos() {
                     return [
                       <div key={item.equipmentId} className="flex items-start gap-4">
                         {equipment?.imageUrl && (
-                          <img src={equipment.imageUrl} alt={equipment.name} className="w-16 h-16 object-contain border border-[#e5e5e5] rounded" />
+                          <img src={equipment.imageUrl} alt={equipment.name} className="w-12 h-12 print:w-10 print:h-10 object-contain border border-[#e5e5e5] rounded" />
                         )}
                         <div className="flex flex-col">
                           <span className="font-bold text-[#1a1a1a]">{equipment?.name || "Equipamento"}</span>
                           {equipment?.description && (
-                            <span className="text-[10px] text-[#666666] leading-tight max-w-[300px] mt-1">
+                            <span className="text-[10px] print:text-[9px] text-[#666666] leading-tight max-w-[300px] mt-0.5">
                               {equipment.description}
                             </span>
                           )}
