@@ -866,9 +866,13 @@ export default function Orcamentos() {
                 <div className="space-y-8 mt-4">
                   <DocumentSection title="LOCADOR/VENDEDOR">
                     <div className="flex flex-col gap-1">
-                      <span className="font-bold text-[#1a1a1a]">TECH4RENT</span>
-                      <span>CNPJ: 44.740.821/0001-30</span>
-                      <span>Avenida 44 A, 499 - Vila Nova, Rio Claro - SP</span>
+                      <span className="font-bold text-[#1a1a1a] uppercase">{companySettings?.name || "TECH4RENT"}</span>
+                      <span>CNPJ: {companySettings?.cnpj || "44.740.821/0001-30"}</span>
+                      <span>
+                        {companySettings?.address 
+                          ? `${companySettings.address.logradouro}, ${companySettings.address.numero}${companySettings.address.complemento ? ` - ${companySettings.address.complemento}` : ''} - ${companySettings.address.bairro}, ${companySettings.address.localidade} - ${companySettings.address.uf}`
+                          : "Avenida 44 A, 499 - Vila Nova, Rio Claro - SP"}
+                      </span>
                     </div>
                   </DocumentSection>
 
