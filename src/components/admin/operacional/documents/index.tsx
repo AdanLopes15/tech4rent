@@ -20,10 +20,10 @@ export const DocumentContainer = ({ children, className }: DocumentContainerProp
   return (
     <div 
       className={cn(
-        "bg-white text-[#1a1a1a] p-10 mx-auto shadow-sm print:shadow-none print:p-0",
-        "w-full max-w-[210mm] min-h-[297mm] flex flex-col gap-6",
-        "font-sans leading-normal print:leading-normal",
-        "print:m-0 print:w-full",
+        "bg-white text-[#1a1a1a] p-10 mx-auto shadow-sm print:shadow-none print:p-8",
+        "w-full max-w-[210mm] min-h-[297mm] flex flex-col gap-4 print:gap-2",
+        "font-sans leading-normal print:leading-tight",
+        "print:m-0 print:w-full print:min-h-0",
         className
       )}
       style={{
@@ -89,9 +89,9 @@ export const DocumentHeader = ({ title, documentNumber, date, subtitle, companyI
       </div>
       
       {/* Título do documento centralizado abaixo do cabeçalho */}
-      <div className="flex flex-col items-center mt-6 mb-2">
-        <h2 className="text-2xl font-bold text-[#1a1a1a] uppercase">{title} - {documentNumber}</h2>
-        <p className="text-[11px] text-[#666666] mt-1">{subtitle || `Data: ${date}`}</p>
+      <div className="flex flex-col items-center mt-2 mb-1 print:mt-1">
+        <h2 className="text-xl font-bold text-[#1a1a1a] uppercase print:text-lg">{title} - {documentNumber}</h2>
+        <p className="text-[11px] text-[#666666] mt-0.5">{subtitle || `Data: ${date}`}</p>
       </div>
 
       {/* Linha divisória discreta */}
@@ -117,8 +117,8 @@ interface DocumentSectionProps {
 
 export const DocumentSection = ({ title, children, className }: DocumentSectionProps) => {
   return (
-    <div className={cn("flex flex-col gap-3", className)}>
-      <h3 className="text-sm font-bold uppercase tracking-wider text-[#1a1a1a] border-b border-[#e5e5e5] pb-1">
+    <div className={cn("flex flex-col gap-2 print:gap-1", className)}>
+      <h3 className="text-sm font-bold uppercase tracking-wider text-[#1a1a1a] border-b border-[#e5e5e5] pb-0.5 print:text-xs">
         {title}
       </h3>
       <div className="px-1 text-sm text-[#333333]">
@@ -160,7 +160,7 @@ export const DocumentTable = ({ headers, rows, alignments = [] }: DocumentTableP
                 <td 
                   key={j} 
                   className={cn(
-                    "py-3 text-sm text-[#1a1a1a]",
+                    "py-2 print:py-1 text-sm print:text-xs text-[#1a1a1a]",
                     alignments[j] === "center" ? "text-center" : alignments[j] === "right" ? "text-right" : "text-left"
                   )}
                 >
@@ -181,7 +181,7 @@ interface DocumentSummaryProps {
 
 export const DocumentSummary = ({ items }: DocumentSummaryProps) => {
   return (
-    <div className="flex flex-col items-end gap-1 mt-4 ml-auto w-full max-w-xs">
+    <div className="flex flex-col items-end gap-1 mt-2 print:mt-1 ml-auto w-full max-w-xs">
       {items.map((item, i) => (
         <div 
           key={i} 
@@ -207,7 +207,7 @@ export const SignatureBlock = ({ clientName }: { clientName?: string }) => {
   const displayCompanyName = companySettings?.name || "TECH4RENT";
 
   return (
-    <div className="grid grid-cols-2 gap-16 mt-20 print:break-inside-avoid">
+    <div className="grid grid-cols-2 gap-16 mt-12 print:mt-6 print:break-inside-avoid">
       <div className="flex flex-col items-center gap-2">
         <div className="w-full border-b border-[#1a1a1a]"></div>
         <span className="text-[10px] font-bold uppercase text-[#1a1a1a]">{displayCompanyName}</span>
