@@ -1,5 +1,5 @@
 //src/components/admin/AdminHeader.tsx
-import logoTech4Rent from "@/assets/landing/logo-tech4rent.png";
+import { CompanyLogo } from "./CompanyLogo";
 
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
