@@ -882,7 +882,10 @@ export default function Orcamentos() {
             <AlertDialogFooter className="flex flex-row gap-2 justify-end sm:justify-end">
               {isContractGenerated ? (
                 <>
-                  <Button variant="outline" type="button" onClick={() => setQuoteForApproval(null)}>
+                  <Button variant="outline" type="button" onClick={() => {
+                    setQuoteForApproval(null);
+                    setIsContractGenerated(false);
+                  }}>
                     Fechar
                   </Button>
                   <Button 
