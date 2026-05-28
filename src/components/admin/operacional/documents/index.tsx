@@ -19,12 +19,11 @@ interface DocumentContainerProps {
 export const DocumentContainer = ({ children, className }: DocumentContainerProps) => {
   return (
     <div 
-    <div 
       className={cn(
         "bg-white text-zinc-900 p-8 mx-auto shadow-sm print:shadow-none print:p-0",
         "w-full max-w-[210mm] min-h-[297mm] flex flex-col gap-6",
         "font-sans leading-normal print:leading-normal",
-        "print:m-0 print:w-full", // Garantias extras para impressão
+        "print:m-0 print:w-full",
         className
       )}
       style={{
@@ -34,11 +33,10 @@ export const DocumentContainer = ({ children, className }: DocumentContainerProp
         printColorAdjust: 'exact'
       } as any}
     >
-
-      }}
-    >
       {children}
     </div>
+  );
+
   );
 };
 
