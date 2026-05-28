@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency, cn } from "@/lib/utils";
+import { generateQuotePDF } from "@/lib/pdf-utils";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -47,6 +48,7 @@ import {
   RefreshCw,
   ChevronUp,
   CalendarIcon,
+  FileDown,
 } from "lucide-react";
 
 import { AddQuoteDialog } from "@/components/orcamentos/AddQuoteDialog";
@@ -229,6 +231,12 @@ export default function Orcamentos() {
     }
   };
 
+  const handleDownloadPDF = (quote: any) => {
+    const { companySettings, clients, equipments } = useStore.getState();
+    const client = clients.find((c: any) => c.id === quote.clientId);
+    generateQuotePDF(quote, client, companySettings, equipments);
+  };
+
   const renderQuoteTable = (quotesList: any[], type: "locacao" | "venda") => (
     <Table>
       <TableHeader>
@@ -273,6 +281,11 @@ export default function Orcamentos() {
                       <DropdownMenuItem onClick={() => handleEdit(quote)}>
                         <Pencil className="mr-2 h-4 w-4" />
                         Editar
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem onClick={() => handleDownloadPDF(quote)}>
+                        <FileDown className="mr-2 h-4 w-4" />
+                        Baixar PDF
                       </DropdownMenuItem>
 
                       {type === "locacao" && displayStatus === "Pendente" && (
