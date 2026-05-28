@@ -1,15 +1,13 @@
-
 import React from "react";
 import { cn } from "@/lib/utils";
 import { CompanyLogo } from "../../CompanyLogo";
 
-// Definindo as cores da marca para uso direto (garante fidelidade em qualquer ambiente)
-const BRAND_COLORS = {
+// Cores base para o estilo clássico/corporativo
+const CLASSIC_COLORS = {
+  text: "#1a1a1a",
+  textMuted: "#666666",
+  border: "#e5e5e5",
   blue: "#1E88E5",
-  green: "#43B02A",
-  orange: "#FF9A00",
-  text: "#0D1B2A",
-  gray: "#F5F7FA"
 };
 
 interface DocumentContainerProps {
@@ -21,15 +19,14 @@ export const DocumentContainer = ({ children, className }: DocumentContainerProp
   return (
     <div 
       className={cn(
-        "bg-white text-zinc-900 p-8 mx-auto shadow-sm print:shadow-none print:p-0",
-        "w-full max-w-[210mm] min-h-[297mm] flex flex-col gap-6",
+        "bg-white text-[#1a1a1a] p-8 mx-auto shadow-sm print:shadow-none print:p-0",
+        "w-full max-w-[210mm] min-h-[297mm] flex flex-col gap-8",
         "font-sans leading-normal print:leading-normal",
         "print:m-0 print:w-full",
         className
       )}
       style={{
         boxSizing: 'border-box',
-        color: BRAND_COLORS.text,
         WebkitPrintColorAdjust: 'exact',
         printColorAdjust: 'exact'
       } as any}
@@ -39,40 +36,27 @@ export const DocumentContainer = ({ children, className }: DocumentContainerProp
   );
 };
 
-
 interface DocumentHeaderProps {
   title: string;
   documentNumber: string;
   date: string;
-  type?: "orcamento" | "contrato";
 }
 
-export const DocumentHeader = ({ title, documentNumber, date, type = "orcamento" }: DocumentHeaderProps) => {
+export const DocumentHeader = ({ title, documentNumber, date }: DocumentHeaderProps) => {
   return (
-    <div 
-      className="flex justify-between items-start border-b-2 pb-6 mb-2"
-      style={{ borderBottomColor: `${BRAND_COLORS.blue}33` }} // 20% opacity of primary blue
-    >
-      <div className="flex flex-col">
-        <CompanyLogo 
-          isDark={false} 
-          className="h-12 w-auto mb-1" 
-          style={{ maxWidth: '200px' }} 
-        />
-        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">
-          Locação de Equipamentos de TI
-        </p>
-      </div>
-      <div className="text-right flex flex-col gap-1">
-        <h2 className="text-xl font-bold uppercase tracking-tight" style={{ color: BRAND_COLORS.text }}>{title}</h2>
-        <div className="flex flex-col text-[11px] text-zinc-600">
-          <span>
-            <span className="font-bold uppercase text-[9px]" style={{ color: BRAND_COLORS.blue }}>Nº Documento:</span> {documentNumber}
-          </span>
-          <span>
-            <span className="font-bold uppercase text-[9px]" style={{ color: BRAND_COLORS.blue }}>Data de Emissão:</span> {date}
-          </span>
+    <div className="flex justify-between items-start border-b border-[#e5e5e5] pb-6">
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-3">
+          <CompanyLogo isDark={false} className="h-10 w-auto" />
+          <div className="flex flex-col">
+            <span className="text-xl font-bold tracking-tight text-[#1a1a1a]">TECH4RENT</span>
+            <span className="text-[10px] text-[#666666] font-medium">CNPJ: 44.740.821/0001-30</span>
+          </div>
         </div>
+      </div>
+      <div className="text-right">
+        <h2 className="text-xl font-bold text-[#1a1a1a] uppercase">{title} #{documentNumber}</h2>
+        <p className="text-xs text-[#666666] mt-1">Data: {date}</p>
       </div>
     </div>
   );
@@ -82,30 +66,15 @@ interface DocumentSectionProps {
   title: string;
   children: React.ReactNode;
   className?: string;
-  columns?: 1 | 2;
 }
 
-export const DocumentSection = ({ title, children, className, columns = 1 }: DocumentSectionProps) => {
+export const DocumentSection = ({ title, children, className }: DocumentSectionProps) => {
   return (
     <div className={cn("flex flex-col gap-3", className)}>
-      <h3 
-        className="text-[10px] font-bold uppercase tracking-widest border-l-4 pl-3 py-1"
-        style={{ 
-          color: BRAND_COLORS.blue, 
-          borderLeftColor: BRAND_COLORS.orange,
-          backgroundColor: `${BRAND_COLORS.blue}08` // 5% opacity
-        }}
-      >
+      <h3 className="text-xs font-bold uppercase tracking-wider text-[#1a1a1a] border-b border-[#e5e5e5] pb-1">
         {title}
       </h3>
-      <div className={cn(
-        "grid gap-4 p-4 rounded-lg border",
-        columns === 2 ? "grid-cols-2" : "grid-cols-1" // Forçamos 2 colunas no print também
-      )}
-      style={{ 
-        backgroundColor: BRAND_COLORS.gray,
-        borderColor: '#e5e7eb'
-      }}>
+      <div className="px-1 text-sm text-[#333333]">
         {children}
       </div>
     </div>
@@ -120,15 +89,15 @@ interface DocumentTableProps {
 
 export const DocumentTable = ({ headers, rows, alignments = [] }: DocumentTableProps) => {
   return (
-    <div className="border border-zinc-200 rounded-lg overflow-hidden mt-2">
+    <div className="w-full mt-2">
       <table className="w-full border-collapse">
         <thead>
-          <tr className="bg-zinc-100/80 border-b border-zinc-200">
+          <tr className="border-b border-[#1a1a1a]">
             {headers.map((header, i) => (
               <th 
                 key={i} 
                 className={cn(
-                  "px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-zinc-600 whitespace-nowrap",
+                  "py-2 text-xs font-bold text-[#1a1a1a] uppercase tracking-wider",
                   alignments[i] === "center" ? "text-center" : alignments[i] === "right" ? "text-right" : "text-left"
                 )}
               >
@@ -139,15 +108,14 @@ export const DocumentTable = ({ headers, rows, alignments = [] }: DocumentTableP
         </thead>
         <tbody>
           {rows.map((row, i) => (
-            <tr key={i} className="border-b border-zinc-100 last:border-0">
+            <tr key={i} className="border-b border-[#e5e5e5] last:border-b-[#1a1a1a]">
               {row.map((cell, j) => (
                 <td 
                   key={j} 
                   className={cn(
-                    "px-4 py-3 text-[11px] text-zinc-800",
+                    "py-3 text-sm text-[#1a1a1a]",
                     alignments[j] === "center" ? "text-center" : alignments[j] === "right" ? "text-right" : "text-left"
                   )}
-                  style={{ lineHeight: '1.4' }}
                 >
                   {cell}
                 </td>
@@ -166,25 +134,19 @@ interface DocumentSummaryProps {
 
 export const DocumentSummary = ({ items }: DocumentSummaryProps) => {
   return (
-    <div className="flex flex-col items-end gap-2 mt-4 ml-auto w-full max-w-xs">
+    <div className="flex flex-col items-end gap-1 mt-4 ml-auto w-full max-w-xs">
       {items.map((item, i) => (
         <div 
           key={i} 
           className={cn(
-            "flex justify-between w-full px-4 py-2",
-            item.isTotal 
-              ? "rounded-lg mt-2 py-3 shadow-sm" 
-              : "text-zinc-600 border-b border-zinc-100"
+            "flex justify-between w-full py-1",
+            item.isTotal && "border-t border-[#1a1a1a] mt-2 pt-2"
           )}
-          style={item.isTotal ? { 
-            backgroundColor: BRAND_COLORS.blue,
-            color: '#ffffff'
-          } : {}}
         >
-          <span className={cn("text-[10px] font-bold uppercase tracking-wider", item.isTotal ? "text-white" : "text-zinc-500")}>
+          <span className={cn("text-sm font-bold", item.isTotal ? "text-[#1a1a1a]" : "text-[#666666]")}>
             {item.label}
           </span>
-          <span className={cn("font-bold", item.isTotal ? "text-lg" : "text-zinc-800")}>
+          <span className={cn("text-sm font-bold text-[#1a1a1a]", item.isTotal && "text-base")}>
             {item.value}
           </span>
         </div>
@@ -195,30 +157,23 @@ export const DocumentSummary = ({ items }: DocumentSummaryProps) => {
 
 export const SignatureBlock = () => {
   return (
-    <div className="grid grid-cols-2 gap-12 mt-16 pt-8 border-t border-zinc-100">
+    <div className="grid grid-cols-2 gap-16 mt-20">
       <div className="flex flex-col items-center gap-2">
-        <div className="w-full border-b border-zinc-400 h-10"></div>
-        <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">TECH4RENT LTDA</span>
-        <span className="text-[9px] text-zinc-400">CONTRATADA</span>
+        <div className="w-full border-b border-[#1a1a1a]"></div>
+        <span className="text-[10px] font-bold uppercase text-[#666666]">TECH4RENT LTDA</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <div className="w-full border-b border-zinc-400 h-10"></div>
-        <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">CONTRATANTE</span>
-        <span className="text-[9px] text-zinc-400">CLIENTE</span>
+        <div className="w-full border-b border-[#1a1a1a]"></div>
+        <span className="text-[10px] font-bold uppercase text-[#666666]">CONTRATANTE</span>
       </div>
     </div>
   );
 };
 
-export const DocumentFooter = () => {
+export const DocumentFooter = ({ text }: { text?: string }) => {
   return (
-    <div className="mt-auto pt-8 border-t border-zinc-100 flex justify-between items-center text-[9px] text-zinc-400 uppercase tracking-widest">
-      <div className="font-bold" style={{ color: BRAND_COLORS.blue }}>TECH4RENT - LOCAÇÃO DE EQUIPAMENTOS DE TI</div>
-      <div className="flex gap-4">
-        <span>WWW.TECH4RENT.COM.BR</span>
-        <span>PÁGINA 1 / 1</span>
-      </div>
+    <div className="mt-auto pt-6 text-[10px] text-[#999999] leading-relaxed text-center">
+      {text || "Este orçamento é válido por 15 dias. Os valores podem ser alterados sem aviso prévio após este período."}
     </div>
   );
 };
-
