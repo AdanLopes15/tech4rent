@@ -724,7 +724,17 @@ export default function Orcamentos() {
             </div>
 
             <AlertDialogFooter className="bg-[#f5f5f5] p-4 flex flex-row gap-2 justify-end">
-              <Button variant="outline" type="button" onClick={() => handleDownloadPDF(viewingQuote)}>
+              <Button 
+                variant="outline" 
+                type="button" 
+                onClick={() => {
+                  setQuoteForDownload(viewingQuote);
+                  setViewingQuote(null);
+                  setTimeout(() => {
+                    handlePrintDocument(quotePrintRef);
+                  }, 200);
+                }}
+              >
                 Imprimir / Salvar PDF
               </Button>
               <AlertDialogCancel className="mt-0" onClick={() => setViewingQuote(null)}>Fechar</AlertDialogCancel>
@@ -858,116 +868,206 @@ export default function Orcamentos() {
             <div ref={contractPrintRef} className="max-h-[70vh] overflow-y-auto bg-[#333333] p-4 md:p-12">
               <DocumentContainer>
                 <DocumentHeader 
-                  title="CONTRATO" 
-                  documentNumber={quoteForApproval.id} 
-                  date={formatDate(quoteForApproval.createdAt)} 
+                  title="Contrato de Locação" 
+                  documentNumber={quoteForApproval.id.replace('ORC-', 'CTR-')} 
+                  date={formatDate(new Date())}
+                  subtitle={`Gerado em ${format(new Date(), "dd/MM/yyyy")} às ${format(new Date(), "HH:mm")}. Válido mediante assinatura.`}
+                  companyInfo={{
+                    name: "TECH4RENT",
+                    cnpj: "44.740.821/0001-30",
+                    address: "Avenida 44 A, 499 - Vila Nova, Rio Claro - SP"
+                  }}
                 />
 
-                <div className="text-center my-4">
-                  <h2 className="text-xl font-bold text-[#1a1a1a] uppercase tracking-wider border-y border-[#e5e5e5] py-4">
-                    CONTRATO DE LOCAÇÃO DE EQUIPAMENTOS
-                  </h2>
-                </div>
-
-                <div className="space-y-6">
-                  <DocumentSection title="1. DAS PARTES">
-                    <div className="flex flex-col gap-3">
-                      <p className="leading-relaxed">
-                        <span className="font-bold">LOCADORA:</span> 
-                        <span className="uppercase"> TECH4RENT LTDA</span>, com sede em São Paulo/SP, inscrita no CNPJ sob o nº 44.740.821/0001-30.
-                      </p>
-                      <p className="leading-relaxed">
-                        <span className="font-bold">LOCATÁRIA:</span> 
-                        <span className="uppercase"> {getClientName(quoteForApproval.clientId, quoteForApproval.clientName)}</span>, inscrita no CNPJ/CPF conforme cadastro no sistema Tech4Rent.
-                      </p>
+                <div className="space-y-8 mt-4">
+                  <DocumentSection title="LOCADOR/VENDEDOR">
+                    <div className="flex flex-col gap-1">
+                      <span className="font-bold text-[#1a1a1a]">TECH4RENT</span>
+                      <span>CNPJ: 44.740.821/0001-30</span>
+                      <span>Avenida 44 A, 499 - Vila Nova, Rio Claro - SP</span>
                     </div>
                   </DocumentSection>
 
-                  <DocumentSection title="2. DO OBJETO">
-                    <p className="mb-3">
-                      O presente contrato tem por objeto a locação dos seguintes equipamentos e acessórios:
+                  <DocumentSection title="LOCATÁRIO/COMPRADOR (CLIENTE)">
+                    <div className="flex flex-col gap-1">
+                      <span className="font-bold text-[#1a1a1a]">
+                        {getClientName(quoteForApproval.clientId, quoteForApproval.clientName)}
+                      </span>
+                      {(() => {
+                        const client = clients.find((c: any) => c.id === quoteForApproval.clientId);
+                        return (
+                          <>
+                            <span>Documento: {client?.cnpj || client?.cpf || "—"}</span>
+                            <span>{client?.address || client?.endereco || "—"}</span>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </DocumentSection>
+
+                  <DocumentSection title="OBJETO DO DOCUMENTO">
+                    <p className="mb-4 text-[#333333]">
+                      O presente documento tem como objeto a locação do(s) seguinte(s) equipamento(s), totalizando {quoteForApproval.items?.reduce((acc: number, item: any) => acc + item.quantity, 0) || 0} itens:
                     </p>
                     <DocumentTable 
-                      headers={["Equipamento", "Qtd.", "Vl. Unit."]}
-                      alignments={["left", "center", "right"]}
+                      headers={["Equipamento", "Qtd.", "Vl. Unit. (Mês)", "Total"]}
+                      alignments={["left", "center", "right", "right"]}
                       rows={(quoteForApproval.items || []).map((item: any) => {
                         const equipment = (useStore.getState().equipments || []).find(
                           (eq: any) => eq.id === item.equipmentId,
                         );
                         return [
-                          equipment?.name || "Equipamento",
+                          <div key={item.equipmentId} className="flex items-start gap-4">
+                            {equipment?.imageUrl && (
+                              <img src={equipment.imageUrl} alt={equipment.name} className="w-16 h-16 object-contain border border-[#e5e5e5] rounded" />
+                            )}
+                            <div className="flex flex-col">
+                              <span className="font-bold text-[#1a1a1a]">{equipment?.name || "Equipamento"}</span>
+                              {equipment?.description && (
+                                <span className="text-[10px] text-[#666666] leading-tight max-w-[300px] mt-1">
+                                  {equipment.description}
+                                </span>
+                              )}
+                            </div>
+                          </div>,
                           item.quantity.toString(),
-                          formatCurrency(Number(item.unitPrice || 0))
+                          formatCurrency(Number(item.unitPrice || 0)),
+                          <span key="total" className="font-bold">{formatCurrency(Number(item.quantity || 0) * Number(item.unitPrice || 0))}</span>
                         ];
                       })}
                     />
                   </DocumentSection>
 
-                  <DocumentSection title="3. DO PRAZO E VALORES">
-                    <div className="flex flex-col gap-4">
-                      <div className="grid grid-cols-2 gap-8">
-                        <div>
-                          <p className="font-bold text-[#1a1a1a]">Início da Locação:</p>
-                          <p className="">{formatDate(quoteForApproval.startDate)}</p>
-                        </div>
-                        <div>
-                          <p className="font-bold text-[#1a1a1a]">Término da Locação:</p>
-                          <p className="">{formatDate(quoteForApproval.endDate)}</p>
-                        </div>
-                      </div>
-                      <p className="pt-4 border-t border-[#e5e5e5]">
-                        O valor mensal total da locação é de <span className="font-bold">{formatCurrency(Number(quoteForApproval.totalValue || 0))}</span>, a ser pago conforme condições comerciais acordadas.
-                      </p>
+                  <DocumentSection title="PERÍODO">
+                    <div className="flex flex-col gap-1">
+                      <p><span className="font-bold">Retirada:</span> {formatDate(quoteForApproval.startDate)}</p>
+                      <p><span className="font-bold">Devolução:</span> {formatDate(quoteForApproval.endDate)}</p>
                     </div>
                   </DocumentSection>
 
-                  <DocumentSection title="4. DAS OBRIGAÇÕES">
-                    <p className="leading-relaxed text-justify">
-                      A <span className="font-bold">LOCATÁRIA</span> obriga-se a manter os equipamentos em perfeito estado de conservação e uso, respondendo por eventuais danos causados por mau uso, negligência ou imprudência. Os equipamentos deverão ser devolvidos à <span className="font-bold">LOCADORA</span> ao final do prazo estabelecido, nas mesmas condições em que foram entregues.
-                    </p>
+                  <DocumentSection title="VALOR E CONDIÇÕES">
+                    <div className="flex flex-col gap-2">
+                      <p>
+                        O valor total da locação é de <span className="font-bold">{formatCurrency(Number(quoteForApproval.totalValue || 0))}</span>, a ser pago em <span className="font-bold">{quoteForApproval.paymentMethods?.[0]?.installments || 1} parcela(s)</span> de <span className="font-bold">{formatCurrency(Number(quoteForApproval.totalValue || 0) / (quoteForApproval.paymentMethods?.[0]?.installments || 1))}</span>.
+                      </p>
+                      <div className="text-xs text-[#666666]">
+                        <p>Primeiro vencimento em: {formatDate(quoteForApproval.startDate)}</p>
+                        <p>Último vencimento em: {formatDate(quoteForApproval.endDate)}</p>
+                      </div>
+                    </div>
                   </DocumentSection>
 
-                  {quoteForApproval.observations && (
-                    <DocumentSection title="5. OBSERVAÇÕES">
-                      <p className="italic">
-                        {quoteForApproval.observations}
-                      </p>
-                    </DocumentSection>
-                  )}
+                  <div className="print:break-before-page pt-8">
+                    <h3 className="text-lg font-bold uppercase text-[#1a1a1a] border-b border-[#e5e5e5] pb-2 mb-6">
+                      CLÁUSULAS CONTRATUAIS DE LOCAÇÃO
+                    </h3>
+                    
+                    <div className="space-y-6 text-sm text-[#333333] leading-relaxed">
+                      <div>
+                        <p className="font-bold mb-2">1. CLÁUSULA PRIMEIRA – OBJETO DO CONTRATO</p>
+                        <p className="text-justify">1.1. Parágrafo primeiro — A LOCADORA afirma que os equipamentos descritos estão em perfeitas condições de uso, sem apresentar defeitos aparentes ou ocultos que possam comprometer ou impedir sua utilização regular.</p>
+                        <p className="text-justify mt-2">1.2. Parágrafo segundo — A partir do momento em que os equipamentos forem entregues, a LOCATÁRIA se compromete a cuidar e conservar adequadamente os bens sob sua responsabilidade. Caso haja danos decorrentes de uso inadequado, será de inteira responsabilidade da LOCATÁRIA indenizar a LOCADORA pelos prejuízos causados, conforme previsto na legislação vigente.</p>
+                      </div>
 
-                  <SignatureBlock />
+                      <div>
+                        <p className="font-bold mb-2">2. CLÁUSULA SEGUNDA – PRAZO DA LOCAÇÃO</p>
+                        <p className="text-justify">2.1. A locação terá o prazo definido no campo "PERÍODO" deste documento. Ao término da locação, os bens deverão ser devolvidos nas mesmas condições em que foram entregues.</p>
+                      </div>
+
+                      <div>
+                        <p className="font-bold mb-2">3. CLÁUSULA TERCEIRA – VALOR E FORMA DE PAGAMENTO</p>
+                        <p className="text-justify">3.1. A LOCATÁRIA se compromete a pagar à LOCADORA o valor total estipulado neste contrato conforme as condições acordadas.</p>
+                      </div>
+
+                      <div>
+                        <p className="font-bold mb-2">4. CLÁUSULA QUARTA – DO ATRASO NO PAGAMENTO</p>
+                        <p className="text-justify">4.1. Pagamentos em atraso serão corrigidos com multa de 2% e juros de 1% ao mês.</p>
+                      </div>
+
+                      <div>
+                        <p className="font-bold mb-2">5. CLÁUSULA QUINTA – ENTREGA DOS EQUIPAMENTOS</p>
+                        <p className="text-justify">5.1. Os equipamentos serão entregues no endereço acordado, devendo a LOCATÁRIA conferir o funcionamento no ato do recebimento.</p>
+                      </div>
+
+                      <div>
+                        <p className="font-bold mb-2">6. CLÁUSULA SEXTA – RESPONSABILIDADES DAS PARTES</p>
+                        <p className="text-justify">6.1. LOCADORA: entregar e manter os equipamentos em perfeito estado.</p>
+                        <p className="text-justify">6.2. LOCATÁRIA: pagar pontualmente, zelar pelo equipamento e não sublocar sem autorização.</p>
+                      </div>
+
+                      <div>
+                        <p className="font-bold mb-2">7. CLÁUSULA SÉTIMA – CESSÃO DE DIREITOS</p>
+                        <p className="text-justify">7.1. É vedada a transferência dos direitos e deveres deste contrato a terceiros sem autorização expressa.</p>
+                      </div>
+
+                      <div>
+                        <p className="font-bold mb-2">8. CLÁUSULA OITAVA – MULTA CONTRATUAL</p>
+                        <p className="text-justify">8.1. A rescisão imotivada do contrato pela LOCATÁRIA ensejará o pagamento de multa conforme acordado entre as partes.</p>
+                      </div>
+
+                      <div>
+                        <p className="font-bold mb-2">9. CLÁUSULA NONA – MULTA POR ATRASO NA DEVOLUÇÃO</p>
+                        <p className="text-justify">9.1. O atraso na devolução incidirá multa diária até a efetiva entrega dos equipamentos.</p>
+                      </div>
+
+                      <div>
+                        <p className="font-bold mb-2">10. CLÁUSULA DÉCIMA – FORO</p>
+                        <p className="text-justify">10.1. Fica eleito o foro da comarca de Rio Claro/SP para dirimir quaisquer questões oriundas deste contrato.</p>
+                      </div>
+                    </div>
+
+                    <SignatureBlock clientName={getClientName(quoteForApproval.clientId, quoteForApproval.clientName)} />
+                  </div>
                 </div>
 
-                <DocumentFooter text="Documento gerado eletronicamente através do sistema Tech4Rent." />
+                <DocumentFooter text="Válido mediante assinatura das partes." />
               </DocumentContainer>
             </div>
 
-            <AlertDialogFooter className="bg-[#f5f5f5] p-4 flex flex-row gap-2 justify-end sm:justify-end">
+            <AlertDialogFooter className="bg-[#f5f5f5] p-4 flex flex-row gap-3 justify-end sm:justify-end border-t border-[#e5e5e5]">
               {isContractGenerated ? (
                 <>
-                  <Button variant="outline" type="button" onClick={() => handlePrintDocument(contractPrintRef)}>
+                  <Button 
+                    variant="outline" 
+                    type="button" 
+                    className="h-10 px-6 font-medium"
+                    onClick={() => handlePrintDocument(contractPrintRef)}
+                  >
                     Imprimir / Salvar PDF
                   </Button>
-                  <Button variant="outline" type="button" onClick={() => {
-                    setQuoteForApproval(null);
-                    setIsContractGenerated(false);
-                  }}>
+                  <Button 
+                    variant="default" 
+                    type="button" 
+                    className="h-10 px-6 font-medium bg-[#1a1a1a] hover:bg-black text-white"
+                    onClick={() => {
+                      setQuoteForApproval(null);
+                      setIsContractGenerated(false);
+                    }}
+                  >
                     Fechar
                   </Button>
                 </>
               ) : (
                 <>
                   <Button 
+                    variant="outline"
+                    className="h-11 px-8 font-semibold border-[#e5e5e5] text-[#666666] hover:bg-gray-50"
+                    type="button" 
+                    onClick={() => {
+                      setQuoteForApproval(null);
+                      setIsContractGenerated(false);
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button 
                     type="button"
-                    className="bg-[#1a1a1a] hover:bg-black text-white" 
+                    className="h-11 px-8 font-semibold bg-[#22c55e] hover:bg-[#16a34a] text-white flex items-center gap-2" 
                     onClick={() => confirmConvertToContract(quoteForApproval.id)}
                   >
+                    <FileCheck className="h-5 w-5" />
                     Confirmar Aprovação e Gerar Contrato
                   </Button>
-                  <AlertDialogCancel className="mt-0" type="button" onClick={() => {
-                    setQuoteForApproval(null);
-                    setIsContractGenerated(false);
-                  }}>Fechar</AlertDialogCancel>
                 </>
               )}
             </AlertDialogFooter>
