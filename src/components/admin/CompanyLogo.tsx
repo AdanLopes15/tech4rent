@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 
 interface CompanyLogoProps {
   className?: string;
+  style?: React.CSSProperties;
   isDark?: boolean;
   useSettings?: boolean;
 }
