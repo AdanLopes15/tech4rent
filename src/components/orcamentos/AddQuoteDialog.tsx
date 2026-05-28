@@ -730,7 +730,9 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
               </div>
 
               <div className="flex items-center justify-between bg-primary/10 border border-primary/20 rounded-lg p-4">
-                <span className="font-bold">Valor Total do Orçamento</span>
+                <span className="font-bold">
+                  {budgetType === "locacao" ? "Valor Total Mensal do Orçamento" : "Valor Total do Orçamento"}
+                </span>
                 <span className="text-lg font-bold">{formatCurrency(totalValue)}</span>
               </div>
             </div>
