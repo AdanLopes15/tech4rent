@@ -85,6 +85,7 @@ export default function Orcamentos() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingQuote, setEditingQuote] = useState<any>(null);
   const [viewingQuote, setViewingQuote] = useState<any>(null);
+  const [quoteResponsible, setQuoteResponsible] = useState("");
   const [quoteForDownload, setQuoteForDownload] = useState<any>(null);
   const [quoteForApproval, setQuoteForApproval] = useState<any>(null);
   const [isContractGenerated, setIsContractGenerated] = useState(false);
@@ -642,6 +643,8 @@ export default function Orcamentos() {
                   title="ORÇAMENTO" 
                   documentNumber={viewingQuote.id} 
                   date={formatDate(viewingQuote.createdAt)} 
+                  responsible={quoteResponsible}
+                  onResponsibleChange={setQuoteResponsible}
                 />
 
                 <DocumentSection title="CLIENTE">
@@ -782,6 +785,7 @@ export default function Orcamentos() {
                 title="ORÇAMENTO" 
                 documentNumber={quoteForDownload.id} 
                 date={formatDate(quoteForDownload.createdAt)} 
+                responsible={quoteResponsible}
               />
 
               <DocumentSection title="CLIENTE">
