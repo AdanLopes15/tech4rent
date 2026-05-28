@@ -273,7 +273,14 @@ export default function Orcamentos() {
       </TableHeader>
 
       <TableBody>
-        {quotesList.length > 0 ? (
+        {loading ? (
+          <TableRow>
+            <TableCell colSpan={6} className="text-center py-10">
+              <RefreshCw className="h-6 w-6 animate-spin mx-auto text-primary mb-2" />
+              <p className="text-sm text-muted-foreground">Carregando orçamentos...</p>
+            </TableCell>
+          </TableRow>
+        ) : quotesList.length > 0 ? (
           quotesList.map((quote: any) => {
             const displayStatus = normalizeStatus(quote.status);
 
