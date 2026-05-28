@@ -70,6 +70,7 @@ export default function Orcamentos() {
   const [editingQuote, setEditingQuote] = useState<any>(null);
   const [viewingQuote, setViewingQuote] = useState<any>(null);
   const [quoteForDownload, setQuoteForDownload] = useState<any>(null);
+  const [quoteForApproval, setQuoteForApproval] = useState<any>(null);
 
   const [clientFilter, setClientFilter] = useState("todos");
   const [statusFilter, setStatusFilter] = useState("todos");
