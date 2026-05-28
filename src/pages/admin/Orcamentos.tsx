@@ -300,7 +300,7 @@ export default function Orcamentos() {
                       </DropdownMenuItem>
 
                       {type === "locacao" && displayStatus === "Pendente" && (
-                        <DropdownMenuItem onClick={() => handleConvertToContract(quote.id)}>
+                        <DropdownMenuItem onClick={() => handleConvertToContract(quote)}>
                           <FileCheck className="mr-2 h-4 w-4" />
                           Aprovar e Gerar Contrato
                         </DropdownMenuItem>
