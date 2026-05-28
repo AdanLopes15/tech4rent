@@ -4,6 +4,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useStore } from "@/store";
 import { ChevronLeft, ChevronRight, Instagram, Linkedin, Youtube, MapPin, Phone, Mail, ShieldCheck, CheckCircle, Globe } from "lucide-react";
+import { CompanyLogo } from "../admin/CompanyLogo";
 import heroDevices from "@/assets/landing/devices-only.png";
 import warehouseBg from "@/assets/landing/hero-bg-warehouse.jpg";
 import iconAgilidade from "@/assets/landing/icon-agilidade.png";
