@@ -326,12 +326,6 @@ export default function Orcamentos() {
     setQuoteForDownload(quote);
   };
 
-  const confirmDownloadPDF = (quote: any) => {
-    const { companySettings, clients, equipments } = useStore.getState();
-    const client = clients.find((c: any) => c.id === quote.clientId);
-    generateQuotePDF(quote, client, companySettings, equipments);
-  };
-
   const renderQuoteTable = (quotesList: any[], type: "locacao" | "venda") => (
     <Table>
       <TableHeader>
