@@ -16,8 +16,8 @@ interface CompanyLogoProps {
  */
 export const CompanyLogo = ({ className, style, isDark = false, useSettings = false }: CompanyLogoProps) => {
   // URLs estáveis para a logo
-  const LIGHT_LOGO_URL = "/lovable-uploads/85f9f688-6623-45c1-9653-e9671f66d48c.png"; // Versão com texto escuro
-  const DARK_LOGO_URL = "/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png";   // Versão com texto branco
+  const LIGHT_LOGO_URL = "/logo-tech4rent.png"; // Versão com texto escuro (localizada em /public)
+  const DARK_LOGO_URL = "/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png";   // Versão com texto branco (mantida)
 
   const [imgSrc, setImgSrc] = useState<string>(isDark ? DARK_LOGO_URL : LIGHT_LOGO_URL);
   const [hasError, setHasError] = useState(false);
