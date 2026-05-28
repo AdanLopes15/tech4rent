@@ -122,5 +122,17 @@ export const generateQuotePDF = (quote: any, client: any, companySettings: any, 
   doc.text(footerText, pageWidth / 2, doc.internal.pageSize.getHeight() - 15, { align: "center" });
 
   // Save the PDF
-  doc.save(`Orcamento_${quote.id}_${client?.name?.replace(/\s+/g, '_') || 'Cliente'}.pdf`);
+  try {
+    doc.save(`Orcamento_${quote.id}_${client?.razaoSocial?.replace(/\s+/g, '_') || client?.name?.replace(/\s+/g, '_') || 'Cliente'}.pdf`);
+  } catch (error) {
+    console.error("Error saving PDF:", error);
+    // Fallback if save fails
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Orcamento_${quote.id}.pdf`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+  }
 };
