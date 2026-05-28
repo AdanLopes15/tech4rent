@@ -867,7 +867,7 @@ export default function Orcamentos() {
               </DocumentSection>
 
               <DocumentSection title="TERMOS E CONDIÇÕES">
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2 print:gap-1">
                   <div>
                     <p className="font-bold text-[#1a1a1a] mb-1 text-sm">Período de locação:</p>
                     <p className="text-sm text-[#333333]">
