@@ -1,6 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { CompanyLogo } from "../../CompanyLogo";
+import { useStore } from "@/store";
 
 // Cores base para o estilo clássico/corporativo
 const CLASSIC_COLORS = {
@@ -49,14 +50,19 @@ interface DocumentHeaderProps {
 }
 
 export const DocumentHeader = ({ title, documentNumber, date, subtitle, companyInfo }: DocumentHeaderProps) => {
+  const { companySettings } = useStore();
+  
+  const displayCnpj = companyInfo?.cnpj || companySettings?.cnpj || "44.740.821/0001-30";
+  const displayCompanyName = companyInfo?.name || companySettings?.name || "TECH4RENT";
+
   return (
     <div className="flex flex-col gap-4">
       {/* Cabeçalho superior: Logo e Nome/CNPJ da Empresa */}
       <div className="flex items-center gap-3">
         <CompanyLogo isDark={false} className="h-10 w-auto" />
         <div className="flex flex-col">
-          <span className="text-xl font-bold tracking-tight text-[#1a1a1a]">TECH4RENT</span>
-          <span className="text-[10px] text-[#666666] font-medium uppercase">CNPJ: 44.740.821/0001-30</span>
+          <span className="text-xl font-bold tracking-tight text-[#1a1a1a] uppercase">{displayCompanyName}</span>
+          <span className="text-[10px] text-[#666666] font-medium uppercase">CNPJ: {displayCnpj}</span>
         </div>
       </div>
       
