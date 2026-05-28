@@ -58,11 +58,19 @@ export const DocumentHeader = ({ title, documentNumber, date, subtitle, companyI
   return (
     <div className="flex flex-col gap-4">
       {/* Cabeçalho superior: Logo e Nome/CNPJ da Empresa */}
-      <div className="flex items-center gap-3">
-        <CompanyLogo isDark={false} className="h-10 w-auto" />
-        <div className="flex flex-col">
-          <span className="text-xl font-bold tracking-tight text-[#1a1a1a] uppercase">{displayCompanyName}</span>
-          <span className="text-[10px] text-[#666666] font-medium uppercase">CNPJ: {displayCnpj}</span>
+      <div className="flex justify-between items-start">
+        <div className="flex items-center gap-3">
+          <CompanyLogo isDark={false} className="h-10 w-auto" />
+          <div className="flex flex-col">
+            <span className="text-xl font-bold tracking-tight text-[#1a1a1a] uppercase">{displayCompanyName}</span>
+            <span className="text-[10px] text-[#666666] font-medium uppercase">CNPJ: {displayCnpj}</span>
+            <span className="text-[10px] text-[#666666] font-medium uppercase">TEL: {companySettings?.phone || "(19) 97107-6928"}</span>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-end text-right">
+          <span className="text-xs text-[#666666] uppercase font-bold">Responsável pelo Orçamento</span>
+          <div className="border-b border-[#e5e5e5] w-48 mt-4"></div>
         </div>
       </div>
       
