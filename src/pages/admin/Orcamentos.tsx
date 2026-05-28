@@ -680,7 +680,9 @@ export default function Orcamentos() {
       )}
 
       {quoteForDownload && (
-        <AlertDialog open={!!quoteForDownload} onOpenChange={() => setQuoteForDownload(null)}>
+        <AlertDialog open={!!quoteForDownload} onOpenChange={(open) => {
+          if (!open) setQuoteForDownload(null);
+        }}>
           <AlertDialogContent className="max-w-3xl">
             <AlertDialogHeader>
               <AlertDialogTitle>Pré-visualização do Orçamento {quoteForDownload.id}</AlertDialogTitle>
