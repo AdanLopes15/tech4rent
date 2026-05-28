@@ -6,6 +6,7 @@ import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency, cn } from "@/lib/utils";
 import { generateQuotePDF } from "@/lib/pdf-utils";
+import html2pdf from "html2pdf.js";
 import { 
   DocumentContainer, 
   DocumentHeader, 
