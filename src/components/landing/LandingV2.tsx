@@ -353,7 +353,7 @@ const LandingV2 = () => {
               <p className="text-sm font-black uppercase tracking-[0.3em] text-[#43B02A] mb-4">SOBRE NÓS</p>
               <h2 className="text-5xl md:text-6xl font-black uppercase leading-[1.1]">
                 QUEM É A <br />
-                <span className="text-white">TECH</span><span className="text-[#43B02A]">4</span><span className="text-white">RENT</span>
+                <CompanyLogo isDark={true} className="h-16 mt-2" />
               </h2>
               <div className="mt-8 space-y-6 text-lg text-white/70 leading-relaxed max-w-[540px]">
                 <p>
