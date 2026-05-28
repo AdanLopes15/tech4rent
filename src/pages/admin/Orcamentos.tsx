@@ -6,6 +6,15 @@ import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency, cn } from "@/lib/utils";
 import { generateQuotePDF } from "@/lib/pdf-utils";
+import { 
+  DocumentContainer, 
+  DocumentHeader, 
+  DocumentSection, 
+  DocumentTable, 
+  DocumentSummary, 
+  SignatureBlock, 
+  DocumentFooter 
+} from "@/components/admin/operacional/documents";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
