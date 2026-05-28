@@ -1,5 +1,5 @@
 //src/components/admin/AdminSidebar.tsx
-import logoTech4Rent from "@/assets/landing/logo-tech4rent.png";
+import { CompanyLogo } from "./CompanyLogo";
 
 import { Link, useLocation } from "react-router-dom";
 import {
