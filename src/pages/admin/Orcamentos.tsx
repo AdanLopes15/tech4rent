@@ -948,13 +948,16 @@ export default function Orcamentos() {
                   }}>
                     Fechar
                   </Button>
+                  <Button variant="outline" type="button" onClick={() => handlePrintDocument(contractPrintRef)}>
+                    Imprimir
+                  </Button>
                   <Button 
                     type="button"
                     className="bg-primary hover:bg-primary/90 text-white" 
-                    onClick={() => handlePrintDocument(contractPrintRef)}
+                    onClick={() => handleDownloadPDFAsFile(contractPrintRef, `Contrato_${quoteForApproval.id}`)}
                   >
                     <FileDown className="mr-2 h-4 w-4" />
-                    Imprimir / Baixar Contrato
+                    Baixar Contrato
                   </Button>
                 </>
               ) : (
