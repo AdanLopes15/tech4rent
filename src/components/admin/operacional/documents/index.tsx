@@ -1,6 +1,7 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
+import { CompanyLogo } from "../../CompanyLogo";
 
 // Definindo as cores da marca para uso direto (garante fidelidade em qualquer ambiente)
 const BRAND_COLORS = {
