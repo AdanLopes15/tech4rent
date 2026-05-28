@@ -106,55 +106,57 @@ export default function Orcamentos() {
         <html>
           <head>
             <title>Tech4Rent - Documento</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <script>
+              tailwind.config = {
+                theme: {
+                  extend: {
+                    colors: {
+                      primary: {
+                        DEFAULT: '#f97316',
+                        foreground: '#ffffff',
+                      },
+                    }
+                  }
+                }
+              }
+            </script>
             <style>
-              body { font-family: sans-serif; padding: 20px; color: #333; }
-              table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
-              th { background-color: #f4f4f4; }
-              .text-primary { color: #f97316; }
-              .font-bold { font-weight: bold; }
-              .uppercase { text-transform: uppercase; }
-              .text-right { text-align: right; }
-              .text-center { text-align: center; }
-              .text-xs { font-size: 10px; }
-              .text-sm { font-size: 12px; }
-              .text-lg { font-size: 18px; }
-              .border-b { border-bottom: 1px solid #eee; }
-              .pb-4 { padding-bottom: 16px; }
-              .pt-4 { padding-top: 16px; }
-              .mb-6 { margin-bottom: 24px; }
-              .mt-10 { margin-top: 40px; }
-              .flex { display: flex; }
-              .justify-between { justify-content: space-between; }
-              .items-start { align-items: flex-start; }
-              .grid { display: grid; }
-              .grid-cols-2 { grid-template-columns: 1fr 1fr; }
-              .gap-6 { gap: 24px; }
-              .border { border: 1px solid #ddd; }
-              .rounded-md { border-radius: 4px; }
-              .p-4 { padding: 16px; }
-              .p-6 { padding: 24px; }
-              .bg-zinc-50 { background-color: #fafafa; }
-              .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.06); }
-              .font-serif { font-family: serif; }
-              .leading-relaxed { line-height: 1.625; }
-              .italic { font-style: italic; }
-              .border-l-4 { border-left-width: 4px; }
-              .border-zinc-300 { border-color: #d4d4d8; }
-              .pl-4 { padding-left: 16px; }
-              .w-48 { width: 12rem; }
+              @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+              
+              body { 
+                font-family: 'Inter', sans-serif;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+              
+              @page {
+                size: A4;
+                margin: 0;
+              }
+
               @media print {
-                body { padding: 0; }
-                .no-print { display: none; }
+                body {
+                  margin: 0;
+                  padding: 0;
+                }
+                .no-print {
+                  display: none;
+                }
               }
             </style>
           </head>
-          <body>
-            ${content}
+          <body class="bg-white">
+            <div class="p-0">
+              ${content}
+            </div>
             <script>
+              // Wait for Tailwind to process and fonts to load
               window.onload = function() {
-                window.print();
-                window.onafterprint = function() { window.close(); };
+                setTimeout(() => {
+                  window.print();
+                  window.onafterprint = function() { window.close(); };
+                }, 500);
               };
             </script>
           </body>
