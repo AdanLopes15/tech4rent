@@ -9,6 +9,7 @@ import { useStore } from "@/store";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { formatCurrency } from "@/lib/utils";
+import { CompanyLogo } from "../admin/CompanyLogo";
 
 interface SaleReceiptDialogProps {
   open: boolean;
