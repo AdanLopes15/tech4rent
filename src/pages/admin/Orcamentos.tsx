@@ -111,7 +111,7 @@ export default function Orcamentos() {
       },
       jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
     };
-    };
+
 
     try {
       toast({ title: "Gerando PDF...", description: "Por favor, aguarde um momento." });
