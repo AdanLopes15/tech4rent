@@ -724,7 +724,18 @@ export default function Orcamentos() {
             </div>
 
             <AlertDialogFooter className="bg-[#f5f5f5] p-4 flex flex-row gap-2 justify-end">
-              <Button variant="outline" type="button" onClick={() => handleDownloadPDF(viewingQuote)}>
+              <Button 
+                variant="outline" 
+                type="button" 
+                onClick={() => {
+                  setViewingQuote(null);
+                  handleDownloadPDF(viewingQuote);
+                  // O setTimeout garante que o modal de download seja renderizado antes de chamar handlePrintDocument
+                  setTimeout(() => {
+                    handlePrintDocument(quotePrintRef);
+                  }, 100);
+                }}
+              >
                 Imprimir / Salvar PDF
               </Button>
               <AlertDialogCancel className="mt-0" onClick={() => setViewingQuote(null)}>Fechar</AlertDialogCancel>
