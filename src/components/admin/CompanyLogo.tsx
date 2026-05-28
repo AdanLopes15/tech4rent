@@ -40,6 +40,7 @@ export const CompanyLogo = ({ className, style, isDark = false, useSettings = fa
       src={imgSrc}
       alt="Tech4Rent Logo"
       onError={handleError}
+      style={style}
       className={cn("object-contain", className)}
     />
   );
