@@ -72,7 +72,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function Orcamentos() {
-  const { quotes, clients, loading, fetchAllData, deleteQuote, updateQuote, convertQuoteToContract, addSale } = useStore();
+  const { quotes, clients, loading, fetchAllData, deleteQuote, updateQuote, convertQuoteToContract, addSale, companySettings } = useStore();
 
   useEffect(() => {
     fetchAllData();
