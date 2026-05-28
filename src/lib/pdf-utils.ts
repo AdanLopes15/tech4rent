@@ -91,15 +91,9 @@ export const generateQuotePDF = (quote: any, client: any, companySettings: any, 
   doc.setFontSize(11);
   doc.setFont("helvetica", "bold");
   
-  if (quote.budgetType === "locacao") {
-    const monthlyTotal = quote.items.reduce((acc: number, item: any) => acc + (item.quantity * item.unitPrice), 0);
-    doc.text(`VALOR TOTAL MENSAL DA LOCAÇÃO:`, pageWidth - 80, currentY, { align: "right" });
-    doc.text(formatCurrency(monthlyTotal), pageWidth - 14, currentY, { align: "right" });
-    currentY += 7;
-  }
-  
   doc.setFontSize(12);
-  doc.text(`VALOR TOTAL DO ORÇAMENTO:`, pageWidth - 80, currentY, { align: "right" });
+  const totalLabel = quote.budgetType === "locacao" ? "VALOR TOTAL MENSAL DO ORÇAMENTO:" : "VALOR TOTAL DO ORÇAMENTO:";
+  doc.text(totalLabel, pageWidth - 80, currentY, { align: "right" });
   doc.text(formatCurrency(quote.totalValue), pageWidth - 14, currentY, { align: "right" });
   currentY += 15;
 

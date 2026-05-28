@@ -382,7 +382,7 @@ export default function Orcamentos() {
           <TableHead className="text-primary">Orçamento</TableHead>
           <TableHead className="text-primary">Cliente</TableHead>
           <TableHead className="text-primary">Data</TableHead>
-          <TableHead className="text-primary">Valor Total</TableHead>
+          <TableHead className="text-primary">{type === "locacao" ? "Valor Total Mensal" : "Valor Total"}</TableHead>
           <TableHead className="text-primary">Status</TableHead>
           <TableHead className="text-right text-primary">Ações</TableHead>
         </TableRow>
@@ -685,7 +685,9 @@ export default function Orcamentos() {
                   <div className="flex justify-end mt-4">
                     <div className="flex flex-col items-end gap-1">
                       <div className="flex justify-between w-64">
-                        <span className="text-sm font-bold text-[#666666]">Total do Orçamento</span>
+                        <span className="text-sm font-bold text-[#666666]">
+                          {viewingQuote.budgetType === "locacao" ? "Total Mensal do Orçamento" : "Total do Orçamento"}
+                        </span>
                         <span className="text-base font-bold text-[#1a1a1a]">{formatCurrency(Number(viewingQuote.totalValue || 0))}</span>
                       </div>
                     </div>
@@ -795,7 +797,9 @@ export default function Orcamentos() {
                 <div className="flex justify-end mt-4">
                   <div className="flex flex-col items-end gap-1">
                     <div className="flex justify-between w-64">
-                      <span className="text-sm font-bold text-[#666666]">Total do Orçamento</span>
+                      <span className="text-sm font-bold text-[#666666]">
+                        {quoteForDownload.budgetType === "locacao" ? "Total Mensal do Orçamento" : "Total do Orçamento"}
+                      </span>
                       <span className="text-base font-bold text-[#1a1a1a]">{formatCurrency(Number(quoteForDownload.totalValue || 0))}</span>
                     </div>
                   </div>
@@ -928,7 +932,7 @@ export default function Orcamentos() {
                   <DocumentSection title="VALOR E CONDIÇÕES">
                     <div className="flex flex-col gap-2">
                       <p>
-                        O valor total da locação é de <span className="font-bold">{formatCurrency(Number(quoteForApproval.totalValue || 0))}</span>, a ser pago em <span className="font-bold">{quoteForApproval.paymentMethods?.[0]?.installments || 1} parcela(s)</span> de <span className="font-bold">{formatCurrency(Number(quoteForApproval.totalValue || 0) / (quoteForApproval.paymentMethods?.[0]?.installments || 1))}</span>.
+                        O valor total mensal da locação é de <span className="font-bold">{formatCurrency(Number(quoteForApproval.totalValue || 0))}</span>, a ser pago em <span className="font-bold">{quoteForApproval.paymentMethods?.[0]?.installments || 1} parcela(s)</span> de <span className="font-bold">{formatCurrency(Number(quoteForApproval.totalValue || 0) / (quoteForApproval.paymentMethods?.[0]?.installments || 1))}</span>.
                       </p>
                       <div className="text-xs text-[#666666]">
                         <p>Primeiro vencimento em: {formatDate(quoteForApproval.startDate)}</p>

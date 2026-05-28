@@ -295,7 +295,7 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
               <div>
                 <h3 className="font-bold text-lg mb-2 uppercase">Valor e Condições</h3>
                 <p className="text-sm">
-                  O valor total da locação é de{" "}
+                  O valor total mensal da locação é de{" "}
                   <span className="font-bold">{formatCurrency(contract.totalValue || 0)}</span>, a ser pago em{" "}
                   <span className="font-bold">{financialDetails.numberOfInstallments} parcela(s)</span> de{" "}
                   <span className="font-bold">{formatCurrency(financialDetails.monthlyValue)}</span>.
