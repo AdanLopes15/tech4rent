@@ -54,11 +54,10 @@ export const DocumentHeader = ({ title, documentNumber, date, type = "orcamento"
       style={{ borderBottomColor: `${BRAND_COLORS.blue}33` }} // 20% opacity of primary blue
     >
       <div className="flex flex-col">
-        <img 
-          src="/logo-tech4rent.png" 
-          alt="Tech4Rent" 
-          className="h-12 w-auto object-contain mb-1"
-          style={{ maxWidth: '200px' }}
+        <CompanyLogo 
+          isDark={false} 
+          className="h-12 w-auto mb-1" 
+          style={{ maxWidth: '200px' }} 
         />
         <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">
           Locação de Equipamentos de TI
