@@ -6,6 +6,15 @@ import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency, cn } from "@/lib/utils";
 import { generateQuotePDF } from "@/lib/pdf-utils";
+import { 
+  DocumentContainer, 
+  DocumentHeader, 
+  DocumentSection, 
+  DocumentTable, 
+  DocumentSummary, 
+  SignatureBlock, 
+  DocumentFooter 
+} from "@/components/admin/operacional/documents";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -97,55 +106,57 @@ export default function Orcamentos() {
         <html>
           <head>
             <title>Tech4Rent - Documento</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <script>
+              tailwind.config = {
+                theme: {
+                  extend: {
+                    colors: {
+                      primary: {
+                        DEFAULT: '#f97316',
+                        foreground: '#ffffff',
+                      },
+                    }
+                  }
+                }
+              }
+            </script>
             <style>
-              body { font-family: sans-serif; padding: 20px; color: #333; }
-              table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
-              th { background-color: #f4f4f4; }
-              .text-primary { color: #f97316; }
-              .font-bold { font-weight: bold; }
-              .uppercase { text-transform: uppercase; }
-              .text-right { text-align: right; }
-              .text-center { text-align: center; }
-              .text-xs { font-size: 10px; }
-              .text-sm { font-size: 12px; }
-              .text-lg { font-size: 18px; }
-              .border-b { border-bottom: 1px solid #eee; }
-              .pb-4 { padding-bottom: 16px; }
-              .pt-4 { padding-top: 16px; }
-              .mb-6 { margin-bottom: 24px; }
-              .mt-10 { margin-top: 40px; }
-              .flex { display: flex; }
-              .justify-between { justify-content: space-between; }
-              .items-start { align-items: flex-start; }
-              .grid { display: grid; }
-              .grid-cols-2 { grid-template-columns: 1fr 1fr; }
-              .gap-6 { gap: 24px; }
-              .border { border: 1px solid #ddd; }
-              .rounded-md { border-radius: 4px; }
-              .p-4 { padding: 16px; }
-              .p-6 { padding: 24px; }
-              .bg-zinc-50 { background-color: #fafafa; }
-              .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.06); }
-              .font-serif { font-family: serif; }
-              .leading-relaxed { line-height: 1.625; }
-              .italic { font-style: italic; }
-              .border-l-4 { border-left-width: 4px; }
-              .border-zinc-300 { border-color: #d4d4d8; }
-              .pl-4 { padding-left: 16px; }
-              .w-48 { width: 12rem; }
+              @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+              
+              body { 
+                font-family: 'Inter', sans-serif;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+              
+              @page {
+                size: A4;
+                margin: 0;
+              }
+
               @media print {
-                body { padding: 0; }
-                .no-print { display: none; }
+                body {
+                  margin: 0;
+                  padding: 0;
+                }
+                .no-print {
+                  display: none;
+                }
               }
             </style>
           </head>
-          <body>
-            ${content}
+          <body class="bg-white">
+            <div class="p-0">
+              ${content}
+            </div>
             <script>
+              // Wait for Tailwind to process and fonts to load
               window.onload = function() {
-                window.print();
-                window.onafterprint = function() { window.close(); };
+                setTimeout(() => {
+                  window.print();
+                  window.onafterprint = function() { window.close(); };
+                }, 500);
               };
             </script>
           </body>
@@ -689,86 +700,78 @@ export default function Orcamentos() {
               <AlertDialogDescription>Confira os dados antes de gerar o PDF.</AlertDialogDescription>
             </AlertDialogHeader>
 
-            <div ref={quotePrintRef} className="space-y-4 max-h-[70vh] overflow-y-auto text-sm p-4 border rounded-md">
-              <div className="flex justify-between items-start border-b pb-4">
-                <div>
-                  <h3 className="text-lg font-bold text-primary">TECH4RENT</h3>
-                  <p className="text-xs text-muted-foreground">Orçamento de {quoteForDownload.budgetType === "locacao" ? "Locação" : "Venda"}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold">Nº {quoteForDownload.id}</p>
-                  <p className="text-xs text-muted-foreground">{formatDate(quoteForDownload.createdAt)}</p>
-                </div>
-              </div>
+            <div ref={quotePrintRef} className="max-h-[70vh] overflow-y-auto border rounded-md bg-zinc-100 p-2 md:p-8">
+              <DocumentContainer>
+                <DocumentHeader 
+                  title={quoteForDownload.budgetType === "locacao" ? "PROPOSTA COMERCIAL" : "ORÇAMENTO DE VENDA"} 
+                  documentNumber={quoteForDownload.id} 
+                  date={formatDate(quoteForDownload.createdAt)} 
+                />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
-                <div>
-                  <h4 className="font-semibold text-xs uppercase text-muted-foreground mb-2">Dados do Cliente</h4>
-                  <p className="font-medium">{getClientName(quoteForDownload.clientId, quoteForDownload.clientName)}</p>
-                  <p className="text-xs text-muted-foreground">ID do Cliente: {quoteForDownload.clientId}</p>
-                </div>
+                <DocumentSection title="DADOS DO CLIENTE" columns={2}>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">Nome do Cliente</span>
+                    <span className="font-semibold text-zinc-800">{getClientName(quoteForDownload.clientId, quoteForDownload.clientName)}</span>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">ID do Cliente</span>
+                    <span className="font-medium text-zinc-700">{quoteForDownload.clientId}</span>
+                  </div>
+                </DocumentSection>
+
                 {quoteForDownload.budgetType === "locacao" && (
-                  <div>
-                    <h4 className="font-semibold text-xs uppercase text-muted-foreground mb-2">Período do Contrato</h4>
-                    <p className="font-medium">
-                      {formatDate(quoteForDownload.startDate)} até {formatDate(quoteForDownload.endDate)}
+                  <DocumentSection title="PERÍODO DO CONTRATO">
+                    <div className="flex items-center gap-8">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">Início</span>
+                        <span className="font-semibold text-zinc-800">{formatDate(quoteForDownload.startDate)}</span>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">Término</span>
+                        <span className="font-semibold text-zinc-800">{formatDate(quoteForDownload.endDate)}</span>
+                      </div>
+                    </div>
+                  </DocumentSection>
+                )}
+
+                <div className="flex flex-col gap-3">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-primary/80 border-l-4 border-primary pl-3 py-0.5 bg-primary/5">
+                    ITENS DO ORÇAMENTO
+                  </h3>
+                  <DocumentTable 
+                    headers={["Equipamento", "Qtd", "Vl. Unitário", "Vl. Total"]}
+                    alignments={["left", "center", "right", "right"]}
+                    rows={(quoteForDownload.items || []).map((item: any) => {
+                      const equipment = (useStore.getState().equipments || []).find(
+                        (eq: any) => eq.id === item.equipmentId,
+                      );
+                      return [
+                        equipment?.name || "Equipamento",
+                        item.quantity.toString(),
+                        formatCurrency(Number(item.unitPrice || 0)),
+                        formatCurrency(Number(item.quantity || 0) * Number(item.unitPrice || 0))
+                      ];
+                    })}
+                  />
+                </div>
+
+                {quoteForDownload.observations && (
+                  <DocumentSection title="OBSERVAÇÕES">
+                    <p className="text-xs text-zinc-600 italic">
+                      {quoteForDownload.observations}
                     </p>
-                  </div>
+                  </DocumentSection>
                 )}
-              </div>
 
-              <div>
-                <h4 className="font-semibold text-xs uppercase text-muted-foreground mb-2">Itens do Orçamento</h4>
-                <div className="border rounded-md overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-muted/50">
-                        <TableHead className="h-8 text-xs">Equipamento</TableHead>
-                        <TableHead className="h-8 text-xs text-center">Qtd</TableHead>
-                        <TableHead className="h-8 text-xs text-right">Unitário</TableHead>
-                        <TableHead className="h-8 text-xs text-right">Total</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {(quoteForDownload.items || []).map((item: any, index: number) => {
-                        const equipment = (useStore.getState().equipments || []).find(
-                          (eq: any) => eq.id === item.equipmentId,
-                        );
-                        return (
-                          <TableRow key={index}>
-                            <TableCell className="py-2 text-xs">{equipment?.name || "Equipamento"}</TableCell>
-                            <TableCell className="py-2 text-xs text-center">{item.quantity}</TableCell>
-                            <TableCell className="py-2 text-xs text-right">{formatCurrency(Number(item.unitPrice || 0))}</TableCell>
-                            <TableCell className="py-2 text-xs text-right font-medium">
-                              {formatCurrency(Number(item.quantity || 0) * Number(item.unitPrice || 0))}
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
+                <DocumentSummary 
+                  items={[
+                    ...(quoteForDownload.budgetType === "locacao" ? [{ label: "Valor Mensal", value: formatCurrency(Number(quoteForDownload.totalValue || 0)) }] : []),
+                    { label: "Valor Total", value: formatCurrency(Number(quoteForDownload.totalValue || 0)), isTotal: true }
+                  ]}
+                />
 
-              {quoteForDownload.observations && (
-                <div>
-                  <h4 className="font-semibold text-xs uppercase text-muted-foreground mb-1">Observações</h4>
-                  <p className="text-xs border p-2 rounded bg-muted/30">{quoteForDownload.observations}</p>
-                </div>
-              )}
-
-              <div className="flex flex-col gap-2 pt-4 border-t">
-                {quoteForDownload.budgetType === "locacao" && (
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">Valor Mensal:</span>
-                    <span className="font-semibold">{formatCurrency(Number(quoteForDownload.totalValue || 0))}</span>
-                  </div>
-                )}
-                <div className="flex justify-between items-center text-base font-bold text-primary">
-                  <span>VALOR TOTAL:</span>
-                  <span>{formatCurrency(Number(quoteForDownload.totalValue || 0))}</span>
-                </div>
-              </div>
+                <DocumentFooter />
+              </DocumentContainer>
             </div>
 
             <AlertDialogFooter className="flex flex-row gap-2 justify-end">
@@ -797,88 +800,102 @@ export default function Orcamentos() {
               </AlertDialogDescription>
             </AlertDialogHeader>
 
-            <div ref={contractPrintRef} className="space-y-6 max-h-[70vh] overflow-y-auto p-6 border rounded-md bg-zinc-50 font-serif text-zinc-900 shadow-inner">
-              <div className="text-center space-y-2 border-b pb-6 mb-6">
-                <h2 className="text-2xl font-bold uppercase tracking-wider">Contrato de Locação de Equipamentos</h2>
-                <p className="text-sm font-medium">Contrato vinculada ao Orçamento nº {quoteForApproval.id}</p>
-              </div>
+            <div ref={contractPrintRef} className="max-h-[70vh] overflow-y-auto border rounded-md bg-zinc-100 p-2 md:p-8">
+              <DocumentContainer>
+                <DocumentHeader 
+                  title="CONTRATO DE LOCAÇÃO" 
+                  documentNumber={quoteForApproval.id} 
+                  date={formatDate(quoteForApproval.createdAt)} 
+                  type="contrato"
+                />
 
-              <div className="space-y-4 text-justify leading-relaxed">
-                <section>
-                  <h3 className="font-bold mb-2">1. DAS PARTES</h3>
-                  <p className="text-sm">
-                    <strong>LOCADORA:</strong> TECH4RENT LTDA, com sede em São Paulo/SP, inscrita no CNPJ sob o nº 00.111.222/0001-33.
+                <div className="text-center my-4">
+                  <h2 className="text-xl font-black text-zinc-800 uppercase tracking-widest border-y border-zinc-200 py-3">
+                    CONTRATO DE LOCAÇÃO DE EQUIPAMENTOS
+                  </h2>
+                  <p className="text-[10px] text-zinc-500 mt-2 font-medium tracking-tight">
+                    ESTE DOCUMENTO VINCULA-SE À PROPOSTA COMERCIAL Nº {quoteForApproval.id}
                   </p>
-                  <p className="text-sm">
-                    <strong>LOCATÁRIA:</strong> {getClientName(quoteForApproval.clientId, quoteForApproval.clientName)}, inscrita no CNPJ/CPF conforme cadastro no sistema.
-                  </p>
-                </section>
+                </div>
 
-                <section>
-                  <h3 className="font-bold mb-2">2. DO OBJETO</h3>
-                  <p className="text-sm mb-2">
-                    O presente contrato tem por objeto a locação dos seguintes equipamentos:
-                  </p>
-                  <div className="border rounded overflow-hidden mb-2 bg-white">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-zinc-100 hover:bg-zinc-100">
-                          <TableHead className="h-8 font-bold text-zinc-900">Descrição do Equipamento</TableHead>
-                          <TableHead className="h-8 font-bold text-zinc-900 text-center">Qtd</TableHead>
-                          <TableHead className="h-8 font-bold text-zinc-900 text-right">Vl. Unitário</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {(quoteForApproval.items || []).map((item: any, index: number) => {
-                          const equipment = (useStore.getState().equipments || []).find(
-                            (eq: any) => eq.id === item.equipmentId,
-                          );
-                          return (
-                            <TableRow key={index} className="hover:bg-zinc-50 border-zinc-200">
-                              <TableCell className="py-2">{equipment?.name || "Equipamento"}</TableCell>
-                              <TableCell className="py-2 text-center">{item.quantity}</TableCell>
-                              <TableCell className="py-2 text-right">{formatCurrency(Number(item.unitPrice || 0))}</TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
+                <div className="space-y-6 text-sm">
+                  <div className="flex flex-col gap-2">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-800">1. DAS PARTES</h3>
+                    <div className="p-4 bg-zinc-50 border border-zinc-100 rounded-lg flex flex-col gap-3">
+                      <p className="text-xs leading-relaxed">
+                        <span className="font-bold text-primary mr-1">LOCADORA:</span> 
+                        <span className="font-semibold">TECH4RENT LTDA</span>, com sede em São Paulo/SP, inscrita no CNPJ sob o nº 00.111.222/0001-33.
+                      </p>
+                      <p className="text-xs leading-relaxed">
+                        <span className="font-bold text-primary mr-1">LOCATÁRIA:</span> 
+                        <span className="font-semibold uppercase">{getClientName(quoteForApproval.clientId, quoteForApproval.clientName)}</span>, inscrita no CNPJ/CPF conforme cadastro no sistema Tech4Rent.
+                      </p>
+                    </div>
                   </div>
-                </section>
 
-                <section>
-                  <h3 className="font-bold mb-2">3. DO PRAZO E VALORES</h3>
-                  <p className="text-sm">
-                    A locação terá início em <strong>{formatDate(quoteForApproval.startDate)}</strong> e término em <strong>{formatDate(quoteForApproval.endDate)}</strong>.
-                  </p>
-                  <p className="text-sm mt-2">
-                    O valor mensal da locação é de <strong>{formatCurrency(Number(quoteForApproval.totalValue || 0))}</strong>, a ser pago conforme as condições comerciais acordadas.
-                  </p>
-                </section>
+                  <div className="flex flex-col gap-2">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-800">2. DO OBJETO</h3>
+                    <p className="text-xs text-zinc-600 px-1">
+                      O presente contrato tem por objeto a locação dos seguintes equipamentos e acessórios:
+                    </p>
+                    <DocumentTable 
+                      headers={["Descrição do Equipamento", "Qtd", "Vl. Unitário"]}
+                      alignments={["left", "center", "right"]}
+                      rows={(quoteForApproval.items || []).map((item: any) => {
+                        const equipment = (useStore.getState().equipments || []).find(
+                          (eq: any) => eq.id === item.equipmentId,
+                        );
+                        return [
+                          equipment?.name || "Equipamento",
+                          item.quantity.toString(),
+                          formatCurrency(Number(item.unitPrice || 0))
+                        ];
+                      })}
+                    />
+                  </div>
 
-                <section>
-                  <h3 className="font-bold mb-2">4. DAS OBRIGAÇÕES</h3>
-                  <p className="text-xs text-zinc-600">
-                    A LOCATÁRIA obriga-se a manter os equipamentos em perfeito estado de conservação e uso, respondendo por eventuais danos causados por mau uso, negligência ou imprudência. Os equipamentos deverão ser devolvidos à LOCADORA ao final do prazo estabelecido.
-                  </p>
-                </section>
+                  <div className="flex flex-col gap-2">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-800">3. DO PRAZO E VALORES</h3>
+                    <div className="p-4 bg-zinc-50 border border-zinc-100 rounded-lg grid grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">Início da Locação</span>
+                        <span className="font-bold text-zinc-800 underline decoration-primary/30 decoration-2">{formatDate(quoteForApproval.startDate)}</span>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">Término da Locação</span>
+                        <span className="font-bold text-zinc-800 underline decoration-primary/30 decoration-2">{formatDate(quoteForApproval.endDate)}</span>
+                      </div>
+                      <div className="col-span-2 mt-2 pt-2 border-t border-zinc-200/60">
+                        <p className="text-xs">
+                          O valor mensal total da locação é de <span className="font-bold text-primary text-sm">{formatCurrency(Number(quoteForApproval.totalValue || 0))}</span>, a ser pago conforme condições comerciais previamente acordadas.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
 
-                {quoteForApproval.observations && (
-                  <section>
-                    <h3 className="font-bold mb-2">5. OBSERVAÇÕES ADICIONAIS</h3>
-                    <p className="text-sm italic border-l-4 border-zinc-300 pl-4">{quoteForApproval.observations}</p>
-                  </section>
-                )}
-              </div>
+                  <div className="flex flex-col gap-2">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-800">4. DAS OBRIGAÇÕES</h3>
+                    <div className="p-4 bg-zinc-50 border border-zinc-100 rounded-lg">
+                      <p className="text-[11px] text-zinc-600 leading-relaxed text-justify">
+                        A <span className="font-bold">LOCATÁRIA</span> obriga-se a manter os equipamentos em perfeito estado de conservação e uso, respondendo por eventuais danos causados por mau uso, negligência ou imprudência. Os equipamentos deverão ser devolvidos à <span className="font-bold">LOCADORA</span> ao final do prazo estabelecido, nas mesmas condições em que foram entregues.
+                      </p>
+                    </div>
+                  </div>
 
-              <div className="pt-10 flex justify-between items-end border-t mt-10">
-                <div className="w-48 border-t border-zinc-400 text-center pt-2">
-                  <p className="text-[10px] uppercase font-bold">Tech4Rent</p>
+                  {quoteForApproval.observations && (
+                    <div className="flex flex-col gap-2">
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-800">5. OBSERVAÇÕES</h3>
+                      <p className="text-xs text-zinc-600 italic bg-zinc-50 p-3 rounded-lg border border-zinc-100">
+                        {quoteForApproval.observations}
+                      </p>
+                    </div>
+                  )}
+
+                  <SignatureBlock />
                 </div>
-                <div className="w-48 border-t border-zinc-400 text-center pt-2">
-                  <p className="text-[10px] uppercase font-bold">Locatária</p>
-                </div>
-              </div>
+
+                <DocumentFooter />
+              </DocumentContainer>
             </div>
 
             <AlertDialogFooter className="flex flex-row gap-2 justify-end sm:justify-end">
