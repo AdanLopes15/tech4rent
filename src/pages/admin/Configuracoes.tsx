@@ -337,7 +337,7 @@ const Configuracoes = () => {
                   <Label>Logotipo do Site (Público)</Label>
                   <div className="flex items-center gap-4">
                     <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground overflow-hidden">
-                      {siteLogo ? <img src={siteLogo} alt="Logo site" className="h-full w-full object-contain" /> : "Logo"}
+                      {siteLogo ? <img src={siteLogo} alt="Logo site" className="h-full w-full object-contain" /> : <CompanyLogo isDark={true} className="h-12 w-12" />}
                     </div>
                     <input ref={siteLogoRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleLogoChange(e, "site")} />
                     <Button variant="outline" size="sm" onClick={() => siteLogoRef.current?.click()}>
