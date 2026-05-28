@@ -373,10 +373,6 @@ export default function Orcamentos() {
 
   const handleDownloadPDF = (quote: any) => {
     setQuoteForDownload(quote);
-    // Pequeno delay para garantir que o ref esteja pronto antes de imprimir se chamado programaticamente
-    if (viewingQuote) {
-      setTimeout(() => handlePrintDocument(quotePrintRef), 100);
-    }
   };
 
   const renderQuoteTable = (quotesList: any[], type: "locacao" | "venda") => (
