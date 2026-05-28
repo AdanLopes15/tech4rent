@@ -192,9 +192,14 @@ export default function Orcamentos() {
     }
   };
 
-  const handleConvertToContract = async (quoteId: string) => {
+  const handleConvertToContract = (quote: any) => {
+    setQuoteForApproval(quote);
+  };
+
+  const confirmConvertToContract = async (quoteId: string) => {
     try {
       await convertQuoteToContract(quoteId);
+      setQuoteForApproval(null);
       toast({ title: "Contrato gerado com sucesso!" });
     } catch (error: any) {
       toast({
