@@ -42,6 +42,8 @@ interface DocumentHeaderProps {
   documentNumber: string;
   date: string;
   subtitle?: string;
+  responsible?: string;
+  onResponsibleChange?: (value: string) => void;
   companyInfo?: {
     name: string;
     cnpj: string;
@@ -49,7 +51,7 @@ interface DocumentHeaderProps {
   };
 }
 
-export const DocumentHeader = ({ title, documentNumber, date, subtitle, companyInfo }: DocumentHeaderProps) => {
+export const DocumentHeader = ({ title, documentNumber, date, subtitle, companyInfo, responsible, onResponsibleChange }: DocumentHeaderProps) => {
   const { companySettings } = useStore();
   
   const displayCnpj = companyInfo?.cnpj || companySettings?.cnpj || "44.740.821/0001-30";
@@ -70,7 +72,19 @@ export const DocumentHeader = ({ title, documentNumber, date, subtitle, companyI
 
         <div className="flex flex-col items-end text-right">
           <span className="text-xs text-[#666666] uppercase font-bold">Responsável pelo Orçamento</span>
-          <div className="border-b border-[#e5e5e5] w-48 mt-4"></div>
+          {onResponsibleChange ? (
+            <input 
+              type="text"
+              value={responsible || ""}
+              onChange={(e) => onResponsibleChange(e.target.value)}
+              placeholder="Digite o nome..."
+              className="border-b border-[#e5e5e5] w-48 mt-1 text-xs text-right bg-transparent focus:outline-none focus:border-[#1a1a1a] print:placeholder:text-transparent"
+            />
+          ) : (
+            <div className="border-b border-[#e5e5e5] w-48 mt-4 text-xs font-bold text-[#1a1a1a]">
+              {responsible}
+            </div>
+          )}
         </div>
       </div>
       
