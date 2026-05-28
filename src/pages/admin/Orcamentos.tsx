@@ -109,16 +109,20 @@ export default function Orcamentos() {
   };
 
   const filteredQuotes = useMemo(() => {
+    if (!quotes || !Array.isArray(quotes)) return [];
+
     return quotes.filter((quote: any) => {
+      // 1. Status Filter
       const normalizedQuoteStatus = normalizeStatus(quote.status);
-
-      const matchesClient = clientFilter === "todos" || quote.clientId === clientFilter;
-
       const matchesStatus = statusFilter === "todos" || normalizedQuoteStatus === statusFilter;
+      if (!matchesStatus) return false;
 
-      let matchesDate = true;
+      // 2. Client Filter
+      const matchesClient = clientFilter === "todos" || quote.clientId === clientFilter;
+      if (!matchesClient) return false;
 
-      if (dateRange.from || dateRange.to) {
+      // 3. Date Filter
+      if (dateRange?.from || dateRange?.to) {
         const quoteDate = quote.createdAt
           ? typeof quote.createdAt?.toDate === "function"
             ? quote.createdAt.toDate()
@@ -126,28 +130,31 @@ export default function Orcamentos() {
           : null;
 
         if (quoteDate && !isNaN(quoteDate.getTime())) {
-          if (dateRange.from && quoteDate < dateRange.from) {
-            matchesDate = false;
-          }
-
+          if (dateRange.from && quoteDate < dateRange.from) return false;
           if (dateRange.to) {
             const endOfDay = new Date(dateRange.to);
             endOfDay.setHours(23, 59, 59, 999);
-
-            if (quoteDate > endOfDay) {
-              matchesDate = false;
-            }
+            if (quoteDate > endOfDay) return false;
           }
+        } else {
+          // If a date filter is applied but the quote has no valid date, hide it
+          return false;
         }
       }
 
-      return matchesClient && matchesStatus && matchesDate;
+      return true;
     });
   }, [quotes, clientFilter, statusFilter, dateRange]);
 
-  const locacaoQuotes = filteredQuotes.filter((quote: any) => quote.budgetType === "locacao");
+  const locacaoQuotes = useMemo(() => 
+    filteredQuotes.filter((quote: any) => quote.budgetType === "locacao"),
+    [filteredQuotes]
+  );
 
-  const vendaQuotes = filteredQuotes.filter((quote: any) => quote.budgetType === "venda");
+  const vendaQuotes = useMemo(() => 
+    filteredQuotes.filter((quote: any) => quote.budgetType === "venda"),
+    [filteredQuotes]
+  );
 
   const handleAddNew = () => {
     setEditingQuote(null);
