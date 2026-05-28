@@ -630,99 +630,104 @@ export default function Orcamentos() {
 
       {viewingQuote && (
         <AlertDialog open={!!viewingQuote} onOpenChange={() => setViewingQuote(null)}>
-          <AlertDialogContent className="max-w-3xl">
-            <AlertDialogHeader>
-              <AlertDialogTitle>Detalhes do Orçamento {viewingQuote.id}</AlertDialogTitle>
-              <AlertDialogDescription>Visualização rápida do orçamento.</AlertDialogDescription>
+          <AlertDialogContent className="max-w-4xl p-0 overflow-hidden border-none">
+            <AlertDialogHeader className="bg-[#333333] p-4">
+              <AlertDialogTitle className="text-white">Visualizar Orçamento - {viewingQuote.id}</AlertDialogTitle>
+              <AlertDialogDescription className="sr-only">Visualização detalhada do orçamento.</AlertDialogDescription>
             </AlertDialogHeader>
 
-            <div className="space-y-4 max-h-[70vh] overflow-y-auto text-sm">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <span className="font-semibold">Cliente:</span>{" "}
-                  {getClientName(viewingQuote.clientId, viewingQuote.clientName)}
-                </div>
-                <div>
-                  <span className="font-semibold">Tipo:</span>{" "}
-                  {viewingQuote.budgetType === "locacao" ? "Locação" : "Venda"}
-                </div>
-                <div>
-                  <span className="font-semibold">Data:</span> {formatDate(viewingQuote.createdAt)}
-                </div>
-                <div>
-                  <span className="font-semibold">Status:</span> {normalizeStatus(viewingQuote.status)}
-                </div>
-              </div>
+            <div className="max-h-[70vh] overflow-y-auto bg-[#333333] p-4 md:p-12">
+              <DocumentContainer>
+                <DocumentHeader 
+                  title="ORÇAMENTO" 
+                  documentNumber={viewingQuote.id} 
+                  date={formatDate(viewingQuote.createdAt)} 
+                />
 
-              {viewingQuote.budgetType === "locacao" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <span className="font-semibold">Início:</span> {formatDate(viewingQuote.startDate)}
+                <DocumentSection title="CLIENTE">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-lg font-bold text-[#1a1a1a]">
+                      {getClientName(viewingQuote.clientId, viewingQuote.clientName)}
+                    </span>
                   </div>
-                  <div>
-                    <span className="font-semibold">Fim:</span> {formatDate(viewingQuote.endDate)}
-                  </div>
-                </div>
-              )}
+                </DocumentSection>
 
-              {viewingQuote.budgetType === "venda" && viewingQuote.prazoEntrega && (
-                <div>
-                  <span className="font-semibold">Prazo de Entrega:</span> {viewingQuote.prazoEntrega}
-                </div>
-              )}
-
-              <div>
-                <div className="font-semibold mb-2">Itens</div>
-                <div className="space-y-2">
-                  {(viewingQuote.items || []).map((item: any, index: number) => {
-                    const equipment = (useStore.getState().equipments || []).find(
-                      (eq: any) => eq.id === item.equipmentId,
-                    );
-
-                    return (
-                      <div
-                        key={`${item.equipmentId}-${index}`}
-                        className="border rounded-md p-3 flex items-center justify-between gap-4"
-                      >
-                        <div>
-                          <div className="font-medium">{equipment?.name || "Equipamento"}</div>
-                          <div className="text-muted-foreground text-xs">Qtd: {item.quantity}</div>
-                        </div>
-
-                        <div className="text-right">
-                          <div>{formatCurrency(Number(item.unitPrice || 0))}</div>
-                          <div className="text-xs text-muted-foreground">
-                            Total: {formatCurrency(Number(item.quantity || 0) * Number(item.unitPrice || 0))}
+                <DocumentSection title="ITENS DO ORÇAMENTO">
+                  <DocumentTable 
+                    headers={["Equipamento", "Qtd.", "Vl. Unit.", "Total"]}
+                    alignments={["left", "center", "right", "right"]}
+                    rows={(viewingQuote.items || []).map((item: any) => {
+                      const equipment = (useStore.getState().equipments || []).find(
+                        (eq: any) => eq.id === item.equipmentId
+                      );
+                      
+                      return [
+                        <div key={item.equipmentId} className="flex items-start gap-4">
+                          {equipment?.imageUrl && (
+                            <img src={equipment.imageUrl} alt={equipment.name} className="w-16 h-16 object-contain border border-[#e5e5e5] rounded" />
+                          )}
+                          <div className="flex flex-col">
+                            <span className="font-bold text-[#1a1a1a]">{equipment?.name || "Equipamento"}</span>
+                            {equipment?.description && (
+                              <span className="text-[10px] text-[#666666] leading-tight max-w-[300px] mt-1">
+                                {equipment.description}
+                              </span>
+                            )}
                           </div>
-                        </div>
+                        </div>,
+                        item.quantity.toString(),
+                        formatCurrency(Number(item.unitPrice || 0)),
+                        <span key="total" className="font-bold">{formatCurrency(Number(item.quantity || 0) * Number(item.unitPrice || 0))}</span>
+                      ];
+                    })}
+                  />
+                  
+                  <div className="flex justify-end mt-4">
+                    <div className="flex flex-col items-end gap-1">
+                      <div className="flex justify-between w-64">
+                        <span className="text-sm font-bold text-[#666666]">Total do Orçamento</span>
+                        <span className="text-base font-bold text-[#1a1a1a]">{formatCurrency(Number(viewingQuote.totalValue || 0))}</span>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
+                    </div>
+                  </div>
+                </DocumentSection>
 
-              <div>
-                <span className="font-semibold">Informações Fiscais:</span>
-                <div className="mt-1 text-muted-foreground">
-                  {viewingQuote.informacoesFiscais || viewingQuote.fiscalInfo || "Nenhuma informação fiscal fornecida."}
-                </div>
-              </div>
+                <DocumentSection title="TERMOS E CONDIÇÕES">
+                  <div className="flex flex-col gap-4">
+                    <div>
+                      <p className="font-bold text-[#1a1a1a] mb-1 text-sm">Período de locação:</p>
+                      <p className="text-sm text-[#333333]">
+                        {viewingQuote.budgetType === "locacao" 
+                          ? `${formatDate(viewingQuote.startDate)} a ${formatDate(viewingQuote.endDate)}.` 
+                          : viewingQuote.prazoEntrega || "Prazo imediato."}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <p className="font-bold text-[#1a1a1a] mb-1 text-sm">Informações Fiscais:</p>
+                      <p className="text-sm text-[#333333]">
+                        {viewingQuote.informacoesFiscais || viewingQuote.fiscalInfo || "Nenhuma informação fiscal fornecida."}
+                      </p>
+                    </div>
 
-              <div>
-                <span className="font-semibold">Observações:</span>
-                <div className="mt-1 text-muted-foreground">
-                  {viewingQuote.observations || "Nenhuma observação fornecida."}
-                </div>
-              </div>
+                    <div>
+                      <p className="font-bold text-[#1a1a1a] mb-1 text-sm">Observações Gerais:</p>
+                      <p className="text-sm text-[#333333]">
+                        {viewingQuote.observations || "Nenhuma observação fornecida."}
+                      </p>
+                    </div>
+                  </div>
+                </DocumentSection>
 
-              <div className="flex items-center justify-between bg-primary/10 border border-primary/20 rounded-lg p-4">
-                <span className="font-bold">Valor Total</span>
-                <span className="text-lg font-bold">{formatCurrency(Number(viewingQuote.totalValue || 0))}</span>
-              </div>
+                <DocumentFooter />
+              </DocumentContainer>
             </div>
 
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setViewingQuote(null)}>Fechar</AlertDialogCancel>
+            <AlertDialogFooter className="bg-[#f5f5f5] p-4 flex flex-row gap-2 justify-end">
+              <Button variant="outline" type="button" onClick={() => handleDownloadPDF(viewingQuote)}>
+                Imprimir / Salvar PDF
+              </Button>
+              <AlertDialogCancel className="mt-0" onClick={() => setViewingQuote(null)}>Fechar</AlertDialogCancel>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
