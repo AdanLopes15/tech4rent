@@ -9,6 +9,7 @@ import { CalendarIcon, PlusCircle, Trash2 } from "lucide-react";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
 import { cn, formatCurrency } from "@/lib/utils";
+import { generateQuotePDF } from "@/lib/pdf-utils";
 
 import {
   Dialog,
@@ -372,6 +373,7 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
         data.prazoEntrega = prazoEntrega;
       }
 
+      let quoteId = quote?.id;
       if (isEditing) {
         await updateQuote({
           id: quote.id,
@@ -379,9 +381,15 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
         });
         toast({ title: "Orçamento atualizado com sucesso!" });
       } else {
-        await addQuote(data);
+        const result = await addQuote(data);
+        quoteId = result.id;
         toast({ title: "Orçamento criado com sucesso!" });
       }
+
+      // Gerar PDF automaticamente ao criar/editar se for locação (ou ambos, conforme pedido)
+      const { companySettings, equipments: allEquipments } = useStore.getState();
+      const fullQuote = { ...data, id: quoteId };
+      generateQuotePDF(fullQuote, client, companySettings, allEquipments);
 
       onOpenChange(false);
     } catch (err: any) {
