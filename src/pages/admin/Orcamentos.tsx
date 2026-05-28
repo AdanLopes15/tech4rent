@@ -382,7 +382,7 @@ export default function Orcamentos() {
           <TableHead className="text-primary">Orçamento</TableHead>
           <TableHead className="text-primary">Cliente</TableHead>
           <TableHead className="text-primary">Data</TableHead>
-          <TableHead className="text-primary">Valor Total</TableHead>
+          <TableHead className="text-primary">{type === "locacao" ? "Valor Total Mensal" : "Valor Total"}</TableHead>
           <TableHead className="text-primary">Status</TableHead>
           <TableHead className="text-right text-primary">Ações</TableHead>
         </TableRow>
