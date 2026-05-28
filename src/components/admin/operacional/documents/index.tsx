@@ -61,7 +61,7 @@ export const DocumentHeader = ({ title, documentNumber, date, subtitle, companyI
             </div>
           </div>
         </div>
-        <div className="text-right">
+        <div className={cn("flex flex-col", subtitle ? "items-center absolute left-1/2 -translate-x-1/2" : "items-end")}>
           <h2 className="text-xl font-bold text-[#1a1a1a] uppercase">{title} - {documentNumber}</h2>
           <p className="text-xs text-[#666666] mt-1">{subtitle || `Data: ${date}`}</p>
         </div>
