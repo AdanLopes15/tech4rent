@@ -57,7 +57,28 @@ export const DocumentHeader = ({ title, documentNumber, date, subtitle, companyI
 
   return (
     <div className="flex flex-col gap-4">
-      <div className=\"flex justify-between items-start\">\n        <div className=\"flex items-center gap-3\">\n          <CompanyLogo isDark={false} className=\"h-10 w-auto\" />\n          <div className=\"flex flex-col\">\n            <span className=\"text-xl font-bold tracking-tight text-[#1a1a1a] uppercase\">{displayCompanyName}</span>\n            <span className=\"text-[10px] text-[#666666] font-medium uppercase\">CNPJ: {displayCnpj}</span>\n            <span className=\"text-[10px] text-[#666666] font-medium uppercase\">TEL: {companySettings?.phone || \"(19) 97107-6928\"}</span>\n          </div>\n        </div>\n\n        <div className=\"flex flex-col items-end text-right\">\n          <span className=\"text-xs text-[#666666] uppercase font-bold\">Responsável pelo Orçamento</span>\n          <div className=\"border-b border-[#e5e5e5] w-48 mt-4\"></div>\n        </div>\n      </div>\n      \n      {/* Título do documento centralizado abaixo do cabeçalho */}\n      <div className=\"flex flex-col items-center mt-6 mb-2\">\n        <h2 className=\"text-2xl font-bold text-[#1a1a1a] uppercase\">{title} - {documentNumber}</h2>\n        <p className=\"text-[11px] text-[#666666] mt-1\">{subtitle || `Data: ${date}`}</p>\n      </div>
+      {/* Cabeçalho superior: Logo e Nome/CNPJ da Empresa */}
+      <div className="flex justify-between items-start">
+        <div className="flex items-center gap-3">
+          <CompanyLogo isDark={false} className="h-10 w-auto" />
+          <div className="flex flex-col">
+            <span className="text-xl font-bold tracking-tight text-[#1a1a1a] uppercase">{displayCompanyName}</span>
+            <span className="text-[10px] text-[#666666] font-medium uppercase">CNPJ: {displayCnpj}</span>
+            <span className="text-[10px] text-[#666666] font-medium uppercase">TEL: {companySettings?.phone || "(19) 97107-6928"}</span>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-end text-right">
+          <span className="text-xs text-[#666666] uppercase font-bold">Responsável pelo Orçamento</span>
+          <div className="border-b border-[#e5e5e5] w-48 mt-4"></div>
+        </div>
+      </div>
+      
+      {/* Título do documento centralizado abaixo do cabeçalho */}
+      <div className="flex flex-col items-center mt-6 mb-2">
+        <h2 className="text-2xl font-bold text-[#1a1a1a] uppercase">{title} - {documentNumber}</h2>
+        <p className="text-[11px] text-[#666666] mt-1">{subtitle || `Data: ${date}`}</p>
+      </div>
 
       {/* Linha divisória discreta */}
       <div className="border-b border-[#e5e5e5] w-full mb-2"></div>
