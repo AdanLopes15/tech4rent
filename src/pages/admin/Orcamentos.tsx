@@ -693,7 +693,7 @@ export default function Orcamentos() {
               <AlertDialogDescription>Confira os dados antes de gerar o PDF.</AlertDialogDescription>
             </AlertDialogHeader>
 
-            <div className="space-y-4 max-h-[70vh] overflow-y-auto text-sm p-4 border rounded-md">
+            <div ref={quotePrintRef} className="space-y-4 max-h-[70vh] overflow-y-auto text-sm p-4 border rounded-md">
               <div className="flex justify-between items-start border-b pb-4">
                 <div>
                   <h3 className="text-lg font-bold text-primary">TECH4RENT</h3>
@@ -777,7 +777,7 @@ export default function Orcamentos() {
 
             <AlertDialogFooter className="flex flex-row gap-2 justify-end">
               <AlertDialogCancel onClick={() => setQuoteForDownload(null)}>Fechar</AlertDialogCancel>
-              <Button onClick={() => confirmDownloadPDF(quoteForDownload)}>
+              <Button type="button" onClick={() => handlePrintDocument(quotePrintRef)}>
                 <FileDown className="mr-2 h-4 w-4" />
                 Imprimir / Baixar PDF
               </Button>
