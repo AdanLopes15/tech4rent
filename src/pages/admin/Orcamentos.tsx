@@ -774,16 +774,14 @@ export default function Orcamentos() {
                 <div className="flex flex-col gap-3">
                   <h3 className="text-xs font-bold uppercase tracking-widest text-primary/80 border-l-4 border-primary pl-3 py-0.5 bg-primary/5">
                     ITENS DO ORÇAMENTO
-            <AlertDialogFooter className="flex flex-row gap-2 justify-end">
-              <AlertDialogCancel onClick={() => setQuoteForDownload(null)}>Fechar</AlertDialogCancel>
-              <Button variant="outline" type="button" onClick={() => handlePrintDocument(quotePrintRef)}>
-                Imprimir
-              </Button>
-              <Button type="button" onClick={() => handleDownloadPDFAsFile(quotePrintRef, `Orcamento_${quoteForDownload.id}`)}>
-                <FileDown className="mr-2 h-4 w-4" />
-                Baixar PDF
-              </Button>
-            </AlertDialogFooter>
+                  </h3>
+                  <DocumentTable 
+                    headers={["Equipamento", "Qtd", "Vl. Unitário", "Vl. Total"]}
+                    alignments={["left", "center", "right", "right"]}
+                    rows={(quoteForDownload.items || []).map((item: any) => {
+                      const equipment = (useStore.getState().equipments || []).find(
+                        (eq: any) => eq.id === item.equipmentId
+
                       );
                       return [
                         equipment?.name || "Equipamento",
