@@ -693,10 +693,10 @@ export default function Orcamentos() {
                       );
                       
                       return [
-                        <div key={item.equipmentId} className="flex items-start gap-4">
-                          {equipment?.imageUrl && (
-                            <img src={equipment.imageUrl} alt={equipment.name} className="w-16 h-16 object-contain border border-[#e5e5e5] rounded" />
-                          )}
+                      <div key={item.equipmentId} className="flex items-start gap-4">
+                        {equipment?.imageUrl && (
+                          <img src={equipment.imageUrl} alt={equipment.name} className="w-12 h-12 print:w-10 print:h-10 object-contain border border-[#e5e5e5] rounded" />
+                        )}
                           <div className="flex flex-col">
                             <span className="font-bold text-[#1a1a1a]">{equipment?.name || "Equipamento"}</span>
                             {equipment?.description && (
@@ -726,7 +726,7 @@ export default function Orcamentos() {
                 </DocumentSection>
 
                 <DocumentSection title="TERMOS E CONDIÇÕES">
-                  <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-2 print:gap-1">
                     <div>
                       <p className="font-bold text-[#1a1a1a] mb-1 text-sm">Período de locação:</p>
                       <p className="text-sm text-[#333333]">
