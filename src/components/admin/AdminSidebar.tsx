@@ -1,5 +1,5 @@
 //src/components/admin/AdminSidebar.tsx
-import logoTech4Rent from "@/assets/landing/logo-tech4rent.png";
+import { CompanyLogo } from "./CompanyLogo";
 
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -197,10 +197,9 @@ const AdminSidebar = ({ isDark }: { isDark?: boolean }) => {
       <div className="flex items-center justify-between h-16 px-4 border-b border-sidebar-border">
         {!collapsed && (
           <Link to="/admin" className="hover:opacity-80 transition-opacity">
-            <img 
-              src={isDark ? "/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png" : logoTech4Rent} 
-              alt="Tech4Rent" 
-              className="h-8 object-contain" 
+            <CompanyLogo 
+              isDark={isDark} 
+              className="h-8" 
             />
           </Link>
         )}

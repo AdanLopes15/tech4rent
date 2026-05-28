@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import ClausulasEditor, { defaultVendaClauses } from "@/components/admin/ClausulasEditor";
 import ImageUploadField from "@/components/admin/ImageUploadField";
 import { useStore } from "@/store";
+import { CompanyLogo } from "@/components/admin/CompanyLogo";
 
 const formatPhone = (value: string) => {
   const digits = value.replace(/\D/g, "");
@@ -320,7 +321,7 @@ const Configuracoes = () => {
                   <Label>Logotipo do Sistema</Label>
                   <div className="flex items-center gap-4">
                     <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground overflow-hidden">
-                      {systemLogo ? <img src={systemLogo} alt="Logo sistema" className="h-full w-full object-contain" /> : "Logo"}
+                      {systemLogo ? <img src={systemLogo} alt="Logo sistema" className="h-full w-full object-contain" /> : <CompanyLogo isDark={false} className="h-12 w-12" />}
                     </div>
                     <input ref={systemLogoRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleLogoChange(e, "system")} />
                     <Button variant="outline" size="sm" onClick={() => systemLogoRef.current?.click()}>
@@ -336,7 +337,7 @@ const Configuracoes = () => {
                   <Label>Logotipo do Site (Público)</Label>
                   <div className="flex items-center gap-4">
                     <div className="h-16 w-16 rounded-lg border border-border bg-muted flex items-center justify-center text-xs text-muted-foreground overflow-hidden">
-                      {siteLogo ? <img src={siteLogo} alt="Logo site" className="h-full w-full object-contain" /> : "Logo"}
+                      {siteLogo ? <img src={siteLogo} alt="Logo site" className="h-full w-full object-contain" /> : <CompanyLogo isDark={true} className="h-12 w-12" />}
                     </div>
                     <input ref={siteLogoRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleLogoChange(e, "site")} />
                     <Button variant="outline" size="sm" onClick={() => siteLogoRef.current?.click()}>

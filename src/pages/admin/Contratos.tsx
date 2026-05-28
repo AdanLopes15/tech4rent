@@ -6,6 +6,7 @@ import { ptBR } from "date-fns/locale";
 import type { DateRange } from "react-day-picker";
 
 import { useStore } from "@/store";
+import { CompanyLogo } from "@/components/admin/CompanyLogo";
 import { useToast } from "@/hooks/use-toast";
 import { cn, formatCurrency } from "@/lib/utils";
 
@@ -161,13 +162,10 @@ function RentalInvoicePrintable({
     <div className="p-6 bg-white text-black">
       <header className="flex justify-between items-start mb-8">
         <div className="flex items-center gap-4">
-          {companySettings?.logoUrl ? (
-            <img src={companySettings.logoUrl} alt="Logo" width={80} height={80} style={{ objectFit: "contain" }} />
-          ) : (
-            <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
-              <span className="text-xs text-gray-500">Logo</span>
-            </div>
-          )}
+          <CompanyLogo 
+            isDark={false} 
+            className="h-20 w-20" 
+          />
 
           <div>
             <h1 className="text-2xl font-bold">{companySettings?.fantasyName || companySettings?.name}</h1>

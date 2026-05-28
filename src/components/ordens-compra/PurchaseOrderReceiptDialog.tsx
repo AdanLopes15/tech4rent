@@ -9,6 +9,7 @@ import { useStore } from "@/store";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { formatCurrency } from "@/lib/utils";
+import { CompanyLogo } from "../admin/CompanyLogo";
 
 interface Props {
   open: boolean;
@@ -47,13 +48,10 @@ export function PurchaseOrderReceiptDialog({ open, onOpenChange, order }: Props)
           <div className="p-6 space-y-6">
             {/* Header com logo e empresa */}
             <div className="flex items-center gap-4">
-              {companySettings?.logoUrl && (
-                <img
-                  src={companySettings.logoUrl}
-                  alt="Logo"
-                  className="h-16 w-16 object-contain rounded"
-                />
-              )}
+              <CompanyLogo 
+                isDark={false} 
+                className="h-16 w-16" 
+              />
               <div>
                 <h1 className="text-2xl font-bold">{companySettings?.fantasyName || companySettings?.name}</h1>
                 <p className="text-sm text-muted-foreground">CNPJ: {companySettings?.cnpj}</p>

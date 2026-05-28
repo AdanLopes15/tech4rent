@@ -10,6 +10,7 @@ import { Printer, X, Pencil, CalendarIcon } from "lucide-react";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
+import { CompanyLogo } from "../admin/CompanyLogo";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -216,13 +217,10 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
             <div id="printable-invoice" className="p-6 bg-white text-black">
               <header className="flex justify-between items-start mb-8">
                 <div className="flex items-center gap-4">
-                  {companySettings.logoUrl ? (
-                    <img src={companySettings.logoUrl} alt="Logo" width={80} height={80} className="object-contain" />
-                  ) : (
-                    <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
-                      <span className="text-xs text-gray-500">Logo</span>
-                    </div>
-                  )}
+                  <CompanyLogo 
+                    isDark={false} 
+                    className="h-20 w-20" 
+                  />
 
                   <div>
                     <h1 className="text-2xl font-bold">{companySettings.fantasyName || companySettings.name}</h1>
