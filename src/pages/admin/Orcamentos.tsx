@@ -883,7 +883,7 @@ export default function Orcamentos() {
                         return (
                           <>
                             <span>Documento: {client?.cnpj || client?.cpf || "—"}</span>
-                            <span>{client?.address || client?.endereco || "—"}</span>
+                            <span>{formatAddress(client?.address || client?.endereco)}</span>
                           </>
                         );
                       })()}
