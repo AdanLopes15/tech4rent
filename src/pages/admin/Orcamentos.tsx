@@ -69,12 +69,15 @@ export default function Orcamentos() {
   }, [fetchAllData]);
 
   const { toast } = useToast();
+  const quotePrintRef = useRef<HTMLDivElement>(null);
+  const contractPrintRef = useRef<HTMLDivElement>(null);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingQuote, setEditingQuote] = useState<any>(null);
   const [viewingQuote, setViewingQuote] = useState<any>(null);
   const [quoteForDownload, setQuoteForDownload] = useState<any>(null);
   const [quoteForApproval, setQuoteForApproval] = useState<any>(null);
+  const [isContractGenerated, setIsContractGenerated] = useState(false);
 
   const [clientFilter, setClientFilter] = useState("todos");
   const [statusFilter, setStatusFilter] = useState("todos");
@@ -82,6 +85,75 @@ export default function Orcamentos() {
 
   const [locacaoOpen, setLocacaoOpen] = useState(true);
   const [vendaOpen, setVendaOpen] = useState(true);
+
+  const handlePrintDocument = (ref: React.RefObject<HTMLDivElement>) => {
+    if (!ref.current) return;
+
+    const content = ref.current.innerHTML;
+    const printWindow = window.open("", "_blank");
+
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Tech4Rent - Documento</title>
+            <style>
+              body { font-family: sans-serif; padding: 20px; color: #333; }
+              table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+              th { background-color: #f4f4f4; }
+              .text-primary { color: #f97316; }
+              .font-bold { font-weight: bold; }
+              .uppercase { text-transform: uppercase; }
+              .text-right { text-align: right; }
+              .text-center { text-align: center; }
+              .text-xs { font-size: 10px; }
+              .text-sm { font-size: 12px; }
+              .text-lg { font-size: 18px; }
+              .border-b { border-bottom: 1px solid #eee; }
+              .pb-4 { padding-bottom: 16px; }
+              .pt-4 { padding-top: 16px; }
+              .mb-6 { margin-bottom: 24px; }
+              .mt-10 { margin-top: 40px; }
+              .flex { display: flex; }
+              .justify-between { justify-content: space-between; }
+              .items-start { align-items: flex-start; }
+              .grid { display: grid; }
+              .grid-cols-2 { grid-template-columns: 1fr 1fr; }
+              .gap-6 { gap: 24px; }
+              .border { border: 1px solid #ddd; }
+              .rounded-md { border-radius: 4px; }
+              .p-4 { padding: 16px; }
+              .p-6 { padding: 24px; }
+              .bg-zinc-50 { background-color: #fafafa; }
+              .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.06); }
+              .font-serif { font-family: serif; }
+              .leading-relaxed { line-height: 1.625; }
+              .italic { font-style: italic; }
+              .border-l-4 { border-left-width: 4px; }
+              .border-zinc-300 { border-color: #d4d4d8; }
+              .pl-4 { padding-left: 16px; }
+              .w-48 { width: 12rem; }
+              @media print {
+                body { padding: 0; }
+                .no-print { display: none; }
+              }
+            </style>
+          </head>
+          <body>
+            ${content}
+            <script>
+              window.onload = function() {
+                window.print();
+                window.onafterprint = function() { window.close(); };
+              };
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+  };
 
   const normalizeStatus = (status?: string) => {
     if (!status) return "Pendente";
