@@ -199,7 +199,7 @@ export default function Orcamentos() {
       `);
       printWindow.document.close();
     }
-  };
+    }
   };
 
   const normalizeStatus = (status?: string) => {
