@@ -40,24 +40,40 @@ interface DocumentHeaderProps {
   title: string;
   documentNumber: string;
   date: string;
+  subtitle?: string;
+  companyInfo?: {
+    name: string;
+    cnpj: string;
+    address: string;
+  };
 }
 
-export const DocumentHeader = ({ title, documentNumber, date }: DocumentHeaderProps) => {
+export const DocumentHeader = ({ title, documentNumber, date, subtitle, companyInfo }: DocumentHeaderProps) => {
   return (
-    <div className="flex justify-between items-start border-b border-[#e5e5e5] pb-6">
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-3">
-          <CompanyLogo isDark={false} className="h-10 w-auto" />
-          <div className="flex flex-col">
-            <span className="text-xl font-bold tracking-tight text-[#1a1a1a]">TECH4RENT</span>
-            <span className="text-[10px] text-[#666666] font-medium">CNPJ: 44.740.821/0001-30</span>
+    <div className="flex flex-col gap-6">
+      <div className="flex justify-between items-start border-b border-[#e5e5e5] pb-6">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-3">
+            <CompanyLogo isDark={false} className="h-10 w-auto" />
+            <div className="flex flex-col">
+              <span className="text-xl font-bold tracking-tight text-[#1a1a1a]">TECH4RENT</span>
+              <span className="text-[10px] text-[#666666] font-medium">CNPJ: 44.740.821/0001-30</span>
+            </div>
           </div>
         </div>
+        <div className="text-right">
+          <h2 className="text-xl font-bold text-[#1a1a1a] uppercase">{title} - {documentNumber}</h2>
+          <p className="text-xs text-[#666666] mt-1">{subtitle || `Data: ${date}`}</p>
+        </div>
       </div>
-      <div className="text-right">
-        <h2 className="text-xl font-bold text-[#1a1a1a] uppercase">{title} #{documentNumber}</h2>
-        <p className="text-xs text-[#666666] mt-1">Data: {date}</p>
-      </div>
+      
+      {companyInfo && (
+        <div className="flex flex-col gap-1 text-sm text-[#333333]">
+          <span className="font-bold text-[#1a1a1a] uppercase">{companyInfo.name}</span>
+          <span>CNPJ: {companyInfo.cnpj}</span>
+          <span>{companyInfo.address}</span>
+        </div>
+      )}
     </div>
   );
 };
@@ -71,7 +87,7 @@ interface DocumentSectionProps {
 export const DocumentSection = ({ title, children, className }: DocumentSectionProps) => {
   return (
     <div className={cn("flex flex-col gap-3", className)}>
-      <h3 className="text-xs font-bold uppercase tracking-wider text-[#1a1a1a] border-b border-[#e5e5e5] pb-1">
+      <h3 className="text-sm font-bold uppercase tracking-wider text-[#1a1a1a] border-b border-[#e5e5e5] pb-1">
         {title}
       </h3>
       <div className="px-1 text-sm text-[#333333]">
@@ -108,7 +124,7 @@ export const DocumentTable = ({ headers, rows, alignments = [] }: DocumentTableP
         </thead>
         <tbody>
           {rows.map((row, i) => (
-            <tr key={i} className="border-b border-[#e5e5e5] last:border-b-[#1a1a1a]">
+            <tr key={i} className="border-b border-[#e5e5e5] last:border-b-[#1a1a1a] print:break-inside-avoid">
               {row.map((cell, j) => (
                 <td 
                   key={j} 
@@ -155,16 +171,20 @@ export const DocumentSummary = ({ items }: DocumentSummaryProps) => {
   );
 };
 
-export const SignatureBlock = () => {
+export const SignatureBlock = ({ clientName }: { clientName?: string }) => {
   return (
-    <div className="grid grid-cols-2 gap-16 mt-20">
+    <div className="grid grid-cols-2 gap-16 mt-20 print:break-inside-avoid">
       <div className="flex flex-col items-center gap-2">
         <div className="w-full border-b border-[#1a1a1a]"></div>
-        <span className="text-[10px] font-bold uppercase text-[#666666]">TECH4RENT LTDA</span>
+        <span className="text-[10px] font-bold uppercase text-[#1a1a1a]">TECH4RENT</span>
+        <span className="text-[10px] text-[#666666]">(Assinatura do Locador/Entregador)</span>
       </div>
       <div className="flex flex-col items-center gap-2">
         <div className="w-full border-b border-[#1a1a1a]"></div>
-        <span className="text-[10px] font-bold uppercase text-[#666666]">CONTRATANTE</span>
+        <span className="text-[10px] font-bold uppercase text-[#1a1a1a] text-center">
+          {clientName || "NOME DO CLIENTE / EMPRESA"}
+        </span>
+        <span className="text-[10px] text-[#666666]">(Assinatura do Locatário/Recebedor)</span>
       </div>
     </div>
   );
@@ -172,7 +192,7 @@ export const SignatureBlock = () => {
 
 export const DocumentFooter = ({ text }: { text?: string }) => {
   return (
-    <div className="mt-auto pt-6 text-[10px] text-[#999999] leading-relaxed text-center">
+    <div className="mt-auto pt-6 text-[10px] text-[#999999] leading-relaxed text-center print:hidden">
       {text || "Este orçamento é válido por 15 dias. Os valores podem ser alterados sem aviso prévio após este período."}
     </div>
   );
