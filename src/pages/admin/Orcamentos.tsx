@@ -644,37 +644,37 @@ export default function Orcamentos() {
                   date={formatDate(viewingQuote.createdAt)} 
                 />
 
-                <DocumentSection title=\"CLIENTE\">
-                  <div className=\"grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-12\">
-                    <div className=\"flex flex-col\">
-                      <span className=\"text-xs text-[#666666] uppercase\">Razão Social</span>
-                      <span className=\"text-sm font-bold text-[#1a1a1a]\">
+                <DocumentSection title="CLIENTE">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-12">
+                    <div className="flex flex-col">
+                      <span className="text-xs text-[#666666] uppercase">Razão Social</span>
+                      <span className="text-sm font-bold text-[#1a1a1a]">
                         {getClientName(viewingQuote.clientId, viewingQuote.clientName)}
                       </span>
                     </div>
-                    <div className=\"flex flex-col\">
-                      <span className=\"text-xs text-[#666666] uppercase\">CNPJ/CPF</span>
-                      <span className=\"text-sm font-bold text-[#1a1a1a]\">
+                    <div className="flex flex-col">
+                      <span className="text-xs text-[#666666] uppercase">CNPJ/CPF</span>
+                      <span className="text-sm font-bold text-[#1a1a1a]">
                         {clients.find((c: any) => c.id === viewingQuote.clientId)?.cnpj || 
                          clients.find((c: any) => c.id === viewingQuote.clientId)?.cpf || 
-                         \"—\"}
+                         "—"}
                       </span>
                     </div>
-                    <div className=\"flex flex-col\">
-                      <span className=\"text-xs text-[#666666] uppercase\">Pessoa de Contato</span>
-                      <span className=\"text-sm font-bold text-[#1a1a1a]\">
+                    <div className="flex flex-col">
+                      <span className="text-xs text-[#666666] uppercase">Pessoa de Contato</span>
+                      <span className="text-sm font-bold text-[#1a1a1a]">
                         {clients.find((c: any) => c.id === viewingQuote.clientId)?.contato || 
                          clients.find((c: any) => c.id === viewingQuote.clientId)?.contactPerson || 
-                         \"—\"}
+                         "—"}
                       </span>
                     </div>
-                    <div className=\"flex flex-col\">
-                      <span className=\"text-xs text-[#666666] uppercase\">Telefone / WhatsApp</span>
-                      <span className=\"text-sm font-bold text-[#1a1a1a]\">
+                    <div className="flex flex-col">
+                      <span className="text-xs text-[#666666] uppercase">Telefone / WhatsApp</span>
+                      <span className="text-sm font-bold text-[#1a1a1a]">
                         {clients.find((c: any) => c.id === viewingQuote.clientId)?.telefone || 
                          clients.find((c: any) => c.id === viewingQuote.clientId)?.phone || 
                          clients.find((c: any) => c.id === viewingQuote.clientId)?.whatsapp || 
-                         \"—\"}
+                         "—"}
                       </span>
                     </div>
                   </div>
