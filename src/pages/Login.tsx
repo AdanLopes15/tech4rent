@@ -86,8 +86,8 @@ const Login = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
           <CardTitle className="flex justify-center">
-            <img src={logoTech4Rent} alt="Tech4Rent" className="h-10 object-contain dark:hidden" />
-            <img src="/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png" alt="Tech4Rent" className="h-10 object-contain hidden dark:block" />
+            <CompanyLogo className="h-10 dark:hidden" isDark={false} />
+            <CompanyLogo className="h-10 hidden dark:block" isDark={true} />
           </CardTitle>
           <CardDescription>Acesse a área restrita do sistema</CardDescription>
         </CardHeader>
