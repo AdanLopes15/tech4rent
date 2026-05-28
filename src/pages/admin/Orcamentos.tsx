@@ -1,6 +1,6 @@
 //src/pages/admin/Orcamentos.tsx
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
@@ -62,7 +62,11 @@ const statusColors: Record<string, string> = {
 };
 
 export default function Orcamentos() {
-  const { quotes, clients, deleteQuote, updateQuote, convertQuoteToContract, addSale } = useStore();
+  const { quotes, clients, loading, fetchAllData, deleteQuote, updateQuote, convertQuoteToContract, addSale } = useStore();
+
+  useEffect(() => {
+    fetchAllData();
+  }, [fetchAllData]);
 
   const { toast } = useToast();
 
@@ -105,16 +109,20 @@ export default function Orcamentos() {
   };
 
   const filteredQuotes = useMemo(() => {
+    if (!quotes || !Array.isArray(quotes)) return [];
+
     return quotes.filter((quote: any) => {
+      // 1. Status Filter
       const normalizedQuoteStatus = normalizeStatus(quote.status);
-
-      const matchesClient = clientFilter === "todos" || quote.clientId === clientFilter;
-
       const matchesStatus = statusFilter === "todos" || normalizedQuoteStatus === statusFilter;
+      if (!matchesStatus) return false;
 
-      let matchesDate = true;
+      // 2. Client Filter
+      const matchesClient = clientFilter === "todos" || quote.clientId === clientFilter;
+      if (!matchesClient) return false;
 
-      if (dateRange.from || dateRange.to) {
+      // 3. Date Filter
+      if (dateRange?.from || dateRange?.to) {
         const quoteDate = quote.createdAt
           ? typeof quote.createdAt?.toDate === "function"
             ? quote.createdAt.toDate()
@@ -122,28 +130,31 @@ export default function Orcamentos() {
           : null;
 
         if (quoteDate && !isNaN(quoteDate.getTime())) {
-          if (dateRange.from && quoteDate < dateRange.from) {
-            matchesDate = false;
-          }
-
+          if (dateRange.from && quoteDate < dateRange.from) return false;
           if (dateRange.to) {
             const endOfDay = new Date(dateRange.to);
             endOfDay.setHours(23, 59, 59, 999);
-
-            if (quoteDate > endOfDay) {
-              matchesDate = false;
-            }
+            if (quoteDate > endOfDay) return false;
           }
+        } else {
+          // If a date filter is applied but the quote has no valid date, hide it
+          return false;
         }
       }
 
-      return matchesClient && matchesStatus && matchesDate;
+      return true;
     });
   }, [quotes, clientFilter, statusFilter, dateRange]);
 
-  const locacaoQuotes = filteredQuotes.filter((quote: any) => quote.budgetType === "locacao");
+  const locacaoQuotes = useMemo(() => 
+    filteredQuotes.filter((quote: any) => quote.budgetType === "locacao"),
+    [filteredQuotes]
+  );
 
-  const vendaQuotes = filteredQuotes.filter((quote: any) => quote.budgetType === "venda");
+  const vendaQuotes = useMemo(() => 
+    filteredQuotes.filter((quote: any) => quote.budgetType === "venda"),
+    [filteredQuotes]
+  );
 
   const handleAddNew = () => {
     setEditingQuote(null);
@@ -262,7 +273,14 @@ export default function Orcamentos() {
       </TableHeader>
 
       <TableBody>
-        {quotesList.length > 0 ? (
+        {loading ? (
+          <TableRow>
+            <TableCell colSpan={6} className="text-center py-10">
+              <RefreshCw className="h-6 w-6 animate-spin mx-auto text-primary mb-2" />
+              <p className="text-sm text-muted-foreground">Carregando orçamentos...</p>
+            </TableCell>
+          </TableRow>
+        ) : quotesList.length > 0 ? (
           quotesList.map((quote: any) => {
             const displayStatus = normalizeStatus(quote.status);
 
