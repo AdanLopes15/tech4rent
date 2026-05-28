@@ -10,6 +10,7 @@ import { Printer, X, Pencil, CalendarIcon } from "lucide-react";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
+import { CompanyLogo } from "../admin/CompanyLogo";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
