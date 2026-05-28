@@ -6,6 +6,7 @@ import { ptBR } from "date-fns/locale";
 import type { DateRange } from "react-day-picker";
 
 import { useStore } from "@/store";
+import { CompanyLogo } from "@/components/admin/CompanyLogo";
 import { useToast } from "@/hooks/use-toast";
 import { cn, formatCurrency } from "@/lib/utils";
 
