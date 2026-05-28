@@ -1,6 +1,6 @@
 //src/pages/admin/Orcamentos.tsx
 
-import { useMemo, useState, useEffect, useCallback } from "react";
+import { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import { format } from "date-fns";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
@@ -69,12 +69,15 @@ export default function Orcamentos() {
   }, [fetchAllData]);
 
   const { toast } = useToast();
+  const quotePrintRef = useRef<HTMLDivElement>(null);
+  const contractPrintRef = useRef<HTMLDivElement>(null);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingQuote, setEditingQuote] = useState<any>(null);
   const [viewingQuote, setViewingQuote] = useState<any>(null);
   const [quoteForDownload, setQuoteForDownload] = useState<any>(null);
   const [quoteForApproval, setQuoteForApproval] = useState<any>(null);
+  const [isContractGenerated, setIsContractGenerated] = useState(false);
 
   const [clientFilter, setClientFilter] = useState("todos");
   const [statusFilter, setStatusFilter] = useState("todos");
@@ -82,6 +85,75 @@ export default function Orcamentos() {
 
   const [locacaoOpen, setLocacaoOpen] = useState(true);
   const [vendaOpen, setVendaOpen] = useState(true);
+
+  const handlePrintDocument = (ref: React.RefObject<HTMLDivElement>) => {
+    if (!ref.current) return;
+
+    const content = ref.current.innerHTML;
+    const printWindow = window.open("", "_blank");
+
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Tech4Rent - Documento</title>
+            <style>
+              body { font-family: sans-serif; padding: 20px; color: #333; }
+              table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+              th { background-color: #f4f4f4; }
+              .text-primary { color: #f97316; }
+              .font-bold { font-weight: bold; }
+              .uppercase { text-transform: uppercase; }
+              .text-right { text-align: right; }
+              .text-center { text-align: center; }
+              .text-xs { font-size: 10px; }
+              .text-sm { font-size: 12px; }
+              .text-lg { font-size: 18px; }
+              .border-b { border-bottom: 1px solid #eee; }
+              .pb-4 { padding-bottom: 16px; }
+              .pt-4 { padding-top: 16px; }
+              .mb-6 { margin-bottom: 24px; }
+              .mt-10 { margin-top: 40px; }
+              .flex { display: flex; }
+              .justify-between { justify-content: space-between; }
+              .items-start { align-items: flex-start; }
+              .grid { display: grid; }
+              .grid-cols-2 { grid-template-columns: 1fr 1fr; }
+              .gap-6 { gap: 24px; }
+              .border { border: 1px solid #ddd; }
+              .rounded-md { border-radius: 4px; }
+              .p-4 { padding: 16px; }
+              .p-6 { padding: 24px; }
+              .bg-zinc-50 { background-color: #fafafa; }
+              .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.06); }
+              .font-serif { font-family: serif; }
+              .leading-relaxed { line-height: 1.625; }
+              .italic { font-style: italic; }
+              .border-l-4 { border-left-width: 4px; }
+              .border-zinc-300 { border-color: #d4d4d8; }
+              .pl-4 { padding-left: 16px; }
+              .w-48 { width: 12rem; }
+              @media print {
+                body { padding: 0; }
+                .no-print { display: none; }
+              }
+            </style>
+          </head>
+          <body>
+            ${content}
+            <script>
+              window.onload = function() {
+                window.print();
+                window.onafterprint = function() { window.close(); };
+              };
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+  };
 
   const normalizeStatus = (status?: string) => {
     if (!status) return "Pendente";
@@ -204,13 +276,14 @@ export default function Orcamentos() {
   };
 
   const handleConvertToContract = (quote: any) => {
+    setIsContractGenerated(false);
     setQuoteForApproval(quote);
   };
 
   const confirmConvertToContract = async (quoteId: string) => {
     try {
       await convertQuoteToContract(quoteId);
-      setQuoteForApproval(null);
+      setIsContractGenerated(true);
       toast({ title: "Contrato gerado com sucesso!" });
     } catch (error: any) {
       toast({
@@ -251,12 +324,6 @@ export default function Orcamentos() {
 
   const handleDownloadPDF = (quote: any) => {
     setQuoteForDownload(quote);
-  };
-
-  const confirmDownloadPDF = (quote: any) => {
-    const { companySettings, clients, equipments } = useStore.getState();
-    const client = clients.find((c: any) => c.id === quote.clientId);
-    generateQuotePDF(quote, client, companySettings, equipments);
   };
 
   const renderQuoteTable = (quotesList: any[], type: "locacao" | "venda") => (
@@ -613,14 +680,16 @@ export default function Orcamentos() {
       )}
 
       {quoteForDownload && (
-        <AlertDialog open={!!quoteForDownload} onOpenChange={() => setQuoteForDownload(null)}>
+        <AlertDialog open={!!quoteForDownload} onOpenChange={(open) => {
+          if (!open) setQuoteForDownload(null);
+        }}>
           <AlertDialogContent className="max-w-3xl">
             <AlertDialogHeader>
               <AlertDialogTitle>Pré-visualização do Orçamento {quoteForDownload.id}</AlertDialogTitle>
               <AlertDialogDescription>Confira os dados antes de gerar o PDF.</AlertDialogDescription>
             </AlertDialogHeader>
 
-            <div className="space-y-4 max-h-[70vh] overflow-y-auto text-sm p-4 border rounded-md">
+            <div ref={quotePrintRef} className="space-y-4 max-h-[70vh] overflow-y-auto text-sm p-4 border rounded-md">
               <div className="flex justify-between items-start border-b pb-4">
                 <div>
                   <h3 className="text-lg font-bold text-primary">TECH4RENT</h3>
@@ -704,7 +773,7 @@ export default function Orcamentos() {
 
             <AlertDialogFooter className="flex flex-row gap-2 justify-end">
               <AlertDialogCancel onClick={() => setQuoteForDownload(null)}>Fechar</AlertDialogCancel>
-              <Button onClick={() => confirmDownloadPDF(quoteForDownload)}>
+              <Button type="button" onClick={() => handlePrintDocument(quotePrintRef)}>
                 <FileDown className="mr-2 h-4 w-4" />
                 Imprimir / Baixar PDF
               </Button>
@@ -714,7 +783,12 @@ export default function Orcamentos() {
       )}
 
       {quoteForApproval && (
-        <AlertDialog open={!!quoteForApproval} onOpenChange={() => setQuoteForApproval(null)}>
+        <AlertDialog open={!!quoteForApproval} onOpenChange={(open) => {
+          if (!open) {
+            setQuoteForApproval(null);
+            setIsContractGenerated(false);
+          }
+        }}>
           <AlertDialogContent className="max-w-4xl">
             <AlertDialogHeader>
               <AlertDialogTitle>Aprovação e Geração de Contrato</AlertDialogTitle>
@@ -723,7 +797,7 @@ export default function Orcamentos() {
               </AlertDialogDescription>
             </AlertDialogHeader>
 
-            <div className="space-y-6 max-h-[70vh] overflow-y-auto p-6 border rounded-md bg-zinc-50 font-serif text-zinc-900 shadow-inner">
+            <div ref={contractPrintRef} className="space-y-6 max-h-[70vh] overflow-y-auto p-6 border rounded-md bg-zinc-50 font-serif text-zinc-900 shadow-inner">
               <div className="text-center space-y-2 border-b pb-6 mb-6">
                 <h2 className="text-2xl font-bold uppercase tracking-wider">Contrato de Locação de Equipamentos</h2>
                 <p className="text-sm font-medium">Contrato vinculada ao Orçamento nº {quoteForApproval.id}</p>
@@ -808,14 +882,39 @@ export default function Orcamentos() {
             </div>
 
             <AlertDialogFooter className="flex flex-row gap-2 justify-end sm:justify-end">
-              <AlertDialogCancel onClick={() => setQuoteForApproval(null)}>Cancelar</AlertDialogCancel>
-              <Button 
-                className="bg-green-600 hover:bg-green-700 text-white" 
-                onClick={() => confirmConvertToContract(quoteForApproval.id)}
-              >
-                <FileCheck className="mr-2 h-4 w-4" />
-                Confirmar Aprovação e Gerar Contrato
-              </Button>
+              {isContractGenerated ? (
+                <>
+                  <Button variant="outline" type="button" onClick={() => {
+                    setQuoteForApproval(null);
+                    setIsContractGenerated(false);
+                  }}>
+                    Fechar
+                  </Button>
+                  <Button 
+                    type="button"
+                    className="bg-primary hover:bg-primary/90 text-white" 
+                    onClick={() => handlePrintDocument(contractPrintRef)}
+                  >
+                    <FileDown className="mr-2 h-4 w-4" />
+                    Imprimir / Baixar Contrato
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <AlertDialogCancel type="button" onClick={() => {
+                    setQuoteForApproval(null);
+                    setIsContractGenerated(false);
+                  }}>Cancelar</AlertDialogCancel>
+                  <Button 
+                    type="button"
+                    className="bg-green-600 hover:bg-green-700 text-white" 
+                    onClick={() => confirmConvertToContract(quoteForApproval.id)}
+                  >
+                    <FileCheck className="mr-2 h-4 w-4" />
+                    Confirmar Aprovação e Gerar Contrato
+                  </Button>
+                </>
+              )}
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
