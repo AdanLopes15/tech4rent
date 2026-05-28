@@ -814,9 +814,12 @@ export default function Orcamentos() {
 
             <AlertDialogFooter className="flex flex-row gap-2 justify-end">
               <AlertDialogCancel onClick={() => setQuoteForDownload(null)}>Fechar</AlertDialogCancel>
-              <Button type="button" onClick={() => handlePrintDocument(quotePrintRef)}>
+              <Button variant="outline" type="button" onClick={() => handlePrintDocument(quotePrintRef)}>
+                Imprimir
+              </Button>
+              <Button type="button" onClick={() => handleDownloadPDFAsFile(quotePrintRef, `Orcamento_${quoteForDownload.id}`)}>
                 <FileDown className="mr-2 h-4 w-4" />
-                Imprimir / Baixar PDF
+                Baixar PDF
               </Button>
             </AlertDialogFooter>
           </AlertDialogContent>
