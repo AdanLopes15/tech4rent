@@ -694,6 +694,113 @@ export default function Orcamentos() {
           </AlertDialogContent>
         </AlertDialog>
       )}
+
+      {quoteForApproval && (
+        <AlertDialog open={!!quoteForApproval} onOpenChange={() => setQuoteForApproval(null)}>
+          <AlertDialogContent className="max-w-4xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Aprovação e Geração de Contrato</AlertDialogTitle>
+              <AlertDialogDescription>
+                Revise os termos do contrato abaixo antes de confirmar a aprovação.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <div className="space-y-6 max-h-[70vh] overflow-y-auto p-6 border rounded-md bg-zinc-50 font-serif text-zinc-900 shadow-inner">
+              <div className="text-center space-y-2 border-b pb-6 mb-6">
+                <h2 className="text-2xl font-bold uppercase tracking-wider">Contrato de Locação de Equipamentos</h2>
+                <p className="text-sm font-medium">Contrato vinculada ao Orçamento nº {quoteForApproval.id}</p>
+              </div>
+
+              <div className="space-y-4 text-justify leading-relaxed">
+                <section>
+                  <h3 className="font-bold mb-2">1. DAS PARTES</h3>
+                  <p className="text-sm">
+                    <strong>LOCADORA:</strong> TECH4RENT LTDA, com sede em São Paulo/SP, inscrita no CNPJ sob o nº 00.111.222/0001-33.
+                  </p>
+                  <p className="text-sm">
+                    <strong>LOCATÁRIA:</strong> {getClientName(quoteForApproval.clientId, quoteForApproval.clientName)}, inscrita no CNPJ/CPF conforme cadastro no sistema.
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="font-bold mb-2">2. DO OBJETO</h3>
+                  <p className="text-sm mb-2">
+                    O presente contrato tem por objeto a locação dos seguintes equipamentos:
+                  </p>
+                  <div className="border rounded overflow-hidden mb-2 bg-white">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-zinc-100 hover:bg-zinc-100">
+                          <TableHead className="h-8 font-bold text-zinc-900">Descrição do Equipamento</TableHead>
+                          <TableHead className="h-8 font-bold text-zinc-900 text-center">Qtd</TableHead>
+                          <TableHead className="h-8 font-bold text-zinc-900 text-right">Vl. Unitário</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {(quoteForApproval.items || []).map((item: any, index: number) => {
+                          const equipment = (useStore.getState().equipments || []).find(
+                            (eq: any) => eq.id === item.equipmentId,
+                          );
+                          return (
+                            <TableRow key={index} className="hover:bg-zinc-50 border-zinc-200">
+                              <TableCell className="py-2">{equipment?.name || "Equipamento"}</TableCell>
+                              <TableCell className="py-2 text-center">{item.quantity}</TableCell>
+                              <TableCell className="py-2 text-right">{formatCurrency(Number(item.unitPrice || 0))}</TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </section>
+
+                <section>
+                  <h3 className="font-bold mb-2">3. DO PRAZO E VALORES</h3>
+                  <p className="text-sm">
+                    A locação terá início em <strong>{formatDate(quoteForApproval.startDate)}</strong> e término em <strong>{formatDate(quoteForApproval.endDate)}</strong>.
+                  </p>
+                  <p className="text-sm mt-2">
+                    O valor mensal da locação é de <strong>{formatCurrency(Number(quoteForApproval.totalValue || 0))}</strong>, a ser pago conforme as condições comerciais acordadas.
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="font-bold mb-2">4. DAS OBRIGAÇÕES</h3>
+                  <p className="text-xs text-zinc-600">
+                    A LOCATÁRIA obriga-se a manter os equipamentos em perfeito estado de conservação e uso, respondendo por eventuais danos causados por mau uso, negligência ou imprudência. Os equipamentos deverão ser devolvidos à LOCADORA ao final do prazo estabelecido.
+                  </p>
+                </section>
+
+                {quoteForApproval.observations && (
+                  <section>
+                    <h3 className="font-bold mb-2">5. OBSERVAÇÕES ADICIONAIS</h3>
+                    <p className="text-sm italic border-l-4 border-zinc-300 pl-4">{quoteForApproval.observations}</p>
+                  </section>
+                )}
+              </div>
+
+              <div className="pt-10 flex justify-between items-end border-t mt-10">
+                <div className="w-48 border-t border-zinc-400 text-center pt-2">
+                  <p className="text-[10px] uppercase font-bold">Tech4Rent</p>
+                </div>
+                <div className="w-48 border-t border-zinc-400 text-center pt-2">
+                  <p className="text-[10px] uppercase font-bold">Locatária</p>
+                </div>
+              </div>
+            </div>
+
+            <AlertDialogFooter className="flex flex-row gap-2 justify-end sm:justify-end">
+              <AlertDialogCancel onClick={() => setQuoteForApproval(null)}>Cancelar</AlertDialogCancel>
+              <Button 
+                className="bg-green-600 hover:bg-green-700 text-white" 
+                onClick={() => confirmConvertToContract(quoteForApproval.id)}
+              >
+                <FileCheck className="mr-2 h-4 w-4" />
+                Confirmar Aprovação e Gerar Contrato
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
     </div>
   );
 }
