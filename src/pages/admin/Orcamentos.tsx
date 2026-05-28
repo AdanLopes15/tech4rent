@@ -275,6 +275,11 @@ export default function Orcamentos() {
                         Editar
                       </DropdownMenuItem>
 
+                      <DropdownMenuItem onClick={() => handleDownloadPDF(quote)}>
+                        <FileDown className=\"mr-2 h-4 w-4\" />
+                        Baixar PDF
+                      </DropdownMenuItem>
+
                       {type === "locacao" && displayStatus === "Pendente" && (
                         <DropdownMenuItem onClick={() => handleConvertToContract(quote.id)}>
                           <FileCheck className="mr-2 h-4 w-4" />
