@@ -16,7 +16,7 @@ interface CompanyLogoProps {
  */
 export const CompanyLogo = ({ className, style, isDark = false, useSettings = false }: CompanyLogoProps) => {
   // URLs estáveis para a logo
-  const LIGHT_LOGO_URL = "/logo-tech4rent.png"; // Versão com texto escuro (localizada em /public)
+  const LIGHT_LOGO_URL = "/logo-tech4rent-light.png"; // Versão gerada com texto escuro (#0D1B2A)
   const DARK_LOGO_URL = "/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png";   // Versão com texto branco (mantida)
 
   const [imgSrc, setImgSrc] = useState<string>(isDark ? DARK_LOGO_URL : LIGHT_LOGO_URL);
