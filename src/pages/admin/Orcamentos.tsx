@@ -1011,8 +1011,13 @@ export default function Orcamentos() {
                       </div>
 
                       <div>
-                        <p className="font-bold mb-2">10. CLÁUSULA DÉCIMA – FORO</p>
-                        <p className="text-justify">10.1. Fica eleito o foro da comarca de Rio Claro/SP para dirimir quaisquer questões oriundas deste contrato.</p>
+                        <p className="font-bold mb-2">10. CLÁUSULA DÉCIMA – FALÊNCIA OU RECUPERAÇÃO JUDICIAL</p>
+                        <p className="text-justify">10.1. Caso a LOCATÁRIA entre em falência ou recuperação judicial, o contrato será rescindido de pleno direito, cabendo à massa a devolução dos equipamentos.</p>
+                      </div>
+
+                      <div>
+                        <p className="font-bold mb-2">11. CLÁUSULA DÉCIMA PRIMEIRA – FORO</p>
+                        <p className="text-justify">11.1. Fica eleito o foro da comarca de Rio Claro/SP para dirimir quaisquer questões oriundas deste contrato, com renúncia a qualquer outro. ASSINATURAS por estarem justas e contratadas, firmam o presente instrumento em 2 (duas) vias de igual teor e forma.</p>
                       </div>
                     </div>
 
