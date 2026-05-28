@@ -685,7 +685,9 @@ export default function Orcamentos() {
                   <div className="flex justify-end mt-4">
                     <div className="flex flex-col items-end gap-1">
                       <div className="flex justify-between w-64">
-                        <span className="text-sm font-bold text-[#666666]">Total do Orçamento</span>
+                        <span className="text-sm font-bold text-[#666666]">
+                          {viewingQuote.budgetType === "locacao" ? "Total Mensal do Orçamento" : "Total do Orçamento"}
+                        </span>
                         <span className="text-base font-bold text-[#1a1a1a]">{formatCurrency(Number(viewingQuote.totalValue || 0))}</span>
                       </div>
                     </div>
