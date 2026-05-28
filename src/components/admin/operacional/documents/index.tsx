@@ -51,7 +51,7 @@ interface DocumentHeaderProps {
 export const DocumentHeader = ({ title, documentNumber, date, subtitle, companyInfo }: DocumentHeaderProps) => {
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex justify-between items-start border-b border-[#e5e5e5] pb-6">
+      <div className="flex justify-between items-start border-b border-[#e5e5e5] pb-6 relative">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-3">
             <CompanyLogo isDark={false} className="h-10 w-auto" />
@@ -61,7 +61,7 @@ export const DocumentHeader = ({ title, documentNumber, date, subtitle, companyI
             </div>
           </div>
         </div>
-        <div className="text-right">
+        <div className={cn("flex flex-col", subtitle ? "items-center absolute left-1/2 -translate-x-1/2" : "items-end")}>
           <h2 className="text-xl font-bold text-[#1a1a1a] uppercase">{title} - {documentNumber}</h2>
           <p className="text-xs text-[#666666] mt-1">{subtitle || `Data: ${date}`}</p>
         </div>
