@@ -796,7 +796,7 @@ export default function Orcamentos() {
               </AlertDialogDescription>
             </AlertDialogHeader>
 
-            <div className="space-y-6 max-h-[70vh] overflow-y-auto p-6 border rounded-md bg-zinc-50 font-serif text-zinc-900 shadow-inner">
+            <div ref={contractPrintRef} className="space-y-6 max-h-[70vh] overflow-y-auto p-6 border rounded-md bg-zinc-50 font-serif text-zinc-900 shadow-inner">
               <div className="text-center space-y-2 border-b pb-6 mb-6">
                 <h2 className="text-2xl font-bold uppercase tracking-wider">Contrato de Locação de Equipamentos</h2>
                 <p className="text-sm font-medium">Contrato vinculada ao Orçamento nº {quoteForApproval.id}</p>
@@ -881,14 +881,33 @@ export default function Orcamentos() {
             </div>
 
             <AlertDialogFooter className="flex flex-row gap-2 justify-end sm:justify-end">
-              <AlertDialogCancel onClick={() => setQuoteForApproval(null)}>Cancelar</AlertDialogCancel>
-              <Button 
-                className="bg-green-600 hover:bg-green-700 text-white" 
-                onClick={() => confirmConvertToContract(quoteForApproval.id)}
-              >
-                <FileCheck className="mr-2 h-4 w-4" />
-                Confirmar Aprovação e Gerar Contrato
-              </Button>
+              {isContractGenerated ? (
+                <>
+                  <Button variant="outline" type="button" onClick={() => setQuoteForApproval(null)}>
+                    Fechar
+                  </Button>
+                  <Button 
+                    type="button"
+                    className="bg-primary hover:bg-primary/90 text-white" 
+                    onClick={() => handlePrintDocument(contractPrintRef)}
+                  >
+                    <FileDown className="mr-2 h-4 w-4" />
+                    Imprimir / Baixar Contrato
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <AlertDialogCancel type="button" onClick={() => setQuoteForApproval(null)}>Cancelar</AlertDialogCancel>
+                  <Button 
+                    type="button"
+                    className="bg-green-600 hover:bg-green-700 text-white" 
+                    onClick={() => confirmConvertToContract(quoteForApproval.id)}
+                  >
+                    <FileCheck className="mr-2 h-4 w-4" />
+                    Confirmar Aprovação e Gerar Contrato
+                  </Button>
+                </>
+              )}
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
