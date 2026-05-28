@@ -857,11 +857,6 @@ export default function Orcamentos() {
                   documentNumber={quoteForApproval.id.replace('ORC-', 'CTR-')} 
                   date={formatDate(new Date())}
                   subtitle={`Gerado em ${format(new Date(), "dd/MM/yyyy")} às ${format(new Date(), "HH:mm")}. Válido mediante assinatura.`}
-                  companyInfo={{
-                    name: "TECH4RENT",
-                    cnpj: "44.740.821/0001-30",
-                    address: "Avenida 44 A, 499 - Vila Nova, Rio Claro - SP"
-                  }}
                 />
 
                 <div className="space-y-8 mt-4">

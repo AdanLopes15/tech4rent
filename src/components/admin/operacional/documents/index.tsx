@@ -19,8 +19,8 @@ export const DocumentContainer = ({ children, className }: DocumentContainerProp
   return (
     <div 
       className={cn(
-        "bg-white text-[#1a1a1a] p-8 mx-auto shadow-sm print:shadow-none print:p-0",
-        "w-full max-w-[210mm] min-h-[297mm] flex flex-col gap-8",
+        "bg-white text-[#1a1a1a] p-10 mx-auto shadow-sm print:shadow-none print:p-0",
+        "w-full max-w-[210mm] min-h-[297mm] flex flex-col gap-6",
         "font-sans leading-normal print:leading-normal",
         "print:m-0 print:w-full",
         className
@@ -50,25 +50,28 @@ interface DocumentHeaderProps {
 
 export const DocumentHeader = ({ title, documentNumber, date, subtitle, companyInfo }: DocumentHeaderProps) => {
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex justify-between items-start border-b border-[#e5e5e5] pb-6 relative">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-3">
-            <CompanyLogo isDark={false} className="h-10 w-auto" />
-            <div className="flex flex-col">
-              <span className="text-xl font-bold tracking-tight text-[#1a1a1a]">TECH4RENT</span>
-              <span className="text-[10px] text-[#666666] font-medium">CNPJ: 44.740.821/0001-30</span>
-            </div>
-          </div>
-        </div>
-        <div className={cn("flex flex-col", subtitle ? "items-center absolute left-1/2 -translate-x-1/2" : "items-end")}>
-          <h2 className="text-xl font-bold text-[#1a1a1a] uppercase">{title} - {documentNumber}</h2>
-          <p className="text-xs text-[#666666] mt-1">{subtitle || `Data: ${date}`}</p>
+    <div className="flex flex-col gap-4">
+      {/* Cabeçalho superior: Logo e Nome/CNPJ da Empresa */}
+      <div className="flex items-center gap-3">
+        <CompanyLogo isDark={false} className="h-10 w-auto" />
+        <div className="flex flex-col">
+          <span className="text-xl font-bold tracking-tight text-[#1a1a1a]">TECH4RENT</span>
+          <span className="text-[10px] text-[#666666] font-medium uppercase">CNPJ: 44.740.821/0001-30</span>
         </div>
       </div>
       
+      {/* Título do documento centralizado abaixo do cabeçalho */}
+      <div className="flex flex-col items-center mt-6 mb-2">
+        <h2 className="text-2xl font-bold text-[#1a1a1a] uppercase">{title} - {documentNumber}</h2>
+        <p className="text-[11px] text-[#666666] mt-1">{subtitle || `Data: ${date}`}</p>
+      </div>
+
+      {/* Linha divisória discreta */}
+      <div className="border-b border-[#e5e5e5] w-full mb-2"></div>
+      
+      {/* Informação opcional (usada em orçamentos, mas evitada em contratos para evitar duplicidade) */}
       {companyInfo && (
-        <div className="flex flex-col gap-1 text-sm text-[#333333]">
+        <div className="flex flex-col gap-1 text-sm text-[#333333] mb-4">
           <span className="font-bold text-[#1a1a1a] uppercase">{companyInfo.name}</span>
           <span>CNPJ: {companyInfo.cnpj}</span>
           <span>{companyInfo.address}</span>
