@@ -139,17 +139,18 @@ export default function Orcamentos() {
           <head>
             <title>Tech4Rent - Documento</title>
             <script src="https://cdn.tailwindcss.com"></script>
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
             <style>
               body { 
                 font-family: 'Inter', sans-serif;
                 margin: 0;
                 padding: 0;
-                background-color: white;
+                background-color: white !important;
+                color: #1a1a1a !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
-                color-adjust: exact !important;
               }
+
               
               @page {
                 size: A4;
