@@ -728,12 +728,11 @@ export default function Orcamentos() {
                 variant="outline" 
                 type="button" 
                 onClick={() => {
+                  setQuoteForDownload(viewingQuote);
                   setViewingQuote(null);
-                  handleDownloadPDF(viewingQuote);
-                  // O setTimeout garante que o modal de download seja renderizado antes de chamar handlePrintDocument
                   setTimeout(() => {
                     handlePrintDocument(quotePrintRef);
-                  }, 100);
+                  }, 200);
                 }}
               >
                 Imprimir / Salvar PDF
