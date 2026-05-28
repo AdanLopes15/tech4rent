@@ -35,7 +35,7 @@ export const generateQuotePDF = (quote: any, client: any, companySettings: any, 
 
   // Client Info
   doc.setFillColor(245, 245, 245);
-  doc.rect(14, 68, pageWidth - 28, 35, "F");
+  doc.rect(14, 68, pageWidth - 28, 40, "F");
   doc.setFontSize(11);
   doc.setFont("helvetica", "bold");
   doc.text("DADOS DO CLIENTE", 18, 75);
@@ -43,13 +43,14 @@ export const generateQuotePDF = (quote: any, client: any, companySettings: any, 
   doc.setFontSize(10);
   doc.text(`Razão Social: ${client?.razaoSocial || client?.name || "N/A"}`, 18, 81);
   doc.text(`CNPJ/CPF: ${client?.cnpj || client?.cpf || "N/A"}`, 18, 86);
-  doc.text(`Endereço: ${client?.address || "N/A"}`, 18, 91);
+  doc.text(`Endereço: ${client?.address ? (typeof client.address === 'string' ? client.address : `${client.address.street}, ${client.address.number}${client.address.complement ? ' - ' + client.address.complement : ''}`) : "N/A"}`, 18, 91);
   doc.text(`E-mail: ${client?.email || "N/A"}`, 18, 96);
-  doc.text(`Telefone: ${client?.phone || "N/A"}`, pageWidth / 2 + 10, 81);
+  doc.text(`Contato: ${client?.contato || client?.contactPerson || "N/A"}`, 18, 101);
+  doc.text(`Telefone: ${client?.telefone || client?.phone || client?.whatsapp || "N/A"}`, pageWidth / 2 + 10, 81);
   doc.text(`Cidade/UF: ${client?.city || ""}${client?.uf ? "/" + client?.uf : ""}`, pageWidth / 2 + 10, 86);
 
   // Rental Period (If locação)
-  let currentY = 110;
+  let currentY = 115;
   if (quote.budgetType === "locacao" && quote.startDate && quote.endDate) {
     const start = new Date(quote.startDate);
     const end = new Date(quote.endDate);
@@ -117,7 +118,7 @@ export const generateQuotePDF = (quote: any, client: any, companySettings: any, 
 
   // Save the PDF
   try {
-    doc.save(`Orcamento_${quote.id}_${client?.razaoSocial?.replace(/\s+/g, '_') || client?.name?.replace(/\s+/g, '_') || 'Cliente'}.pdf`);
+    doc.save(`Orcamento_${quote.id}_${client?.razaoSocial?.replace(/\\s+/g, '_') || client?.name?.replace(/\\s+/g, '_') || 'Cliente'}.pdf`);
   } catch (error) {
     console.error("Error saving PDF:", error);
     // Fallback if save fails
