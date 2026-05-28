@@ -781,7 +781,12 @@ export default function Orcamentos() {
       )}
 
       {quoteForApproval && (
-        <AlertDialog open={!!quoteForApproval} onOpenChange={() => setQuoteForApproval(null)}>
+        <AlertDialog open={!!quoteForApproval} onOpenChange={(open) => {
+          if (!open) {
+            setQuoteForApproval(null);
+            setIsContractGenerated(false);
+          }
+        }}>
           <AlertDialogContent className="max-w-4xl">
             <AlertDialogHeader>
               <AlertDialogTitle>Aprovação e Geração de Contrato</AlertDialogTitle>
