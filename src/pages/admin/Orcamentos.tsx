@@ -694,8 +694,16 @@ export default function Orcamentos() {
                       
                       return [
                       <div key={item.equipmentId} className="flex items-start gap-4">
-                        {equipment?.imageUrl && (
-                          <img src={equipment.imageUrl} alt={equipment.name} className="w-16 h-16 object-contain border border-[#e5e5e5] rounded" />
+                        {equipment?.imageUrl ? (
+                          <img src={equipment.imageUrl} alt={equipment.name} className="w-16 h-16 object-contain border border-[#e5e5e5] rounded" onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = "/placeholder.svg";
+                            target.className = "w-16 h-16 object-contain border border-[#e5e5e5] rounded opacity-50";
+                          }} />
+                        ) : (
+                          <div className="w-16 h-16 bg-gray-100 border border-[#e5e5e5] rounded flex items-center justify-center">
+                            <span className="text-[10px] text-gray-400">Sem imagem</span>
+                          </div>
                         )}
                           <div className="flex flex-col">
                             <span className="font-bold text-[#1a1a1a]">{equipment?.name || "Equipamento"}</span>
@@ -835,8 +843,16 @@ export default function Orcamentos() {
                     
                     return [
                       <div key={item.equipmentId} className="flex items-start gap-4">
-                        {equipment?.imageUrl && (
-                          <img src={equipment.imageUrl} alt={equipment.name} className="w-16 h-16 object-contain border border-[#e5e5e5] rounded" />
+                        {equipment?.imageUrl ? (
+                          <img src={equipment.imageUrl} alt={equipment.name} className="w-16 h-16 object-contain border border-[#e5e5e5] rounded" onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = "/placeholder.svg";
+                            target.className = "w-16 h-16 object-contain border border-[#e5e5e5] rounded opacity-50";
+                          }} />
+                        ) : (
+                          <div className="w-16 h-16 bg-gray-100 border border-[#e5e5e5] rounded flex items-center justify-center">
+                            <span className="text-[10px] text-gray-400">Sem imagem</span>
+                          </div>
                         )}
                         <div className="flex flex-col">
                           <span className="font-bold text-[#1a1a1a]">{equipment?.name || "Equipamento"}</span>
@@ -966,8 +982,16 @@ export default function Orcamentos() {
                         );
                         return [
                           <div key={item.equipmentId} className="flex items-start gap-4">
-                            {equipment?.imageUrl && (
-                              <img src={equipment.imageUrl} alt={equipment.name} className="w-16 h-16 object-contain border border-[#e5e5e5] rounded" />
+                            {equipment?.imageUrl ? (
+                              <img src={equipment.imageUrl} alt={equipment.name} className="w-16 h-16 object-contain border border-[#e5e5e5] rounded" onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = "/placeholder.svg";
+                                target.className = "w-16 h-16 object-contain border border-[#e5e5e5] rounded opacity-50";
+                              }} />
+                            ) : (
+                              <div className="w-16 h-16 bg-gray-100 border border-[#e5e5e5] rounded flex items-center justify-center">
+                                <span className="text-[10px] text-gray-400">Sem imagem</span>
+                              </div>
                             )}
                             <div className="flex flex-col">
                               <span className="font-bold text-[#1a1a1a]">{equipment?.name || "Equipamento"}</span>
