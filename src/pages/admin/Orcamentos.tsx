@@ -80,6 +80,7 @@ export default function Orcamentos() {
 
   const { toast } = useToast();
   const quotePrintRef = useRef<HTMLDivElement>(null);
+  const quoteDownloadRef = useRef<HTMLDivElement>(null);
   const contractPrintRef = useRef<HTMLDivElement>(null);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
