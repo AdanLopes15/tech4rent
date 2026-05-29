@@ -844,9 +844,9 @@ export default function Orcamentos() {
         </AlertDialog>
       )}
 
-      {/* Conteúdo Invisível para Impressão de Orçamentos */}
+      {/* Ref para download direto de PDF */}
       <div className="sr-only">
-        <div ref={quotePrintRef}>
+        <div ref={quoteDownloadRef}>
           {quoteForDownload && (
             <DocumentContainer>
               <DocumentHeader 
