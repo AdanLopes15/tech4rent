@@ -221,7 +221,16 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
           >
             <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden">
               {avatarUrl ? (
-                <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+                <img 
+                  src={avatarUrl} 
+                  alt="Avatar" 
+                  className="h-full w-full object-cover" 
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.onerror = null; // Prevent infinite loop
+                    setAvatarUrl(null); // Fallback to icon
+                  }}
+                />
               ) : (
                 <User className="h-4 w-4 text-primary" />
               )}

@@ -11,6 +11,7 @@ import { ptBR } from "date-fns/locale";
 import { Timestamp } from "firebase/firestore";
 import { formatCurrency } from "@/lib/utils";
 import { CompanyLogo } from "../admin/CompanyLogo";
+import { DocumentItemRow } from "@/components/admin/operacional/documents";
 import { useToast } from "@/hooks/use-toast";
 
 interface ViewContractDialogProps {
@@ -253,19 +254,7 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
                       return (
                         <tr key={index} className="border-b">
                           <td className="p-2 align-top">
-                            <div className="flex items-start gap-4">
-                              <img
-                                src={equipment?.imageUrl || "https://placehold.co/100x100.png"}
-                                alt={equipment?.name || "Equipamento"}
-                                width={80}
-                                height={80}
-                                className="rounded-md object-contain"
-                              />
-                              <div className="max-w-xs">
-                                <p className="font-semibold">{equipment?.name}</p>
-                                <p className="text-sm text-gray-500">{equipment?.description}</p>
-                              </div>
-                            </div>
+                            <DocumentItemRow item={item} equipments={equipments} />
                           </td>
 
                           <td className="p-2 text-center align-top">{item.quantity}</td>

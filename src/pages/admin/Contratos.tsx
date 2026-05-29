@@ -9,6 +9,7 @@ import { useStore } from "@/store";
 import { CompanyLogo } from "@/components/admin/CompanyLogo";
 import { useToast } from "@/hooks/use-toast";
 import { cn, formatCurrency } from "@/lib/utils";
+import { DocumentItemRow } from "@/components/admin/operacional/documents";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -233,19 +234,7 @@ function RentalInvoicePrintable({
                 return (
                   <tr key={index} className="border-b border-gray-200">
                     <td className="p-2 align-top">
-                      <div className="flex items-start gap-4">
-                        <img
-                          src={equipment?.imageUrl || "https://placehold.co/100x100.png"}
-                          alt={equipment?.name || "Equipamento"}
-                          width={80}
-                          height={80}
-                          style={{ borderRadius: 6, objectFit: "contain" }}
-                        />
-                        <div className="max-w-xs">
-                          <p className="font-semibold">{equipment?.name}</p>
-                          <p className="text-sm text-gray-500">{equipment?.description}</p>
-                        </div>
-                      </div>
+                      <DocumentItemRow item={item} equipments={equipments} />
                     </td>
                     <td className="p-2 text-center align-top">{item.quantity}</td>
                     <td className="p-2 text-right align-top">{formatCurrency(item.unitPrice)}</td>
