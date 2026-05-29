@@ -1031,14 +1031,39 @@ export default function Orcamentos() {
                         const equipment = (useStore.getState().equipments || []).find(
                           (eq: any) => eq.id === item.equipmentId,
                         );
+                        
+                        const imageUrl = item.imageUrl || 
+                                item.image || 
+                                item.photoUrl || 
+                                item.foto || 
+                                item.fotoUrl || 
+                                item.equipmentImage || 
+                                item.equipment?.imageUrl || 
+                                item.equipment?.photoUrl || 
+                                item.product?.imageUrl || 
+                                item.produto?.imagem || 
+                                equipment?.imageUrl ||
+                                null;
+
                         return [
                           <div key={item.equipmentId} className="flex items-start gap-4">
-                            {equipment?.imageUrl ? (
-                              <img src={equipment.imageUrl} alt={equipment.name} className="w-16 h-16 object-contain border border-[#e5e5e5] rounded" onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = "/placeholder.svg";
-                                target.className = "w-16 h-16 object-contain border border-[#e5e5e5] rounded opacity-50";
-                              }} />
+                            {imageUrl ? (
+                              <img 
+                                src={imageUrl} 
+                                alt={equipment?.name || "Equipamento"} 
+                                className="w-16 h-16 object-contain border border-[#e5e5e5] rounded" 
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  const parent = target.parentElement;
+                                  if (parent && !parent.querySelector('.no-image-placeholder')) {
+                                    const placeholder = document.createElement('div');
+                                    placeholder.className = 'no-image-placeholder w-16 h-16 bg-gray-100 border border-[#e5e5e5] rounded flex items-center justify-center';
+                                    placeholder.innerHTML = '<span class="text-[10px] text-gray-400">Sem imagem</span>';
+                                    parent.appendChild(placeholder);
+                                  }
+                                }} 
+                              />
                             ) : (
                               <div className="w-16 h-16 bg-gray-100 border border-[#e5e5e5] rounded flex items-center justify-center">
                                 <span className="text-[10px] text-gray-400">Sem imagem</span>
