@@ -14,7 +14,8 @@ import {
   DocumentTable, 
   DocumentSummary, 
   SignatureBlock, 
-  DocumentFooter 
+  DocumentFooter,
+  DocumentItemRow
 } from "@/components/admin/operacional/documents";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -72,7 +73,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function Orcamentos() {
-  const { quotes, clients, loading, fetchAllData, deleteQuote, updateQuote, convertQuoteToContract, addSale, companySettings } = useStore();
+  const { quotes, equipments, clients, loading, fetchAllData, deleteQuote, updateQuote, convertQuoteToContract, addSale, companySettings } = useStore();
 
   useEffect(() => {
     fetchAllData();
@@ -206,85 +207,6 @@ export default function Orcamentos() {
   };
 
 
-  const getItemImageUrl = (item: any) => {
-    // 1. Verificar se temos o equipamento no store para fallback
-    const equipment = (useStore.getState().equipments || []).find(
-      (eq: any) => eq.id === item.equipmentId
-    );
-
-    // 2. Lista de campos possíveis conforme solicitado
-    const possibleFields = [
-      item.imageUrl,
-      item.image,
-      item.photoUrl,
-      item.foto,
-      item.fotoUrl,
-      item.imagem,
-      item.imagemUrl,
-      item.equipmentImage,
-      item.equipment?.imageUrl,
-      item.equipment?.photoUrl,
-      item.equipment?.fotoUrl,
-      item.equipment?.imagem,
-      item.product?.imageUrl,
-      item.product?.photoUrl,
-      item.produto?.imagem,
-      item.produto?.imagemUrl,
-      item.equipamento?.imagem,
-      item.equipamento?.imagemUrl,
-      equipment?.imageUrl,
-      equipment?.photoUrl,
-      equipment?.fotoUrl,
-      equipment?.imagem,
-      equipment?.image
-    ];
-
-    // 3. Retornar a primeira URL válida que não seja vazia ou undefined
-    return possibleFields.find(url => url && typeof url === 'string' && url.length > 5) || null;
-  };
-
-  const DocumentItemRow = ({ item }: { item: any }) => {
-    const equipment = (useStore.getState().equipments || []).find(
-      (eq: any) => eq.id === item.equipmentId
-    );
-    
-    const imageUrl = getItemImageUrl(item);
-
-    return (
-      <div key={item.equipmentId} className="flex items-start gap-4">
-        {imageUrl ? (
-          <img 
-            src={imageUrl} 
-            alt={equipment?.name || "Equipamento"} 
-            className="w-16 h-16 object-contain border border-[#e5e5e5] rounded flex-shrink-0" 
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-              const parent = target.parentElement;
-              if (parent && !parent.querySelector('.no-image-placeholder')) {
-                const placeholder = document.createElement('div');
-                placeholder.className = 'no-image-placeholder w-16 h-16 bg-gray-100 border border-[#e5e5e5] rounded flex items-center justify-center flex-shrink-0';
-                placeholder.innerHTML = '<span class="text-[10px] text-gray-400 text-center">Sem imagem</span>';
-                parent.appendChild(placeholder);
-              }
-            }} 
-          />
-        ) : (
-          <div className="w-16 h-16 bg-gray-100 border border-[#e5e5e5] rounded flex items-center justify-center flex-shrink-0">
-            <span className="text-[10px] text-gray-400 text-center">Sem imagem</span>
-          </div>
-        )}
-        <div className="flex flex-col min-w-0">
-          <span className="font-bold text-[#1a1a1a] truncate">{equipment?.name || "Equipamento"}</span>
-          {equipment?.description && (
-            <span className="text-[10px] text-[#666666] leading-tight mt-1 line-clamp-3">
-              {equipment.description}
-            </span>
-          )}
-        </div>
-      </div>
-    );
-  };
 
   const normalizeStatus = (status?: string) => {
     if (!status) return "Pendente";
@@ -773,7 +695,7 @@ export default function Orcamentos() {
                     alignments={["left", "center", "right", "right"]}
                     rows={(viewingQuote.items || []).map((item: any) => {
                       return [
-                        <DocumentItemRow key={item.equipmentId} item={item} />,
+                        <DocumentItemRow key={item.equipmentId} item={item} equipments={equipments} />,
                         item.quantity.toString(),
                         formatCurrency(Number(item.unitPrice || 0)),
                         <span key="total" className="font-bold">{formatCurrency(Number(item.quantity || 0) * Number(item.unitPrice || 0))}</span>
@@ -898,7 +820,7 @@ export default function Orcamentos() {
                   alignments={["left", "center", "right", "right"]}
                   rows={(quoteForDownload.items || []).map((item: any) => {
                     return [
-                      <DocumentItemRow key={item.equipmentId} item={item} />,
+                      <DocumentItemRow key={item.equipmentId} item={item} equipments={equipments} />,
                       item.quantity.toString(),
                       formatCurrency(Number(item.unitPrice || 0)),
                       <span key="total" className="font-bold">{formatCurrency(Number(item.quantity || 0) * Number(item.unitPrice || 0))}</span>
