@@ -935,56 +935,8 @@ export default function Orcamentos() {
                       headers={["Equipamento", "Qtd.", "Vl. Unit. (Mês)", "Total"]}
                       alignments={["left", "center", "right", "right"]}
                       rows={(quoteForApproval.items || []).map((item: any) => {
-                        const equipment = (useStore.getState().equipments || []).find(
-                          (eq: any) => eq.id === item.equipmentId,
-                        );
-                        
-                        const imageUrl = item.imageUrl || 
-                                item.image || 
-                                item.photoUrl || 
-                                item.foto || 
-                                item.fotoUrl || 
-                                item.equipmentImage || 
-                                item.equipment?.imageUrl || 
-                                item.equipment?.photoUrl || 
-                                item.product?.imageUrl || 
-                                item.produto?.imagem || 
-                                equipment?.imageUrl ||
-                                null;
-
                         return [
-                          <div key={item.equipmentId} className="flex items-start gap-4">
-                            {imageUrl ? (
-                              <img 
-                                src={imageUrl} 
-                                alt={equipment?.name || "Equipamento"} 
-                                className="w-16 h-16 object-contain border border-[#e5e5e5] rounded" 
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.style.display = 'none';
-                                  const parent = target.parentElement;
-                                  if (parent && !parent.querySelector('.no-image-placeholder')) {
-                                    const placeholder = document.createElement('div');
-                                    placeholder.className = 'no-image-placeholder w-16 h-16 bg-gray-100 border border-[#e5e5e5] rounded flex items-center justify-center';
-                                    placeholder.innerHTML = '<span class="text-[10px] text-gray-400">Sem imagem</span>';
-                                    parent.appendChild(placeholder);
-                                  }
-                                }} 
-                              />
-                            ) : (
-                              <div className="w-16 h-16 bg-gray-100 border border-[#e5e5e5] rounded flex items-center justify-center">
-                                <span className="text-[10px] text-gray-400">Sem imagem</span>
-                              </div>
-                            )}
-                            <div className="flex flex-col">
-                              <span className="font-bold text-[#1a1a1a]">{equipment?.name || "Equipamento"}</span>
-                              {equipment?.description && (
-                                <span className="text-[10px] text-[#666666] leading-tight max-w-[300px] mt-1">
-                                  {equipment.description}
-                                </span>
-                              )}
-                            </div>
-                          </div>,
+                          <DocumentItemRow key={item.equipmentId} item={item} equipments={equipments} />,
                           item.quantity.toString(),
                           formatCurrency(Number(item.unitPrice || 0)),
                           <span key="total" className="font-bold">{formatCurrency(Number(item.quantity || 0) * Number(item.unitPrice || 0))}</span>
