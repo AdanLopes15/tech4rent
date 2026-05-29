@@ -80,6 +80,7 @@ export default function Orcamentos() {
 
   const { toast } = useToast();
   const quotePrintRef = useRef<HTMLDivElement>(null);
+  const quoteDownloadRef = useRef<HTMLDivElement>(null);
   const contractPrintRef = useRef<HTMLDivElement>(null);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -204,6 +205,86 @@ export default function Orcamentos() {
     }
   };
 
+
+  const getItemImageUrl = (item: any) => {
+    // 1. Verificar se temos o equipamento no store para fallback
+    const equipment = (useStore.getState().equipments || []).find(
+      (eq: any) => eq.id === item.equipmentId
+    );
+
+    // 2. Lista de campos possíveis conforme solicitado
+    const possibleFields = [
+      item.imageUrl,
+      item.image,
+      item.photoUrl,
+      item.foto,
+      item.fotoUrl,
+      item.imagem,
+      item.imagemUrl,
+      item.equipmentImage,
+      item.equipment?.imageUrl,
+      item.equipment?.photoUrl,
+      item.equipment?.fotoUrl,
+      item.equipment?.imagem,
+      item.product?.imageUrl,
+      item.product?.photoUrl,
+      item.produto?.imagem,
+      item.produto?.imagemUrl,
+      item.equipamento?.imagem,
+      item.equipamento?.imagemUrl,
+      equipment?.imageUrl,
+      equipment?.photoUrl,
+      equipment?.fotoUrl,
+      equipment?.imagem,
+      equipment?.image
+    ];
+
+    // 3. Retornar a primeira URL válida que não seja vazia ou undefined
+    return possibleFields.find(url => url && typeof url === 'string' && url.length > 5) || null;
+  };
+
+  const DocumentItemRow = ({ item }: { item: any }) => {
+    const equipment = (useStore.getState().equipments || []).find(
+      (eq: any) => eq.id === item.equipmentId
+    );
+    
+    const imageUrl = getItemImageUrl(item);
+
+    return (
+      <div key={item.equipmentId} className="flex items-start gap-4">
+        {imageUrl ? (
+          <img 
+            src={imageUrl} 
+            alt={equipment?.name || "Equipamento"} 
+            className="w-16 h-16 object-contain border border-[#e5e5e5] rounded flex-shrink-0" 
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              const parent = target.parentElement;
+              if (parent && !parent.querySelector('.no-image-placeholder')) {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'no-image-placeholder w-16 h-16 bg-gray-100 border border-[#e5e5e5] rounded flex items-center justify-center flex-shrink-0';
+                placeholder.innerHTML = '<span class="text-[10px] text-gray-400 text-center">Sem imagem</span>';
+                parent.appendChild(placeholder);
+              }
+            }} 
+          />
+        ) : (
+          <div className="w-16 h-16 bg-gray-100 border border-[#e5e5e5] rounded flex items-center justify-center flex-shrink-0">
+            <span className="text-[10px] text-gray-400 text-center">Sem imagem</span>
+          </div>
+        )}
+        <div className="flex flex-col min-w-0">
+          <span className="font-bold text-[#1a1a1a] truncate">{equipment?.name || "Equipamento"}</span>
+          {equipment?.description && (
+            <span className="text-[10px] text-[#666666] leading-tight mt-1 line-clamp-3">
+              {equipment.description}
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   const normalizeStatus = (status?: string) => {
     if (!status) return "Pendente";
@@ -375,8 +456,8 @@ export default function Orcamentos() {
   const handleDownloadPDF = (quote: any) => {
     setQuoteForDownload(quote);
     setTimeout(() => {
-      handlePrintDocument(quotePrintRef);
-    }, 200);
+      handleDownloadPDFAsFile(quoteDownloadRef, `Orcamento_${quote.id}`);
+    }, 500);
   };
 
   const renderQuoteTable = (quotesList: any[], type: "locacao" | "venda") => (
@@ -691,56 +772,8 @@ export default function Orcamentos() {
                     headers={["Equipamento", "Qtd.", "Vl. Unit.", "Total"]}
                     alignments={["left", "center", "right", "right"]}
                     rows={(viewingQuote.items || []).map((item: any) => {
-                      const equipment = (useStore.getState().equipments || []).find(
-                        (eq: any) => eq.id === item.equipmentId
-                      );
-                      
-                      const imageUrl = item.imageUrl || 
-                              item.image || 
-                              item.photoUrl || 
-                              item.foto || 
-                              item.fotoUrl || 
-                              item.equipmentImage || 
-                              item.equipment?.imageUrl || 
-                              item.equipment?.photoUrl || 
-                              item.product?.imageUrl || 
-                              item.produto?.imagem || 
-                              equipment?.imageUrl ||
-                              null;
-
                       return [
-                        <div key={item.equipmentId} className="flex items-start gap-4">
-                          {imageUrl ? (
-                            <img 
-                              src={imageUrl} 
-                              alt={equipment?.name || "Equipamento"} 
-                              className="w-16 h-16 object-contain border border-[#e5e5e5] rounded" 
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                                const parent = target.parentElement;
-                                if (parent && !parent.querySelector('.no-image-placeholder')) {
-                                  const placeholder = document.createElement('div');
-                                  placeholder.className = 'no-image-placeholder w-16 h-16 bg-gray-100 border border-[#e5e5e5] rounded flex items-center justify-center';
-                                  placeholder.innerHTML = '<span class="text-[10px] text-gray-400">Sem imagem</span>';
-                                  parent.appendChild(placeholder);
-                                }
-                              }} 
-                            />
-                          ) : (
-                            <div className="w-16 h-16 bg-gray-100 border border-[#e5e5e5] rounded flex items-center justify-center">
-                              <span className="text-[10px] text-gray-400">Sem imagem</span>
-                            </div>
-                          )}
-                          <div className="flex flex-col">
-                            <span className="font-bold text-[#1a1a1a]">{equipment?.name || "Equipamento"}</span>
-                            {equipment?.description && (
-                              <span className="text-[10px] text-[#666666] leading-tight max-w-[300px] mt-1">
-                                {equipment.description}
-                              </span>
-                            )}
-                          </div>
-                        </div>,
+                        <DocumentItemRow key={item.equipmentId} item={item} />,
                         item.quantity.toString(),
                         formatCurrency(Number(item.unitPrice || 0)),
                         <span key="total" className="font-bold">{formatCurrency(Number(item.quantity || 0) * Number(item.unitPrice || 0))}</span>
@@ -811,9 +844,9 @@ export default function Orcamentos() {
         </AlertDialog>
       )}
 
-      {/* Conteúdo Invisível para Impressão de Orçamentos */}
+      {/* Ref para download direto de PDF */}
       <div className="sr-only">
-        <div ref={quotePrintRef}>
+        <div ref={quoteDownloadRef}>
           {quoteForDownload && (
             <DocumentContainer>
               <DocumentHeader 
@@ -864,56 +897,8 @@ export default function Orcamentos() {
                   headers={["Equipamento", "Qtd.", "Vl. Unit.", "Total"]}
                   alignments={["left", "center", "right", "right"]}
                   rows={(quoteForDownload.items || []).map((item: any) => {
-                    const equipment = (useStore.getState().equipments || []).find(
-                      (eq: any) => eq.id === item.equipmentId
-                    );
-                    
-                    const imageUrl = item.imageUrl || 
-                            item.image || 
-                            item.photoUrl || 
-                            item.foto || 
-                            item.fotoUrl || 
-                            item.equipmentImage || 
-                            item.equipment?.imageUrl || 
-                            item.equipment?.photoUrl || 
-                            item.product?.imageUrl || 
-                            item.produto?.imagem || 
-                            equipment?.imageUrl ||
-                            null;
-
                     return [
-                      <div key={item.equipmentId} className="flex items-start gap-4">
-                        {imageUrl ? (
-                          <img 
-                            src={imageUrl} 
-                            alt={equipment?.name || "Equipamento"} 
-                            className="w-16 h-16 object-contain border border-[#e5e5e5] rounded" 
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
-                              const parent = target.parentElement;
-                              if (parent && !parent.querySelector('.no-image-placeholder')) {
-                                const placeholder = document.createElement('div');
-                                placeholder.className = 'no-image-placeholder w-16 h-16 bg-gray-100 border border-[#e5e5e5] rounded flex items-center justify-center';
-                                placeholder.innerHTML = '<span class="text-[10px] text-gray-400">Sem imagem</span>';
-                                parent.appendChild(placeholder);
-                              }
-                            }} 
-                          />
-                        ) : (
-                          <div className="w-16 h-16 bg-gray-100 border border-[#e5e5e5] rounded flex items-center justify-center">
-                            <span className="text-[10px] text-gray-400">Sem imagem</span>
-                          </div>
-                        )}
-                        <div className="flex flex-col">
-                          <span className="font-bold text-[#1a1a1a]">{equipment?.name || "Equipamento"}</span>
-                          {equipment?.description && (
-                            <span className="text-[10px] text-[#666666] leading-tight max-w-[300px] mt-1">
-                              {equipment.description}
-                            </span>
-                          )}
-                        </div>
-                      </div>,
+                      <DocumentItemRow key={item.equipmentId} item={item} />,
                       item.quantity.toString(),
                       formatCurrency(Number(item.unitPrice || 0)),
                       <span key="total" className="font-bold">{formatCurrency(Number(item.quantity || 0) * Number(item.unitPrice || 0))}</span>
@@ -1227,6 +1212,112 @@ export default function Orcamentos() {
           </AlertDialogContent>
         </AlertDialog>
       )}
+      {/* Ref para download direto de PDF */}
+      <div className="sr-only">
+        <div ref={quoteDownloadRef}>
+          {quoteForDownload && (
+            <DocumentContainer>
+              <DocumentHeader 
+                title="ORÇAMENTO" 
+                documentNumber={quoteForDownload.id} 
+                date={formatDate(quoteForDownload.createdAt)} 
+                responsible={quoteResponsible}
+              />
+
+              <DocumentSection title="CLIENTE">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-12">
+                  <div className="flex flex-col">
+                    <span className="text-xs text-[#666666] uppercase">Razão Social</span>
+                    <span className="text-sm font-bold text-[#1a1a1a]">
+                      {getClientName(quoteForDownload.clientId, quoteForDownload.clientName)}
+                    </span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs text-[#666666] uppercase">CNPJ/CPF</span>
+                    <span className="text-sm font-bold text-[#1a1a1a]">
+                      {clients.find((c: any) => c.id === quoteForDownload.clientId)?.cnpj || 
+                       clients.find((c: any) => c.id === quoteForDownload.clientId)?.cpf || 
+                       "—"}
+                    </span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs text-[#666666] uppercase">Pessoa de Contato</span>
+                    <span className="text-sm font-bold text-[#1a1a1a]">
+                      {clients.find((c: any) => c.id === quoteForDownload.clientId)?.contato || 
+                       clients.find((c: any) => c.id === quoteForDownload.clientId)?.contactPerson || 
+                       "—"}
+                    </span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs text-[#666666] uppercase">Telefone / WhatsApp</span>
+                    <span className="text-sm font-bold text-[#1a1a1a]">
+                      {clients.find((c: any) => c.id === quoteForDownload.clientId)?.telefone || 
+                       clients.find((c: any) => c.id === quoteForDownload.clientId)?.phone || 
+                       clients.find((c: any) => c.id === quoteForDownload.clientId)?.whatsapp || 
+                       "—"}
+                    </span>
+                  </div>
+                </div>
+              </DocumentSection>
+
+              <DocumentSection title="ITENS DO ORÇAMENTO">
+                <DocumentTable 
+                  headers={["Equipamento", "Qtd.", "Vl. Unit.", "Total"]}
+                  alignments={["left", "center", "right", "right"]}
+                  rows={(quoteForDownload.items || []).map((item: any) => {
+                    return [
+                      <DocumentItemRow key={item.equipmentId} item={item} />,
+                      item.quantity.toString(),
+                      formatCurrency(Number(item.unitPrice || 0)),
+                      <span key="total" className="font-bold">{formatCurrency(Number(item.quantity || 0) * Number(item.unitPrice || 0))}</span>
+                    ];
+                  })}
+                />
+                
+                <div className="flex justify-end mt-4">
+                  <div className="flex flex-col items-end gap-1">
+                    <div className="flex justify-between w-64">
+                      <span className="text-sm font-bold text-[#666666]">
+                        {quoteForDownload.budgetType === "locacao" ? "Total Mensal do Orçamento" : "Total do Orçamento"}
+                      </span>
+                      <span className="text-base font-bold text-[#1a1a1a]">{formatCurrency(Number(quoteForDownload.totalValue || 0))}</span>
+                    </div>
+                  </div>
+                </div>
+              </DocumentSection>
+
+              <DocumentSection title="TERMOS E CONDIÇÕES">
+                <div className="flex flex-col gap-2">
+                  <div>
+                    <p className="font-bold text-[#1a1a1a] mb-1 text-sm">Período de locação:</p>
+                    <p className="text-sm text-[#333333]">
+                      {quoteForDownload.budgetType === "locacao" 
+                        ? `${formatDate(quoteForDownload.startDate)} a ${formatDate(quoteForDownload.endDate)}.` 
+                        : quoteForDownload.prazoEntrega || "Prazo imediato."}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <p className="font-bold text-[#1a1a1a] mb-1 text-sm">Informações Fiscais:</p>
+                    <p className="text-sm text-[#333333]">
+                      {quoteForDownload.informacoesFiscais || quoteForDownload.fiscalInfo || "Nenhuma informação fiscal fornecida."}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="font-bold text-[#1a1a1a] mb-1 text-sm">Observações Gerais:</p>
+                    <p className="text-sm text-[#333333]">
+                      {quoteForDownload.observations || "Nenhuma observação fornecida."}
+                    </p>
+                  </div>
+                </div>
+              </DocumentSection>
+
+              <DocumentFooter />
+            </DocumentContainer>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
