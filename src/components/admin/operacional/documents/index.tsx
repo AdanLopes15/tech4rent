@@ -68,8 +68,8 @@ export const DocumentItemRow = ({ item, equipments = [] }: DocumentItemRowProps)
   const equipmentDescription = item.description || equipments.find(e => e.id === item.equipmentId)?.description;
 
   return (
-    <div className="flex items-start gap-3 py-1 min-w-[250px]">
-      <div className="w-12 h-12 flex-shrink-0 border border-[#e5e5e5] rounded overflow-hidden bg-white flex items-center justify-center">
+    <div className="flex items-start gap-4 py-1 min-w-[250px]">
+      <div className="w-16 h-16 flex-shrink-0 border border-[#e5e5e5] rounded overflow-hidden bg-white flex items-center justify-center">
         {imageUrl ? (
           <img 
             src={imageUrl} 
