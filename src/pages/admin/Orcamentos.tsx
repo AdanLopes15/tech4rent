@@ -772,10 +772,9 @@ export default function Orcamentos() {
                 type="button" 
                 onClick={() => {
                   setQuoteForDownload(viewingQuote);
-                  setViewingQuote(null);
                   setTimeout(() => {
-                    handlePrintDocument(quotePrintRef);
-                  }, 200);
+                    handlePrintDocument(quoteDownloadRef);
+                  }, 500);
                 }}
               >
                 Imprimir / Salvar PDF
