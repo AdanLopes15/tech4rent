@@ -203,6 +203,12 @@ export default function Orcamentos() {
         </html>
       `);
       printWindow.document.close();
+    } else {
+      toast({
+        title: "Pop-up bloqueado",
+        description: "Por favor, permita pop-ups para este site para poder imprimir.",
+        variant: "destructive",
+      });
     }
   };
 
