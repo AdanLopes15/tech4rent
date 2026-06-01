@@ -1125,8 +1125,8 @@ export default function Orcamentos() {
           </AlertDialogContent>
         </AlertDialog>
       )}
-      {/* Ref para download direto de PDF */}
-      <div className="sr-only">
+      {/* Ref para download direto de PDF - Posicionado fora da tela para garantir renderização correta */}
+      <div className="fixed -left-[9999px] top-0 overflow-visible">
         <div ref={quoteDownloadRef}>
           {quoteForDownload && (
             <DocumentContainer>
