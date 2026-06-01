@@ -103,40 +103,22 @@ export default function Orcamentos() {
     if (!ref.current) return;
 
     const element = ref.current;
-    
-    // Garantir que todas as imagens dentro do elemento foram carregadas
-    const images = element.getElementsByTagName('img');
-    const imagePromises = Array.from(images).map(img => {
-      if (img.complete) return Promise.resolve();
-      return new Promise((resolve) => {
-        img.onload = resolve;
-        img.onerror = resolve; // Resolve mesmo em erro para não travar o PDF
-      });
-    });
+    const opt = {
+      margin: 0,
+      filename: `${filename}.pdf`,
+      image: { type: 'jpeg' as const, quality: 0.98 },
+      html2canvas: { 
+        scale: 2, 
+        useCORS: true, 
+        letterRendering: true,
+        backgroundColor: '#ffffff'
+      },
+      jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
+    };
+
 
     try {
-      toast({ title: "Preparando documento...", description: "Aguardando carregamento das imagens." });
-      
-      // Aguardar até 5 segundos pelas imagens
-      await Promise.race([
-        Promise.all(imagePromises),
-        new Promise(resolve => setTimeout(resolve, 5000))
-      ]);
-
-      const opt = {
-        margin: 0,
-        filename: `${filename}.pdf`,
-        image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: { 
-          scale: 2, 
-          useCORS: true, 
-          letterRendering: true,
-          backgroundColor: '#ffffff',
-          logging: false
-        },
-        jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
-      };
-
+      toast({ title: "Gerando PDF...", description: "Por favor, aguarde um momento." });
       await html2pdf().set(opt).from(element).save();
       toast({ title: "PDF gerado com sucesso!" });
     } catch (error) {
@@ -1125,8 +1107,8 @@ export default function Orcamentos() {
           </AlertDialogContent>
         </AlertDialog>
       )}
-      {/* Ref para download direto de PDF - Posicionado fora da tela para garantir renderização correta */}
-      <div className="fixed -left-[9999px] top-0 overflow-visible">
+      {/* Ref para download direto de PDF */}
+      <div className="sr-only">
         <div ref={quoteDownloadRef}>
           {quoteForDownload && (
             <DocumentContainer>

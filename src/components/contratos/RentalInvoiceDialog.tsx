@@ -126,37 +126,20 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
         <head>
           <title>Imprimir Fatura</title>
           <base href="${window.location.origin}/" />
-          <script src="https://cdn.tailwindcss.com"></script>
-          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+          ${headLinksAndStyles}
           <style>
-            body { 
-              font-family: 'Inter', sans-serif;
-              margin: 0;
-              padding: 0;
-              background-color: white !important;
-              color: #1a1a1a !important;
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-            }
+            ${cssRulesText}
             @media print {
-              body { margin: 0; }
-              * {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
+              body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
               }
             }
-            .print-container {
-              width: 100%;
-              max-width: 210mm;
-              margin: 0 auto;
-              padding: 10mm;
-            }
+            body { margin: 0; padding: 0; }
           </style>
         </head>
         <body>
-          <div class="print-container">
-            ${printableContent.innerHTML}
-          </div>
+          ${printableContent.innerHTML}
         </body>
       </html>
     `);

@@ -74,7 +74,6 @@ export const DocumentItemRow = ({ item, equipments = [] }: DocumentItemRowProps)
           <img 
             src={imageUrl} 
             alt={equipmentName}
-            crossOrigin="anonymous"
             className="w-full h-full object-contain"
             onError={(e) => {
               const target = e.target as HTMLImageElement;

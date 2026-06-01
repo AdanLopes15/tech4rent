@@ -41,7 +41,6 @@ export const CompanyLogo = ({ className, style, isDark = false, useSettings = fa
       alt="Tech4Rent Logo"
       onError={handleError}
       style={style}
-      crossOrigin="anonymous"
       className={cn("object-contain", className)}
     />
   );
