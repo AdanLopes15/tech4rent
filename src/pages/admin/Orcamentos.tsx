@@ -81,7 +81,6 @@ export default function Orcamentos() {
   }, [fetchAllData]);
 
   const { toast } = useToast();
-  const quotePrintRef = useRef<HTMLDivElement>(null);
   const quoteDownloadRef = useRef<HTMLDivElement>(null);
   const contractPrintRef = useRef<HTMLDivElement>(null);
 
