@@ -81,7 +81,6 @@ export default function Orcamentos() {
   }, [fetchAllData]);
 
   const { toast } = useToast();
-  const quotePrintRef = useRef<HTMLDivElement>(null);
   const quoteDownloadRef = useRef<HTMLDivElement>(null);
   const contractPrintRef = useRef<HTMLDivElement>(null);
 
@@ -204,6 +203,12 @@ export default function Orcamentos() {
         </html>
       `);
       printWindow.document.close();
+    } else {
+      toast({
+        title: "Pop-up bloqueado",
+        description: "Por favor, permita pop-ups para este site para poder imprimir.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -773,10 +778,9 @@ export default function Orcamentos() {
                 type="button" 
                 onClick={() => {
                   setQuoteForDownload(viewingQuote);
-                  setViewingQuote(null);
                   setTimeout(() => {
-                    handlePrintDocument(quotePrintRef);
-                  }, 200);
+                    handlePrintDocument(quoteDownloadRef);
+                  }, 500);
                 }}
               >
                 Imprimir / Salvar PDF
