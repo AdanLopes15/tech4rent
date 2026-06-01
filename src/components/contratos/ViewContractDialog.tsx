@@ -103,18 +103,30 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
         <head>
           <title>Imprimir Contrato</title>
           <base href="${window.location.origin}/" />
-          ${headLinksAndStyles}
+          <script src="https://cdn.tailwindcss.com"></script>
+          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
           <style>
-            ${cssRulesText}
-            @media print {
-              body {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-            }
-            body {
+            body { 
+              font-family: 'Inter', sans-serif;
               margin: 0;
               padding: 0;
+              background-color: white !important;
+              color: #1a1a1a !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            @media print {
+              body { margin: 0; }
+              * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+            }
+            .print-container {
+              width: 100%;
+              max-width: 210mm;
+              margin: 0 auto;
+              padding: 10mm;
             }
           </style>
         </head>

@@ -480,23 +480,36 @@ export default function Contratos() {
       <html>
         <head>
           <title>Faturas de Locação</title>
-          ${headLinksAndStyles}
+          <script src="https://cdn.tailwindcss.com"></script>
+          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
           <style>
+            body { 
+              font-family: 'Inter', sans-serif;
+              margin: 0;
+              padding: 0;
+              background-color: white !important;
+              color: #1a1a1a !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
             @media print {
-              body {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
+              body { margin: 0; }
               .bulk-page {
                 page-break-after: always;
               }
               .bulk-page:last-child {
                 page-break-after: auto;
               }
+              * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
             }
-            body {
-              margin: 0;
-              padding: 0;
+            .print-container {
+              width: 100%;
+              max-width: 210mm;
+              margin: 0 auto;
+              padding: 10mm;
             }
           </style>
         </head>
