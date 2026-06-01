@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Timestamp } from "firebase/firestore";
 import { format, addMonths, differenceInMonths, isAfter } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, PlusCircle, Trash2 } from "lucide-react";
+import { CalendarIcon, PlusCircle, Trash2, Copy } from "lucide-react";
 
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
@@ -110,7 +110,7 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
   const [loading, setLoading] = useState(false);
   const [isClientDialogOpen, setIsClientDialogOpen] = useState(false);
 
-  const isEditing = !!quote;
+  const isEditing = !!quote?.id;
 
   const resetForm = () => {
     setSelectedClientId("");
@@ -397,9 +397,9 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{isEditing ? "Editar Orçamento" : "Novo Orçamento Interno"}</DialogTitle>
+            <DialogTitle>{isEditing ? "Editar Orçamento" : quote ? "Duplicar Orçamento" : "Novo Orçamento Interno"}</DialogTitle>
             <DialogDescription>
-              {isEditing ? "Edite os dados do orçamento." : "Crie um novo orçamento para um cliente."}
+              {isEditing ? "Edite os dados do orçamento." : quote ? "Confira os dados para o novo orçamento duplicado." : "Crie um novo orçamento para um cliente."}
             </DialogDescription>
           </DialogHeader>
 
