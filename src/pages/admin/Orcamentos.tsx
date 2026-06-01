@@ -60,6 +60,7 @@ import {
   ChevronUp,
   CalendarIcon,
   FileDown,
+  Copy,
 } from "lucide-react";
 
 import { AddQuoteDialog } from "@/components/orcamentos/AddQuoteDialog";
@@ -291,6 +292,21 @@ export default function Orcamentos() {
     setIsDialogOpen(true);
   };
 
+  const handleDuplicate = (quote: any) => {
+    // Clone but remove IDs and reset status
+    const { id, ...rest } = quote;
+    const duplicatedQuote = {
+      ...rest,
+      status: "Pendente",
+      createdAt: new Date(),
+      // We keep items, client, etc.
+    };
+    
+    // Pass as editing but we'll change AddQuoteDialog to handle objects without ID as "New"
+    setEditingQuote(duplicatedQuote);
+    setIsDialogOpen(true);
+  };
+
   const handleCloseDialog = (open: boolean) => {
     if (!open) {
       setEditingQuote(null);
@@ -433,6 +449,11 @@ export default function Orcamentos() {
                       <DropdownMenuItem onClick={() => handleEdit(quote)}>
                         <Pencil className="mr-2 h-4 w-4" />
                         Editar
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem onClick={() => handleDuplicate(quote)}>
+                        <Copy className="mr-2 h-4 w-4" />
+                        Duplicar
                       </DropdownMenuItem>
 
                       <DropdownMenuItem onClick={() => handleDownloadPDF(quote)}>
