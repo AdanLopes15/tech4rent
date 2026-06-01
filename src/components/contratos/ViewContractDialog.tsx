@@ -119,7 +119,9 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
           </style>
         </head>
         <body>
-          ${printableContent.innerHTML}
+          <div class="print-container">
+            ${printableContent.innerHTML}
+          </div>
         </body>
       </html>
     `);

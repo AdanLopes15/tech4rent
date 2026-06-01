@@ -139,7 +139,9 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
           </style>
         </head>
         <body>
-          ${printableContent.innerHTML}
+          <div class="print-container">
+            ${printableContent.innerHTML}
+          </div>
         </body>
       </html>
     `);

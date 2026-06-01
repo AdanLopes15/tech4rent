@@ -501,7 +501,9 @@ export default function Contratos() {
           </style>
         </head>
         <body>
-          ${pages}
+          <div class="print-container">
+            ${pages}
+          </div>
         </body>
       </html>
     `);
