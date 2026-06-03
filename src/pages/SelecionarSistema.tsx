@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CompanyLogo } from "@/components/admin/CompanyLogo";
-import { LogOut, LayoutDashboard, ShieldCheck } from "lucide-react";
+import { LogOut, LayoutDashboard, ShieldCheck, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 const SelecionarSistema = () => {
@@ -42,7 +42,16 @@ const SelecionarSistema = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 relative">
+      {/* Voltar ao site */}
+      <a
+        href="https://tech4rent.com.br"
+        className="absolute top-4 left-4 flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-primary transition-colors duration-300 group"
+      >
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform duration-300" />
+        <span>Voltar ao site</span>
+      </a>
+
       {/* Header com Logo */}
       <div className="mb-12 animate-in fade-in slide-in-from-top-4 duration-1000">
         <CompanyLogo className="h-12" />
