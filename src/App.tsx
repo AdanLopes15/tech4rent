@@ -16,6 +16,7 @@ import Comparar from "./pages/Comparar";
 import Contato from "./pages/Contato";
 import PoliticaDevolucao from "./pages/PoliticaDevolucao";
 import Login from "./pages/Login";
+import SelecionarSistema from "./pages/SelecionarSistema";
 import { PoliticaPrivacidade, TermosUso, ExclusaoDados } from "./pages/StaticPages";
 import NotFound from "./pages/NotFound";
 import AdminLayout from "./components/admin/AdminLayout";
@@ -90,6 +91,14 @@ const App = () => (
             <Route path="/termos-de-uso" element={<TermosUso />} />
             <Route path="/exclusao-de-dados" element={<ExclusaoDados />} />
             <Route path="/login" element={<Login />} />
+            <Route
+              path="/selecionar-sistema"
+              element={
+                <ProtectedRoute>
+                  <SelecionarSistema />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/admin"
               element={

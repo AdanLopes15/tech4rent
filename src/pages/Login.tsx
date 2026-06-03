@@ -18,7 +18,7 @@ const Login = () => {
 
   useEffect(() => {
     if (!authLoading && user) {
-      navigate("/admin", { replace: true });
+      navigate("/selecionar-sistema", { replace: true });
     }
   }, [user, authLoading, navigate]);
 
@@ -41,7 +41,7 @@ const Login = () => {
       setLoading(true);
       await signIn(email, password);
       toast.success("Login realizado com sucesso!");
-      navigate("/admin");
+      navigate("/selecionar-sistema");
     } catch (err: any) {
       toast.error(err.message === "Invalid login credentials"
         ? "Email ou senha inválidos."
