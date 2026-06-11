@@ -49,13 +49,7 @@ import Usuarios from "./pages/admin/Usuarios";
 import ContatosSite from "./pages/admin/ContatosSite";
 import ProjetosVisaoGeral from "./pages/admin/ProjetosVisaoGeral";
 import ProjetosTech4Zap from "./pages/admin/ProjetosTech4Zap";
-import { MDMSidebar } from "./components/mdm/Sidebar";
-import { MDMLayout } from "./components/mdm/MDMLayout";
-import MDMDashboard from "./pages/mdm/Dashboard";
-import MDMDevices from "./pages/mdm/Devices";
-import MDMDeviceDetails from "./pages/mdm/DeviceDetails";
-import MDMCommands from "./pages/mdm/Commands";
-import MDMLocations from "./pages/mdm/Locations";
+// MDM components removed
 
 const queryClient = new QueryClient();
 
