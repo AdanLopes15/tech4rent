@@ -230,13 +230,14 @@ export interface SmtpSettings {
 }
 
 export interface SubClause {
-  id: number;
+  id: string | number;
   text: string;
 }
 
 export interface Clause {
-  id: number;
-  text: string;
+  id: string | number;
+  title?: string;
+  text?: string;
   subClauses: SubClause[];
 }
 
