@@ -134,15 +134,21 @@ const genId = () => String(++idCounter);
 
 const ClausulasEditor = ({ initialClauses, onSave, title, description }: ClausulasEditorProps) => {
   const [clauses, setClauses] = useState<Clause[]>([]);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   useEffect(() => {
+    // Só inicializamos se ainda não tivermos dados ou se os dados iniciais mudarem após o carregamento
     if (initialClauses && initialClauses.length > 0) {
+      console.log(`ClausulasEditor [${title}]: Initializing with data from store`, initialClauses);
       setClauses(initialClauses);
-    } else if (!initialClauses || initialClauses.length === 0) {
-      // Se não houver cláusulas iniciais (vazio do banco), usa o default apenas se for a primeira carga
-      setClauses(defaultLocacaoClauses);
+      setHasInitialized(true);
+    } else if (!hasInitialized && (!initialClauses || initialClauses.length === 0)) {
+      // Se não houver cláusulas e ainda não inicializamos, usamos o padrão
+      console.log(`ClausulasEditor [${title}]: No data in store, using defaults`);
+      setClauses(title.toLowerCase().includes("venda") ? defaultVendaClauses : defaultLocacaoClauses);
+      setHasInitialized(true);
     }
-  }, [initialClauses]);
+  }, [initialClauses, title, hasInitialized]);
 
   const updateClauseTitle = (clauseId: string, newTitle: string) => {
     setClauses((prev) => prev.map((c) => (c.id === clauseId ? { ...c, title: newTitle } : c)));
