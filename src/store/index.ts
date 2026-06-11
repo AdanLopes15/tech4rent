@@ -2512,8 +2512,14 @@ const useStore = create<State & Actions>((set, get) => {
 
         console.log("[CLAUSES_SAVE] Successfully saved and verified rental clauses");
         set({ rentalClauses: clauses });
-      } catch (error) {
+      } catch (error: any) {
         console.error("[CLAUSES_SAVE] Error updating rental clauses in Firestore:", error);
+        console.error("[CLAUSES_SAVE_ERROR] Details:", {
+          message: error.message,
+          code: error.code,
+          name: error.name,
+          fullError: error
+        });
         throw error;
       }
     },
@@ -2538,8 +2544,14 @@ const useStore = create<State & Actions>((set, get) => {
 
         console.log("[CLAUSES_SAVE] Successfully saved and verified sale clauses");
         set({ saleClauses: clauses });
-      } catch (error) {
+      } catch (error: any) {
         console.error("[CLAUSES_SAVE] Error updating sale clauses in Firestore:", error);
+        console.error("[CLAUSES_SAVE_ERROR] Details (Sale):", {
+          message: error.message,
+          code: error.code,
+          name: error.name,
+          fullError: error
+        });
         throw error;
       }
     },
