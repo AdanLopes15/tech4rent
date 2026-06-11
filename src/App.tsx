@@ -133,21 +133,8 @@ const App = () => (
               <Route path="projetos/tech4zap" element={<ProjetosTech4Zap />} />
             </Route>
 
-            {/* Tech4Rent MDM Routes */}
-            <Route
-              path="/mdm"
-              element={
-                <ProtectedRoute>
-                  <MDMLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="dashboard" element={<MDMDashboard />} />
-              <Route path="devices" element={<MDMDevices />} />
-              <Route path="devices/:id" element={<MDMDeviceDetails />} />
-              <Route path="commands" element={<MDMCommands />} />
-              <Route path="locations" element={<MDMLocations />} />
-            </Route>
+            {/* Tech4Rent MDM Routes - Redirected to Projects Overview */}
+            <Route path="/mdm/*" element={<Navigate to="/admin/projetos" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
