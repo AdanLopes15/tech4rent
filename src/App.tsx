@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -49,13 +49,7 @@ import Usuarios from "./pages/admin/Usuarios";
 import ContatosSite from "./pages/admin/ContatosSite";
 import ProjetosVisaoGeral from "./pages/admin/ProjetosVisaoGeral";
 import ProjetosTech4Zap from "./pages/admin/ProjetosTech4Zap";
-import { MDMSidebar } from "./components/mdm/Sidebar";
-import { MDMLayout } from "./components/mdm/MDMLayout";
-import MDMDashboard from "./pages/mdm/Dashboard";
-import MDMDevices from "./pages/mdm/Devices";
-import MDMDeviceDetails from "./pages/mdm/DeviceDetails";
-import MDMCommands from "./pages/mdm/Commands";
-import MDMLocations from "./pages/mdm/Locations";
+// MDM components removed
 
 const queryClient = new QueryClient();
 
@@ -139,21 +133,8 @@ const App = () => (
               <Route path="projetos/tech4zap" element={<ProjetosTech4Zap />} />
             </Route>
 
-            {/* Tech4Rent MDM Routes */}
-            <Route
-              path="/mdm"
-              element={
-                <ProtectedRoute>
-                  <MDMLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="dashboard" element={<MDMDashboard />} />
-              <Route path="devices" element={<MDMDevices />} />
-              <Route path="devices/:id" element={<MDMDeviceDetails />} />
-              <Route path="commands" element={<MDMCommands />} />
-              <Route path="locations" element={<MDMLocations />} />
-            </Route>
+            {/* Tech4Rent MDM Routes - Redirected to Projects Overview */}
+            <Route path="/mdm/*" element={<Navigate to="/admin/projetos" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
