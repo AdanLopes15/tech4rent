@@ -230,13 +230,13 @@ export interface SmtpSettings {
 }
 
 export interface SubClause {
-  id: number;
+  id: string;
   text: string;
 }
 
 export interface Clause {
-  id: number;
-  text: string;
+  id: string;
+  title: string;
   subClauses: SubClause[];
 }
 
@@ -660,21 +660,21 @@ const initialSmtpSettings: SmtpSettings = {
 
 const initialRentalClauses: Clause[] = [
   {
-    id: 1,
-    text: "O locatário se responsabiliza pela guarda e bom uso do equipamento.",
+    id: "1",
+    title: "O locatário se responsabiliza pela guarda e bom uso do equipamento.",
     subClauses: [],
   },
   {
-    id: 2,
-    text: "Qualquer dano ao equipamento será de responsabilidade do locatário.",
+    id: "2",
+    title: "Qualquer dano ao equipamento será de responsabilidade do locatário.",
     subClauses: [],
   },
 ];
 
 const initialSaleClauses: Clause[] = [
   {
-    id: 1,
-    text: "Garantia de 90 (noventa) dias contra defeitos de fabricação, não cobrindo mau uso.",
+    id: "1",
+    title: "Garantia de 90 (noventa) dias contra defeitos de fabricação, não cobrindo mau uso.",
     subClauses: [],
   },
 ];

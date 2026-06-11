@@ -636,7 +636,16 @@ const Configuracoes = () => {
               <ClausulasEditor
                 title="Cláusulas do Contrato de Locação"
                 description="Adicione, edite ou remova as cláusulas padrão que aparecerão em todos os contratos de locação gerados."
-                onSave={() => toast.success("Cláusulas de locação salvas com sucesso!")}
+                initialClauses={useStore.getState().rentalClauses}
+                onSave={async (clauses) => {
+                  try {
+                    await useStore.getState().updateRentalClauses(clauses);
+                    toast.success("Cláusulas de locação salvas com sucesso!");
+                  } catch (error) {
+                    console.error("Erro ao salvar cláusulas:", error);
+                    toast.error("Erro ao salvar cláusulas de locação.");
+                  }
+                }}
               />
             </CardContent>
           </Card>
@@ -649,8 +658,16 @@ const Configuracoes = () => {
               <ClausulasEditor
                 title="Cláusulas do Recibo de Venda"
                 description="Adicione, edite ou remova as cláusulas padrão que aparecerão em todos os recibos de venda gerados."
-                initialClauses={defaultVendaClauses}
-                onSave={() => toast.success("Cláusulas de venda salvas com sucesso!")}
+                initialClauses={useStore.getState().saleClauses}
+                onSave={async (clauses) => {
+                  try {
+                    await useStore.getState().updateSaleClauses(clauses);
+                    toast.success("Cláusulas de venda salvas com sucesso!");
+                  } catch (error) {
+                    console.error("Erro ao salvar cláusulas:", error);
+                    toast.error("Erro ao salvar cláusulas de venda.");
+                  }
+                }}
               />
             </CardContent>
           </Card>

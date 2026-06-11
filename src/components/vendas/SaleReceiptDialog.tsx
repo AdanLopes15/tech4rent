@@ -263,7 +263,7 @@ export function SaleReceiptDialog({ open, onOpenChange, sale }: SaleReceiptDialo
                     {saleClauses.map((clause, index) => (
                       <div key={clause.id}>
                         <h4 className="font-bold text-black mb-1">
-                          {index + 1}. {clause.text}
+                          {index + 1}. {clause.title}
                         </h4>
 
                         {clause.subClauses?.map((subClause, subIndex) => (
