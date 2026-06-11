@@ -133,11 +133,14 @@ let idCounter = 100;
 const genId = () => String(++idCounter);
 
 const ClausulasEditor = ({ initialClauses, onSave, title, description }: ClausulasEditorProps) => {
-  const [clauses, setClauses] = useState<Clause[]>(initialClauses || defaultLocacaoClauses);
+  const [clauses, setClauses] = useState<Clause[]>([]);
 
   useEffect(() => {
-    if (initialClauses) {
+    if (initialClauses && initialClauses.length > 0) {
       setClauses(initialClauses);
+    } else if (!initialClauses || initialClauses.length === 0) {
+      // Se não houver cláusulas iniciais (vazio do banco), usa o default apenas se for a primeira carga
+      setClauses(defaultLocacaoClauses);
     }
   }, [initialClauses]);
 

@@ -919,10 +919,12 @@ const useStore = create<State & Actions>((set, get) => {
         const newState: Partial<State> = {
           companySettings: mergedCompanySettings,
           smtpSettings: smtpSettingsSnap.exists() ? (smtpSettingsSnap.data() as SmtpSettings) : get().smtpSettings,
-          rentalClauses: clausesSnap.exists()
-            ? clausesSnap.data()?.rental || initialRentalClauses
+          rentalClauses: (clausesSnap.exists() && clausesSnap.data()?.rental)
+            ? clausesSnap.data()?.rental 
             : initialRentalClauses,
-          saleClauses: clausesSnap.exists() ? clausesSnap.data()?.sale || initialSaleClauses : initialSaleClauses,
+          saleClauses: (clausesSnap.exists() && clausesSnap.data()?.sale) 
+            ? clausesSnap.data()?.sale 
+            : initialSaleClauses,
           equipments: equipmentsSnap.docs.map(mapDoc),
           catalogItems: catalogItemsSnap.docs.map(mapDoc),
           homePage: homePageSnap.exists()
