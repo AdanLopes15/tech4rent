@@ -926,10 +926,10 @@ const useStore = create<State & Actions>((set, get) => {
         const newState: Partial<State> = {
           companySettings: mergedCompanySettings,
           smtpSettings: smtpSettingsSnap.exists() ? (smtpSettingsSnap.data() as SmtpSettings) : get().smtpSettings,
-          rentalClauses: (clausesSnap.exists() && clausesSnap.data()?.rental)
+          rentalClauses: (clausesSnap.exists() && clausesSnap.data()?.rental && Array.isArray(clausesSnap.data()?.rental) && clausesSnap.data()?.rental.length > 0)
             ? clausesSnap.data()?.rental 
             : initialRentalClauses,
-          saleClauses: (clausesSnap.exists() && clausesSnap.data()?.sale) 
+          saleClauses: (clausesSnap.exists() && clausesSnap.data()?.sale && Array.isArray(clausesSnap.data()?.sale) && clausesSnap.data()?.sale.length > 0) 
             ? clausesSnap.data()?.sale 
             : initialSaleClauses,
           equipments: equipmentsSnap.docs.map(mapDoc),
@@ -2494,34 +2494,52 @@ const useStore = create<State & Actions>((set, get) => {
 
     updateRentalClauses: async (clauses) => {
       try {
-        console.log("Saving rental clauses to Firestore...", {
+        console.log("[CLAUSES_SAVE] Saving rental clauses to Firestore...", {
           collection: "settings",
           docId: "clauses",
           payload: { rental: clauses }
         });
         const clausesRef = doc(db, "settings", "clauses");
         await setDoc(clausesRef, { rental: clauses }, { merge: true });
-        console.log("Successfully saved rental clauses to Firestore");
+        
+        // Verificação imediata após salvar (leitura de segurança)
+        const verifySnap = await getDoc(clausesRef);
+        console.log("[CLAUSES_SAVE] Verification response from Firestore:", verifySnap.data());
+        
+        if (!verifySnap.exists() || JSON.stringify(verifySnap.data()?.rental) !== JSON.stringify(clauses)) {
+          throw new Error("Falha na verificação de persistência: dados no banco não correspondem ao enviado.");
+        }
+
+        console.log("[CLAUSES_SAVE] Successfully saved and verified rental clauses");
         set({ rentalClauses: clauses });
       } catch (error) {
-        console.error("Error updating rental clauses in Firestore:", error);
+        console.error("[CLAUSES_SAVE] Error updating rental clauses in Firestore:", error);
         throw error;
       }
     },
 
     updateSaleClauses: async (clauses) => {
       try {
-        console.log("Saving sale clauses to Firestore...", {
+        console.log("[CLAUSES_SAVE] Saving sale clauses to Firestore...", {
           collection: "settings",
           docId: "clauses",
           payload: { sale: clauses }
         });
         const clausesRef = doc(db, "settings", "clauses");
         await setDoc(clausesRef, { sale: clauses }, { merge: true });
-        console.log("Successfully saved sale clauses to Firestore");
+        
+        // Verificação imediata
+        const verifySnap = await getDoc(clausesRef);
+        console.log("[CLAUSES_SAVE] Verification response from Firestore:", verifySnap.data());
+
+        if (!verifySnap.exists() || JSON.stringify(verifySnap.data()?.sale) !== JSON.stringify(clauses)) {
+          throw new Error("Falha na verificação de persistência: dados no banco não correspondem ao enviado.");
+        }
+
+        console.log("[CLAUSES_SAVE] Successfully saved and verified sale clauses");
         set({ saleClauses: clauses });
       } catch (error) {
-        console.error("Error updating sale clauses in Firestore:", error);
+        console.error("[CLAUSES_SAVE] Error updating sale clauses in Firestore:", error);
         throw error;
       }
     },
