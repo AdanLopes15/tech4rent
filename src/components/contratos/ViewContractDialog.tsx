@@ -304,7 +304,7 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
               <div className="space-y-4 text-sm text-gray-500">
                 {rentalClauses.map((clause, index) => (
                   <div key={clause.id}>
-                    <h4 className="font-bold text-black mb-1">{`${index + 1}. ${clause.title || clause.text}`}</h4>
+                    <h4 className="font-bold text-black mb-1">{`${index + 1}. ${clause.title}`}</h4>
 
                     {clause.subClauses &&
                       clause.subClauses.map((subClause, subIndex) => (
