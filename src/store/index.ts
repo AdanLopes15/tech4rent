@@ -2537,33 +2537,37 @@ const useStore = create<State & Actions>((set, get) => {
       try {
         console.log("[CLAUSES_SAVE] Saving sale clauses to Firestore...", {
           collection: "settings",
-          docId: "clauses",
-          payload: JSON.stringify({ sale: clauses }, null, 2)
+          docId: "clauses"
         });
         const clausesRef = doc(db, "settings", "clauses");
         await setDoc(clausesRef, { sale: clauses }, { merge: true });
         
-        // Verificação imediata
         const verifySnap = await getDoc(clausesRef);
         const freshData = verifySnap.data();
-        console.log("[CLAUSES_SAVE] Verification response from Firestore:", JSON.stringify(freshData, null, 2));
 
-        if (!verifySnap.exists() || !freshData || JSON.stringify(freshData.sale) !== JSON.stringify(clauses)) {
-          console.error("[CLAUSES_SAVE] Verification mismatch (Sale)!", {
-            sent: clauses,
-            received: freshData?.sale
-          });
+        const normalizeClauses = (c: any[]) => (c || []).map((clause, index) => ({
+          id: String(clause.id ?? index + 1),
+          title: String(clause.title ?? clause.text ?? "").trim(),
+          subClauses: (clause.subClauses || []).map((sub: any, subIndex: number) => ({
+            id: String(sub.id ?? subIndex + 1),
+            text: String(sub.text ?? sub.title ?? "").trim(),
+          })),
+        }));
+
+        const sent = normalizeClauses(clauses);
+        const saved = normalizeClauses(freshData?.sale);
+        const matches = JSON.stringify(sent) === JSON.stringify(saved);
+
+        if (!matches) {
+          console.error("[CLAUSES_SAVE] Verification mismatch (Sale)!", { sent, saved });
           throw new Error("Falha na verificação de persistência: dados no banco não correspondem ao enviado.");
         }
 
         console.log("[CLAUSES_SAVE] Successfully saved and verified sale clauses");
         set({ saleClauses: clauses });
       } catch (error: any) {
-        console.error("[CLAUSES_SAVE] Error updating sale clauses in Firestore:", error);
         console.error("[CLAUSES_SAVE_ERROR] Details (Sale):", {
           message: error.message,
-          code: error.code,
-          name: error.name,
           fullError: error
         });
         throw error;
