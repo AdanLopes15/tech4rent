@@ -641,6 +641,7 @@ const Configuracoes = () => {
                   try {
                     await useStore.getState().updateRentalClauses(clauses);
                     toast.success("Cláusulas de locação salvas com sucesso!");
+                    await useStore.getState().fetchAllData();
                   } catch (error) {
                     console.error("Erro ao salvar cláusulas:", error);
                     toast.error("Erro ao salvar cláusulas de locação.");
@@ -663,6 +664,7 @@ const Configuracoes = () => {
                   try {
                     await useStore.getState().updateSaleClauses(clauses);
                     toast.success("Cláusulas de venda salvas com sucesso!");
+                    await useStore.getState().fetchAllData();
                   } catch (error) {
                     console.error("Erro ao salvar cláusulas:", error);
                     toast.error("Erro ao salvar cláusulas de venda.");

@@ -919,10 +919,12 @@ const useStore = create<State & Actions>((set, get) => {
         const newState: Partial<State> = {
           companySettings: mergedCompanySettings,
           smtpSettings: smtpSettingsSnap.exists() ? (smtpSettingsSnap.data() as SmtpSettings) : get().smtpSettings,
-          rentalClauses: clausesSnap.exists()
-            ? clausesSnap.data()?.rental || initialRentalClauses
+          rentalClauses: (clausesSnap.exists() && clausesSnap.data()?.rental)
+            ? clausesSnap.data()?.rental 
             : initialRentalClauses,
-          saleClauses: clausesSnap.exists() ? clausesSnap.data()?.sale || initialSaleClauses : initialSaleClauses,
+          saleClauses: (clausesSnap.exists() && clausesSnap.data()?.sale) 
+            ? clausesSnap.data()?.sale 
+            : initialSaleClauses,
           equipments: equipmentsSnap.docs.map(mapDoc),
           catalogItems: catalogItemsSnap.docs.map(mapDoc),
           homePage: homePageSnap.exists()
@@ -2484,15 +2486,25 @@ const useStore = create<State & Actions>((set, get) => {
     },
 
     updateRentalClauses: async (clauses) => {
-      const clausesRef = doc(db, "settings", "clauses");
-      await setDoc(clausesRef, { rental: clauses }, { merge: true });
-      set({ rentalClauses: clauses });
+      try {
+        const clausesRef = doc(db, "settings", "clauses");
+        await setDoc(clausesRef, { rental: clauses }, { merge: true });
+        set({ rentalClauses: clauses });
+      } catch (error) {
+        console.error("Error updating rental clauses in Firestore:", error);
+        throw error;
+      }
     },
 
     updateSaleClauses: async (clauses) => {
-      const clausesRef = doc(db, "settings", "clauses");
-      await setDoc(clausesRef, { sale: clauses }, { merge: true });
-      set({ saleClauses: clauses });
+      try {
+        const clausesRef = doc(db, "settings", "clauses");
+        await setDoc(clausesRef, { sale: clauses }, { merge: true });
+        set({ saleClauses: clauses });
+      } catch (error) {
+        console.error("Error updating sale clauses in Firestore:", error);
+        throw error;
+      }
     },
   };
 });
