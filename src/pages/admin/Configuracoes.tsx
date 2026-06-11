@@ -636,7 +636,7 @@ const Configuracoes = () => {
               <ClausulasEditor
                 title="Cláusulas do Contrato de Locação"
                 description="Adicione, edite ou remova as cláusulas padrão que aparecerão em todos os contratos de locação gerados."
-                initialClauses={useStore.getState().rentalClauses}
+                initialClauses={useStore((state) => state.rentalClauses)}
                 onSave={async (clauses) => {
                   try {
                     await useStore.getState().updateRentalClauses(clauses);
@@ -658,7 +658,7 @@ const Configuracoes = () => {
               <ClausulasEditor
                 title="Cláusulas do Recibo de Venda"
                 description="Adicione, edite ou remova as cláusulas padrão que aparecerão em todos os recibos de venda gerados."
-                initialClauses={useStore.getState().saleClauses}
+                initialClauses={useStore((state) => state.saleClauses)}
                 onSave={async (clauses) => {
                   try {
                     await useStore.getState().updateSaleClauses(clauses);
