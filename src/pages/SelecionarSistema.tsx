@@ -25,7 +25,7 @@ const SelecionarSistema = () => {
       id: "tech4rent",
       title: "Tech4Rent",
       description: "Sistema principal de gestão Tech4Rent.",
-      icon: <LayoutDashboard className="w-12 h-12 text-primary" />,
+      icon: <img src="/tech4rent-logo.png" alt="Tech4Rent Logo" className="w-16 h-16 object-contain" />,
       buttonText: "Acessar Tech4Rent",
       action: () => navigate("/admin"),
       delay: "100ms",
@@ -34,7 +34,7 @@ const SelecionarSistema = () => {
       id: "tech4guard",
       title: "Tech4Guard MDM",
       description: "Gestão, monitoramento e segurança dos PDAs.",
-      icon: <ShieldCheck className="w-12 h-12 text-[#10b981]" />,
+      icon: <img src="/tech4guard-logo.png" alt="Tech4Guard Logo" className="w-16 h-16 object-contain" />,
       buttonText: "Acessar Tech4Guard",
       action: () => window.location.href = "https://app.tech4guard.com.br",
       delay: "300ms",
@@ -74,7 +74,7 @@ const SelecionarSistema = () => {
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             
             <CardHeader className="items-center pt-10 pb-4 relative z-10">
-              <div className="p-5 bg-white rounded-2xl shadow-md group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 mb-6 border border-slate-100 ring-4 ring-slate-50">
+              <div className="p-2 transition-transform duration-500 mb-6 group-hover:scale-110 group-hover:rotate-3">
                 {system.icon}
               </div>
               <CardTitle className="text-2xl font-bold mb-2 group-hover:text-primary transition-colors duration-300">
