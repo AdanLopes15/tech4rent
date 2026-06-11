@@ -850,6 +850,7 @@ const useStore = create<State & Actions>((set, get) => {
     fetchAllData: async (publicOnly = false) => {
       set({ loading: true });
       try {
+        console.log("Fetching all data from Firestore...");
         const baseSnaps = (await Promise.all([
           getDoc(doc(db, "settings", "company")),
           getDoc(doc(db, "settings", "smtp")),
@@ -871,6 +872,12 @@ const useStore = create<State & Actions>((set, get) => {
         ];
 
         const [companySettingsSnap, smtpSettingsSnap, clausesSnap, equipmentsSnap, catalogItemsSnap, homePageSnap, sobrePageSnap, contatoPageSnap] = baseSnaps;
+        
+        if (clausesSnap.exists()) {
+          console.log("Firestore Clauses Data found:", clausesSnap.data());
+        } else {
+          console.log("No clauses document found in Firestore (settings/clauses)");
+        }
 
         const existingCompanySettings = companySettingsSnap.exists()
           ? (companySettingsSnap.data() as Partial<CompanySettings>)
@@ -2487,8 +2494,14 @@ const useStore = create<State & Actions>((set, get) => {
 
     updateRentalClauses: async (clauses) => {
       try {
+        console.log("Saving rental clauses to Firestore...", {
+          collection: "settings",
+          docId: "clauses",
+          payload: { rental: clauses }
+        });
         const clausesRef = doc(db, "settings", "clauses");
         await setDoc(clausesRef, { rental: clauses }, { merge: true });
+        console.log("Successfully saved rental clauses to Firestore");
         set({ rentalClauses: clauses });
       } catch (error) {
         console.error("Error updating rental clauses in Firestore:", error);
@@ -2498,8 +2511,14 @@ const useStore = create<State & Actions>((set, get) => {
 
     updateSaleClauses: async (clauses) => {
       try {
+        console.log("Saving sale clauses to Firestore...", {
+          collection: "settings",
+          docId: "clauses",
+          payload: { sale: clauses }
+        });
         const clausesRef = doc(db, "settings", "clauses");
         await setDoc(clausesRef, { sale: clauses }, { merge: true });
+        console.log("Successfully saved sale clauses to Firestore");
         set({ saleClauses: clauses });
       } catch (error) {
         console.error("Error updating sale clauses in Firestore:", error);
