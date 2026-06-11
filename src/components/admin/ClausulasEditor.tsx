@@ -142,13 +142,17 @@ const ClausulasEditor = ({ initialClauses, onSave, title, description }: Clausul
       console.log(`ClausulasEditor [${title}]: Initializing with data from store`, initialClauses);
       setClauses(initialClauses);
       setHasInitialized(true);
-    } else if (!hasInitialized && (!initialClauses || initialClauses.length === 0)) {
-      // Se não houver cláusulas e ainda não inicializamos, usamos o padrão
+    }
+  }, [initialClauses, title]);
+
+  // Efeito separado para carregar defaults apenas se realmente não houver nada e o carregamento terminou
+  useEffect(() => {
+    if (!hasInitialized && (!initialClauses || initialClauses.length === 0)) {
       console.log(`ClausulasEditor [${title}]: No data in store, using defaults`);
       setClauses(title.toLowerCase().includes("venda") ? defaultVendaClauses : defaultLocacaoClauses);
       setHasInitialized(true);
     }
-  }, [initialClauses, title, hasInitialized]);
+  }, [hasInitialized, initialClauses, title]);
 
   const updateClauseTitle = (clauseId: string, newTitle: string) => {
     setClauses((prev) => prev.map((c) => (c.id === clauseId ? { ...c, title: newTitle } : c)));
