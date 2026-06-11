@@ -2484,15 +2484,25 @@ const useStore = create<State & Actions>((set, get) => {
     },
 
     updateRentalClauses: async (clauses) => {
-      const clausesRef = doc(db, "settings", "clauses");
-      await setDoc(clausesRef, { rental: clauses }, { merge: true });
-      set({ rentalClauses: clauses });
+      try {
+        const clausesRef = doc(db, "settings", "clauses");
+        await setDoc(clausesRef, { rental: clauses }, { merge: true });
+        set({ rentalClauses: clauses });
+      } catch (error) {
+        console.error("Error updating rental clauses in Firestore:", error);
+        throw error;
+      }
     },
 
     updateSaleClauses: async (clauses) => {
-      const clausesRef = doc(db, "settings", "clauses");
-      await setDoc(clausesRef, { sale: clauses }, { merge: true });
-      set({ saleClauses: clauses });
+      try {
+        const clausesRef = doc(db, "settings", "clauses");
+        await setDoc(clausesRef, { sale: clauses }, { merge: true });
+        set({ saleClauses: clauses });
+      } catch (error) {
+        console.error("Error updating sale clauses in Firestore:", error);
+        throw error;
+      }
     },
   };
 });
