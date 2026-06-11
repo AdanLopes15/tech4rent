@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Trash2, Plus } from "lucide-react";
@@ -134,6 +134,12 @@ const genId = () => String(++idCounter);
 
 const ClausulasEditor = ({ initialClauses, onSave, title, description }: ClausulasEditorProps) => {
   const [clauses, setClauses] = useState<Clause[]>(initialClauses || defaultLocacaoClauses);
+
+  useEffect(() => {
+    if (initialClauses) {
+      setClauses(initialClauses);
+    }
+  }, [initialClauses]);
 
   const updateClauseTitle = (clauseId: string, newTitle: string) => {
     setClauses((prev) => prev.map((c) => (c.id === clauseId ? { ...c, title: newTitle } : c)));
