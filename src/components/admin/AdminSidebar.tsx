@@ -92,7 +92,6 @@ const menuItems: MenuItem[] = [
     children: [
       { icon: Eye, label: "Visão Geral", path: "/admin/projetos" },
       { icon: Package, label: "Tech4Zap", path: "/admin/projetos/tech4zap" },
-      { icon: Smartphone, label: "Tech4Rent MDM", path: "/mdm/dashboard" },
     ],
   },
   {
