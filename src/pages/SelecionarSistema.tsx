@@ -74,7 +74,7 @@ const SelecionarSistema = () => {
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             
             <CardHeader className="items-center pt-10 pb-4 relative z-10">
-              <div className="p-5 bg-white rounded-2xl shadow-md group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 mb-6 border border-slate-100 ring-4 ring-slate-50">
+              <div className="p-2 transition-transform duration-500 mb-6 group-hover:scale-110 group-hover:rotate-3">
                 {system.icon}
               </div>
               <CardTitle className="text-2xl font-bold mb-2 group-hover:text-primary transition-colors duration-300">
