@@ -28,6 +28,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { AddClientDialog } from "@/components/clientes/AddClientDialog";
+import { buildObservationsWithPaymentCondition } from "@/store/utils";
 
 type BudgetType = "locacao" | "venda";
 type BillingType = "diaria" | "semanal" | "mensal" | "venda";
