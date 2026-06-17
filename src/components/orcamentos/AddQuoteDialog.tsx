@@ -120,6 +120,8 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
     setBudgetType("locacao");
     setStartDate(undefined);
     setEndDate(undefined);
+    setCustomPeriod("");
+    setPeriodMonths(null);
     setItems([
       {
         id: Date.now(),
