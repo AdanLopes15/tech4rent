@@ -106,25 +106,45 @@ export default function Orcamentos() {
       reader.readAsDataURL(blob);
     });
 
-  const fetchAsDataUrl = async (src: string): Promise<string> => {
-    // 1ª tentativa: download direto (funciona se o servidor enviar headers de CORS)
+  // fetch com timeout via AbortController para nunca travar o fluxo
+  const fetchWithTimeout = async (url: string, ms = 5000): Promise<Response> => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), ms);
     try {
-      const res = await fetch(src, { mode: "cors" });
+      return await fetch(url, { mode: "cors", signal: controller.signal });
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+
+  // Tenta converter para base64; retorna null em qualquer falha (nunca lança/trava)
+  const fetchAsDataUrl = async (src: string): Promise<string | null> => {
+    // 1ª tentativa: download direto (servidor com headers de CORS)
+    try {
+      const res = await fetchWithTimeout(src, 5000);
       if (res.ok) {
         const blob = await res.blob();
         if (blob.size > 0) return await blobToDataUrl(blob);
       }
     } catch (e) {
-      // ignora e tenta o proxy
+      console.warn("Falha no download direto da imagem, tentando proxy:", src);
     }
 
-    // 2ª tentativa: proxy com CORS habilitado (contorna imagens externas sem CORS)
-    const proxied = `https://images.weserv.nl/?url=${encodeURIComponent(
-      src.replace(/^https?:\/\//, ""),
-    )}`;
-    const res = await fetch(proxied, { mode: "cors" });
-    const blob = await res.blob();
-    return await blobToDataUrl(blob);
+    // 2ª tentativa: proxy com CORS habilitado (imagens externas sem CORS)
+    try {
+      const proxied = `https://images.weserv.nl/?url=${encodeURIComponent(
+        src.replace(/^https?:\/\//, ""),
+      )}`;
+      const res = await fetchWithTimeout(proxied, 5000);
+      if (res.ok) {
+        const blob = await res.blob();
+        if (blob.size > 0) return await blobToDataUrl(blob);
+      }
+    } catch (e) {
+      console.warn("Falha ao converter imagem via proxy:", src);
+    }
+
+    return null;
   };
 
   const inlineImagesAsBase64 = async (root: HTMLElement) => {
@@ -139,28 +159,37 @@ export default function Orcamentos() {
             img.setAttribute("src", dataUrl);
             img.removeAttribute("crossorigin");
           }
+          // Se falhar, mantém a URL original (html2canvas tenta via useCORS)
         } catch (e) {
-          // Se não for possível converter (CORS, etc.), mantém a URL original
           console.warn("Não foi possível converter imagem para base64:", src, e);
         }
       }),
     );
   };
 
-
-  const waitForImages = async (root: HTMLElement) => {
+  // Aguarda imagens carregarem, com timeout por imagem para não travar
+  const waitForImages = async (root: HTMLElement, ms = 5000) => {
     const imgs = Array.from(root.querySelectorAll("img"));
     await Promise.all(
       imgs.map(
         (img) =>
           new Promise<void>((resolve) => {
-            if (img.complete && img.naturalWidth > 0) return resolve();
-            img.onload = () => resolve();
-            img.onerror = () => resolve();
+            if (img.complete) return resolve();
+            const done = () => resolve();
+            const timer = setTimeout(done, ms);
+            img.onload = () => {
+              clearTimeout(timer);
+              done();
+            };
+            img.onerror = () => {
+              clearTimeout(timer);
+              done();
+            };
           }),
       ),
     );
   };
+
 
   const handleDownloadPDFAsFile = async (ref: React.RefObject<HTMLDivElement>, filename: string) => {
     if (!ref.current) return;
@@ -191,9 +220,14 @@ export default function Orcamentos() {
 
     try {
       toast({ title: "Gerando PDF...", description: "Por favor, aguarde um momento." });
-      // Garante que as imagens (foto do equipamento) estejam embutidas e carregadas antes de gerar
-      await inlineImagesAsBase64(docRoot);
-      await waitForImages(docRoot);
+      // Prepara imagens com proteção global de tempo: nunca trava a geração do PDF
+      const prepareImages = (async () => {
+        await inlineImagesAsBase64(docRoot);
+        await waitForImages(docRoot);
+      })();
+      const globalGuard = new Promise<void>((resolve) => setTimeout(resolve, 12000));
+      await Promise.race([prepareImages, globalGuard]);
+      // Gera e baixa o PDF mesmo que alguma imagem não tenha sido preparada a tempo
       await html2pdf().set(opt).from(docRoot).save();
       toast({ title: "PDF gerado com sucesso!" });
     } catch (error) {
