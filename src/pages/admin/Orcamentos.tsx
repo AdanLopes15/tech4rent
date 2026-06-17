@@ -211,7 +211,10 @@ export default function Orcamentos() {
         scale: 2, 
         useCORS: true, 
         letterRendering: true,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: docRoot.scrollWidth || 794
       },
       pagebreak: { mode: ['avoid-all', 'css', 'legacy'] as any },
       jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
@@ -980,7 +983,7 @@ export default function Orcamentos() {
                   alignments={["left", "center", "right", "right"]}
                   rows={(quoteForDownload.items || []).map((item: any) => {
                     return [
-                      <DocumentItemRow key={item.equipmentId} item={item} equipments={equipments} />,
+                      <DocumentItemRow key={item.equipmentId} item={item} equipments={equipments} pdfMode />,
                       item.quantity.toString(),
                       formatCurrency(Number(item.unitPrice || 0)),
                       <span key="total" className="font-bold">{formatCurrency(Number(item.quantity || 0) * Number(item.unitPrice || 0))}</span>
@@ -1300,7 +1303,7 @@ export default function Orcamentos() {
                   alignments={["left", "center", "right", "right"]}
                   rows={(quoteForDownload.items || []).map((item: any) => {
                     return [
-                      <DocumentItemRow key={item.equipmentId} item={item} equipments={equipments} />,
+                      <DocumentItemRow key={item.equipmentId} item={item} equipments={equipments} pdfMode />,
                       item.quantity.toString(),
                       formatCurrency(Number(item.unitPrice || 0)),
                       <span key="total" className="font-bold">{formatCurrency(Number(item.quantity || 0) * Number(item.unitPrice || 0))}</span>
