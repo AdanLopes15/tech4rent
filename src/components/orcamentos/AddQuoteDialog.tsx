@@ -367,7 +367,7 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
         data.paymentMethods = cleanedPaymentMethods;
         data.prazoEntrega = prazoEntrega;
         // Preenche/atualiza automaticamente a condição de pagamento nas observações
-        data.observations = buildObservationsWithPaymentCondition(observations, cleanedPaymentMethods);
+        data.observations = buildObservationsWithPaymentCondition(observations, cleanedPaymentMethods, totalValue);
       }
 
       let quoteId = quote?.id;

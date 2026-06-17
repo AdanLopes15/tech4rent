@@ -45,13 +45,26 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
   transferencia: "Transferência",
 };
 
-function describePaymentMethod(pm: any): string {
+function formatBRL(value: number): string {
+  return value.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+function describePaymentMethod(pm: any, totalValue: number): string {
   const label = PAYMENT_METHOD_LABELS[pm?.paymentMethod] || pm?.paymentMethod || "Pagamento";
   const installments = Number(pm?.installments || 1);
+  const total = Number(totalValue || 0);
+
   if (pm?.paymentMethod === "pix" || pm?.paymentMethod === "transferencia" || installments <= 1) {
-    return `${label} à vista`;
+    return `${label} à vista no valor de ${formatBRL(total)}`;
   }
-  return `${label} em ${installments}x`;
+
+  const installmentValue = total / installments;
+  return `${label} em ${installments}x de ${formatBRL(installmentValue)}`;
 }
 
 // Captura tanto "Condição de pagamento:" (singular) quanto "Condições de pagamento:" (plural),
@@ -66,6 +79,7 @@ const PAYMENT_CONDITION_REGEX =
 export function buildObservationsWithPaymentCondition(
   observations: string,
   paymentMethods: any[],
+  totalValue: number = 0,
 ): string {
   // Remove qualquer bloco de condição de pagamento já existente (singular ou plural)
   const userText = (observations || "").replace(PAYMENT_CONDITION_REGEX, "").trim();
@@ -76,10 +90,10 @@ export function buildObservationsWithPaymentCondition(
 
   let conditionBlock: string;
   if (paymentMethods.length === 1) {
-    conditionBlock = `Condição de pagamento: ${describePaymentMethod(paymentMethods[0])}.`;
+    conditionBlock = `Condição de pagamento: ${describePaymentMethod(paymentMethods[0], totalValue)}.`;
   } else {
     const options = paymentMethods
-      .map((pm, i) => `Opção ${i + 1}: ${describePaymentMethod(pm)}.`)
+      .map((pm, i) => `Opção ${i + 1}: ${describePaymentMethod(pm, totalValue)}.`)
       .join("\n");
     conditionBlock = `Condições de pagamento:\n${options}`;
   }
