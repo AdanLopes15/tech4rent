@@ -980,7 +980,7 @@ export default function Orcamentos() {
                   alignments={["left", "center", "right", "right"]}
                   rows={(quoteForDownload.items || []).map((item: any) => {
                     return [
-                      <DocumentItemRow key={item.equipmentId} item={item} equipments={equipments} />,
+                      <DocumentItemRow key={item.equipmentId} item={item} equipments={equipments} pdfMode />,
                       item.quantity.toString(),
                       formatCurrency(Number(item.unitPrice || 0)),
                       <span key="total" className="font-bold">{formatCurrency(Number(item.quantity || 0) * Number(item.unitPrice || 0))}</span>
