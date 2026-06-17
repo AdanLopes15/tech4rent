@@ -30,7 +30,7 @@ import {
 } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { db, auth, storage } from "@/lib/firebase";
-import { getNextId as getNextIdUtil } from "./utils";
+import { getNextId as getNextIdUtil, removeUndefined } from "./utils";
 import { format, differenceInMonths, addMonths, addDays, addYears, addWeeks, getDate } from "date-fns";
 import { addSale, updateSale, cancelSale, deleteSale } from "./methods/sales";
 
@@ -1372,7 +1372,7 @@ const useStore = create<State & Actions>((set, get) => {
         });
       }
 
-      await setDoc(doc(db, "quotes", newId), dataToSave);
+      await setDoc(doc(db, "quotes", newId), removeUndefined(dataToSave));
 
       const notificationRef = doc(collection(db, "notifications"));
       await setDoc(notificationRef, {
@@ -1413,7 +1413,7 @@ const useStore = create<State & Actions>((set, get) => {
       }
 
       const quoteRef = doc(db, "quotes", id);
-      await updateDoc(quoteRef, dataToUpdate);
+      await updateDoc(quoteRef, removeUndefined(dataToUpdate));
 
       set((state) => ({
         quotes: state.quotes.map((q) => (q.id === id ? { ...q, ...updatedQuote } : q)),

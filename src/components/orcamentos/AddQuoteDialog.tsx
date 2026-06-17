@@ -28,6 +28,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { AddClientDialog } from "@/components/clientes/AddClientDialog";
+import { buildObservationsWithPaymentCondition } from "@/store/utils";
 
 type BudgetType = "locacao" | "venda";
 type BillingType = "diaria" | "semanal" | "mensal" | "venda";
@@ -359,11 +360,14 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
 
       if (budgetType === "venda") {
         data.saleDate = quote?.saleDate || new Date().toISOString();
-        data.paymentMethods = paymentMethods.map(({ id, ...rest }) => ({
+        const cleanedPaymentMethods = paymentMethods.map(({ id, ...rest }) => ({
           ...rest,
           value: totalValue,
         }));
+        data.paymentMethods = cleanedPaymentMethods;
         data.prazoEntrega = prazoEntrega;
+        // Preenche/atualiza automaticamente a condição de pagamento nas observações
+        data.observations = buildObservationsWithPaymentCondition(observations, cleanedPaymentMethods);
       }
 
       let quoteId = quote?.id;
