@@ -211,7 +211,10 @@ export default function Orcamentos() {
         scale: 2, 
         useCORS: true, 
         letterRendering: true,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: docRoot.scrollWidth || 794
       },
       pagebreak: { mode: ['avoid-all', 'css', 'legacy'] as any },
       jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
