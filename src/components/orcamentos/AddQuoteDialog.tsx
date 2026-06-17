@@ -285,8 +285,42 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
       return;
     }
 
+    setCustomPeriod("");
+    setPeriodMonths(months);
     setEndDate(addMonths(startDate, months));
   };
+
+  const handleCustomPeriodChange = (value: string) => {
+    // aceita apenas números inteiros positivos
+    const cleaned = value.replace(/[^\d]/g, "");
+    setCustomPeriod(cleaned);
+
+    const months = parseInt(cleaned, 10);
+    if (!cleaned || isNaN(months) || months <= 0) {
+      setPeriodMonths(null);
+      return;
+    }
+
+    if (!startDate) {
+      toast({
+        title: "Data de início não selecionada",
+        description: "Selecione a data de início primeiro.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setPeriodMonths(months);
+    setEndDate(addMonths(startDate, months));
+  };
+
+  // Recalcula a data final automaticamente se a data de início mudar após escolher um período
+  useEffect(() => {
+    if (startDate && periodMonths && periodMonths > 0) {
+      setEndDate(addMonths(startDate, periodMonths));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startDate, periodMonths]);
 
   const handleAddPaymentMethod = () => {
     if (paymentMethods.length >= 3) return;
