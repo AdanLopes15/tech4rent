@@ -1372,7 +1372,7 @@ const useStore = create<State & Actions>((set, get) => {
         });
       }
 
-      await setDoc(doc(db, "quotes", newId), dataToSave);
+      await setDoc(doc(db, "quotes", newId), removeUndefined(dataToSave));
 
       const notificationRef = doc(collection(db, "notifications"));
       await setDoc(notificationRef, {
