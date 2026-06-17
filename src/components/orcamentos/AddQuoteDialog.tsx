@@ -154,6 +154,8 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
 
       setStartDate(safeToDate(quote.startDate));
       setEndDate(safeToDate(quote.endDate));
+      setCustomPeriod("");
+      setPeriodMonths(null);
 
       setItems(
         quote.items?.length
