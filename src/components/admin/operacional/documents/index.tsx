@@ -63,31 +63,23 @@ interface DocumentItemRowProps {
 
 export const DocumentItemRow = ({ item, equipments = [] }: DocumentItemRowProps) => {
   const imageUrl = getItemImageUrl(item, equipments);
+  const [imgError, setImgError] = React.useState(false);
   const equipmentName = item.equipmentName || item.productName || item.name || 
                         equipments.find(e => e.id === item.equipmentId)?.name || "Equipamento";
   const equipmentDescription = item.description || equipments.find(e => e.id === item.equipmentId)?.description;
 
+  const showImage = imageUrl && !imgError;
+
   return (
     <div className="flex items-start gap-4 py-1 min-w-[250px]">
       <div className="w-16 h-16 flex-shrink-0 border border-[#e5e5e5] rounded overflow-hidden bg-white flex items-center justify-center">
-        {imageUrl ? (
+        {showImage ? (
           <img 
             src={imageUrl} 
             alt={equipmentName}
+            crossOrigin="anonymous"
             className="w-full h-full object-contain"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.onerror = null; 
-              target.src = ""; // Clear src to trigger fallback or hidden state
-              target.classList.add('hidden');
-              const parent = target.parentElement;
-              if (parent && !parent.querySelector('.fallback-icon')) {
-                const icon = document.createElement('div');
-                icon.className = 'fallback-icon w-full h-full flex flex-col items-center justify-center bg-gray-50';
-                icon.innerHTML = '<span class="text-[8px] text-gray-400 text-center font-bold leading-none uppercase px-1">Sem<br/>foto</span>';
-                parent.appendChild(icon);
-              }
-            }}
+            onError={() => setImgError(true)}
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50">
