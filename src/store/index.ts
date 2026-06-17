@@ -1413,7 +1413,7 @@ const useStore = create<State & Actions>((set, get) => {
       }
 
       const quoteRef = doc(db, "quotes", id);
-      await updateDoc(quoteRef, dataToUpdate);
+      await updateDoc(quoteRef, removeUndefined(dataToUpdate));
 
       set((state) => ({
         quotes: state.quotes.map((q) => (q.id === id ? { ...q, ...updatedQuote } : q)),
