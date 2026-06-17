@@ -83,6 +83,8 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
 
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
+  const [customPeriod, setCustomPeriod] = useState("");
+  const [periodMonths, setPeriodMonths] = useState<number | null>(null);
 
   const [items, setItems] = useState<QuoteItem[]>([
     {
@@ -118,6 +120,8 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
     setBudgetType("locacao");
     setStartDate(undefined);
     setEndDate(undefined);
+    setCustomPeriod("");
+    setPeriodMonths(null);
     setItems([
       {
         id: Date.now(),
@@ -150,6 +154,8 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
 
       setStartDate(safeToDate(quote.startDate));
       setEndDate(safeToDate(quote.endDate));
+      setCustomPeriod("");
+      setPeriodMonths(null);
 
       setItems(
         quote.items?.length
@@ -283,8 +289,42 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
       return;
     }
 
+    setCustomPeriod("");
+    setPeriodMonths(months);
     setEndDate(addMonths(startDate, months));
   };
+
+  const handleCustomPeriodChange = (value: string) => {
+    // aceita apenas números inteiros positivos
+    const cleaned = value.replace(/[^\d]/g, "");
+    setCustomPeriod(cleaned);
+
+    const months = parseInt(cleaned, 10);
+    if (!cleaned || isNaN(months) || months <= 0) {
+      setPeriodMonths(null);
+      return;
+    }
+
+    if (!startDate) {
+      toast({
+        title: "Data de início não selecionada",
+        description: "Selecione a data de início primeiro.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setPeriodMonths(months);
+    setEndDate(addMonths(startDate, months));
+  };
+
+  // Recalcula a data final automaticamente se a data de início mudar após escolher um período
+  useEffect(() => {
+    if (startDate && periodMonths && periodMonths > 0) {
+      setEndDate(addMonths(startDate, periodMonths));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startDate, periodMonths]);
 
   const handleAddPaymentMethod = () => {
     if (paymentMethods.length >= 3) return;
@@ -360,15 +400,16 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
 
       if (budgetType === "venda") {
         data.saleDate = quote?.saleDate || new Date().toISOString();
-        const cleanedPaymentMethods = paymentMethods.map(({ id, ...rest }) => ({
-          ...rest,
-          value: totalValue,
-        }));
-        data.paymentMethods = cleanedPaymentMethods;
         data.prazoEntrega = prazoEntrega;
-        // Preenche/atualiza automaticamente a condição de pagamento nas observações
-        data.observations = buildObservationsWithPaymentCondition(observations, cleanedPaymentMethods, totalValue);
       }
+
+      // Opções de pagamento e condição automática nas observações (Locação e Venda)
+      const cleanedPaymentMethods = paymentMethods.map(({ id, ...rest }) => ({
+        ...rest,
+        value: totalValue,
+      }));
+      data.paymentMethods = cleanedPaymentMethods;
+      data.observations = buildObservationsWithPaymentCondition(observations, cleanedPaymentMethods, totalValue);
 
       let quoteId = quote?.id;
       if (isEditing) {
@@ -503,12 +544,25 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
 
                   <div className="space-y-1">
                     <Label className="text-xs text-muted-foreground">Atalhos de Período:</Label>
-                    <div className="flex gap-2 flex-wrap">
+                    <div className="flex gap-2 flex-wrap items-center">
                       {[3, 6, 12].map((m) => (
                         <Button key={m} type="button" variant="outline" size="sm" onClick={() => setQuickPeriod(m)}>
                           {m} Meses
                         </Button>
                       ))}
+                      <div className="flex items-center gap-1">
+                        <Input
+                          type="number"
+                          min={1}
+                          step={1}
+                          inputMode="numeric"
+                          value={customPeriod}
+                          onChange={(e) => handleCustomPeriodChange(e.target.value)}
+                          placeholder="Digite o período"
+                          className="h-9 w-32"
+                        />
+                        <span className="text-sm text-muted-foreground">Meses</span>
+                      </div>
                     </div>
                   </div>
                 </>
@@ -522,131 +576,132 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
                       placeholder="Ex: 15 dias úteis"
                     />
                   </div>
+                </div>
+              )}
 
-                  <div className="space-y-3">
-                    <Label className="font-semibold">Opções de Pagamento</Label>
+              {/* Opções de Pagamento (Locação e Venda) */}
+              <div className="space-y-3">
+                <Label className="font-semibold">Opções de Pagamento</Label>
 
-                    {paymentMethods.map((pm, index) => (
-                      <div key={pm.id} className="border rounded-lg p-4 space-y-4 relative">
-                        <div className="font-medium">Opção {index + 1}</div>
+                {paymentMethods.map((pm, index) => (
+                  <div key={pm.id} className="border rounded-lg p-4 space-y-4 relative">
+                    <div className="font-medium">Opção {index + 1}</div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Forma de Pagamento</Label>
+                        <Select
+                          value={pm.paymentMethod}
+                          onValueChange={(value) => handlePaymentChange(pm.id, "paymentMethod", value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="boleto">Boleto</SelectItem>
+                            <SelectItem value="entrada_boleto">Entrada + Boleto</SelectItem>
+                            <SelectItem value="pix">PIX</SelectItem>
+                            <SelectItem value="cartao_credito">Cartão de Crédito</SelectItem>
+                            <SelectItem value="transferencia">Transferência</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Nº de Parcelas</Label>
+                        <Input
+                          type="number"
+                          min={1}
+                          value={pm.installments}
+                          onChange={(e) => handlePaymentChange(pm.id, "installments", Number(e.target.value))}
+                        />
+                      </div>
+                    </div>
+
+                    {pm.paymentMethod === "entrada_boleto" && (
+                      <div className="border rounded-lg p-4 bg-muted/40 space-y-4">
+                        <div className="space-y-2">
+                          <Label>Tipo da Entrada</Label>
+                          <RadioGroup
+                            value={pm.downPaymentType}
+                            onValueChange={(value: DownPaymentType) =>
+                              handlePaymentChange(pm.id, "downPaymentType", value)
+                            }
+                            className="flex gap-4"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="fixed" id={`fixed-${pm.id}`} />
+                              <Label htmlFor={`fixed-${pm.id}`}>Valor Fixo (R$)</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="percentage" id={`percentage-${pm.id}`} />
+                              <Label htmlFor={`percentage-${pm.id}`}>Porcentagem (%)</Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label>Forma de Pagamento</Label>
-                            <Select
-                              value={pm.paymentMethod}
-                              onValueChange={(value) => handlePaymentChange(pm.id, "paymentMethod", value)}
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="boleto">Boleto</SelectItem>
-                                <SelectItem value="entrada_boleto">Entrada + Boleto</SelectItem>
-                                <SelectItem value="pix">PIX</SelectItem>
-                                <SelectItem value="cartao_credito">Cartão de Crédito</SelectItem>
-                                <SelectItem value="transferencia">Transferência</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <Label>Valor da Entrada</Label>
+                            <Input
+                              type="text"
+                              value={String(pm.downPaymentValue)}
+                              onChange={(e) => handlePaymentChange(pm.id, "downPaymentValue", e.target.value)}
+                            />
                           </div>
 
                           <div className="space-y-2">
-                            <Label>Nº de Parcelas</Label>
-                            <Input
-                              type="number"
-                              min={1}
-                              value={pm.installments}
-                              onChange={(e) => handlePaymentChange(pm.id, "installments", Number(e.target.value))}
-                            />
+                            <Label>Data da Entrada</Label>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !pm.downPaymentDate && "text-muted-foreground",
+                                  )}
+                                >
+                                  <CalendarIcon className="mr-2 h-4 w-4" />
+                                  {pm.downPaymentDate
+                                    ? format(pm.downPaymentDate, "dd/MM/yyyy")
+                                    : "Escolha uma data"}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={pm.downPaymentDate}
+                                  onSelect={(date) => handlePaymentChange(pm.id, "downPaymentDate", date)}
+                                  locale={ptBR}
+                                />
+                              </PopoverContent>
+                            </Popover>
                           </div>
                         </div>
-
-                        {pm.paymentMethod === "entrada_boleto" && (
-                          <div className="border rounded-lg p-4 bg-muted/40 space-y-4">
-                            <div className="space-y-2">
-                              <Label>Tipo da Entrada</Label>
-                              <RadioGroup
-                                value={pm.downPaymentType}
-                                onValueChange={(value: DownPaymentType) =>
-                                  handlePaymentChange(pm.id, "downPaymentType", value)
-                                }
-                                className="flex gap-4"
-                              >
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="fixed" id={`fixed-${pm.id}`} />
-                                  <Label htmlFor={`fixed-${pm.id}`}>Valor Fixo (R$)</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="percentage" id={`percentage-${pm.id}`} />
-                                  <Label htmlFor={`percentage-${pm.id}`}>Porcentagem (%)</Label>
-                                </div>
-                              </RadioGroup>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div className="space-y-2">
-                                <Label>Valor da Entrada</Label>
-                                <Input
-                                  type="text"
-                                  value={String(pm.downPaymentValue)}
-                                  onChange={(e) => handlePaymentChange(pm.id, "downPaymentValue", e.target.value)}
-                                />
-                              </div>
-
-                              <div className="space-y-2">
-                                <Label>Data da Entrada</Label>
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      className={cn(
-                                        "w-full justify-start text-left font-normal",
-                                        !pm.downPaymentDate && "text-muted-foreground",
-                                      )}
-                                    >
-                                      <CalendarIcon className="mr-2 h-4 w-4" />
-                                      {pm.downPaymentDate
-                                        ? format(pm.downPaymentDate, "dd/MM/yyyy")
-                                        : "Escolha uma data"}
-                                    </Button>
-                                  </PopoverTrigger>
-                                  <PopoverContent className="w-auto p-0" align="start">
-                                    <Calendar
-                                      mode="single"
-                                      selected={pm.downPaymentDate}
-                                      onSelect={(date) => handlePaymentChange(pm.id, "downPaymentDate", date)}
-                                      locale={ptBR}
-                                    />
-                                  </PopoverContent>
-                                </Popover>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {paymentMethods.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="absolute top-2 right-2"
-                            onClick={() => handleRemovePaymentMethod(pm.id)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        )}
                       </div>
-                    ))}
+                    )}
 
-                    {paymentMethods.length < 3 && (
-                      <Button type="button" variant="outline" onClick={handleAddPaymentMethod}>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Adicionar outra opção de pagamento
+                    {paymentMethods.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-2 right-2"
+                        onClick={() => handleRemovePaymentMethod(pm.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     )}
                   </div>
-                </div>
-              )}
+                ))}
+
+                {paymentMethods.length < 3 && (
+                  <Button type="button" variant="outline" onClick={handleAddPaymentMethod}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Adicionar outra opção de pagamento
+                  </Button>
+                )}
+              </div>
 
               <div className="space-y-2">
                 <Label className="font-semibold">Itens</Label>
