@@ -157,7 +157,7 @@ export default function Orcamentos() {
               
               @page {
                 size: A4;
-                margin: 10mm;
+                margin: 8mm;
               }
 
               @media print {
@@ -167,6 +167,13 @@ export default function Orcamentos() {
                 * {
                   -webkit-print-color-adjust: exact !important;
                   print-color-adjust: exact !important;
+                }
+                /* Impede que o container force a altura total de uma página A4,
+                   evitando a geração de uma segunda página em branco */
+                .print-container > div,
+                .document-print-root {
+                  min-height: 0 !important;
+                  height: auto !important;
                 }
               }
 
