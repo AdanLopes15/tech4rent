@@ -98,12 +98,58 @@ export default function Orcamentos() {
 
   const [locacaoOpen, setLocacaoOpen] = useState(true);
   const [vendaOpen, setVendaOpen] = useState(true);
+  const inlineImagesAsBase64 = async (root: HTMLElement) => {
+    const imgs = Array.from(root.querySelectorAll("img"));
+    await Promise.all(
+      imgs.map(async (img) => {
+        const src = img.getAttribute("src");
+        if (!src || src.startsWith("data:")) return;
+        try {
+          const res = await fetch(src, { mode: "cors" });
+          const blob = await res.blob();
+          const dataUrl: string = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+          img.setAttribute("src", dataUrl);
+        } catch (e) {
+          // Se não for possível converter (CORS, etc.), mantém a URL original
+          console.warn("Não foi possível converter imagem para base64:", src, e);
+        }
+      }),
+    );
+  };
+
+  const waitForImages = async (root: HTMLElement) => {
+    const imgs = Array.from(root.querySelectorAll("img"));
+    await Promise.all(
+      imgs.map(
+        (img) =>
+          new Promise<void>((resolve) => {
+            if (img.complete && img.naturalWidth > 0) return resolve();
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+          }),
+      ),
+    );
+  };
+
   const handleDownloadPDFAsFile = async (ref: React.RefObject<HTMLDivElement>, filename: string) => {
     if (!ref.current) return;
 
     const element = ref.current;
+    const docRoot = element.querySelector<HTMLElement>(".document-print-root") || element;
+
+    // Remove temporariamente a altura mínima de 1 página A4 para evitar página em branco extra
+    const prevMinHeight = docRoot.style.minHeight;
+    const prevHeight = docRoot.style.height;
+    docRoot.style.minHeight = "auto";
+    docRoot.style.height = "auto";
+
     const opt = {
-      margin: 0,
+      margin: 8,
       filename: `${filename}.pdf`,
       image: { type: 'jpeg' as const, quality: 0.98 },
       html2canvas: { 
@@ -112,13 +158,17 @@ export default function Orcamentos() {
         letterRendering: true,
         backgroundColor: '#ffffff'
       },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] as any },
       jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
     };
 
 
     try {
       toast({ title: "Gerando PDF...", description: "Por favor, aguarde um momento." });
-      await html2pdf().set(opt).from(element).save();
+      // Garante que as imagens (foto do equipamento) estejam embutidas e carregadas antes de gerar
+      await inlineImagesAsBase64(docRoot);
+      await waitForImages(docRoot);
+      await html2pdf().set(opt).from(docRoot).save();
       toast({ title: "PDF gerado com sucesso!" });
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
@@ -127,6 +177,9 @@ export default function Orcamentos() {
         description: "Houve um problema ao gerar o arquivo. Tente usar a opção de imprimir.",
         variant: "destructive" 
       });
+    } finally {
+      docRoot.style.minHeight = prevMinHeight;
+      docRoot.style.height = prevHeight;
     }
   };
 
