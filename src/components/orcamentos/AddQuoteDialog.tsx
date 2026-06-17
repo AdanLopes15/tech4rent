@@ -539,12 +539,25 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
 
                   <div className="space-y-1">
                     <Label className="text-xs text-muted-foreground">Atalhos de Período:</Label>
-                    <div className="flex gap-2 flex-wrap">
+                    <div className="flex gap-2 flex-wrap items-center">
                       {[3, 6, 12].map((m) => (
                         <Button key={m} type="button" variant="outline" size="sm" onClick={() => setQuickPeriod(m)}>
                           {m} Meses
                         </Button>
                       ))}
+                      <div className="flex items-center gap-1">
+                        <Input
+                          type="number"
+                          min={1}
+                          step={1}
+                          inputMode="numeric"
+                          value={customPeriod}
+                          onChange={(e) => handleCustomPeriodChange(e.target.value)}
+                          placeholder="Digite o período"
+                          className="h-9 w-32"
+                        />
+                        <span className="text-sm text-muted-foreground">Meses</span>
+                      </div>
                     </div>
                   </div>
                 </>
