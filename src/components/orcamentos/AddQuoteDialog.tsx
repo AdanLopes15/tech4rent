@@ -396,15 +396,16 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
 
       if (budgetType === "venda") {
         data.saleDate = quote?.saleDate || new Date().toISOString();
-        const cleanedPaymentMethods = paymentMethods.map(({ id, ...rest }) => ({
-          ...rest,
-          value: totalValue,
-        }));
-        data.paymentMethods = cleanedPaymentMethods;
         data.prazoEntrega = prazoEntrega;
-        // Preenche/atualiza automaticamente a condição de pagamento nas observações
-        data.observations = buildObservationsWithPaymentCondition(observations, cleanedPaymentMethods, totalValue);
       }
+
+      // Opções de pagamento e condição automática nas observações (Locação e Venda)
+      const cleanedPaymentMethods = paymentMethods.map(({ id, ...rest }) => ({
+        ...rest,
+        value: totalValue,
+      }));
+      data.paymentMethods = cleanedPaymentMethods;
+      data.observations = buildObservationsWithPaymentCondition(observations, cleanedPaymentMethods, totalValue);
 
       let quoteId = quote?.id;
       if (isEditing) {
