@@ -220,9 +220,14 @@ export default function Orcamentos() {
 
     try {
       toast({ title: "Gerando PDF...", description: "Por favor, aguarde um momento." });
-      // Garante que as imagens (foto do equipamento) estejam embutidas e carregadas antes de gerar
-      await inlineImagesAsBase64(docRoot);
-      await waitForImages(docRoot);
+      // Prepara imagens com proteção global de tempo: nunca trava a geração do PDF
+      const prepareImages = (async () => {
+        await inlineImagesAsBase64(docRoot);
+        await waitForImages(docRoot);
+      })();
+      const globalGuard = new Promise<void>((resolve) => setTimeout(resolve, 12000));
+      await Promise.race([prepareImages, globalGuard]);
+      // Gera e baixa o PDF mesmo que alguma imagem não tenha sido preparada a tempo
       await html2pdf().set(opt).from(docRoot).save();
       toast({ title: "PDF gerado com sucesso!" });
     } catch (error) {
