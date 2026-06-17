@@ -54,8 +54,10 @@ function describePaymentMethod(pm: any): string {
   return `${label} em ${installments}x`;
 }
 
+// Captura tanto "Condição de pagamento:" (singular) quanto "Condições de pagamento:" (plural),
+// removendo todos os blocos automáticos existentes para evitar duplicação.
 const PAYMENT_CONDITION_REGEX =
-  /^\s*Condi[çc][õo]es?\s+de\s+pagamento:[\s\S]*?(?:\n{2,}|$)/i;
+  /Condi[^\s]*\s+de\s+pagamento:[\s\S]*?(?:\n{2,}|$)/gi;
 
 /**
  * Monta o texto de condição de pagamento a partir das formas de pagamento e
