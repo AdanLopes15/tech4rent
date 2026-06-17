@@ -926,8 +926,8 @@ export default function Orcamentos() {
         </AlertDialog>
       )}
 
-      {/* Ref para download direto de PDF */}
-      <div className="sr-only">
+      {/* Ref para download direto de PDF (off-screen, mas com tamanho real para o html2canvas) */}
+      <div style={{ position: "fixed", left: "-10000px", top: 0, width: "800px", pointerEvents: "none", zIndex: -1 }} aria-hidden="true">
         <div ref={quoteDownloadRef}>
           {quoteForDownload && (
             <DocumentContainer>
@@ -1246,8 +1246,8 @@ export default function Orcamentos() {
           </AlertDialogContent>
         </AlertDialog>
       )}
-      {/* Ref para download direto de PDF */}
-      <div className="sr-only">
+      {/* Ref para download direto de PDF (off-screen, mas com tamanho real para o html2canvas) */}
+      <div style={{ position: "fixed", left: "-10000px", top: 0, width: "800px", pointerEvents: "none", zIndex: -1 }} aria-hidden="true">
         <div ref={quoteDownloadRef}>
           {quoteForDownload && (
             <DocumentContainer>
