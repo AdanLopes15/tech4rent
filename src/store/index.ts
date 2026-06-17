@@ -30,7 +30,7 @@ import {
 } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { db, auth, storage } from "@/lib/firebase";
-import { getNextId as getNextIdUtil } from "./utils";
+import { getNextId as getNextIdUtil, removeUndefined } from "./utils";
 import { format, differenceInMonths, addMonths, addDays, addYears, addWeeks, getDate } from "date-fns";
 import { addSale, updateSale, cancelSale, deleteSale } from "./methods/sales";
 
