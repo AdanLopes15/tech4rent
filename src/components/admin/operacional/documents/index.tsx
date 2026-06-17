@@ -125,8 +125,10 @@ export const DocumentContainer = ({ children, className }: DocumentContainerProp
   return (
     <div 
       className={cn(
-        "bg-white text-[#1a1a1a] p-10 mx-auto shadow-sm print:shadow-none print:p-10",
+        "document-print-root",
+        "bg-white text-[#1a1a1a] p-10 mx-auto shadow-sm print:shadow-none print:p-8",
         "w-full max-w-[210mm] min-h-[297mm] flex flex-col gap-4",
+        "print:min-h-0",
         "font-sans leading-normal",
         "print:m-0 print:w-full",
         className
