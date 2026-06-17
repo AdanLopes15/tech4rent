@@ -67,8 +67,8 @@ export function buildObservationsWithPaymentCondition(
   observations: string,
   paymentMethods: any[],
 ): string {
-  // Remove qualquer bloco de condição de pagamento já existente no início
-  const userText = (observations || "").replace(PAYMENT_CONDITION_REGEX, "").trimStart();
+  // Remove qualquer bloco de condição de pagamento já existente (singular ou plural)
+  const userText = (observations || "").replace(PAYMENT_CONDITION_REGEX, "").trim();
 
   if (!paymentMethods || paymentMethods.length === 0) {
     return userText;
