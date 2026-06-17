@@ -98,6 +98,35 @@ export default function Orcamentos() {
 
   const [locacaoOpen, setLocacaoOpen] = useState(true);
   const [vendaOpen, setVendaOpen] = useState(true);
+  const blobToDataUrl = (blob: Blob) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+
+  const fetchAsDataUrl = async (src: string): Promise<string> => {
+    // 1ª tentativa: download direto (funciona se o servidor enviar headers de CORS)
+    try {
+      const res = await fetch(src, { mode: "cors" });
+      if (res.ok) {
+        const blob = await res.blob();
+        if (blob.size > 0) return await blobToDataUrl(blob);
+      }
+    } catch (e) {
+      // ignora e tenta o proxy
+    }
+
+    // 2ª tentativa: proxy com CORS habilitado (contorna imagens externas sem CORS)
+    const proxied = `https://images.weserv.nl/?url=${encodeURIComponent(
+      src.replace(/^https?:\/\//, ""),
+    )}`;
+    const res = await fetch(proxied, { mode: "cors" });
+    const blob = await res.blob();
+    return await blobToDataUrl(blob);
+  };
+
   const inlineImagesAsBase64 = async (root: HTMLElement) => {
     const imgs = Array.from(root.querySelectorAll("img"));
     await Promise.all(
@@ -105,15 +134,11 @@ export default function Orcamentos() {
         const src = img.getAttribute("src");
         if (!src || src.startsWith("data:")) return;
         try {
-          const res = await fetch(src, { mode: "cors" });
-          const blob = await res.blob();
-          const dataUrl: string = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-          });
-          img.setAttribute("src", dataUrl);
+          const dataUrl = await fetchAsDataUrl(src);
+          if (dataUrl && dataUrl.startsWith("data:")) {
+            img.setAttribute("src", dataUrl);
+            img.removeAttribute("crossorigin");
+          }
         } catch (e) {
           // Se não for possível converter (CORS, etc.), mantém a URL original
           console.warn("Não foi possível converter imagem para base64:", src, e);
@@ -121,6 +146,7 @@ export default function Orcamentos() {
       }),
     );
   };
+
 
   const waitForImages = async (root: HTMLElement) => {
     const imgs = Array.from(root.querySelectorAll("img"));
