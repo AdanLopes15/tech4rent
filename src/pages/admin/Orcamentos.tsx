@@ -243,8 +243,23 @@ export default function Orcamentos() {
     }
   };
 
-  const handlePrintDocument = (ref: React.RefObject<HTMLDivElement>) => {
+  const handlePrintDocument = async (ref: React.RefObject<HTMLDivElement>) => {
     if (!ref.current) return;
+
+    const docRoot = ref.current.querySelector<HTMLElement>(".document-print-root") || ref.current;
+
+    // Embute as imagens como base64 para que apareçam na janela de impressão
+    // (evita perda da imagem por CORS, blob: ou origem cruzada)
+    try {
+      const prepare = (async () => {
+        await inlineImagesAsBase64(docRoot);
+        await waitForImages(docRoot);
+      })();
+      const guard = new Promise<void>((resolve) => setTimeout(resolve, 12000));
+      await Promise.race([prepare, guard]);
+    } catch (e) {
+      console.warn("Falha ao preparar imagens para impressão:", e);
+    }
 
     const content = ref.current.innerHTML;
     const printWindow = window.open("", "_blank");
