@@ -59,9 +59,12 @@ export const getItemImageUrl = (item: any, equipments: any[] = []) => {
 interface DocumentItemRowProps {
   item: any;
   equipments?: any[];
+  /** Quando true, ajusta o layout para captura via html2canvas/PDF direto
+   *  (largura fixa na coluna de texto e descrição sem corte). */
+  pdfMode?: boolean;
 }
 
-export const DocumentItemRow = ({ item, equipments = [] }: DocumentItemRowProps) => {
+export const DocumentItemRow = ({ item, equipments = [], pdfMode = false }: DocumentItemRowProps) => {
   const imageUrl = getItemImageUrl(item, equipments);
   const [imgError, setImgError] = React.useState(false);
   const equipmentName = item.equipmentName || item.productName || item.name || 
@@ -86,10 +89,19 @@ export const DocumentItemRow = ({ item, equipments = [] }: DocumentItemRowProps)
           </div>
         )}
       </div>
-      <div className="flex flex-col min-w-0 flex-1">
+      {/* No modo PDF usamos largura fixa em vez de flex-1, pois o html2canvas
+          colapsa a coluna flexível e corta a descrição. */}
+      <div
+        className={pdfMode ? "flex flex-col" : "flex flex-col min-w-0 flex-1"}
+        style={pdfMode ? { width: "600px" } : undefined}
+      >
         <span className="text-sm font-bold text-[#1a1a1a] leading-tight mb-0.5">{equipmentName}</span>
         {equipmentDescription && (
-          <span className="text-[10px] text-[#666666] leading-snug line-clamp-2">
+          <span
+            className={pdfMode
+              ? "text-[10px] text-[#666666] leading-snug whitespace-normal break-words"
+              : "text-[10px] text-[#666666] leading-snug line-clamp-2"}
+          >
             {equipmentDescription}
           </span>
         )}
