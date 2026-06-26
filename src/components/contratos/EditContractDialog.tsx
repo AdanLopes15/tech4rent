@@ -70,6 +70,8 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [items, setItems] = useState<ContractItem[]>([]);
   const [totalValue, setTotalValue] = useState(0);
+  const [retiradaOpen, setRetiradaOpen] = useState(false);
+  const [endOpen, setEndOpen] = useState(false);
 
   const resetForm = () => {
     setSelectedClientId("");
