@@ -380,6 +380,23 @@ export default function Orcamentos() {
     }
   };
 
+  // Resolve a melhor fonte de data do orçamento, cobrindo registros antigos
+  // que podem ter salvo a data em campos diferentes.
+  const getQuoteDate = (quote: any) =>
+    quote?.createdAt ??
+    quote?.created_at ??
+    quote?.dataOrcamento ??
+    quote?.quoteDate ??
+    quote?.createdDate ??
+    quote?.data ??
+    quote?.date ??
+    quote?.saleDate ??
+    null;
+
+  const formatQuoteDate = (quote: any) => formatDate(getQuoteDate(quote));
+
+
+
   const getClientName = (clientId: string, fallbackName?: string) => {
     const client = clients.find((c: any) => c.id === clientId);
     return client?.razaoSocial || client?.name || fallbackName || "N/A";
