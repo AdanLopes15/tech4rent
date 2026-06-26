@@ -94,7 +94,7 @@ export function AddClientDialog({ open, onOpenChange, client }: AddClientDialogP
       setCpf(client.cpf || "");
       setIe(client.ie || client.rg || "");
       setEmail(client.email || "");
-      setTelefone(getContactPhone(client));
+      setTelefone(maskPhoneBR(getContactPhone(client)));
       setCep(client.cep || "");
       setAddress(mappedAddress);
       setStatus(client.status || "ativo");
