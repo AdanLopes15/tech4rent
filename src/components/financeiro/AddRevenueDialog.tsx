@@ -60,6 +60,9 @@ export const AddRevenueDialog = ({ open, onOpenChange, revenue, viewOnly = false
   const [repetitionType, setRepetitionType] = useState<"diario" | "semanal" | "mensal" | "anual">("mensal");
 
   const [saving, setSaving] = useState(false);
+  const [competenceOpen, setCompetenceOpen] = useState(false);
+  const [dueOpen, setDueOpen] = useState(false);
+  const [paymentOpen, setPaymentOpen] = useState(false);
   const [showAddClient, setShowAddClient] = useState(false);
 
   const valorTotal = useMemo(() => valorBruto - desconto + juros, [valorBruto, desconto, juros]);
