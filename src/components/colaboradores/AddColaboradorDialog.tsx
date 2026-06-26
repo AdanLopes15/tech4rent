@@ -170,7 +170,7 @@ export function AddCollaboratorDialog({ open, onOpenChange, collaborator }: AddC
               <Input
                 placeholder="(00) 00000-0000"
                 value={telefone}
-                onChange={(e) => setTelefone(e.target.value)}
+                onChange={(e) => setTelefone(maskPhoneBR(e.target.value))}
                 className="h-9"
               />
             </div>
