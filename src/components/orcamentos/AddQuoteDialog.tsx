@@ -508,7 +508,7 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Data de Início</Label>
-                      <Popover>
+                      <Popover open={startOpen} onOpenChange={setStartOpen}>
                         <PopoverTrigger asChild>
                           <Button
                             variant="outline"
@@ -522,7 +522,7 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar mode="single" selected={startDate} onSelect={setStartDate} locale={ptBR} />
+                          <Calendar mode="single" selected={startDate} onSelect={(date) => { setStartDate(date); setStartOpen(false); }} locale={ptBR} className="pointer-events-auto" />
                         </PopoverContent>
                       </Popover>
                     </div>
