@@ -156,7 +156,7 @@ export default function Fornecedores() {
 
                         <TableCell className="text-muted-foreground">{supplier.email || "—"}</TableCell>
 
-                        <TableCell className="text-muted-foreground">{phone || "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">{formatPhoneBR(phone)}</TableCell>
 
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1">
