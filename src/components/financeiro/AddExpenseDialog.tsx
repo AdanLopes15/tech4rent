@@ -531,7 +531,7 @@ export const AddExpenseDialog = ({ open, onOpenChange, expense, viewOnly = false
                     disabled={viewOnly || isRecurring}
                     className="pr-8"
                   />
-                  <Popover>
+                  <Popover open={dueOpen} onOpenChange={setDueOpen}>
                     <PopoverTrigger asChild>
                       <Button
                         variant="ghost"
@@ -543,7 +543,7 @@ export const AddExpenseDialog = ({ open, onOpenChange, expense, viewOnly = false
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" selected={dueDate} onSelect={setDueDate} initialFocus locale={ptBR} />
+                      <Calendar mode="single" selected={dueDate} onSelect={(d) => { setDueDate(d); setDueOpen(false); }} initialFocus locale={ptBR} />
                     </PopoverContent>
                   </Popover>
                 </div>
