@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency, cn, formatAddress } from "@/lib/utils";
+import { formatPhoneBR } from "@/lib/contact";
 import { generateQuotePDF } from "@/lib/pdf-utils";
 import html2pdf from "html2pdf.js";
 import { 
@@ -91,6 +92,13 @@ export default function Orcamentos() {
   const [quoteForDownload, setQuoteForDownload] = useState<any>(null);
   const [quoteForApproval, setQuoteForApproval] = useState<any>(null);
   const [isContractGenerated, setIsContractGenerated] = useState(false);
+
+  useEffect(() => {
+    const active = viewingQuote || quoteForDownload || quoteForApproval;
+    if (active) setQuoteResponsible(active.quoteResponsible || "");
+  }, [viewingQuote, quoteForDownload, quoteForApproval]);
+
+
 
   const [clientFilter, setClientFilter] = useState("todos");
   const [statusFilter, setStatusFilter] = useState("todos");
@@ -849,10 +857,11 @@ export default function Orcamentos() {
                     <div className="flex flex-col">
                       <span className="text-xs text-[#666666] uppercase">Telefone / WhatsApp</span>
                       <span className="text-sm font-bold text-[#1a1a1a]">
-                        {clients.find((c: any) => c.id === viewingQuote.clientId)?.telefone || 
+                        {formatPhoneBR(clients.find((c: any) => c.id === viewingQuote.clientId)?.telefone || 
                          clients.find((c: any) => c.id === viewingQuote.clientId)?.phone || 
-                         clients.find((c: any) => c.id === viewingQuote.clientId)?.whatsapp || 
+                         clients.find((c: any) => c.id === viewingQuote.clientId)?.whatsapp) || 
                          "—"}
+
                       </span>
                     </div>
                   </div>
@@ -974,10 +983,11 @@ export default function Orcamentos() {
                   <div className="flex flex-col">
                     <span className="text-xs text-[#666666] uppercase">Telefone / WhatsApp</span>
                     <span className="text-sm font-bold text-[#1a1a1a]">
-                      {clients.find((c: any) => c.id === quoteForDownload.clientId)?.telefone || 
+                      {formatPhoneBR(clients.find((c: any) => c.id === quoteForDownload.clientId)?.telefone || 
                        clients.find((c: any) => c.id === quoteForDownload.clientId)?.phone || 
-                       clients.find((c: any) => c.id === quoteForDownload.clientId)?.whatsapp || 
+                       clients.find((c: any) => c.id === quoteForDownload.clientId)?.whatsapp) || 
                        "—"}
+
                     </span>
                   </div>
                 </div>
@@ -1295,10 +1305,11 @@ export default function Orcamentos() {
                   <div className="flex flex-col">
                     <span className="text-xs text-[#666666] uppercase">Telefone / WhatsApp</span>
                     <span className="text-sm font-bold text-[#1a1a1a]">
-                      {clients.find((c: any) => c.id === quoteForDownload.clientId)?.telefone || 
+                      {formatPhoneBR(clients.find((c: any) => c.id === quoteForDownload.clientId)?.telefone || 
                        clients.find((c: any) => c.id === quoteForDownload.clientId)?.phone || 
-                       clients.find((c: any) => c.id === quoteForDownload.clientId)?.whatsapp || 
+                       clients.find((c: any) => c.id === quoteForDownload.clientId)?.whatsapp) || 
                        "—"}
+
                     </span>
                   </div>
                 </div>
