@@ -16,28 +16,27 @@ interface CompanyLogoProps {
  */
 export const CompanyLogo = ({ className, style, isDark = false, useSettings = false }: CompanyLogoProps) => {
   // URLs estáveis para a logo
-  const LIGHT_LOGO_URL = "/logo-tech4rent-light.png"; // Versão gerada com texto escuro (#0D1B2A)
-  const DARK_LOGO_URL = "/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png";   // Versão com texto branco (mantida)
+  const LIGHT_LOGO_URL = "/logo-tech4rent-light.png"; // Versão com texto escuro (#0D1B2A)
+  const DARK_LOGO_URL = "/lovable-uploads/48e895df-32f2-443b-9e4a-977ca36b043d.png"; // Versão com texto branco
 
-  const [imgSrc, setImgSrc] = useState<string>(isDark ? DARK_LOGO_URL : LIGHT_LOGO_URL);
+  // Fonte derivada diretamente do tema atual (reativa em tempo real).
+  const themedSrc = isDark ? DARK_LOGO_URL : LIGHT_LOGO_URL;
+
   const [hasError, setHasError] = useState(false);
 
-  // Efeito para atualizar o src quando o tema mudar ou se houver erro
+  // Sempre que o tema mudar, limpamos o estado de erro para tentar a imagem correta novamente.
   useEffect(() => {
-    if (!hasError) {
-      setImgSrc(isDark ? DARK_LOGO_URL : LIGHT_LOGO_URL);
-    }
-  }, [isDark, hasError]);
+    setHasError(false);
+  }, [isDark]);
 
   const handleError = () => {
     console.warn("Logo URL failed to load, falling back to local asset.");
     setHasError(true);
-    setImgSrc(logoTech4RentAsset);
   };
 
   return (
     <img
-      src={imgSrc}
+      src={hasError ? logoTech4RentAsset : themedSrc}
       alt="Tech4Rent Logo"
       onError={handleError}
       style={style}
