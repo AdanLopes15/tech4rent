@@ -751,11 +751,12 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
                       <div className="space-y-1">
                         <Label className="text-xs">{budgetType === "locacao" ? "Vl. Unitário" : "Vl. Unitário"}</Label>
                         <Input
-                          type="number"
-                          min={0}
-                          value={item.unitPrice}
-                          onChange={(e) => updateItem(item.id, "unitPrice", Number(e.target.value))}
+                          type="text"
+                          inputMode="numeric"
+                          value={formatCurrency(item.unitPrice)}
+                          onChange={(e) => updateItem(item.id, "unitPrice", parseCurrencyBR(e.target.value))}
                         />
+
                       </div>
 
                       <Button
