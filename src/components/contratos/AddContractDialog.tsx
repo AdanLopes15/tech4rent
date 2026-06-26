@@ -53,6 +53,9 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
   const [bankAccountId, setBankAccountId] = useState("");
   const [loading, setLoading] = useState(false);
   const [isClientDialogOpen, setIsClientDialogOpen] = useState(false);
+  const [startOpen, setStartOpen] = useState(false);
+  const [endOpen, setEndOpen] = useState(false);
+  const [firstInstallmentOpen, setFirstInstallmentOpen] = useState(false);
 
   const isEditing = !!contract;
 
