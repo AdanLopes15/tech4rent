@@ -254,7 +254,7 @@ export function AddSupplierDialog({ open, onOpenChange, supplier, viewOnly = fal
       razaoSocial: razaoSocial.trim(),
       contato: contato.trim(),
       ie: ie.trim(),
-      telefone: telefone.trim(),
+      telefone: telefone.replace(/\D/g, ""),
       observacoes: observacoes.trim(),
       address: {
         street: address.street.trim(),
