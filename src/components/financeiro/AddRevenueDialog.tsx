@@ -515,7 +515,7 @@ export const AddRevenueDialog = ({ open, onOpenChange, revenue, viewOnly = false
                       <Calendar
                         mode="single"
                         selected={paymentDate}
-                        onSelect={setPaymentDate}
+                        onSelect={(d) => { setPaymentDate(d); setPaymentOpen(false); }}
                         initialFocus
                         locale={ptBR}
                       />
