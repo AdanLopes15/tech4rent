@@ -257,8 +257,8 @@ export function AddClientDialog({ open, onOpenChange, client }: AddClientDialogP
       // campos já usados no Lovable para compatibilidade
       name: razaoSocial.trim(),
       contactPerson: contato.trim(),
-      phone: telefone.trim(),
-      whatsapp: telefone.trim(),
+      phone: telefone.replace(/\D/g, ""),
+      whatsapp: telefone.replace(/\D/g, ""),
       notes: observacoes.trim(),
       street: address.street.trim(),
       number: address.number.trim(),
