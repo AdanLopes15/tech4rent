@@ -84,6 +84,9 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
 
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
+  const [startOpen, setStartOpen] = useState(false);
+  const [endOpen, setEndOpen] = useState(false);
+  const [downPaymentDateOpen, setDownPaymentDateOpen] = useState<Record<string, boolean>>({});
   const [customPeriod, setCustomPeriod] = useState("");
   const [periodMonths, setPeriodMonths] = useState<number | null>(null);
 
@@ -505,7 +508,7 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Data de Início</Label>
-                      <Popover>
+                      <Popover open={startOpen} onOpenChange={setStartOpen}>
                         <PopoverTrigger asChild>
                           <Button
                             variant="outline"
@@ -519,14 +522,14 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar mode="single" selected={startDate} onSelect={setStartDate} locale={ptBR} />
+                          <Calendar mode="single" selected={startDate} onSelect={(date) => { setStartDate(date); setStartOpen(false); }} locale={ptBR} className="pointer-events-auto" />
                         </PopoverContent>
                       </Popover>
                     </div>
 
                     <div className="space-y-2">
                       <Label>Data Final</Label>
-                      <Popover>
+                      <Popover open={endOpen} onOpenChange={setEndOpen}>
                         <PopoverTrigger asChild>
                           <Button
                             variant="outline"
@@ -540,7 +543,7 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar mode="single" selected={endDate} onSelect={setEndDate} locale={ptBR} />
+                          <Calendar mode="single" selected={endDate} onSelect={(date) => { setEndDate(date); setEndOpen(false); }} locale={ptBR} className="pointer-events-auto" />
                         </PopoverContent>
                       </Popover>
                     </div>
@@ -656,7 +659,7 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
 
                           <div className="space-y-2">
                             <Label>Data da Entrada</Label>
-                            <Popover>
+                            <Popover open={!!downPaymentDateOpen[pm.id]} onOpenChange={(o) => setDownPaymentDateOpen((prev) => ({ ...prev, [pm.id]: o }))}>
                               <PopoverTrigger asChild>
                                 <Button
                                   variant="outline"
@@ -675,8 +678,9 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
                                 <Calendar
                                   mode="single"
                                   selected={pm.downPaymentDate}
-                                  onSelect={(date) => handlePaymentChange(pm.id, "downPaymentDate", date)}
+                                  onSelect={(date) => { handlePaymentChange(pm.id, "downPaymentDate", date); setDownPaymentDateOpen((prev) => ({ ...prev, [pm.id]: false })); }}
                                   locale={ptBR}
+                                  className="pointer-events-auto"
                                 />
                               </PopoverContent>
                             </Popover>
