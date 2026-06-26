@@ -560,7 +560,7 @@ export const AddExpenseDialog = ({ open, onOpenChange, expense, viewOnly = false
                     disabled={viewOnly || status !== "pago"}
                     className="pr-8"
                   />
-                  <Popover>
+                  <Popover open={paymentOpen} onOpenChange={setPaymentOpen}>
                     <PopoverTrigger asChild>
                       <Button
                         variant="ghost"
@@ -575,7 +575,7 @@ export const AddExpenseDialog = ({ open, onOpenChange, expense, viewOnly = false
                       <Calendar
                         mode="single"
                         selected={paymentDate}
-                        onSelect={setPaymentDate}
+                        onSelect={(d) => { setPaymentDate(d); setPaymentOpen(false); }}
                         initialFocus
                         locale={ptBR}
                       />
