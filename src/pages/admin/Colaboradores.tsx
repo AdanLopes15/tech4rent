@@ -157,7 +157,7 @@ export default function Colaboradores() {
                       <TableRow key={collab.id}>
                         <TableCell className="font-medium">{collab.name}</TableCell>
                         <TableCell className="text-muted-foreground">{collab.cpf || "—"}</TableCell>
-                        <TableCell className="text-muted-foreground">{phone || "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">{formatPhoneBR(phone)}</TableCell>
                         <TableCell className="text-muted-foreground">{clientName}</TableCell>
                         <TableCell className="text-muted-foreground">{permissionLabel(collab.permission)}</TableCell>
                         <TableCell>
