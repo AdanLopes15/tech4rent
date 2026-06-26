@@ -1353,9 +1353,10 @@ const useStore = create<State & Actions>((set, get) => {
       const newId = await get().getNextId("quotes");
       const dataToSave: any = {
         ...quoteData,
-        createdAt: serverTimestamp(),
+        createdAt: Timestamp.fromDate(new Date()),
         id: newId,
       };
+
 
       if (quoteData.startDate) dataToSave.startDate = Timestamp.fromDate(new Date(quoteData.startDate));
       if (quoteData.endDate) dataToSave.endDate = Timestamp.fromDate(new Date(quoteData.endDate));
