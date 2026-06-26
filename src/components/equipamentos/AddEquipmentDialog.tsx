@@ -281,29 +281,29 @@ export function AddEquipmentDialog({ open, onOpenChange, equipment }: AddEquipme
           <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="vl-diaria" className="text-xs font-medium">Diária (R$)</Label>
-              <Input id="vl-diaria" type="number" placeholder="0,00" value={dailyRate} onChange={(e) => setDailyRate(e.target.value)} className="h-9" />
+              <Input id="vl-diaria" type="text" inputMode="numeric" placeholder="R$ 0,00" value={dailyRate} onChange={(e) => setDailyRate(maskCurrencyBR(e.target.value))} className="h-9" />
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="vl-semanal" className="text-xs font-medium">Semanal (R$)</Label>
-              <Input id="vl-semanal" type="number" placeholder="0,00" value={weeklyRate} onChange={(e) => setWeeklyRate(e.target.value)} className="h-9" />
+              <Input id="vl-semanal" type="text" inputMode="numeric" placeholder="R$ 0,00" value={weeklyRate} onChange={(e) => setWeeklyRate(maskCurrencyBR(e.target.value))} className="h-9" />
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="vl-mensal" className="text-xs font-medium">Mensal (R$)</Label>
-              <Input id="vl-mensal" type="number" placeholder="0,00" value={monthlyRate} onChange={(e) => setMonthlyRate(e.target.value)} className="h-9" />
+              <Input id="vl-mensal" type="text" inputMode="numeric" placeholder="R$ 0,00" value={monthlyRate} onChange={(e) => setMonthlyRate(maskCurrencyBR(e.target.value))} className="h-9" />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="vl-venda" className="text-xs font-medium">Preço de Venda (R$)</Label>
-              <Input id="vl-venda" type="number" placeholder="0,00" value={salePrice} onChange={(e) => setSalePrice(e.target.value)} className="h-9" />
+              <Input id="vl-venda" type="text" inputMode="numeric" placeholder="R$ 0,00" value={salePrice} onChange={(e) => setSalePrice(maskCurrencyBR(e.target.value))} className="h-9" />
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="vl-custo" className="text-xs font-medium">Preço de Custo (R$)</Label>
-              <Input id="vl-custo" type="number" placeholder="0,00" value={costPrice} onChange={(e) => setCostPrice(e.target.value)} className="h-9" />
+              <Input id="vl-custo" type="text" inputMode="numeric" placeholder="R$ 0,00" value={costPrice} onChange={(e) => setCostPrice(maskCurrencyBR(e.target.value))} className="h-9" />
             </div>
           </div>
 
