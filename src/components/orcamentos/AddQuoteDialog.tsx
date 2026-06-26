@@ -398,6 +398,8 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
         status: quote?.status || "Pendente",
         informacoesFiscais,
         observations,
+        quoteResponsible,
+
       };
 
       if (budgetType === "locacao") {
