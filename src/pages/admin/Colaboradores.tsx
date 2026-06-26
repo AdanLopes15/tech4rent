@@ -23,7 +23,7 @@ import {
 
 import { PlusCircle, Phone, Pencil, Trash2 } from "lucide-react";
 import { AddCollaboratorDialog } from "@/components/colaboradores/AddColaboradorDialog";
-import { getContactPhone, getWhatsappLink, openWhatsappLink } from "@/lib/contact";
+import { getContactPhone, getWhatsappLink, openWhatsappLink, formatPhoneBR } from "@/lib/contact";
 
 export default function Colaboradores() {
   const { collaborators, clients, deleteCollaborator } = useStore();
