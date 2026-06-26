@@ -8,7 +8,7 @@ import { Timestamp } from "firebase/firestore";
 
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency, maskCurrencyBR, parseCurrencyBR } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import {
