@@ -113,6 +113,7 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
     },
   ]);
   const [prazoEntrega, setPrazoEntrega] = useState("");
+  const [quoteResponsible, setQuoteResponsible] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [isClientDialogOpen, setIsClientDialogOpen] = useState(false);
@@ -147,6 +148,7 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
       },
     ]);
     setPrazoEntrega("");
+    setQuoteResponsible("");
   };
 
   useEffect(() => {
@@ -208,6 +210,7 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
       }
 
       setPrazoEntrega(quote.prazoEntrega || "");
+      setQuoteResponsible(quote.quoteResponsible || "");
     } else {
       resetForm();
     }
