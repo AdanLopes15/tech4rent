@@ -55,6 +55,7 @@ interface AddQuoteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   quote?: any;
+  onCreated?: (quote: any) => void;
 }
 
 const safeToDate = (value: any): Date | undefined => {
@@ -74,7 +75,7 @@ const safeToDate = (value: any): Date | undefined => {
   return undefined;
 };
 
-export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProps) {
+export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuoteDialogProps) {
   const { clients, equipments, addQuote, updateQuote } = useStore();
   const { toast } = useToast();
 
@@ -422,6 +423,9 @@ export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProp
         const result = await addQuote(data);
         quoteId = result.id;
         toast({ title: "Orçamento criado com sucesso!" });
+        onOpenChange(false);
+        onCreated?.({ ...data, ...result, id: quoteId });
+        return;
       }
 
       // O PDF pode ser baixado manualmente na lista de orçamentos após a criação/edição.

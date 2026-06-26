@@ -797,7 +797,12 @@ export default function Orcamentos() {
         </Card>
       </Collapsible>
 
-      <AddQuoteDialog open={isDialogOpen} onOpenChange={handleCloseDialog} quote={editingQuote} />
+      <AddQuoteDialog
+        open={isDialogOpen}
+        onOpenChange={handleCloseDialog}
+        quote={editingQuote}
+        onCreated={(created) => setViewingQuote(created)}
+      />
 
       {viewingQuote && (
         <AlertDialog open={!!viewingQuote} onOpenChange={() => setViewingQuote(null)}>
