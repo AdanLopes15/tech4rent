@@ -34,11 +34,11 @@ export function AddEquipmentDialog({ open, onOpenChange, equipment }: AddEquipme
   const [purpose, setPurpose] = useState("aluguel");
   const [stock, setStock] = useState<number | string>(1);
   const [unit, setUnit] = useState("");
-  const [dailyRate, setDailyRate] = useState<number | string>(0);
-  const [weeklyRate, setWeeklyRate] = useState<number | string>(0);
-  const [monthlyRate, setMonthlyRate] = useState<number | string>(0);
-  const [salePrice, setSalePrice] = useState<number | string>(0);
-  const [costPrice, setCostPrice] = useState<number | string>(0);
+  const [dailyRate, setDailyRate] = useState<string>("");
+  const [weeklyRate, setWeeklyRate] = useState<string>("");
+  const [monthlyRate, setMonthlyRate] = useState<string>("");
+  const [salePrice, setSalePrice] = useState<string>("");
+  const [costPrice, setCostPrice] = useState<string>("");
   const [description, setDescription] = useState("");
   const [imageUrls, setImageUrls] = useState<(string | null)[]>([null, null, null]);
   const [imageFiles, setImageFiles] = useState<(File | null)[]>([null, null, null]);
