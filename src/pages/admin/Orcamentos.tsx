@@ -887,12 +887,13 @@ export default function Orcamentos() {
                 <DocumentSection title="TERMOS E CONDIÇÕES">
                   <div className="flex flex-col gap-2 print:gap-1">
                     <div>
-                      <p className="font-bold text-[#1a1a1a] mb-1 text-sm">Período de locação:</p>
+                      <p className="font-bold text-[#1a1a1a] mb-1 text-sm">{viewingQuote.budgetType === "locacao" ? "Período de locação:" : "Prazo de entrega:"}</p>
                       <p className="text-sm text-[#333333]">
                         {viewingQuote.budgetType === "locacao" 
                           ? `${formatDate(viewingQuote.startDate)} a ${formatDate(viewingQuote.endDate)}.` 
                           : viewingQuote.prazoEntrega || "Prazo imediato."}
                       </p>
+
                     </div>
                     
                     <div>
@@ -1011,12 +1012,13 @@ export default function Orcamentos() {
               <DocumentSection title="TERMOS E CONDIÇÕES">
                 <div className="flex flex-col gap-2 print:gap-1">
                   <div>
-                    <p className="font-bold text-[#1a1a1a] mb-1 text-sm">Período de locação:</p>
+                    <p className="font-bold text-[#1a1a1a] mb-1 text-sm">{quoteForDownload.budgetType === "locacao" ? "Período de locação:" : "Prazo de entrega:"}</p>
                     <p className="text-sm text-[#333333]">
                       {quoteForDownload.budgetType === "locacao" 
                         ? `${formatDate(quoteForDownload.startDate)} a ${formatDate(quoteForDownload.endDate)}.` 
                         : quoteForDownload.prazoEntrega || "Prazo imediato."}
                     </p>
+
                   </div>
                   
                   <div>
@@ -1331,12 +1333,13 @@ export default function Orcamentos() {
               <DocumentSection title="TERMOS E CONDIÇÕES">
                 <div className="flex flex-col gap-2">
                   <div>
-                    <p className="font-bold text-[#1a1a1a] mb-1 text-sm">Período de locação:</p>
+                    <p className="font-bold text-[#1a1a1a] mb-1 text-sm">{quoteForDownload.budgetType === "locacao" ? "Período de locação:" : "Prazo de entrega:"}</p>
                     <p className="text-sm text-[#333333]">
                       {quoteForDownload.budgetType === "locacao" 
                         ? `${formatDate(quoteForDownload.startDate)} a ${formatDate(quoteForDownload.endDate)}.` 
                         : quoteForDownload.prazoEntrega || "Prazo imediato."}
                     </p>
+
                   </div>
                   
                   <div>
