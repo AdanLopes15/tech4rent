@@ -496,7 +496,7 @@ export const AddExpenseDialog = ({ open, onOpenChange, expense, viewOnly = false
                     disabled={viewOnly}
                     className="pr-8"
                   />
-                  <Popover>
+                  <Popover open={competenceOpen} onOpenChange={setCompetenceOpen}>
                     <PopoverTrigger asChild>
                       <Button
                         variant="ghost"
@@ -511,7 +511,7 @@ export const AddExpenseDialog = ({ open, onOpenChange, expense, viewOnly = false
                       <Calendar
                         mode="single"
                         selected={competenceDate}
-                        onSelect={setCompetenceDate}
+                        onSelect={(d) => { setCompetenceDate(d); setCompetenceOpen(false); }}
                         initialFocus
                         locale={ptBR}
                       />
