@@ -78,11 +78,11 @@ export function AddEquipmentDialog({ open, onOpenChange, equipment }: AddEquipme
     setPurpose("aluguel");
     setStock(1);
     setUnit("");
-    setDailyRate(0);
-    setWeeklyRate(0);
-    setMonthlyRate(0);
-    setSalePrice(0);
-    setCostPrice(0);
+    setDailyRate("");
+    setWeeklyRate("");
+    setMonthlyRate("");
+    setSalePrice("");
+    setCostPrice("");
     setDescription("");
     setImageUrls([null, null, null]);
     setImageFiles([null, null, null]);
