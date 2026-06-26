@@ -415,9 +415,9 @@ export function AddClientDialog({ open, onOpenChange, client }: AddClientDialogP
             <div className="space-y-1.5">
               <Label className="text-xs font-medium">Telefone / WhatsApp</Label>
               <Input
-                placeholder="DDD + Número"
+                placeholder="(11) 99999-9999"
                 value={telefone}
-                onChange={(e) => setTelefone(e.target.value)}
+                onChange={(e) => setTelefone(maskPhoneBR(e.target.value))}
                 className="h-9"
               />
             </div>
