@@ -471,7 +471,7 @@ export const AddRevenueDialog = ({ open, onOpenChange, revenue, viewOnly = false
                     disabled={viewOnly || (isRecurring && !!revenue)}
                     className="pr-8"
                   />
-                  <Popover>
+                  <Popover open={dueOpen} onOpenChange={setDueOpen}>
                     <PopoverTrigger asChild>
                       <Button
                         variant="ghost"
