@@ -15,6 +15,32 @@ export const getContactPhone = (record: Record<string, any> | null | undefined) 
   return "";
 };
 
+// Formata um telefone para o padrão brasileiro de exibição.
+// 11 dígitos -> (XX) XXXXX-XXXX | 10 dígitos -> (XX) XXXX-XXXX
+export const formatPhoneBR = (phone: string | null | undefined): string => {
+  if (!phone) return "—";
+  const digits = String(phone).replace(/\D/g, "").slice(0, 11);
+  if (digits.length === 11) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  }
+  if (digits.length === 10) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  }
+  return digits || "—";
+};
+
+// Aplica máscara em tempo real durante a digitação (parcial).
+export const maskPhoneBR = (phone: string | null | undefined): string => {
+  const digits = String(phone ?? "").replace(/\D/g, "").slice(0, 11);
+  if (!digits) return "";
+  if (digits.length <= 2) return `(${digits}`;
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  }
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+};
+
 export const normalizeWhatsappPhone = (phone: string) => {
   const digits = phone.replace(/\D/g, "");
 

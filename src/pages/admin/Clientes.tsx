@@ -30,7 +30,7 @@ import {
 
 import { PlusCircle, Phone, Mail, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { AddClientDialog } from "@/components/clientes/AddClientDialog";
-import { getContactPhone, getWhatsappLink, openWhatsappLink } from "@/lib/contact";
+import { getContactPhone, getWhatsappLink, openWhatsappLink, formatPhoneBR } from "@/lib/contact";
 
 export default function Clientes() {
   const { clients, deleteClient } = useStore();
@@ -172,7 +172,7 @@ export default function Clientes() {
 
                         <TableCell className="text-muted-foreground">{client.email || "—"}</TableCell>
 
-                        <TableCell className="text-muted-foreground">{phone || "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">{formatPhoneBR(phone)}</TableCell>
 
                         <TableCell>
                           <Badge

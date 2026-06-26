@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { getContactPhone } from "@/lib/contact";
+import { getContactPhone, maskPhoneBR } from "@/lib/contact";
 
 interface AddClientDialogProps {
   open: boolean;
@@ -94,7 +94,7 @@ export function AddClientDialog({ open, onOpenChange, client }: AddClientDialogP
       setCpf(client.cpf || "");
       setIe(client.ie || client.rg || "");
       setEmail(client.email || "");
-      setTelefone(getContactPhone(client));
+      setTelefone(maskPhoneBR(getContactPhone(client)));
       setCep(client.cep || "");
       setAddress(mappedAddress);
       setStatus(client.status || "ativo");
@@ -243,7 +243,7 @@ export function AddClientDialog({ open, onOpenChange, client }: AddClientDialogP
       razaoSocial: razaoSocial.trim(),
       contato: contato.trim(),
       ie: ie.trim(),
-      telefone: telefone.trim(),
+      telefone: telefone.replace(/\D/g, ""),
       observacoes: observacoes.trim(),
       address: {
         street: address.street.trim(),
@@ -257,8 +257,8 @@ export function AddClientDialog({ open, onOpenChange, client }: AddClientDialogP
       // campos já usados no Lovable para compatibilidade
       name: razaoSocial.trim(),
       contactPerson: contato.trim(),
-      phone: telefone.trim(),
-      whatsapp: telefone.trim(),
+      phone: telefone.replace(/\D/g, ""),
+      whatsapp: telefone.replace(/\D/g, ""),
       notes: observacoes.trim(),
       street: address.street.trim(),
       number: address.number.trim(),
@@ -415,9 +415,9 @@ export function AddClientDialog({ open, onOpenChange, client }: AddClientDialogP
             <div className="space-y-1.5">
               <Label className="text-xs font-medium">Telefone / WhatsApp</Label>
               <Input
-                placeholder="DDD + Número"
+                placeholder="(11) 99999-9999"
                 value={telefone}
-                onChange={(e) => setTelefone(e.target.value)}
+                onChange={(e) => setTelefone(maskPhoneBR(e.target.value))}
                 className="h-9"
               />
             </div>
