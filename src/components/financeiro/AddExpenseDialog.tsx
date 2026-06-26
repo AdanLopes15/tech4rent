@@ -19,7 +19,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, PlusCircle } from "lucide-react";
 import { useStore } from "@/store";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency, parseCurrencyBR } from "@/lib/utils";
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -65,6 +65,10 @@ export const AddExpenseDialog = ({ open, onOpenChange, expense, viewOnly = false
   const [repetitionQuantity, setRepetitionQuantity] = useState(1);
 
   const [saving, setSaving] = useState(false);
+  const [competenceOpen, setCompetenceOpen] = useState(false);
+  const [dueOpen, setDueOpen] = useState(false);
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [firstInstallmentOpen, setFirstInstallmentOpen] = useState(false);
 
   const [showAddSupplier, setShowAddSupplier] = useState(false);
   const [showAddClient, setShowAddClient] = useState(false);
@@ -444,9 +448,10 @@ export const AddExpenseDialog = ({ open, onOpenChange, expense, viewOnly = false
               <div className="space-y-2">
                 <Label>Valor Bruto (R$)</Label>
                 <Input
-                  type="number"
-                  value={valorBruto}
-                  onChange={(e) => setValorBruto(Number(e.target.value))}
+                  type="text"
+                  inputMode="numeric"
+                  value={formatCurrency(valorBruto)}
+                  onChange={(e) => setValorBruto(parseCurrencyBR(e.target.value))}
                   disabled={viewOnly}
                 />
               </div>
@@ -454,9 +459,10 @@ export const AddExpenseDialog = ({ open, onOpenChange, expense, viewOnly = false
               <div className="space-y-2">
                 <Label>Desconto (R$)</Label>
                 <Input
-                  type="number"
-                  value={desconto}
-                  onChange={(e) => setDesconto(Number(e.target.value))}
+                  type="text"
+                  inputMode="numeric"
+                  value={formatCurrency(desconto)}
+                  onChange={(e) => setDesconto(parseCurrencyBR(e.target.value))}
                   disabled={viewOnly}
                 />
               </div>
@@ -464,9 +470,10 @@ export const AddExpenseDialog = ({ open, onOpenChange, expense, viewOnly = false
               <div className="space-y-2">
                 <Label>Juros (R$)</Label>
                 <Input
-                  type="number"
-                  value={juros}
-                  onChange={(e) => setJuros(Number(e.target.value))}
+                  type="text"
+                  inputMode="numeric"
+                  value={formatCurrency(juros)}
+                  onChange={(e) => setJuros(parseCurrencyBR(e.target.value))}
                   disabled={viewOnly}
                 />
               </div>
@@ -489,7 +496,7 @@ export const AddExpenseDialog = ({ open, onOpenChange, expense, viewOnly = false
                     disabled={viewOnly}
                     className="pr-8"
                   />
-                  <Popover>
+                  <Popover open={competenceOpen} onOpenChange={setCompetenceOpen}>
                     <PopoverTrigger asChild>
                       <Button
                         variant="ghost"
@@ -504,7 +511,7 @@ export const AddExpenseDialog = ({ open, onOpenChange, expense, viewOnly = false
                       <Calendar
                         mode="single"
                         selected={competenceDate}
-                        onSelect={setCompetenceDate}
+                        onSelect={(d) => { setCompetenceDate(d); setCompetenceOpen(false); }}
                         initialFocus
                         locale={ptBR}
                       />
@@ -524,7 +531,7 @@ export const AddExpenseDialog = ({ open, onOpenChange, expense, viewOnly = false
                     disabled={viewOnly || isRecurring}
                     className="pr-8"
                   />
-                  <Popover>
+                  <Popover open={dueOpen} onOpenChange={setDueOpen}>
                     <PopoverTrigger asChild>
                       <Button
                         variant="ghost"
@@ -536,7 +543,7 @@ export const AddExpenseDialog = ({ open, onOpenChange, expense, viewOnly = false
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" selected={dueDate} onSelect={setDueDate} initialFocus locale={ptBR} />
+                      <Calendar mode="single" selected={dueDate} onSelect={(d) => { setDueDate(d); setDueOpen(false); }} initialFocus locale={ptBR} />
                     </PopoverContent>
                   </Popover>
                 </div>
@@ -553,7 +560,7 @@ export const AddExpenseDialog = ({ open, onOpenChange, expense, viewOnly = false
                     disabled={viewOnly || status !== "pago"}
                     className="pr-8"
                   />
-                  <Popover>
+                  <Popover open={paymentOpen} onOpenChange={setPaymentOpen}>
                     <PopoverTrigger asChild>
                       <Button
                         variant="ghost"
@@ -568,7 +575,7 @@ export const AddExpenseDialog = ({ open, onOpenChange, expense, viewOnly = false
                       <Calendar
                         mode="single"
                         selected={paymentDate}
-                        onSelect={setPaymentDate}
+                        onSelect={(d) => { setPaymentDate(d); setPaymentOpen(false); }}
                         initialFocus
                         locale={ptBR}
                       />
@@ -627,7 +634,7 @@ export const AddExpenseDialog = ({ open, onOpenChange, expense, viewOnly = false
 
                   <div className="space-y-2">
                     <Label>Data da 1ª Parcela</Label>
-                    <Popover>
+                    <Popover open={firstInstallmentOpen} onOpenChange={setFirstInstallmentOpen}>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
@@ -642,7 +649,7 @@ export const AddExpenseDialog = ({ open, onOpenChange, expense, viewOnly = false
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
-                        <Calendar mode="single" selected={dueDate} onSelect={setDueDate} initialFocus locale={ptBR} />
+                        <Calendar mode="single" selected={dueDate} onSelect={(d) => { setDueDate(d); setFirstInstallmentOpen(false); }} initialFocus locale={ptBR} />
                       </PopoverContent>
                     </Popover>
                   </div>
