@@ -451,7 +451,7 @@ export const AddRevenueDialog = ({ open, onOpenChange, revenue, viewOnly = false
                       <Calendar
                         mode="single"
                         selected={competenceDate}
-                        onSelect={setCompetenceDate}
+                        onSelect={(d) => { setCompetenceDate(d); setCompetenceOpen(false); }}
                         initialFocus
                         locale={ptBR}
                       />
