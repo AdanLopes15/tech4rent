@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
+import { maskCurrencyBR, parseCurrencyBR } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -33,11 +34,11 @@ export function AddEquipmentDialog({ open, onOpenChange, equipment }: AddEquipme
   const [purpose, setPurpose] = useState("aluguel");
   const [stock, setStock] = useState<number | string>(1);
   const [unit, setUnit] = useState("");
-  const [dailyRate, setDailyRate] = useState<number | string>(0);
-  const [weeklyRate, setWeeklyRate] = useState<number | string>(0);
-  const [monthlyRate, setMonthlyRate] = useState<number | string>(0);
-  const [salePrice, setSalePrice] = useState<number | string>(0);
-  const [costPrice, setCostPrice] = useState<number | string>(0);
+  const [dailyRate, setDailyRate] = useState<string>("");
+  const [weeklyRate, setWeeklyRate] = useState<string>("");
+  const [monthlyRate, setMonthlyRate] = useState<string>("");
+  const [salePrice, setSalePrice] = useState<string>("");
+  const [costPrice, setCostPrice] = useState<string>("");
   const [description, setDescription] = useState("");
   const [imageUrls, setImageUrls] = useState<(string | null)[]>([null, null, null]);
   const [imageFiles, setImageFiles] = useState<(File | null)[]>([null, null, null]);
@@ -51,11 +52,11 @@ export function AddEquipmentDialog({ open, onOpenChange, equipment }: AddEquipme
       setPurpose(equipment.purpose || "aluguel");
       setStock(equipment.stock || 1);
       setUnit(equipment.unit || "");
-      setDailyRate(equipment.dailyRate || 0);
-      setWeeklyRate(equipment.weeklyRate || 0);
-      setMonthlyRate(equipment.monthlyRate || 0);
-      setSalePrice(equipment.salePrice || 0);
-      setCostPrice(equipment.costPrice || 0);
+      setDailyRate(maskCurrencyBR(equipment.dailyRate || 0));
+      setWeeklyRate(maskCurrencyBR(equipment.weeklyRate || 0));
+      setMonthlyRate(maskCurrencyBR(equipment.monthlyRate || 0));
+      setSalePrice(maskCurrencyBR(equipment.salePrice || 0));
+      setCostPrice(maskCurrencyBR(equipment.costPrice || 0));
       setDescription(equipment.description || "");
 
       const existingImageUrls = Array.isArray(equipment.imageUrls) ? equipment.imageUrls : [equipment.imageUrl];
@@ -77,11 +78,11 @@ export function AddEquipmentDialog({ open, onOpenChange, equipment }: AddEquipme
     setPurpose("aluguel");
     setStock(1);
     setUnit("");
-    setDailyRate(0);
-    setWeeklyRate(0);
-    setMonthlyRate(0);
-    setSalePrice(0);
-    setCostPrice(0);
+    setDailyRate("");
+    setWeeklyRate("");
+    setMonthlyRate("");
+    setSalePrice("");
+    setCostPrice("");
     setDescription("");
     setImageUrls([null, null, null]);
     setImageFiles([null, null, null]);
@@ -123,11 +124,11 @@ export function AddEquipmentDialog({ open, onOpenChange, equipment }: AddEquipme
       purpose,
       stock: Number(stock),
       unit,
-      dailyRate: Number(dailyRate),
-      weeklyRate: Number(weeklyRate),
-      monthlyRate: Number(monthlyRate),
-      salePrice: Number(salePrice),
-      costPrice: Number(costPrice),
+      dailyRate: parseCurrencyBR(dailyRate),
+      weeklyRate: parseCurrencyBR(weeklyRate),
+      monthlyRate: parseCurrencyBR(monthlyRate),
+      salePrice: parseCurrencyBR(salePrice),
+      costPrice: parseCurrencyBR(costPrice),
       description,
       imageUrls,
       imageFiles,
@@ -280,29 +281,29 @@ export function AddEquipmentDialog({ open, onOpenChange, equipment }: AddEquipme
           <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="vl-diaria" className="text-xs font-medium">Diária (R$)</Label>
-              <Input id="vl-diaria" type="number" placeholder="0,00" value={dailyRate} onChange={(e) => setDailyRate(e.target.value)} className="h-9" />
+              <Input id="vl-diaria" type="text" inputMode="numeric" placeholder="R$ 0,00" value={dailyRate} onChange={(e) => setDailyRate(maskCurrencyBR(e.target.value))} className="h-9" />
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="vl-semanal" className="text-xs font-medium">Semanal (R$)</Label>
-              <Input id="vl-semanal" type="number" placeholder="0,00" value={weeklyRate} onChange={(e) => setWeeklyRate(e.target.value)} className="h-9" />
+              <Input id="vl-semanal" type="text" inputMode="numeric" placeholder="R$ 0,00" value={weeklyRate} onChange={(e) => setWeeklyRate(maskCurrencyBR(e.target.value))} className="h-9" />
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="vl-mensal" className="text-xs font-medium">Mensal (R$)</Label>
-              <Input id="vl-mensal" type="number" placeholder="0,00" value={monthlyRate} onChange={(e) => setMonthlyRate(e.target.value)} className="h-9" />
+              <Input id="vl-mensal" type="text" inputMode="numeric" placeholder="R$ 0,00" value={monthlyRate} onChange={(e) => setMonthlyRate(maskCurrencyBR(e.target.value))} className="h-9" />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="vl-venda" className="text-xs font-medium">Preço de Venda (R$)</Label>
-              <Input id="vl-venda" type="number" placeholder="0,00" value={salePrice} onChange={(e) => setSalePrice(e.target.value)} className="h-9" />
+              <Input id="vl-venda" type="text" inputMode="numeric" placeholder="R$ 0,00" value={salePrice} onChange={(e) => setSalePrice(maskCurrencyBR(e.target.value))} className="h-9" />
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="vl-custo" className="text-xs font-medium">Preço de Custo (R$)</Label>
-              <Input id="vl-custo" type="number" placeholder="0,00" value={costPrice} onChange={(e) => setCostPrice(e.target.value)} className="h-9" />
+              <Input id="vl-custo" type="text" inputMode="numeric" placeholder="R$ 0,00" value={costPrice} onChange={(e) => setCostPrice(maskCurrencyBR(e.target.value))} className="h-9" />
             </div>
           </div>
 
