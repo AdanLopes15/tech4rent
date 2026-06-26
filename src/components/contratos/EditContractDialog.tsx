@@ -265,7 +265,7 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
 
             <div className="space-y-2">
               <Label htmlFor="end-date">Data de Devolução</Label>
-              <Popover>
+              <Popover open={endOpen} onOpenChange={setEndOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -276,7 +276,7 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
-                  <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus locale={ptBR} />
+                  <Calendar mode="single" selected={endDate} onSelect={(d) => { setEndDate(d); setEndOpen(false); }} initialFocus locale={ptBR} />
                 </PopoverContent>
               </Popover>
             </div>
