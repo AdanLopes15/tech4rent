@@ -483,6 +483,16 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
               </div>
             </div>
 
+            <div className="space-y-2">
+              <Label>Responsável pelo Orçamento</Label>
+              <Input
+                value={quoteResponsible}
+                onChange={(e) => setQuoteResponsible(e.target.value)}
+                placeholder="Ex: João Vitor"
+              />
+            </div>
+
+
             <div className="border rounded-lg p-4 space-y-5">
               <h3 className="font-semibold">Detalhes do Orçamento</h3>
 
