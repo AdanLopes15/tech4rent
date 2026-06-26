@@ -172,7 +172,7 @@ export default function Clientes() {
 
                         <TableCell className="text-muted-foreground">{client.email || "—"}</TableCell>
 
-                        <TableCell className="text-muted-foreground">{phone || "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">{formatPhoneBR(phone)}</TableCell>
 
                         <TableCell>
                           <Badge
