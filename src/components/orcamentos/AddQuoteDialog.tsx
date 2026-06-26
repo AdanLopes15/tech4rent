@@ -8,7 +8,7 @@ import { CalendarIcon, PlusCircle, Trash2, Copy } from "lucide-react";
 
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency, parseCurrencyBR } from "@/lib/utils";
 import { generateQuotePDF } from "@/lib/pdf-utils";
 
 import {
@@ -649,12 +649,23 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label>Valor da Entrada</Label>
-                            <Input
-                              type="text"
-                              value={String(pm.downPaymentValue)}
-                              onChange={(e) => handlePaymentChange(pm.id, "downPaymentValue", e.target.value)}
-                            />
+                            <Label>{pm.downPaymentType === "percentage" ? "Valor da Entrada (%)" : "Valor da Entrada"}</Label>
+                            {pm.downPaymentType === "percentage" ? (
+                              <Input
+                                type="text"
+                                inputMode="numeric"
+                                value={String(pm.downPaymentValue ?? "")}
+                                onChange={(e) => handlePaymentChange(pm.id, "downPaymentValue", e.target.value.replace(/[^\d.,]/g, ""))}
+                              />
+                            ) : (
+                              <Input
+                                type="text"
+                                inputMode="numeric"
+                                value={formatCurrency(parseCurrencyBR(pm.downPaymentValue))}
+                                onChange={(e) => handlePaymentChange(pm.id, "downPaymentValue", parseCurrencyBR(e.target.value))}
+                              />
+                            )}
+
                           </div>
 
                           <div className="space-y-2">
@@ -751,11 +762,12 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
                       <div className="space-y-1">
                         <Label className="text-xs">{budgetType === "locacao" ? "Vl. Unitário" : "Vl. Unitário"}</Label>
                         <Input
-                          type="number"
-                          min={0}
-                          value={item.unitPrice}
-                          onChange={(e) => updateItem(item.id, "unitPrice", Number(e.target.value))}
+                          type="text"
+                          inputMode="numeric"
+                          value={formatCurrency(item.unitPrice)}
+                          onChange={(e) => updateItem(item.id, "unitPrice", parseCurrencyBR(e.target.value))}
                         />
+
                       </div>
 
                       <Button
