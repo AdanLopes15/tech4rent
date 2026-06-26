@@ -436,7 +436,7 @@ export const AddRevenueDialog = ({ open, onOpenChange, revenue, viewOnly = false
                     disabled={viewOnly}
                     className="pr-8"
                   />
-                  <Popover>
+                  <Popover open={competenceOpen} onOpenChange={setCompetenceOpen}>
                     <PopoverTrigger asChild>
                       <Button
                         variant="ghost"
