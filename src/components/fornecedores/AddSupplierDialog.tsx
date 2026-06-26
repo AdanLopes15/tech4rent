@@ -95,7 +95,7 @@ export function AddSupplierDialog({ open, onOpenChange, supplier, viewOnly = fal
       setCpf(supplier.cpf || "");
       setIe(supplier.ie || supplier.rg || "");
       setEmail(supplier.email || "");
-      setTelefone(getContactPhone(supplier));
+      setTelefone(maskPhoneBR(getContactPhone(supplier)));
       setCep(supplier.cep || "");
       setAddress(mappedAddress);
       setStatus(supplier.status || "ativo");
