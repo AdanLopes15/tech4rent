@@ -65,6 +65,10 @@ export const AddExpenseDialog = ({ open, onOpenChange, expense, viewOnly = false
   const [repetitionQuantity, setRepetitionQuantity] = useState(1);
 
   const [saving, setSaving] = useState(false);
+  const [competenceOpen, setCompetenceOpen] = useState(false);
+  const [dueOpen, setDueOpen] = useState(false);
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [firstInstallmentOpen, setFirstInstallmentOpen] = useState(false);
 
   const [showAddSupplier, setShowAddSupplier] = useState(false);
   const [showAddClient, setShowAddClient] = useState(false);
