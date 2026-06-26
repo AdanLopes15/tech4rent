@@ -262,7 +262,7 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
               </div>
               <div className="space-y-2">
                 <Label>Data da 1ª Parcela</Label>
-                <Popover>
+                <Popover open={firstInstallmentOpen} onOpenChange={setFirstInstallmentOpen}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -276,7 +276,7 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={firstInstallmentDate} onSelect={setFirstInstallmentDate} />
+                    <Calendar mode="single" selected={firstInstallmentDate} onSelect={(d) => { setFirstInstallmentDate(d); setFirstInstallmentOpen(false); }} />
                   </PopoverContent>
                 </Popover>
               </div>
