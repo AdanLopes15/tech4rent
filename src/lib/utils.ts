@@ -18,6 +18,20 @@ export function formatCurrency(value: number | null | undefined): string {
   }).format(value);
 }
 
+// Máscara de dinheiro (digitação de trás para frente). Retorna ex: "R$ 90,99"
+export function maskCurrencyBR(input: string | number | null | undefined): string {
+  const digits = String(input ?? "").replace(/\D/g, "");
+  const cents = digits ? parseInt(digits, 10) : 0;
+  return formatCurrency(cents / 100);
+}
+
+// Converte valor mascarado/numérico em número decimal. Ex: "R$ 1.200,00" -> 1200
+export function parseCurrencyBR(masked: string | number | null | undefined): number {
+  if (typeof masked === "number") return Number.isNaN(masked) ? 0 : masked;
+  const digits = String(masked ?? "").replace(/\D/g, "");
+  return digits ? parseInt(digits, 10) / 100 : 0;
+}
+
 export function formatAddress(address: any): string {
   if (!address) return "Endereço não informado";
   if (typeof address === "string") return address;
