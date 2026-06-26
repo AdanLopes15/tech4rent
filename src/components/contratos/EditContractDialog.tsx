@@ -8,7 +8,7 @@ import { Timestamp } from "firebase/firestore";
 
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency, maskCurrencyBR, parseCurrencyBR } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -318,9 +318,11 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
                   <div className="space-y-2">
                     <Label>Vl. Unit.</Label>
                     <Input
-                      type="number"
-                      value={item.unitPrice}
-                      onChange={(e) => handleItemChange(item.id, "unitPrice", Number(e.target.value))}
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="R$ 0,00"
+                      value={maskCurrencyBR(Math.round((item.unitPrice || 0) * 100).toString())}
+                      onChange={(e) => handleItemChange(item.id, "unitPrice", parseCurrencyBR(e.target.value))}
                     />
                   </div>
 

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, maskCurrencyBR, parseCurrencyBR } from "@/lib/utils";
 
 import {
   Dialog,
@@ -343,12 +343,11 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
                       </SelectContent>
                     </Select>
                     <Input
-                      type="number"
-                      min={0}
-                      step="0.01"
-                      placeholder="0,00"
-                      value={item.unitPrice || ""}
-                      onChange={(e) => updateItem(idx, "unitPrice", Number(e.target.value))}
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="R$ 0,00"
+                      value={maskCurrencyBR(Math.round((item.unitPrice || 0) * 100).toString())}
+                      onChange={(e) => updateItem(idx, "unitPrice", parseCurrencyBR(e.target.value))}
                     />
                     <Button
                       type="button"
