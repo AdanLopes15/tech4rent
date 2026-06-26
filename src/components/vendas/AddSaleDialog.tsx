@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, maskCurrencyBR, parseCurrencyBR } from "@/lib/utils";
 import { format } from "date-fns";
 
 import {
@@ -383,9 +383,10 @@ export function AddSaleDialog({ open, onOpenChange, sale }: AddSaleDialogProps) 
                       <div className="space-y-2">
                         <Label>Vl. Unit.</Label>
                         <Input
-                          type="number"
-                          value={item.unitPrice}
-                          onChange={(e) => updateItem(item.id, "unitPrice", Number(e.target.value))}
+                          type="text"
+                          inputMode="numeric"
+                          value={formatCurrency(item.unitPrice)}
+                          onChange={(e) => updateItem(item.id, "unitPrice", parseCurrencyBR(e.target.value))}
                         />
                       </div>
 
@@ -436,9 +437,10 @@ export function AddSaleDialog({ open, onOpenChange, sale }: AddSaleDialogProps) 
                       <div className="space-y-2">
                         <Label>Valor (R$)</Label>
                         <Input
-                          type="number"
-                          value={pm.value}
-                          onChange={(e) => updatePaymentMethod(pm.id, "value", Number(e.target.value))}
+                          type="text"
+                          inputMode="numeric"
+                          value={formatCurrency(pm.value)}
+                          onChange={(e) => updatePaymentMethod(pm.id, "value", parseCurrencyBR(e.target.value))}
                         />
                       </div>
 
@@ -478,12 +480,21 @@ export function AddSaleDialog({ open, onOpenChange, sale }: AddSaleDialogProps) 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label>Valor da Entrada</Label>
-                            <Input
-                              type="number"
-                              min={0}
-                              value={pm.downPaymentValue}
-                              onChange={(e) => updatePaymentMethod(pm.id, "downPaymentValue", Number(e.target.value))}
-                            />
+                            {pm.downPaymentType === "percentage" ? (
+                              <Input
+                                type="number"
+                                min={0}
+                                value={pm.downPaymentValue}
+                                onChange={(e) => updatePaymentMethod(pm.id, "downPaymentValue", Number(e.target.value))}
+                              />
+                            ) : (
+                              <Input
+                                type="text"
+                                inputMode="numeric"
+                                value={formatCurrency(pm.downPaymentValue)}
+                                onChange={(e) => updatePaymentMethod(pm.id, "downPaymentValue", parseCurrencyBR(e.target.value))}
+                              />
+                            )}
                           </div>
 
                           <div className="space-y-2">

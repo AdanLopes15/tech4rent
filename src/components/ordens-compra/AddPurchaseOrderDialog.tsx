@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, parseCurrencyBR } from "@/lib/utils";
 
 import {
   Dialog,
@@ -262,9 +262,10 @@ export function AddPurchaseOrderDialog({ open, onOpenChange, order }: AddPurchas
                         <Label htmlFor={`cost-${item.id}`}>Custo Unit. (R$)</Label>
                         <Input
                           id={`cost-${item.id}`}
-                          type="number"
-                          value={item.unitPrice}
-                          onChange={(e) => handleItemChange(item.id, "unitPrice", Number(e.target.value))}
+                          type="text"
+                          inputMode="numeric"
+                          value={formatCurrency(item.unitPrice)}
+                          onChange={(e) => handleItemChange(item.id, "unitPrice", parseCurrencyBR(e.target.value))}
                         />
                       </div>
 

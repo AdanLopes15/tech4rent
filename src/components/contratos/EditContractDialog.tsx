@@ -70,6 +70,8 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [items, setItems] = useState<ContractItem[]>([]);
   const [totalValue, setTotalValue] = useState(0);
+  const [retiradaOpen, setRetiradaOpen] = useState(false);
+  const [endOpen, setEndOpen] = useState(false);
 
   const resetForm = () => {
     setSelectedClientId("");
@@ -236,7 +238,7 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="start-date">Data de Retirada</Label>
-              <Popover>
+              <Popover open={retiradaOpen} onOpenChange={setRetiradaOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -253,7 +255,7 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
                   <Calendar
                     mode="single"
                     selected={retiradaDate}
-                    onSelect={setRetiradaDate}
+                    onSelect={(d) => { setRetiradaDate(d); setRetiradaOpen(false); }}
                     initialFocus
                     locale={ptBR}
                   />
@@ -263,7 +265,7 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
 
             <div className="space-y-2">
               <Label htmlFor="end-date">Data de Devolução</Label>
-              <Popover>
+              <Popover open={endOpen} onOpenChange={setEndOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -274,7 +276,7 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
-                  <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus locale={ptBR} />
+                  <Calendar mode="single" selected={endDate} onSelect={(d) => { setEndDate(d); setEndOpen(false); }} initialFocus locale={ptBR} />
                 </PopoverContent>
               </Popover>
             </div>
