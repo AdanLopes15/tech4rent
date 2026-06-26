@@ -55,6 +55,7 @@ interface AddQuoteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   quote?: any;
+  onCreated?: (quote: any) => void;
 }
 
 const safeToDate = (value: any): Date | undefined => {
