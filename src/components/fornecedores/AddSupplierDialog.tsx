@@ -442,7 +442,7 @@ export function AddSupplierDialog({ open, onOpenChange, supplier, viewOnly = fal
                 <Input
                   placeholder="DDD + Número"
                   value={telefone}
-                  onChange={(e) => setTelefone(e.target.value)}
+                  onChange={(e) => setTelefone(maskPhoneBR(e.target.value))}
                   className="h-9"
                   disabled={viewOnly}
                 />
