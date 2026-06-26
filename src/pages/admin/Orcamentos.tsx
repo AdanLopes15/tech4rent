@@ -850,10 +850,11 @@ export default function Orcamentos() {
                     <div className="flex flex-col">
                       <span className="text-xs text-[#666666] uppercase">Telefone / WhatsApp</span>
                       <span className="text-sm font-bold text-[#1a1a1a]">
-                        {clients.find((c: any) => c.id === viewingQuote.clientId)?.telefone || 
+                        {formatPhoneBR(clients.find((c: any) => c.id === viewingQuote.clientId)?.telefone || 
                          clients.find((c: any) => c.id === viewingQuote.clientId)?.phone || 
-                         clients.find((c: any) => c.id === viewingQuote.clientId)?.whatsapp || 
+                         clients.find((c: any) => c.id === viewingQuote.clientId)?.whatsapp) || 
                          "—"}
+
                       </span>
                     </div>
                   </div>
@@ -975,10 +976,11 @@ export default function Orcamentos() {
                   <div className="flex flex-col">
                     <span className="text-xs text-[#666666] uppercase">Telefone / WhatsApp</span>
                     <span className="text-sm font-bold text-[#1a1a1a]">
-                      {clients.find((c: any) => c.id === quoteForDownload.clientId)?.telefone || 
+                      {formatPhoneBR(clients.find((c: any) => c.id === quoteForDownload.clientId)?.telefone || 
                        clients.find((c: any) => c.id === quoteForDownload.clientId)?.phone || 
-                       clients.find((c: any) => c.id === quoteForDownload.clientId)?.whatsapp || 
+                       clients.find((c: any) => c.id === quoteForDownload.clientId)?.whatsapp) || 
                        "—"}
+
                     </span>
                   </div>
                 </div>
@@ -1296,10 +1298,11 @@ export default function Orcamentos() {
                   <div className="flex flex-col">
                     <span className="text-xs text-[#666666] uppercase">Telefone / WhatsApp</span>
                     <span className="text-sm font-bold text-[#1a1a1a]">
-                      {clients.find((c: any) => c.id === quoteForDownload.clientId)?.telefone || 
+                      {formatPhoneBR(clients.find((c: any) => c.id === quoteForDownload.clientId)?.telefone || 
                        clients.find((c: any) => c.id === quoteForDownload.clientId)?.phone || 
-                       clients.find((c: any) => c.id === quoteForDownload.clientId)?.whatsapp || 
+                       clients.find((c: any) => c.id === quoteForDownload.clientId)?.whatsapp) || 
                        "—"}
+
                     </span>
                   </div>
                 </div>
