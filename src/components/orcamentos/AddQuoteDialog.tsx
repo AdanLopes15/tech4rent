@@ -529,7 +529,7 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
 
                     <div className="space-y-2">
                       <Label>Data Final</Label>
-                      <Popover>
+                      <Popover open={endOpen} onOpenChange={setEndOpen}>
                         <PopoverTrigger asChild>
                           <Button
                             variant="outline"
@@ -543,7 +543,7 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar mode="single" selected={endDate} onSelect={setEndDate} locale={ptBR} />
+                          <Calendar mode="single" selected={endDate} onSelect={(date) => { setEndDate(date); setEndOpen(false); }} locale={ptBR} className="pointer-events-auto" />
                         </PopoverContent>
                       </Popover>
                     </div>
