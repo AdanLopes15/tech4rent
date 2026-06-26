@@ -423,6 +423,9 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
         const result = await addQuote(data);
         quoteId = result.id;
         toast({ title: "Orçamento criado com sucesso!" });
+        onOpenChange(false);
+        onCreated?.({ ...data, ...result, id: quoteId });
+        return;
       }
 
       // O PDF pode ser baixado manualmente na lista de orçamentos após a criação/edição.
