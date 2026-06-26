@@ -659,7 +659,7 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
 
                           <div className="space-y-2">
                             <Label>Data da Entrada</Label>
-                            <Popover>
+                            <Popover open={!!downPaymentDateOpen[pm.id]} onOpenChange={(o) => setDownPaymentDateOpen((prev) => ({ ...prev, [pm.id]: o }))}>
                               <PopoverTrigger asChild>
                                 <Button
                                   variant="outline"
@@ -678,8 +678,9 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
                                 <Calendar
                                   mode="single"
                                   selected={pm.downPaymentDate}
-                                  onSelect={(date) => handlePaymentChange(pm.id, "downPaymentDate", date)}
+                                  onSelect={(date) => { handlePaymentChange(pm.id, "downPaymentDate", date); setDownPaymentDateOpen((prev) => ({ ...prev, [pm.id]: false })); }}
                                   locale={ptBR}
+                                  className="pointer-events-auto"
                                 />
                               </PopoverContent>
                             </Popover>
