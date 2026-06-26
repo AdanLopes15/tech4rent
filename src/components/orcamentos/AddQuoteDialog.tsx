@@ -84,6 +84,9 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
 
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
+  const [startOpen, setStartOpen] = useState(false);
+  const [endOpen, setEndOpen] = useState(false);
+  const [downPaymentDateOpen, setDownPaymentDateOpen] = useState<Record<string, boolean>>({});
   const [customPeriod, setCustomPeriod] = useState("");
   const [periodMonths, setPeriodMonths] = useState<number | null>(null);
 
