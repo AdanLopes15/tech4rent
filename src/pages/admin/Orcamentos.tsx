@@ -595,7 +595,7 @@ export default function Orcamentos() {
               <TableRow key={quote.id}>
                 <TableCell className="font-medium">{quote.id}</TableCell>
                 <TableCell>{getClientName(quote.clientId, quote.clientName)}</TableCell>
-                <TableCell>{formatDate(quote.createdAt)}</TableCell>
+                <TableCell>{formatQuoteDate(quote)}</TableCell>
                 <TableCell>{formatCurrency(Number(quote.totalValue || 0))}</TableCell>
                 <TableCell>
                   <Badge className={statusColors[displayStatus] || "bg-muted"}>{displayStatus}</Badge>
@@ -842,7 +842,7 @@ export default function Orcamentos() {
                 <DocumentHeader 
                   title="ORÇAMENTO" 
                   documentNumber={viewingQuote.id} 
-                  date={formatDate(viewingQuote.createdAt)} 
+                  date={formatQuoteDate(viewingQuote)} 
                   responsible={quoteResponsible}
                   onResponsibleChange={setQuoteResponsible}
                 />
@@ -969,7 +969,7 @@ export default function Orcamentos() {
               <DocumentHeader 
                 title="ORÇAMENTO" 
                 documentNumber={quoteForDownload.id} 
-                date={formatDate(quoteForDownload.createdAt)} 
+                date={formatQuoteDate(quoteForDownload)} 
                 responsible={quoteResponsible}
               />
 
@@ -1291,7 +1291,7 @@ export default function Orcamentos() {
               <DocumentHeader 
                 title="ORÇAMENTO" 
                 documentNumber={quoteForDownload.id} 
-                date={formatDate(quoteForDownload.createdAt)} 
+                date={formatQuoteDate(quoteForDownload)} 
                 responsible={quoteResponsible}
               />
 
