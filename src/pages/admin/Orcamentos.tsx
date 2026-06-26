@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency, cn, formatAddress } from "@/lib/utils";
+import { formatPhoneBR } from "@/lib/contact";
 import { generateQuotePDF } from "@/lib/pdf-utils";
 import html2pdf from "html2pdf.js";
 import { 
