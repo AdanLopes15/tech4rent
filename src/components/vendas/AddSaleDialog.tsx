@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, maskCurrencyBR, parseCurrencyBR } from "@/lib/utils";
 import { format } from "date-fns";
 
 import {
