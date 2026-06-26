@@ -380,6 +380,23 @@ export default function Orcamentos() {
     }
   };
 
+  // Resolve a melhor fonte de data do orçamento, cobrindo registros antigos
+  // que podem ter salvo a data em campos diferentes.
+  const getQuoteDate = (quote: any) =>
+    quote?.createdAt ??
+    quote?.created_at ??
+    quote?.dataOrcamento ??
+    quote?.quoteDate ??
+    quote?.createdDate ??
+    quote?.data ??
+    quote?.date ??
+    quote?.saleDate ??
+    null;
+
+  const formatQuoteDate = (quote: any) => formatDate(getQuoteDate(quote));
+
+
+
   const getClientName = (clientId: string, fallbackName?: string) => {
     const client = clients.find((c: any) => c.id === clientId);
     return client?.razaoSocial || client?.name || fallbackName || "N/A";
@@ -578,7 +595,7 @@ export default function Orcamentos() {
               <TableRow key={quote.id}>
                 <TableCell className="font-medium">{quote.id}</TableCell>
                 <TableCell>{getClientName(quote.clientId, quote.clientName)}</TableCell>
-                <TableCell>{formatDate(quote.createdAt)}</TableCell>
+                <TableCell>{formatQuoteDate(quote)}</TableCell>
                 <TableCell>{formatCurrency(Number(quote.totalValue || 0))}</TableCell>
                 <TableCell>
                   <Badge className={statusColors[displayStatus] || "bg-muted"}>{displayStatus}</Badge>
@@ -825,7 +842,7 @@ export default function Orcamentos() {
                 <DocumentHeader 
                   title="ORÇAMENTO" 
                   documentNumber={viewingQuote.id} 
-                  date={formatDate(viewingQuote.createdAt)} 
+                  date={formatQuoteDate(viewingQuote)} 
                   responsible={quoteResponsible}
                   onResponsibleChange={setQuoteResponsible}
                 />
@@ -952,7 +969,7 @@ export default function Orcamentos() {
               <DocumentHeader 
                 title="ORÇAMENTO" 
                 documentNumber={quoteForDownload.id} 
-                date={formatDate(quoteForDownload.createdAt)} 
+                date={formatQuoteDate(quoteForDownload)} 
                 responsible={quoteResponsible}
               />
 
@@ -1274,7 +1291,7 @@ export default function Orcamentos() {
               <DocumentHeader 
                 title="ORÇAMENTO" 
                 documentNumber={quoteForDownload.id} 
-                date={formatDate(quoteForDownload.createdAt)} 
+                date={formatQuoteDate(quoteForDownload)} 
                 responsible={quoteResponsible}
               />
 
