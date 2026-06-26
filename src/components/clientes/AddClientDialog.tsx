@@ -243,7 +243,7 @@ export function AddClientDialog({ open, onOpenChange, client }: AddClientDialogP
       razaoSocial: razaoSocial.trim(),
       contato: contato.trim(),
       ie: ie.trim(),
-      telefone: telefone.trim(),
+      telefone: telefone.replace(/\D/g, ""),
       observacoes: observacoes.trim(),
       address: {
         street: address.street.trim(),
