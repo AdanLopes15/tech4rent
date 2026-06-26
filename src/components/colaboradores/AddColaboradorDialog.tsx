@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
+import { maskPhoneBR } from "@/lib/contact";
 
 import { Button } from "@/components/ui/button";
 import {
