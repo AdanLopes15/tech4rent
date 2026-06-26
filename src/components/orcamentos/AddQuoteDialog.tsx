@@ -75,7 +75,7 @@ const safeToDate = (value: any): Date | undefined => {
   return undefined;
 };
 
-export function AddQuoteDialog({ open, onOpenChange, quote }: AddQuoteDialogProps) {
+export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuoteDialogProps) {
   const { clients, equipments, addQuote, updateQuote } = useStore();
   const { toast } = useToast();
 
