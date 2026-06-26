@@ -238,7 +238,7 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="start-date">Data de Retirada</Label>
-              <Popover>
+              <Popover open={retiradaOpen} onOpenChange={setRetiradaOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -255,7 +255,7 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
                   <Calendar
                     mode="single"
                     selected={retiradaDate}
-                    onSelect={setRetiradaDate}
+                    onSelect={(d) => { setRetiradaDate(d); setRetiradaOpen(false); }}
                     initialFocus
                     locale={ptBR}
                   />
