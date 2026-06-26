@@ -480,12 +480,21 @@ export function AddSaleDialog({ open, onOpenChange, sale }: AddSaleDialogProps) 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label>Valor da Entrada</Label>
-                            <Input
-                              type="number"
-                              min={0}
-                              value={pm.downPaymentValue}
-                              onChange={(e) => updatePaymentMethod(pm.id, "downPaymentValue", Number(e.target.value))}
-                            />
+                            {pm.downPaymentType === "percentage" ? (
+                              <Input
+                                type="number"
+                                min={0}
+                                value={pm.downPaymentValue}
+                                onChange={(e) => updatePaymentMethod(pm.id, "downPaymentValue", Number(e.target.value))}
+                              />
+                            ) : (
+                              <Input
+                                type="text"
+                                inputMode="numeric"
+                                value={formatCurrency(pm.downPaymentValue)}
+                                onChange={(e) => updatePaymentMethod(pm.id, "downPaymentValue", parseCurrencyBR(e.target.value))}
+                              />
+                            )}
                           </div>
 
                           <div className="space-y-2">
