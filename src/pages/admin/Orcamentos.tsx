@@ -89,6 +89,11 @@ export default function Orcamentos() {
   const [editingQuote, setEditingQuote] = useState<any>(null);
   const [viewingQuote, setViewingQuote] = useState<any>(null);
   const [quoteResponsible, setQuoteResponsible] = useState("");
+
+  useEffect(() => {
+    const active = viewingQuote || quoteForDownload || quoteForApproval;
+    if (active) setQuoteResponsible(active.quoteResponsible || "");
+  }, [viewingQuote, quoteForDownload, quoteForApproval]);
   const [quoteForDownload, setQuoteForDownload] = useState<any>(null);
   const [quoteForApproval, setQuoteForApproval] = useState<any>(null);
   const [isContractGenerated, setIsContractGenerated] = useState(false);
