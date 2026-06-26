@@ -52,11 +52,11 @@ export function AddEquipmentDialog({ open, onOpenChange, equipment }: AddEquipme
       setPurpose(equipment.purpose || "aluguel");
       setStock(equipment.stock || 1);
       setUnit(equipment.unit || "");
-      setDailyRate(equipment.dailyRate || 0);
-      setWeeklyRate(equipment.weeklyRate || 0);
-      setMonthlyRate(equipment.monthlyRate || 0);
-      setSalePrice(equipment.salePrice || 0);
-      setCostPrice(equipment.costPrice || 0);
+      setDailyRate(maskCurrencyBR(equipment.dailyRate || 0));
+      setWeeklyRate(maskCurrencyBR(equipment.weeklyRate || 0));
+      setMonthlyRate(maskCurrencyBR(equipment.monthlyRate || 0));
+      setSalePrice(maskCurrencyBR(equipment.salePrice || 0));
+      setCostPrice(maskCurrencyBR(equipment.costPrice || 0));
       setDescription(equipment.description || "");
 
       const existingImageUrls = Array.isArray(equipment.imageUrls) ? equipment.imageUrls : [equipment.imageUrl];
