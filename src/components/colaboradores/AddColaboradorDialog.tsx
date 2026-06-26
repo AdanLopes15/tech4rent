@@ -44,7 +44,7 @@ export function AddCollaboratorDialog({ open, onOpenChange, collaborator }: AddC
       setPassword("");
       setPermission(collaborator.permission || "colaborador");
       setStatus(collaborator.status || "ativo");
-      setTelefone(collaborator.telefone || collaborator.phone || collaborator.whatsapp || "");
+      setTelefone(maskPhoneBR(collaborator.telefone || collaborator.phone || collaborator.whatsapp || ""));
     } else if (open) {
       resetForm();
     }
