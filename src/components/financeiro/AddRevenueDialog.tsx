@@ -388,9 +388,10 @@ export const AddRevenueDialog = ({ open, onOpenChange, revenue, viewOnly = false
               <div className="space-y-1">
                 <Label>Valor Bruto (R$)</Label>
                 <Input
-                  type="number"
-                  value={valorBruto}
-                  onChange={(e) => setValorBruto(Number(e.target.value))}
+                  type="text"
+                  inputMode="numeric"
+                  value={formatCurrency(valorBruto)}
+                  onChange={(e) => setValorBruto(parseCurrencyBR(e.target.value))}
                   disabled={viewOnly}
                 />
               </div>
@@ -398,9 +399,10 @@ export const AddRevenueDialog = ({ open, onOpenChange, revenue, viewOnly = false
               <div className="space-y-1">
                 <Label>Desconto (R$)</Label>
                 <Input
-                  type="number"
-                  value={desconto}
-                  onChange={(e) => setDesconto(Number(e.target.value))}
+                  type="text"
+                  inputMode="numeric"
+                  value={formatCurrency(desconto)}
+                  onChange={(e) => setDesconto(parseCurrencyBR(e.target.value))}
                   disabled={viewOnly}
                 />
               </div>
@@ -408,9 +410,10 @@ export const AddRevenueDialog = ({ open, onOpenChange, revenue, viewOnly = false
               <div className="space-y-1">
                 <Label>Juros (R$)</Label>
                 <Input
-                  type="number"
-                  value={juros}
-                  onChange={(e) => setJuros(Number(e.target.value))}
+                  type="text"
+                  inputMode="numeric"
+                  value={formatCurrency(juros)}
+                  onChange={(e) => setJuros(parseCurrencyBR(e.target.value))}
                   disabled={viewOnly}
                 />
               </div>
