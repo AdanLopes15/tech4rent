@@ -634,7 +634,7 @@ export const AddExpenseDialog = ({ open, onOpenChange, expense, viewOnly = false
 
                   <div className="space-y-2">
                     <Label>Data da 1ª Parcela</Label>
-                    <Popover>
+                    <Popover open={firstInstallmentOpen} onOpenChange={setFirstInstallmentOpen}>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
@@ -649,7 +649,7 @@ export const AddExpenseDialog = ({ open, onOpenChange, expense, viewOnly = false
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
-                        <Calendar mode="single" selected={dueDate} onSelect={setDueDate} initialFocus locale={ptBR} />
+                        <Calendar mode="single" selected={dueDate} onSelect={(d) => { setDueDate(d); setFirstInstallmentOpen(false); }} initialFocus locale={ptBR} />
                       </PopoverContent>
                     </Popover>
                   </div>
