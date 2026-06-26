@@ -93,6 +93,13 @@ export default function Orcamentos() {
   const [quoteForApproval, setQuoteForApproval] = useState<any>(null);
   const [isContractGenerated, setIsContractGenerated] = useState(false);
 
+  useEffect(() => {
+    const active = viewingQuote || quoteForDownload || quoteForApproval;
+    if (active) setQuoteResponsible(active.quoteResponsible || "");
+  }, [viewingQuote, quoteForDownload, quoteForApproval]);
+
+
+
   const [clientFilter, setClientFilter] = useState("todos");
   const [statusFilter, setStatusFilter] = useState("todos");
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
