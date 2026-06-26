@@ -483,7 +483,7 @@ export const AddRevenueDialog = ({ open, onOpenChange, revenue, viewOnly = false
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="single" selected={dueDate} onSelect={setDueDate} initialFocus locale={ptBR} />
+                      <Calendar mode="single" selected={dueDate} onSelect={(d) => { setDueDate(d); setDueOpen(false); }} initialFocus locale={ptBR} />
                     </PopoverContent>
                   </Popover>
                 </div>
