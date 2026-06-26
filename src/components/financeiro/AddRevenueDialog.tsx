@@ -500,7 +500,7 @@ export const AddRevenueDialog = ({ open, onOpenChange, revenue, viewOnly = false
                     disabled={viewOnly || status !== "recebido"}
                     className="pr-8"
                   />
-                  <Popover>
+                  <Popover open={paymentOpen} onOpenChange={setPaymentOpen}>
                     <PopoverTrigger asChild>
                       <Button
                         variant="ghost"
