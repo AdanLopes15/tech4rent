@@ -437,9 +437,10 @@ export function AddSaleDialog({ open, onOpenChange, sale }: AddSaleDialogProps) 
                       <div className="space-y-2">
                         <Label>Valor (R$)</Label>
                         <Input
-                          type="number"
-                          value={pm.value}
-                          onChange={(e) => updatePaymentMethod(pm.id, "value", Number(e.target.value))}
+                          type="text"
+                          inputMode="numeric"
+                          value={formatCurrency(pm.value)}
+                          onChange={(e) => updatePaymentMethod(pm.id, "value", parseCurrencyBR(e.target.value))}
                         />
                       </div>
 
