@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { getContactPhone } from "@/lib/contact";
+import { getContactPhone, maskPhoneBR } from "@/lib/contact";
 
 interface AddSupplierDialogProps {
   open: boolean;
@@ -95,7 +95,7 @@ export function AddSupplierDialog({ open, onOpenChange, supplier, viewOnly = fal
       setCpf(supplier.cpf || "");
       setIe(supplier.ie || supplier.rg || "");
       setEmail(supplier.email || "");
-      setTelefone(getContactPhone(supplier));
+      setTelefone(maskPhoneBR(getContactPhone(supplier)));
       setCep(supplier.cep || "");
       setAddress(mappedAddress);
       setStatus(supplier.status || "ativo");
@@ -254,7 +254,7 @@ export function AddSupplierDialog({ open, onOpenChange, supplier, viewOnly = fal
       razaoSocial: razaoSocial.trim(),
       contato: contato.trim(),
       ie: ie.trim(),
-      telefone: telefone.trim(),
+      telefone: telefone.replace(/\D/g, ""),
       observacoes: observacoes.trim(),
       address: {
         street: address.street.trim(),
@@ -268,8 +268,8 @@ export function AddSupplierDialog({ open, onOpenChange, supplier, viewOnly = fal
       // campos já usados no Lovable para compatibilidade
       name: razaoSocial.trim(),
       contactPerson: contato.trim(),
-      phone: telefone.trim(),
-      whatsapp: telefone.trim(),
+      phone: telefone.replace(/\D/g, ""),
+      whatsapp: telefone.replace(/\D/g, ""),
       notes: observacoes.trim(),
       street: address.street.trim(),
       number: address.number.trim(),
@@ -442,7 +442,7 @@ export function AddSupplierDialog({ open, onOpenChange, supplier, viewOnly = fal
                 <Input
                   placeholder="DDD + Número"
                   value={telefone}
-                  onChange={(e) => setTelefone(e.target.value)}
+                  onChange={(e) => setTelefone(maskPhoneBR(e.target.value))}
                   className="h-9"
                   disabled={viewOnly}
                 />

@@ -22,7 +22,7 @@ import {
 
 import { PlusCircle, Phone, Pencil, Trash2, Eye } from "lucide-react";
 import { AddSupplierDialog } from "@/components/fornecedores/AddSupplierDialog";
-import { getContactPhone, getWhatsappLink, openWhatsappLink } from "@/lib/contact";
+import { getContactPhone, getWhatsappLink, openWhatsappLink, formatPhoneBR } from "@/lib/contact";
 
 export default function Fornecedores() {
   const { suppliers, deleteSupplier } = useStore();
@@ -156,7 +156,7 @@ export default function Fornecedores() {
 
                         <TableCell className="text-muted-foreground">{supplier.email || "—"}</TableCell>
 
-                        <TableCell className="text-muted-foreground">{phone || "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">{formatPhoneBR(phone)}</TableCell>
 
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1">

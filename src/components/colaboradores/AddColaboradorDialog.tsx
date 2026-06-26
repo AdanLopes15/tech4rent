@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
+import { maskPhoneBR } from "@/lib/contact";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -43,7 +44,7 @@ export function AddCollaboratorDialog({ open, onOpenChange, collaborator }: AddC
       setPassword("");
       setPermission(collaborator.permission || "colaborador");
       setStatus(collaborator.status || "ativo");
-      setTelefone(collaborator.telefone || collaborator.phone || collaborator.whatsapp || "");
+      setTelefone(maskPhoneBR(collaborator.telefone || collaborator.phone || collaborator.whatsapp || ""));
     } else if (open) {
       resetForm();
     }
@@ -85,9 +86,9 @@ export function AddCollaboratorDialog({ open, onOpenChange, collaborator }: AddC
       clientName,
       name,
       cpf,
-      telefone,
-      phone: telefone,
-      whatsapp: telefone,
+      telefone: telefone.replace(/\D/g, ""),
+      phone: telefone.replace(/\D/g, ""),
+      whatsapp: telefone.replace(/\D/g, ""),
       permission,
       status,
       ...(password && { password }),
@@ -169,7 +170,7 @@ export function AddCollaboratorDialog({ open, onOpenChange, collaborator }: AddC
               <Input
                 placeholder="(00) 00000-0000"
                 value={telefone}
-                onChange={(e) => setTelefone(e.target.value)}
+                onChange={(e) => setTelefone(maskPhoneBR(e.target.value))}
                 className="h-9"
               />
             </div>
