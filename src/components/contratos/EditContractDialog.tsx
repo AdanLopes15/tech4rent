@@ -104,15 +104,13 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
   }, [open, contract]);
 
   useEffect(() => {
-    const monthlyValue = items.reduce((acc, item) => acc + item.quantity * item.unitPrice, 0);
+    const total = items.reduce(
+      (acc, item) => acc + Number(item.quantity || 0) * Number(item.unitPrice || 0),
+      0,
+    );
+    setTotalValue(total);
+  }, [items]);
 
-    if (retiradaDate && endDate && endDate > retiradaDate) {
-      const months = differenceInMonths(endDate, retiradaDate) + 1;
-      setTotalValue(monthlyValue * months);
-    } else {
-      setTotalValue(monthlyValue);
-    }
-  }, [items, retiradaDate, endDate]);
 
   const handleAddItem = () => {
     setItems((prev) => [
