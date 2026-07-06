@@ -328,7 +328,7 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
 
               <Separator className="my-6" />
 
-              <div className="mb-8">
+              <div className="invoice-terms mb-8">
                 <h3 className="font-bold text-lg mb-2 uppercase">Termos e Condições</h3>
                 <p className="text-sm text-gray-500">
                   Período de referência da locação: {formatDate(contract.startDate, "dd/MM/yyyy")} a{" "}
