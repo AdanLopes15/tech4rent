@@ -406,13 +406,14 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
 
     const previousTitle = document.title;
     const printTitle = `Fatura de Locação - ${contract.id}`;
-    const escapedPrintTitle = printTitle.replace(/[&<>"']/g, (char) => ({
+    const titleEntities: Record<string, string> = {
       "&": "&amp;",
       "<": "&lt;",
       ">": "&gt;",
       '"': "&quot;",
       "'": "&#039;",
-    })[char] || char);
+    };
+    const escapedPrintTitle = printTitle.replace(/[&<>"']/g, (char) => titleEntities[char] || char);
     const printWindow = window.open("", "_blank");
 
     if (!printWindow) {
