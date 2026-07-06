@@ -91,78 +91,9 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
       });
       return;
     }
-
-    const printWindow = window.open("", "", "height=800,width=800");
-    if (!printWindow) {
-      toast({
-        title: "Pop-up bloqueado",
-        description: "Permita pop-ups para gerar o PDF.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const headLinksAndStyles = Array.from(document.querySelectorAll("link[rel='stylesheet'], style"))
-      .map((node) => node.outerHTML)
-      .join("\n");
-
-    const cssRulesText = Array.from(document.styleSheets)
-      .map((styleSheet) => {
-        try {
-          // @ts-ignore
-          return Array.from(styleSheet.cssRules)
-            .map((rule: CSSRule) => rule.cssText)
-            .join("\n");
-        } catch {
-          return "";
-        }
-      })
-      .filter(Boolean)
-      .join("\n");
-
-    printWindow.document.open();
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Imprimir Fatura</title>
-          <base href="${window.location.origin}/" />
-          ${headLinksAndStyles}
-          <style>
-            ${cssRulesText}
-            @media print {
-              body {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-            }
-            body { margin: 0; padding: 0; }
-          </style>
-        </head>
-        <body>
-          ${printableContent.innerHTML}
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-
-    const images = Array.from(printWindow.document.images);
-    const imagePromises = images.map(
-      (img) =>
-        new Promise<void>((resolve) => {
-          if (img.complete) resolve();
-          else {
-            img.onload = () => resolve();
-            img.onerror = () => resolve();
-          }
-        }),
-    );
-
-    await Promise.all(imagePromises);
-
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
+    window.print();
   };
+
 
   const allInstallments = contract ? revenues.filter((r: any) => r.contractId === contract.id) : [];
   
