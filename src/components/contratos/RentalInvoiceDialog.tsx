@@ -406,7 +406,14 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
 
     const previousTitle = document.title;
     const printTitle = `Fatura de Locação - ${contract.id}`;
-    const printWindow = window.open("", "_blank", "noopener,noreferrer");
+    const escapedPrintTitle = printTitle.replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;",
+    })[char] || char);
+    const printWindow = window.open("", "_blank");
 
     if (!printWindow) {
       document.title = printTitle;
@@ -421,13 +428,14 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
     }
 
     document.title = printTitle;
+    printWindow.opener = null;
     printWindow.document.open();
     printWindow.document.write(`<!doctype html>
       <html lang="pt-BR">
         <head>
           <meta charset="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <title>${printTitle}</title>
+          <title>${escapedPrintTitle}</title>
           <style>${invoicePrintStyles}</style>
         </head>
         <body>
@@ -698,13 +706,13 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
   return (
     <>
       <style>{`
-        #invoice-print-area {
+        #print-root {
           display: none;
         }
 
         @page {
           size: A4 portrait;
-          margin: 14mm;
+          margin: 8mm;
         }
 
         @media print {
@@ -712,33 +720,48 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
           body {
             margin: 0 !important;
             padding: 0 !important;
-            width: 210mm !important;
-            min-height: auto !important;
+            width: auto !important;
             height: auto !important;
+            min-height: 0 !important;
             overflow: visible !important;
             background: white !important;
           }
 
-          body * { visibility: hidden !important; }
-
-          #invoice-print-area,
-          #invoice-print-area * {
-            visibility: visible !important;
+          body > *:not(#print-root) {
+            display: none !important;
           }
 
+          #print-root,
           #invoice-print-area {
             display: block !important;
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
+            position: static !important;
+            height: auto !important;
+            min-height: 0 !important;
+            overflow: visible !important;
+            margin: 0 !important;
+            padding: 0 !important;
             background: white !important;
+            box-shadow: none !important;
+            visibility: visible !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
 
+          #print-root {
+            width: 100% !important;
+          }
+
+          #invoice-print-area {
+            width: 194mm !important;
+            max-width: 194mm !important;
+            margin: 0 auto !important;
+          }
+
           .invoice-no-print,
+          .print-actions,
+          .no-print,
           button,
+          [role="dialog"],
           [data-radix-dialog-overlay],
           [data-radix-dialog-content] {
             display: none !important;
@@ -747,15 +770,16 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
           /* Faithful A4 layout — no scaling, comfortable typography */
           #invoice-print-area .invoice-page {
             width: 100% !important;
-            max-width: 182mm !important;
+            max-width: 194mm !important;
             margin: 0 auto !important;
             padding: 0 !important;
+            min-height: 0 !important;
             background: white !important;
             box-shadow: none !important;
             border: none !important;
             color: #0f172a !important;
             font-size: 13px !important;
-            line-height: 1.5 !important;
+            line-height: 1.45 !important;
           }
 
           /* Keep tightly-related rows together, but allow natural flow */
@@ -771,8 +795,8 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
             align-items: flex-start !important;
             justify-content: space-between !important;
             gap: 8mm !important;
-            margin: 0 0 7mm !important;
-            padding: 0 0 5mm !important;
+            margin: 0 0 6mm !important;
+            padding: 0 0 4mm !important;
             border-bottom: 1.5px solid #1f4f8f !important;
           }
 
@@ -798,7 +822,7 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
           }
 
           #invoice-print-area .invoice-section {
-            margin: 0 0 7mm !important;
+            margin: 0 0 6mm !important;
           }
 
           #invoice-print-area .invoice-parties {
@@ -925,7 +949,7 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
           }
 
           #invoice-print-area .invoice-footer {
-            margin-top: 8mm !important;
+            margin-top: 7mm !important;
             padding-top: 4mm !important;
             border-top: 1px solid #e5e7eb !important;
           }
@@ -971,8 +995,10 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
 
       {typeof document !== "undefined" &&
         createPortal(
-          <div id="invoice-print-area" aria-hidden="true">
-            <InvoiceContent printMode />
+          <div id="print-root" aria-hidden="true">
+            <div id="invoice-print-area">
+              <InvoiceContent printMode />
+            </div>
           </div>,
           document.body,
         )}
