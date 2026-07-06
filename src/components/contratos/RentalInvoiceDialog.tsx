@@ -287,14 +287,20 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
                                 <img
                                   src={equipment?.imageUrl || "https://placehold.co/100x100.png"}
                                   alt={equipment?.name || "Equipamento"}
-                                  width={80}
-                                  height={80}
-                                  className="rounded-md object-contain"
+                                  width={56}
+                                  height={56}
+                                  className="h-14 w-14 rounded-md object-contain border border-gray-200"
                                 />
                                 <div className="max-w-xs">
                                   <p className="font-semibold">{equipment?.name}</p>
-                                  <p className="text-sm text-gray-500">{equipment?.description}</p>
+                                  <p
+                                    className="text-sm text-gray-500 overflow-hidden"
+                                    style={{ display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical" }}
+                                  >
+                                    {equipment?.description}
+                                  </p>
                                 </div>
+
                               </div>
                             </td>
 
