@@ -244,7 +244,7 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
 
               <Separator className="my-6" />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <div className="invoice-parties grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <div>
                   <h3 className="font-semibold text-lg mb-2">LOCADOR</h3>
                   <p className="font-bold">{companySettings.name}</p>
