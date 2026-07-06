@@ -598,23 +598,24 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
           </div>
         </header>
 
-        <section className="invoice-section invoice-parties grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="invoice-party rounded-md border border-slate-200 p-4">
-            <h3 className="invoice-section-title font-semibold uppercase">LOCADOR</h3>
+        <section className="invoice-section invoice-parties grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div className="invoice-party">
+            <h3 className="invoice-section-title font-bold uppercase">LOCADOR</h3>
             <p className="font-bold">{companyLegalName}</p>
             <p>CNPJ: {companySettings?.cnpj || "Não informado"}</p>
             <p>{[companyAddress.logradouro, companyAddress.numero].filter(Boolean).join(", ")}</p>
             <p>{[companyAddress.bairro, companyAddress.localidade || companyAddress.city, companyAddress.uf || companyAddress.state].filter(Boolean).join(", ")}</p>
           </div>
 
-          <div className="invoice-party rounded-md border border-slate-200 p-4">
-            <h3 className="invoice-section-title font-semibold uppercase">LOCATÁRIO</h3>
+          <div className="invoice-party">
+            <h3 className="invoice-section-title font-bold uppercase">LOCATÁRIO</h3>
             <p className="font-bold">{contract.client?.razaoSocial || contract.client?.name || "Cliente não informado"}</p>
             <p>Documento: {contract.client?.cnpj || contract.client?.cpf || "Não informado"}</p>
             <p>{[clientAddress.street || clientAddress.logradouro, clientAddress.number || clientAddress.numero].filter(Boolean).join(", ")}</p>
             <p>{[clientAddress.neighborhood || clientAddress.bairro, clientAddress.city || clientAddress.localidade, clientAddress.state || clientAddress.uf].filter(Boolean).join(", ")}</p>
           </div>
         </section>
+
 
         <section className="invoice-section invoice-items">
           <h3 className="invoice-section-title font-bold uppercase">Itens da Locação</h3>
