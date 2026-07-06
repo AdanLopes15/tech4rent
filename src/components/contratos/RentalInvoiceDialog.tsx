@@ -156,8 +156,8 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
   const handleEditInvoice = () => setIsEditRevenueDialogOpen(true);
 
   const InvoiceContent = ({ printMode = false }: { printMode?: boolean }) => {
-    const companyAddress = companySettings?.address || {};
-    const clientAddress = contract.client?.address || {};
+    const companyAddress: any = companySettings?.address || {};
+    const clientAddress: any = contract.client?.address || {};
     const companyName = companySettings?.fantasyName || companySettings?.name || "TECH4RENT";
     const companyLegalName = companySettings?.name || companyName;
     const companyCity = companyAddress.localidade || companyAddress.city || companyAddress.cidade || "";
