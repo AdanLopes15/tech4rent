@@ -635,7 +635,7 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
                   const equipment = getEquipmentDetails(item.equipmentId);
                   const itemTotal = (item.quantity || 0) * (item.unitPrice || 0);
                   const equipmentName = equipment?.name || item.description || "Equipamento";
-                  const description = shortText(equipment?.description || item.description, printMode ? 120 : 160);
+                  const description = String(equipment?.description || item.description || "").replace(/\s+/g, " ").trim() || "Descrição do equipamento locado.";
 
                   return (
                     <tr key={index}>
