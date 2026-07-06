@@ -343,8 +343,8 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
         }
 
         @page {
-          size: A4;
-          margin: 8mm;
+          size: A4 portrait;
+          margin: 14mm;
         }
 
         @media print {
@@ -357,10 +357,6 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
             height: auto !important;
             overflow: visible !important;
             background: white !important;
-          }
-
-          body > *:not(#invoice-print-area) {
-            display: none !important;
           }
 
           body * { visibility: hidden !important; }
@@ -376,26 +372,11 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
             left: 0 !important;
             top: 0 !important;
             width: 100% !important;
-            max-width: 190mm !important;
-            min-height: auto !important;
-            height: auto !important;
-            overflow: visible !important;
             background: white !important;
-            box-shadow: none !important;
-            border: none !important;
-            padding: 0 !important;
-            margin: 0 auto !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
 
-          .modal,
-          .dialog,
-          .overlay,
-          .modal-content,
-          .dialog-content,
-          .print-actions,
-          .no-print,
           .invoice-no-print,
           button,
           [data-radix-dialog-overlay],
@@ -403,37 +384,24 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
             display: none !important;
           }
 
+          /* Faithful A4 layout — no scaling, comfortable typography */
           #invoice-print-area .invoice-page {
-            width: 190mm !important;
-            max-width: 190mm !important;
-            min-height: auto !important;
-            height: auto !important;
-            overflow: visible !important;
+            width: 100% !important;
+            max-width: 182mm !important;
+            margin: 0 auto !important;
+            padding: 0 !important;
             background: white !important;
             box-shadow: none !important;
             border: none !important;
-            padding: 0 !important;
-            margin: 0 auto !important;
-            color: #111827 !important;
-            font-size: 10.5px !important;
-            line-height: 1.22 !important;
-            page-break-before: avoid !important;
-            break-before: avoid !important;
-            page-break-after: avoid !important;
-            break-after: avoid !important;
+            color: #0f172a !important;
+            font-size: 13px !important;
+            line-height: 1.5 !important;
           }
 
-          #invoice-print-area .invoice-header,
-          #invoice-print-area .invoice-section,
-          #invoice-print-area .invoice-parties,
-          #invoice-print-area .invoice-items,
-          #invoice-print-area .invoice-total-row,
-          #invoice-print-area .invoice-terms,
-          #invoice-print-area .invoice-footer,
-          #invoice-print-area table,
+          /* Keep tightly-related rows together, but allow natural flow */
+          #invoice-print-area tr,
           #invoice-print-area thead,
-          #invoice-print-area tfoot,
-          #invoice-print-area tr {
+          #invoice-print-area .invoice-total-row {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
           }
@@ -442,56 +410,61 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
             display: flex !important;
             align-items: flex-start !important;
             justify-content: space-between !important;
-            gap: 5mm !important;
-            margin: 0 0 3mm !important;
-            padding: 0 0 2.5mm !important;
-            border-bottom: 0.35mm solid #1f4f8f !important;
+            gap: 8mm !important;
+            margin: 0 0 7mm !important;
+            padding: 0 0 5mm !important;
+            border-bottom: 1.5px solid #1f4f8f !important;
           }
 
           #invoice-print-area .invoice-logo {
-            width: 15mm !important;
-            height: 15mm !important;
+            width: 22mm !important;
+            height: 22mm !important;
           }
 
           #invoice-print-area .invoice-company {
-            font-size: 15px !important;
-            line-height: 1.1 !important;
+            font-size: 22px !important;
+            line-height: 1.15 !important;
           }
 
           #invoice-print-area .invoice-company-doc,
           #invoice-print-area .invoice-meta-line {
-            font-size: 9.5px !important;
-            line-height: 1.2 !important;
+            font-size: 12px !important;
+            line-height: 1.35 !important;
           }
 
           #invoice-print-area .invoice-title {
-            font-size: 15px !important;
-            line-height: 1.1 !important;
+            font-size: 22px !important;
+            line-height: 1.15 !important;
           }
 
           #invoice-print-area .invoice-section {
-            margin: 0 0 3mm !important;
+            margin: 0 0 7mm !important;
           }
 
           #invoice-print-area .invoice-parties {
             display: grid !important;
             grid-template-columns: 1fr 1fr !important;
-            gap: 3mm !important;
+            gap: 6mm !important;
           }
 
           #invoice-print-area .invoice-party {
-            min-height: auto !important;
             border: 1px solid #d8dee9 !important;
-            border-radius: 3px !important;
-            padding: 2.3mm !important;
+            border-radius: 4px !important;
+            padding: 4mm !important;
+          }
+
+          #invoice-print-area .invoice-party p {
+            font-size: 12.5px !important;
+            line-height: 1.5 !important;
+            margin: 0 0 1mm !important;
           }
 
           #invoice-print-area .invoice-section-title {
-            margin: 0 0 1.5mm !important;
-            padding: 0 0 1mm !important;
+            margin: 0 0 3mm !important;
+            padding: 0 0 2mm !important;
             border-bottom: 1px solid #e5e7eb !important;
-            font-size: 10.5px !important;
-            line-height: 1.1 !important;
+            font-size: 14px !important;
+            line-height: 1.2 !important;
             color: #0f2742 !important;
           }
 
@@ -514,87 +487,91 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
 
           #invoice-print-area th,
           #invoice-print-area td {
-            padding: 1.2mm 1.5mm !important;
+            padding: 3mm 2.5mm !important;
             border-bottom: 1px solid #e5e7eb !important;
-            font-size: 10px !important;
-            line-height: 1.2 !important;
+            font-size: 12.5px !important;
+            line-height: 1.45 !important;
           }
 
           #invoice-print-area th:nth-child(1),
           #invoice-print-area td:nth-child(1) {
-            width: 56% !important;
+            width: 52% !important;
           }
 
           #invoice-print-area th:nth-child(2),
           #invoice-print-area td:nth-child(2) {
-            width: 10% !important;
+            width: 12% !important;
           }
 
           #invoice-print-area th:nth-child(3),
           #invoice-print-area td:nth-child(3),
           #invoice-print-area th:nth-child(4),
           #invoice-print-area td:nth-child(4) {
-            width: 17% !important;
+            width: 18% !important;
           }
 
           #invoice-print-area thead th {
             background: #eef4fb !important;
             color: #0f2742 !important;
+            font-size: 12.5px !important;
           }
 
           #invoice-print-area .invoice-item {
-            gap: 2mm !important;
+            gap: 3mm !important;
           }
 
           #invoice-print-area .invoice-item-image {
-            width: 10mm !important;
-            height: 10mm !important;
-            min-width: 10mm !important;
+            width: 16mm !important;
+            height: 16mm !important;
+            min-width: 16mm !important;
           }
 
           #invoice-print-area .invoice-item-name {
-            font-size: 10px !important;
-            line-height: 1.15 !important;
-            margin-bottom: 0.7mm !important;
+            font-size: 13px !important;
+            line-height: 1.3 !important;
+            margin-bottom: 1.5mm !important;
           }
 
           #invoice-print-area .invoice-description {
             display: -webkit-box !important;
-            -webkit-line-clamp: 3 !important;
+            -webkit-line-clamp: 5 !important;
             -webkit-box-orient: vertical !important;
-            max-height: 3.7em !important;
             overflow: hidden !important;
-            font-size: 9px !important;
-            line-height: 1.22 !important;
+            font-size: 11.5px !important;
+            line-height: 1.4 !important;
+            color: #64748b !important;
           }
 
           #invoice-print-area .invoice-total-row td {
-            border-top: 1.5px solid #0f2742 !important;
+            border-top: 2px solid #0f2742 !important;
             border-bottom: 0 !important;
-            font-size: 11px !important;
-            padding-top: 1.8mm !important;
+            font-size: 15px !important;
+            padding-top: 4mm !important;
           }
 
           #invoice-print-area .invoice-terms-list {
-            margin-top: 1.2mm !important;
-            gap: 0 !important;
+            margin-top: 3mm !important;
           }
 
           #invoice-print-area .invoice-terms p {
-            font-size: 9.5px !important;
-            line-height: 1.22 !important;
-            margin-bottom: 0.7mm !important;
+            font-size: 12px !important;
+            line-height: 1.5 !important;
+            margin-bottom: 1.5mm !important;
           }
 
           #invoice-print-area .invoice-receipt-note {
-            margin-top: 1.6mm !important;
-            font-size: 9.5px !important;
+            margin-top: 4mm !important;
+            font-size: 12px !important;
           }
 
           #invoice-print-area .invoice-footer {
-            margin-top: 3mm !important;
-            padding-top: 2mm !important;
+            margin-top: 8mm !important;
+            padding-top: 4mm !important;
             border-top: 1px solid #e5e7eb !important;
+          }
+
+          #invoice-print-area .invoice-footer p {
+            font-size: 13px !important;
           }
 
           #invoice-print-area img {
@@ -602,6 +579,7 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
           }
         }
       `}</style>
+
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 bg-background">
           <DialogHeader className="p-6 pb-0">
