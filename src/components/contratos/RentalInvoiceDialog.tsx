@@ -196,11 +196,12 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
                   <p className="text-sm text-gray-500">Contrato: {contract.id}</p>
                   <div className="flex items-center justify-end gap-2 text-sm text-gray-500">
                     <span>Fatura:</span>
+                    <span className="hidden print:inline">{currentInstallmentNumber} / {totalInstallments}</span>
                     <Select
                       value={String(activeIndex)}
                       onValueChange={(val) => setSelectedInstallmentIndex(Number(val))}
                     >
-                      <SelectTrigger className="w-auto h-7 text-sm border-gray-300 bg-white text-black px-2 py-0">
+                      <SelectTrigger className="invoice-no-print w-auto h-7 text-sm border-gray-300 bg-white text-black px-2 py-0">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -214,9 +215,10 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
                   </div>
                   <div className="flex items-center justify-end gap-2 text-sm text-gray-500">
                     <span>Vencimento:</span>
+                    <span className="hidden print:inline">{formatDate(currentInstallment.dueDate)}</span>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm" className="h-7 text-sm border-gray-300 bg-white text-black px-2 py-0 font-normal">
+                        <Button variant="outline" size="sm" className="invoice-no-print h-7 text-sm border-gray-300 bg-white text-black px-2 py-0 font-normal">
                           <CalendarIcon className="mr-1 h-3 w-3" />
                           {formatDate(currentInstallment.dueDate)}
                         </Button>
@@ -236,6 +238,7 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
                       </PopoverContent>
                     </Popover>
                   </div>
+
                 </div>
               </header>
 
