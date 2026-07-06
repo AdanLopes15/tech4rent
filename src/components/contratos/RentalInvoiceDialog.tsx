@@ -138,6 +138,37 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
 
   return (
     <>
+      <style>{`
+        @media print {
+          @page { size: A4; margin: 12mm; }
+          html, body { background: #fff !important; }
+          body * { visibility: hidden !important; }
+          #printable-invoice, #printable-invoice * { visibility: visible !important; }
+          #printable-invoice {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+            overflow: visible !important;
+          }
+          #printable-invoice [data-radix-scroll-area-viewport] { overflow: visible !important; }
+          .invoice-no-print { display: none !important; }
+          #printable-invoice header,
+          #printable-invoice section,
+          #printable-invoice table,
+          #printable-invoice thead,
+          #printable-invoice tfoot,
+          #printable-invoice .invoice-terms,
+          #printable-invoice .invoice-parties { break-inside: avoid; page-break-inside: avoid; }
+          #printable-invoice tr { break-inside: avoid; page-break-inside: avoid; }
+          #printable-invoice { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+      `}</style>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 bg-background">
           <DialogHeader className="p-6 pb-0">
@@ -146,6 +177,7 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
 
           <ScrollArea className="flex-grow bg-background">
             <div id="printable-invoice" className="p-6 bg-white text-black">
+
               <header className="flex justify-between items-start mb-8">
                 <div className="flex items-center gap-4">
                   <CompanyLogo 
