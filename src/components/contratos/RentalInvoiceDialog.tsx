@@ -797,16 +797,16 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
             gap: 8mm !important;
             margin: 0 0 6mm !important;
             padding: 0 0 4mm !important;
-            border-bottom: 1.5px solid #1f4f8f !important;
+            border-bottom: 1px solid #d1d5db !important;
           }
 
           #invoice-print-area .invoice-logo {
-            width: 22mm !important;
-            height: 22mm !important;
+            width: 20mm !important;
+            height: 20mm !important;
           }
 
           #invoice-print-area .invoice-company {
-            font-size: 22px !important;
+            font-size: 20px !important;
             line-height: 1.15 !important;
           }
 
@@ -817,7 +817,7 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
           }
 
           #invoice-print-area .invoice-title {
-            font-size: 22px !important;
+            font-size: 20px !important;
             line-height: 1.15 !important;
           }
 
@@ -828,13 +828,13 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
           #invoice-print-area .invoice-parties {
             display: grid !important;
             grid-template-columns: 1fr 1fr !important;
-            gap: 6mm !important;
+            gap: 8mm !important;
           }
 
           #invoice-print-area .invoice-party {
-            border: 1px solid #d8dee9 !important;
-            border-radius: 4px !important;
-            padding: 4mm !important;
+            border: none !important;
+            border-radius: 0 !important;
+            padding: 0 !important;
           }
 
           #invoice-print-area .invoice-party p {
@@ -845,11 +845,11 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
 
           #invoice-print-area .invoice-section-title {
             margin: 0 0 3mm !important;
-            padding: 0 0 2mm !important;
-            border-bottom: 1px solid #e5e7eb !important;
-            font-size: 14px !important;
+            padding: 0 !important;
+            border-bottom: none !important;
+            font-size: 13px !important;
             line-height: 1.2 !important;
-            color: #0f2742 !important;
+            color: #0f172a !important;
           }
 
           #invoice-print-area p,
@@ -895,9 +895,10 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
           }
 
           #invoice-print-area thead th {
-            background: #eef4fb !important;
-            color: #0f2742 !important;
-            font-size: 12.5px !important;
+            background: transparent !important;
+            color: #64748b !important;
+            font-size: 12px !important;
+            border-bottom: 1px solid #cbd5e1 !important;
           }
 
           #invoice-print-area .invoice-item {
@@ -917,21 +918,18 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
           }
 
           #invoice-print-area .invoice-description {
-            display: -webkit-box !important;
-            -webkit-line-clamp: 5 !important;
-            -webkit-box-orient: vertical !important;
-            overflow: hidden !important;
-            font-size: 11.5px !important;
+            font-size: 11px !important;
             line-height: 1.4 !important;
             color: #64748b !important;
           }
 
           #invoice-print-area .invoice-total-row td {
-            border-top: 2px solid #0f2742 !important;
+            border-top: 1px solid #cbd5e1 !important;
             border-bottom: 0 !important;
             font-size: 15px !important;
             padding-top: 4mm !important;
           }
+
 
           #invoice-print-area .invoice-terms-list {
             margin-top: 3mm !important;
