@@ -165,6 +165,7 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
       } else {
         await addContract({
           clientId,
+          unitOperation: unitOperation.trim(),
           client,
           startDate,
           endDate,
