@@ -131,7 +131,8 @@ export function AddEquipmentDialog({ open, onOpenChange, equipment }: AddEquipme
       weeklyRate: parseCurrencyBR(weeklyRate),
       monthlyRate: parseCurrencyBR(monthlyRate),
       salePrice: parseCurrencyBR(salePrice),
-      costPrice: parseCurrencyBR(costPrice),
+      // Só envia custo se o usuário tiver permissão (evita sobrescrever o valor sensível).
+      ...(canViewCost ? { costPrice: parseCurrencyBR(costPrice) } : {}),
       description,
       imageUrls,
       imageFiles,
