@@ -1891,9 +1891,7 @@ const useStore = create<State & Actions>((set, get) => {
       // Impede excluir o último administrador ativo.
       const target = state.systemUsers.find((u) => u.uid === uid);
       if (target?.profile === "admin") {
-        const activeAdmins = state.systemUsers.filter(
-          (u) => u.profile === "admin" && u.status === "ativo",
-        );
+        const activeAdmins = state.systemUsers.filter((u) => u.profile === "admin" && isAtivo(u));
         if (activeAdmins.length <= 1) {
           throw new Error("Não é possível excluir o último administrador ativo.");
         }
