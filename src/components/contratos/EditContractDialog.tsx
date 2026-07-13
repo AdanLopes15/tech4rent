@@ -86,6 +86,7 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
   useEffect(() => {
     if (open && contract) {
       setSelectedClientId(contract.clientId || "");
+      setUnitOperation(contract.unitOperation || "");
       setRetiradaDate(safeToDate(contract.startDate));
       setEndDate(safeToDate(contract.endDate));
       setItems(
