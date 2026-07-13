@@ -1,0 +1,76 @@
+rules_version = '2';
+
+// Regras de segurança do Firestore para o RBAC da Tech4Rent.
+// Copie este conteúdo no Firebase Console > Firestore > Regras.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- Helpers ----
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    // Usuário só é considerado válido se tiver documento em users/{uid} e estiver ativo.
+    function isActiveUser() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && userDoc().status == 'ativo';
+    }
+
+    function isAdmin() {
+      return isActiveUser() && userDoc().profile == 'admin';
+    }
+
+    // Verifica permissão "modulo.acao" no perfil/permissões do usuário.
+    function hasPerm(perm) {
+      return isActiveUser() && (
+        userDoc().profile == 'admin'
+        || (userDoc().permissions is list && userDoc().permissions.hasAny([perm]))
+      );
+    }
+
+    // ---- Coleção de usuários ----
+    match /users/{uid} {
+      // Cada usuário pode ler o próprio documento; admins leem todos.
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      // Apenas admins gerenciam usuários (criação real do Auth via Cloud Function).
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ---- Auditoria ----
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isActiveUser();
+      allow update, delete: if false;
+    }
+
+    // ---- Orçamentos (exemplo de permissões por ação) ----
+    match /quotes/{quoteId} {
+      allow read: if hasPerm('orcamentos.view');
+      allow create: if hasPerm('orcamentos.create');
+      allow update: if hasPerm('orcamentos.edit');
+      allow delete: if hasPerm('orcamentos.delete');
+    }
+
+    match /clients/{id} {
+      allow read: if hasPerm('clientes.view');
+      allow write: if hasPerm('clientes.edit') || hasPerm('clientes.create');
+    }
+
+    match /equipments/{id} {
+      allow read: if hasPerm('equipamentos.view');
+      allow write: if hasPerm('equipamentos.edit') || hasPerm('equipamentos.create');
+    }
+
+    // Demais coleções administrativas: exigem usuário ativo.
+    // Ajuste conforme os módulos (contratos, vendas, financeiro, etc.).
+    match /{document=**} {
+      allow read, write: if isActiveUser();
+    }
+  }
+}
