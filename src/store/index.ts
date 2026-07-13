@@ -1435,6 +1435,7 @@ const useStore = create<State & Actions>((set, get) => {
         createdAt: new Date().toISOString(),
       };
       set((state: any) => ({ quotes: [...state.quotes, newQuote] }));
+      await logAudit("quote.create", { quoteId: newId, client: quoteData.clientName });
       return newQuote;
     },
 
