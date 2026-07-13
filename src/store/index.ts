@@ -1830,7 +1830,7 @@ const useStore = create<State & Actions>((set, get) => {
           profile: profile || "custom",
           permissions: profile === "custom" ? permissions || [] : [],
           permission: rest.permission || profile || "custom",
-          status: rest.status || "ativo",
+          status: normalizeStatus(rest.status),
           createdAt: serverTimestamp(),
         };
 
