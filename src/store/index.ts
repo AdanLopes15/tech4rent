@@ -1216,18 +1216,28 @@ const useStore = create<State & Actions>((set, get) => {
       };
       delete finalEquipmentData.imageFiles;
 
+      // Remove custo do documento público; grava em coleção privada.
+      const { cost, ...publicEquipmentData } = finalEquipmentData as any;
       const equipmentRef = doc(db, "equipments", id);
-      await updateDoc(equipmentRef, finalEquipmentData);
+      await updateDoc(equipmentRef, publicEquipmentData);
+      // Só grava custo quando informado (usuários sem permissão não o enviam,
+      // evitando sobrescrever/apagar o valor sensível existente).
+      if (cost !== undefined && cost !== null && cost !== "") {
+        await setDoc(doc(db, "equipamentosPrivate", id), { cost }, { merge: true });
+      }
 
-      const fullUpdatedEquipment = { id, ...finalEquipmentData };
+      const fullUpdatedEquipment = { id, ...publicEquipmentData, ...(cost !== undefined && cost !== "" ? { cost } : {}) };
 
       set((state) => ({
-        equipments: state.equipments.map((equipment) => (equipment.id === id ? fullUpdatedEquipment : equipment)),
+        equipments: state.equipments.map((equipment) =>
+          equipment.id === id ? { ...equipment, ...fullUpdatedEquipment } : equipment,
+        ),
       }));
     },
 
     deleteEquipment: async (equipmentId) => {
       await deleteDoc(doc(db, "equipments", equipmentId));
+      await deleteDoc(doc(db, "equipamentosPrivate", equipmentId)).catch(() => {});
       set((state) => ({
         equipments: state.equipments.filter((eq) => eq.id !== equipmentId),
       }));
