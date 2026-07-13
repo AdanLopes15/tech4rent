@@ -88,12 +88,9 @@ exports.deleteUser = functions.https.onCall(async (data, context) => {
   // Impede excluir o último admin ativo.
   const target = (await db.collection("users").doc(uid).get()).data();
   if (target && target.profile === "admin") {
-    const admins = await db
-      .collection("users")
-      .where("profile", "==", "admin")
-      .where("status", "==", "ativo")
-      .get();
-    if (admins.size <= 1) {
+    const admins = await db.collection("users").where("profile", "==", "admin").get();
+    const activeAdmins = admins.docs.filter((d) => normalizeStatus(d.data().status) === "ativo");
+    if (activeAdmins.length <= 1) {
       throw new functions.https.HttpsError("failed-precondition", "Não pode excluir o último administrador ativo.");
     }
   }
