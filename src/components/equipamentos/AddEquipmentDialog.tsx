@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useStore } from "@/store";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { maskCurrencyBR, parseCurrencyBR } from "@/lib/utils";
 
