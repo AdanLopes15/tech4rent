@@ -53,6 +53,10 @@ import ProjetosTech4Zap from "./pages/admin/ProjetosTech4Zap";
 
 const queryClient = new QueryClient();
 
+const Guard = ({ require, children }: { require: string; children: React.ReactNode }) => (
+  <ProtectedRoute require={require}>{children}</ProtectedRoute>
+);
+
 const ScrollToTop = () => {
   const { pathname, hash } = useLocation();
 
