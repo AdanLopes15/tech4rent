@@ -158,7 +158,7 @@ const AddUserDialog = ({ open, onOpenChange, user }: Props) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={!!user}
-                placeholder="Ex.: joao@tech4rent.com.br"
+                placeholder="email@email.com"
               />
             </div>
 
