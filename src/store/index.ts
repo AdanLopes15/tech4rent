@@ -1174,7 +1174,12 @@ const useStore = create<State & Actions>((set, get) => {
       };
       delete finalEquipmentData.imageFiles;
 
-      await setDoc(doc(db, "equipments", newId), finalEquipmentData);
+      // Dado sensível (custo) vai para coleção privada, protegida por regras.
+      const { cost, ...publicEquipmentData } = finalEquipmentData as any;
+      await setDoc(doc(db, "equipments", newId), publicEquipmentData);
+      if (cost !== undefined && cost !== null && cost !== "") {
+        await setDoc(doc(db, "equipamentosPrivate", newId), { cost });
+      }
       set((state) => ({
         equipments: [...state.equipments, finalEquipmentData],
       }));
