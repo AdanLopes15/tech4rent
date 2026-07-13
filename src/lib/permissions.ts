@@ -43,7 +43,7 @@ export const MODULES: ModuleDef[] = [
     ],
   },
   { key: "clientes", label: "Clientes", route: "/admin/clientes", actions: CRUD },
-  { key: "equipamentos", label: "Equipamentos", route: "/admin/equipamentos", actions: CRUD },
+  { key: "equipamentos", label: "Equipamentos", route: "/admin/equipamentos", actions: [...CRUD, { key: "viewCost", label: "Ver custo" }] },
   { key: "contratos", label: "Contratos", route: "/admin/contratos", actions: CRUD },
   { key: "vendas", label: "Vendas", route: "/admin/vendas", actions: CRUD },
   { key: "ordensCompra", label: "Ordens de Compra", route: "/admin/ordens-compra", actions: CRUD },

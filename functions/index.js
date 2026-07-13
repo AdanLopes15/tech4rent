@@ -26,10 +26,19 @@ async function assertAdmin(context) {
   }
   const snap = await db.collection("users").doc(context.auth.uid).get();
   const data = snap.data();
-  if (!snap.exists || data.profile !== "admin" || data.status !== "ativo") {
+  const status = normalizeStatus(data && data.status);
+  if (!snap.exists || !data || data.profile !== "admin" || status !== "ativo") {
     throw new functions.https.HttpsError("permission-denied", "Apenas administradores.");
   }
   return data;
+}
+
+// Normaliza status legado (active/inactive) para ativo/inativo.
+function normalizeStatus(s) {
+  const v = String(s || "ativo").toLowerCase();
+  if (v === "active") return "ativo";
+  if (v === "inactive") return "inativo";
+  return v;
 }
 
 async function logAudit(action, actor, details) {
@@ -79,12 +88,9 @@ exports.deleteUser = functions.https.onCall(async (data, context) => {
   // Impede excluir o último admin ativo.
   const target = (await db.collection("users").doc(uid).get()).data();
   if (target && target.profile === "admin") {
-    const admins = await db
-      .collection("users")
-      .where("profile", "==", "admin")
-      .where("status", "==", "ativo")
-      .get();
-    if (admins.size <= 1) {
+    const admins = await db.collection("users").where("profile", "==", "admin").get();
+    const activeAdmins = admins.docs.filter((d) => normalizeStatus(d.data().status) === "ativo");
+    if (activeAdmins.length <= 1) {
       throw new functions.https.HttpsError("failed-precondition", "Não pode excluir o último administrador ativo.");
     }
   }
@@ -99,9 +105,15 @@ exports.deleteUser = functions.https.onCall(async (data, context) => {
 exports.onUserStatusChange = functions.firestore
   .document("users/{uid}")
   .onUpdate(async (change, context) => {
-    const before = change.before.data();
-    const after = change.after.data();
-    if (before.status === "ativo" && after.status !== "ativo") {
+    const before = normalizeStatus(change.before.data().status);
+    const after = normalizeStatus(change.after.data().status);
+    if (before === "ativo" && after !== "ativo") {
       await admin.auth().revokeRefreshTokens(context.params.uid);
+      await db.collection("auditLogs").add({
+        action: "user.deactivate",
+        actorUid: null,
+        details: { targetUid: context.params.uid },
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
     }
   });

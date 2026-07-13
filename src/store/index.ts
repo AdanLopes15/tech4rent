@@ -36,6 +36,17 @@ import { getNextId as getNextIdUtil, removeUndefined } from "./utils";
 import { format, differenceInMonths, addMonths, addDays, addYears, addWeeks, getDate } from "date-fns";
 import { addSale, updateSale, cancelSale, deleteSale } from "./methods/sales";
 
+// Normaliza status legado (active/inactive) para o padrão ativo/inativo.
+const normalizeStatus = (s: any): string => {
+  const v = String(s || "ativo").toLowerCase();
+  if (v === "active") return "ativo";
+  if (v === "inactive") return "inativo";
+  return v;
+};
+const isAtivo = (u: any) => normalizeStatus(u?.status) === "ativo";
+
+
+
 export type Differentiator = {
   title: string;
   description: string;
@@ -1074,6 +1085,21 @@ const useStore = create<State & Actions>((set, get) => {
           }));
         }
 
+        // Mescla custos da coleção privada para usuários autorizados.
+        // Usuários sem permissão recebem erro nas regras -> custo fica oculto.
+        try {
+          const privateSnap = await getDocs(collection(db, "equipamentosPrivate"));
+          const costMap = new Map<string, any>();
+          privateSnap.docs.forEach((d) => costMap.set(d.id, (d.data() as any).costPrice));
+          if (Array.isArray(newState.equipments)) {
+            newState.equipments = newState.equipments.map((eq: any) =>
+              costMap.has(eq.id) ? { ...eq, costPrice: costMap.get(eq.id) } : eq,
+            );
+          }
+        } catch {
+          // sem permissão de custo: mantém equipamentos sem o campo cost
+        }
+
         set(newState as State);
       } catch (error) {
         console.error("Error fetching data from Firestore:", error);
@@ -1174,7 +1200,12 @@ const useStore = create<State & Actions>((set, get) => {
       };
       delete finalEquipmentData.imageFiles;
 
-      await setDoc(doc(db, "equipments", newId), finalEquipmentData);
+      // Dado sensível (custo) vai para coleção privada, protegida por regras.
+      const { costPrice, ...publicEquipmentData } = finalEquipmentData as any;
+      await setDoc(doc(db, "equipments", newId), publicEquipmentData);
+      if (costPrice !== undefined && costPrice !== null && costPrice !== "") {
+        await setDoc(doc(db, "equipamentosPrivate", newId), { costPrice });
+      }
       set((state) => ({
         equipments: [...state.equipments, finalEquipmentData],
       }));
@@ -1211,18 +1242,28 @@ const useStore = create<State & Actions>((set, get) => {
       };
       delete finalEquipmentData.imageFiles;
 
+      // Remove custo do documento público; grava em coleção privada.
+      const { costPrice, ...publicEquipmentData } = finalEquipmentData as any;
       const equipmentRef = doc(db, "equipments", id);
-      await updateDoc(equipmentRef, finalEquipmentData);
+      await updateDoc(equipmentRef, publicEquipmentData);
+      // Só grava custo quando informado (usuários sem permissão não o enviam,
+      // evitando sobrescrever/apagar o valor sensível existente).
+      if (costPrice !== undefined && costPrice !== null && costPrice !== "") {
+        await setDoc(doc(db, "equipamentosPrivate", id), { costPrice }, { merge: true });
+      }
 
-      const fullUpdatedEquipment = { id, ...finalEquipmentData };
+      const fullUpdatedEquipment = { id, ...publicEquipmentData, ...(costPrice !== undefined && costPrice !== "" ? { costPrice } : {}) };
 
       set((state) => ({
-        equipments: state.equipments.map((equipment) => (equipment.id === id ? fullUpdatedEquipment : equipment)),
+        equipments: state.equipments.map((equipment) =>
+          equipment.id === id ? { ...equipment, ...fullUpdatedEquipment } : equipment,
+        ),
       }));
     },
 
     deleteEquipment: async (equipmentId) => {
       await deleteDoc(doc(db, "equipments", equipmentId));
+      await deleteDoc(doc(db, "equipamentosPrivate", equipmentId)).catch(() => {});
       set((state) => ({
         equipments: state.equipments.filter((eq) => eq.id !== equipmentId),
       }));
@@ -1394,6 +1435,7 @@ const useStore = create<State & Actions>((set, get) => {
         createdAt: new Date().toISOString(),
       };
       set((state: any) => ({ quotes: [...state.quotes, newQuote] }));
+      await logAudit("quote.create", { quoteId: newId, client: quoteData.clientName });
       return newQuote;
     },
 
@@ -1422,6 +1464,7 @@ const useStore = create<State & Actions>((set, get) => {
       set((state) => ({
         quotes: state.quotes.map((q) => (q.id === id ? { ...q, ...updatedQuote } : q)),
       }));
+      await logAudit("quote.update", { quoteId: id });
     },
 
     deleteQuote: async (quoteId) => {
@@ -1787,7 +1830,7 @@ const useStore = create<State & Actions>((set, get) => {
           profile: profile || "custom",
           permissions: profile === "custom" ? permissions || [] : [],
           permission: rest.permission || profile || "custom",
-          status: rest.status || "ativo",
+          status: normalizeStatus(rest.status),
           createdAt: serverTimestamp(),
         };
 
@@ -1810,16 +1853,15 @@ const useStore = create<State & Actions>((set, get) => {
       const target = state.systemUsers.find((u) => u.uid === uid);
 
       // Impede desativar o último administrador ativo.
-      if (target?.profile === "admin" && rest.status && rest.status !== "ativo") {
-        const activeAdmins = state.systemUsers.filter(
-          (u) => u.profile === "admin" && u.status === "ativo",
-        );
+      if (target?.profile === "admin" && rest.status && normalizeStatus(rest.status) !== "ativo") {
+        const activeAdmins = state.systemUsers.filter((u) => u.profile === "admin" && isAtivo(u));
         if (activeAdmins.length <= 1) {
           throw new Error("Não é possível desativar o último administrador ativo.");
         }
       }
 
       const dataToSave: any = { ...rest };
+      if (rest.status) dataToSave.status = normalizeStatus(rest.status);
       if (profile) {
         dataToSave.profile = profile;
         dataToSave.permission = profile;
@@ -1851,9 +1893,7 @@ const useStore = create<State & Actions>((set, get) => {
       // Impede excluir o último administrador ativo.
       const target = state.systemUsers.find((u) => u.uid === uid);
       if (target?.profile === "admin") {
-        const activeAdmins = state.systemUsers.filter(
-          (u) => u.profile === "admin" && u.status === "ativo",
-        );
+        const activeAdmins = state.systemUsers.filter((u) => u.profile === "admin" && isAtivo(u));
         if (activeAdmins.length <= 1) {
           throw new Error("Não é possível excluir o último administrador ativo.");
         }

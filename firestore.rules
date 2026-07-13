@@ -1,12 +1,13 @@
 rules_version = '2';
 
 // Regras de segurança do Firestore para o RBAC da Tech4Rent.
-// Copie este conteúdo no Firebase Console > Firestore > Regras.
+// Projeto: st4r-f404e
+// Publicar: firebase deploy --only firestore:rules
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ---- Helpers ----
+    // ---------- Helpers ----------
     function isSignedIn() {
       return request.auth != null;
     }
@@ -15,41 +16,82 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
 
-    // Usuário só é considerado válido se tiver documento em users/{uid} e estiver ativo.
+    // Normaliza status legado (active/inactive) para ativo/inativo.
+    function statusOf() {
+      return userDoc().status == 'active' ? 'ativo'
+           : userDoc().status == 'inactive' ? 'inativo'
+           : userDoc().status;
+    }
+
+    // Usuário válido = tem documento em users/{uid} e está ativo.
     function isActiveUser() {
       return isSignedIn()
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && userDoc().status == 'ativo';
+        && statusOf() == 'ativo';
+    }
+
+    function profileOf() {
+      return userDoc().profile;
     }
 
     function isAdmin() {
-      return isActiveUser() && userDoc().profile == 'admin';
+      return isActiveUser() && profileOf() == 'admin';
     }
 
-    // Verifica permissão "modulo.acao" no perfil/permissões do usuário.
+    // Permissões FIXAS do perfil comercial_orcamentos (não dependem do array).
+    function comercialHas(perm) {
+      return profileOf() == 'comercial_orcamentos' && (
+        perm == 'orcamentos.view' ||
+        perm == 'orcamentos.create' ||
+        perm == 'orcamentos.edit' ||
+        perm == 'orcamentos.duplicate' ||
+        perm == 'orcamentos.pdf' ||
+        perm == 'clientes.view' ||
+        perm == 'equipamentos.view'
+      );
+    }
+
+    // Verifica permissão "modulo.acao":
+    //  - admin: tudo
+    //  - comercial_orcamentos: conjunto fixo acima
+    //  - custom: array permissions no documento
     function hasPerm(perm) {
       return isActiveUser() && (
-        userDoc().profile == 'admin'
+        profileOf() == 'admin'
+        || comercialHas(perm)
         || (userDoc().permissions is list && userDoc().permissions.hasAny([perm]))
       );
     }
 
-    // ---- Coleção de usuários ----
+    // ---------- Usuários ----------
     match /users/{uid} {
-      // Cada usuário pode ler o próprio documento; admins leem todos.
       allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
-      // Apenas admins gerenciam usuários (criação real do Auth via Cloud Function).
       allow create, update, delete: if isAdmin();
     }
 
-    // ---- Auditoria ----
+    // ---------- Auditoria ----------
     match /auditLogs/{logId} {
       allow read: if isAdmin();
       allow create: if isActiveUser();
       allow update, delete: if false;
     }
 
-    // ---- Orçamentos (exemplo de permissões por ação) ----
+    // ---------- Equipamentos (público, SEM custo) ----------
+    match /equipments/{id} {
+      allow read: if hasPerm('equipamentos.view');
+      allow create: if hasPerm('equipamentos.create');
+      allow update: if hasPerm('equipamentos.edit');
+      allow delete: if hasPerm('equipamentos.delete');
+    }
+
+    // ---------- Equipamentos: dados sensíveis (custo) ----------
+    match /equipamentosPrivate/{id} {
+      allow read: if hasPerm('equipamentos.viewCost');
+      // Só quem pode ver custo pode gravá-lo.
+      allow write: if hasPerm('equipamentos.viewCost');
+    }
+
+    // ---------- Orçamentos ----------
     match /quotes/{quoteId} {
       allow read: if hasPerm('orcamentos.view');
       allow create: if hasPerm('orcamentos.create');
@@ -57,18 +99,27 @@ service cloud.firestore {
       allow delete: if hasPerm('orcamentos.delete');
     }
 
-    match /clients/{id} {
-      allow read: if hasPerm('clientes.view');
-      allow write: if hasPerm('clientes.edit') || hasPerm('clientes.create');
+    // ---------- Orçamentos: custo/margem sensíveis ----------
+    match /orcamentosPrivate/{id} {
+      allow read: if hasPerm('orcamentos.viewCost') || hasPerm('orcamentos.viewMargin');
+      allow write: if hasPerm('orcamentos.viewCost') || hasPerm('orcamentos.viewMargin');
     }
 
-    match /equipments/{id} {
-      allow read: if hasPerm('equipamentos.view');
-      allow write: if hasPerm('equipamentos.edit') || hasPerm('equipamentos.create');
+    // ---------- Clientes ----------
+    match /clients/{id} {
+      allow read: if hasPerm('clientes.view');
+      allow create: if hasPerm('clientes.create');
+      allow update: if hasPerm('clientes.edit');
+      allow delete: if hasPerm('clientes.delete');
+    }
+
+    // ---------- Notificações ----------
+    match /notifications/{id} {
+      allow read, write: if isActiveUser();
     }
 
     // Demais coleções administrativas: exigem usuário ativo.
-    // Ajuste conforme os módulos (contratos, vendas, financeiro, etc.).
+    // (contratos, vendas, financeiro, etc.) — ajuste conforme necessário.
     match /{document=**} {
       allow read, write: if isActiveUser();
     }

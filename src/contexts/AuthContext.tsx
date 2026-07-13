@@ -7,6 +7,7 @@ import {
   User,
 } from "firebase/auth";
 import { doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { logAudit } from "@/lib/audit";
 import {
   resolvePermissions,
   resolveHomePath,
@@ -75,8 +76,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         const data = snap.data() as any;
 
+        // Normaliza status legado (active/inactive) para o padrão ativo/inativo.
+        const rawStatus = String(data.status || "ativo").toLowerCase();
+        const normalizedStatus =
+          rawStatus === "active"
+            ? "ativo"
+            : rawStatus === "inactive"
+              ? "inativo"
+              : rawStatus;
+
         // Regra: usuário inativo é desconectado.
-        if (data.status && data.status !== "ativo") {
+        if (normalizedStatus !== "ativo") {
           setAccessDenied("Seu usuário está inativo. Contate o administrador.");
           clearState();
           await firebaseSignOut(auth);
@@ -108,15 +118,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           email: data.email || fbUser.email || undefined,
           profile,
           permissions: data.permissions || [],
-          status: data.status,
+          status: normalizedStatus,
         });
         setPermissions(resolved);
         setAccessDenied(null);
 
-        // Auditoria simples: registra último acesso (fire-and-forget).
+        // Auditoria: registra último acesso e login (fire-and-forget).
         updateDoc(doc(db, "users", fbUser.uid), {
           lastAccess: serverTimestamp(),
         }).catch(() => {});
+        logAudit("login", { uid: fbUser.uid, profile });
       } catch (err) {
         clearState();
       } finally {

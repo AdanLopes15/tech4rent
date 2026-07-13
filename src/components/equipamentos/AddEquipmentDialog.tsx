@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useStore } from "@/store";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { maskCurrencyBR, parseCurrencyBR } from "@/lib/utils";
 
@@ -26,6 +27,8 @@ interface AddEquipmentDialogProps {
 export function AddEquipmentDialog({ open, onOpenChange, equipment }: AddEquipmentDialogProps) {
   const { addEquipment, updateEquipment } = useStore();
   const { toast } = useToast();
+  const { can } = useAuth();
+  const canViewCost = can("equipamentos.viewCost");
 
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
@@ -128,7 +131,8 @@ export function AddEquipmentDialog({ open, onOpenChange, equipment }: AddEquipme
       weeklyRate: parseCurrencyBR(weeklyRate),
       monthlyRate: parseCurrencyBR(monthlyRate),
       salePrice: parseCurrencyBR(salePrice),
-      costPrice: parseCurrencyBR(costPrice),
+      // Só envia custo se o usuário tiver permissão (evita sobrescrever o valor sensível).
+      ...(canViewCost ? { costPrice: parseCurrencyBR(costPrice) } : {}),
       description,
       imageUrls,
       imageFiles,
@@ -301,10 +305,12 @@ export function AddEquipmentDialog({ open, onOpenChange, equipment }: AddEquipme
               <Input id="vl-venda" type="text" inputMode="numeric" placeholder="R$ 0,00" value={salePrice} onChange={(e) => setSalePrice(maskCurrencyBR(e.target.value))} className="h-9" />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="vl-custo" className="text-xs font-medium">Preço de Custo (R$)</Label>
-              <Input id="vl-custo" type="text" inputMode="numeric" placeholder="R$ 0,00" value={costPrice} onChange={(e) => setCostPrice(maskCurrencyBR(e.target.value))} className="h-9" />
-            </div>
+            {canViewCost && (
+              <div className="space-y-1.5">
+                <Label htmlFor="vl-custo" className="text-xs font-medium">Preço de Custo (R$)</Label>
+                <Input id="vl-custo" type="text" inputMode="numeric" placeholder="R$ 0,00" value={costPrice} onChange={(e) => setCostPrice(maskCurrencyBR(e.target.value))} className="h-9" />
+              </div>
+            )}
           </div>
 
           {/* Descrição e Imagens */}
