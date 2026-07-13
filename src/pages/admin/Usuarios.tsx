@@ -98,7 +98,8 @@ const Usuarios = () => {
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Permissão</TableHead>
+                <TableHead>Perfil</TableHead>
+                <TableHead>Último acesso</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead />
               </TableRow>
@@ -111,8 +112,17 @@ const Usuarios = () => {
                   <TableCell>{user.email}</TableCell>
 
                   <TableCell>
-                    <Badge variant="outline">{user.permission}</Badge>
+                    <Badge variant="outline">
+                      {PROFILE_LABELS[(user.profile as ProfileKey)] || user.permission || "—"}
+                    </Badge>
                   </TableCell>
+
+                  <TableCell className="text-sm text-muted-foreground">
+                    {user.lastAccess
+                      ? (user.lastAccess.toDate ? user.lastAccess.toDate() : new Date(user.lastAccess)).toLocaleString("pt-BR")
+                      : "Nunca acessou"}
+                  </TableCell>
+
 
                   <TableCell>
                     <Badge variant={user.status === "ativo" ? "default" : "secondary"}>{user.status}</Badge>
