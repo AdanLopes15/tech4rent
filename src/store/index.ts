@@ -36,6 +36,17 @@ import { getNextId as getNextIdUtil, removeUndefined } from "./utils";
 import { format, differenceInMonths, addMonths, addDays, addYears, addWeeks, getDate } from "date-fns";
 import { addSale, updateSale, cancelSale, deleteSale } from "./methods/sales";
 
+// Normaliza status legado (active/inactive) para o padrão ativo/inativo.
+const normalizeStatus = (s: any): string => {
+  const v = String(s || "ativo").toLowerCase();
+  if (v === "active") return "ativo";
+  if (v === "inactive") return "inativo";
+  return v;
+};
+const isAtivo = (u: any) => normalizeStatus(u?.status) === "ativo";
+
+
+
 export type Differentiator = {
   title: string;
   description: string;
