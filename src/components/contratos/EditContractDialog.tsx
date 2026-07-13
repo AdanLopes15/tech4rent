@@ -183,6 +183,7 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
       await updateContract({
         id: contract.id,
         clientId: selectedClientId,
+        unitOperation: unitOperation.trim(),
         client: selectedClient || contract.client || null,
         startDate: retiradaDate,
         endDate: endDate,
