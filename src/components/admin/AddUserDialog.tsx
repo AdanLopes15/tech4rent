@@ -148,12 +148,18 @@ const AddUserDialog = ({ open, onOpenChange, user }: Props) => {
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
               <Label>Nome</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} />
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: João da Silva" />
             </div>
 
             <div className="space-y-2">
               <Label>Email</Label>
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={!!user} />
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={!!user}
+                placeholder="Ex.: joao@tech4rent.com.br"
+              />
             </div>
 
             {!user && (
@@ -164,6 +170,8 @@ const AddUserDialog = ({ open, onOpenChange, user }: Props) => {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    minLength={6}
+                    placeholder="Ex.: mínimo de 6 caracteres"
                   />
                   <Button
                     type="button"
