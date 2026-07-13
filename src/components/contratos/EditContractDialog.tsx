@@ -235,6 +235,15 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="unit-operation">Unidade / Operação</Label>
+              <Input
+                id="unit-operation"
+                placeholder="Ex: Unidade Sumaré, CD Campinas, Operação Mercado Livre"
+                value={unitOperation}
+                onChange={(e) => setUnitOperation(e.target.value)}
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
