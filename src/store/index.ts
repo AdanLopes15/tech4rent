@@ -1090,10 +1090,10 @@ const useStore = create<State & Actions>((set, get) => {
         try {
           const privateSnap = await getDocs(collection(db, "equipamentosPrivate"));
           const costMap = new Map<string, any>();
-          privateSnap.docs.forEach((d) => costMap.set(d.id, (d.data() as any).cost));
+          privateSnap.docs.forEach((d) => costMap.set(d.id, (d.data() as any).costPrice));
           if (Array.isArray(newState.equipments)) {
             newState.equipments = newState.equipments.map((eq: any) =>
-              costMap.has(eq.id) ? { ...eq, cost: costMap.get(eq.id) } : eq,
+              costMap.has(eq.id) ? { ...eq, costPrice: costMap.get(eq.id) } : eq,
             );
           }
         } catch {
@@ -1201,10 +1201,10 @@ const useStore = create<State & Actions>((set, get) => {
       delete finalEquipmentData.imageFiles;
 
       // Dado sensível (custo) vai para coleção privada, protegida por regras.
-      const { cost, ...publicEquipmentData } = finalEquipmentData as any;
+      const { costPrice, ...publicEquipmentData } = finalEquipmentData as any;
       await setDoc(doc(db, "equipments", newId), publicEquipmentData);
-      if (cost !== undefined && cost !== null && cost !== "") {
-        await setDoc(doc(db, "equipamentosPrivate", newId), { cost });
+      if (costPrice !== undefined && costPrice !== null && costPrice !== "") {
+        await setDoc(doc(db, "equipamentosPrivate", newId), { costPrice });
       }
       set((state) => ({
         equipments: [...state.equipments, finalEquipmentData],
@@ -1243,16 +1243,16 @@ const useStore = create<State & Actions>((set, get) => {
       delete finalEquipmentData.imageFiles;
 
       // Remove custo do documento público; grava em coleção privada.
-      const { cost, ...publicEquipmentData } = finalEquipmentData as any;
+      const { costPrice, ...publicEquipmentData } = finalEquipmentData as any;
       const equipmentRef = doc(db, "equipments", id);
       await updateDoc(equipmentRef, publicEquipmentData);
       // Só grava custo quando informado (usuários sem permissão não o enviam,
       // evitando sobrescrever/apagar o valor sensível existente).
-      if (cost !== undefined && cost !== null && cost !== "") {
-        await setDoc(doc(db, "equipamentosPrivate", id), { cost }, { merge: true });
+      if (costPrice !== undefined && costPrice !== null && costPrice !== "") {
+        await setDoc(doc(db, "equipamentosPrivate", id), { costPrice }, { merge: true });
       }
 
-      const fullUpdatedEquipment = { id, ...publicEquipmentData, ...(cost !== undefined && cost !== "" ? { cost } : {}) };
+      const fullUpdatedEquipment = { id, ...publicEquipmentData, ...(costPrice !== undefined && costPrice !== "" ? { costPrice } : {}) };
 
       set((state) => ({
         equipments: state.equipments.map((equipment) =>
