@@ -122,10 +122,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setPermissions(resolved);
         setAccessDenied(null);
 
-        // Auditoria simples: registra último acesso (fire-and-forget).
+        // Auditoria: registra último acesso e login (fire-and-forget).
         updateDoc(doc(db, "users", fbUser.uid), {
           lastAccess: serverTimestamp(),
         }).catch(() => {});
+        logAudit("login", { uid: fbUser.uid, profile });
       } catch (err) {
         clearState();
       } finally {
