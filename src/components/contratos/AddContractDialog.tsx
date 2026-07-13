@@ -42,6 +42,7 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
   const { toast } = useToast();
 
   const [clientId, setClientId] = useState("");
+  const [unitOperation, setUnitOperation] = useState("");
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [firstInstallmentDate, setFirstInstallmentDate] = useState<Date | undefined>();
