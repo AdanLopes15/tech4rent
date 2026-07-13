@@ -82,6 +82,17 @@ const AddUserDialog = ({ open, onOpenChange, user }: Props) => {
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      toast.error("Informe um e-mail em formato válido.");
+      return;
+    }
+
+    if (!user && password.length < 6) {
+      toast.error("A senha deve ter no mínimo 6 caracteres.");
+      return;
+    }
+
     try {
       setSaving(true);
 
