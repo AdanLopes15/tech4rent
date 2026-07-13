@@ -26,10 +26,12 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
+  sendPasswordResetEmail,
   type User,
 } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
-import { db, auth, storage } from "@/lib/firebase";
+import { db, auth, storage, createAuthUserIsolated } from "@/lib/firebase";
+import { logAudit } from "@/lib/audit";
 import { getNextId as getNextIdUtil, removeUndefined } from "./utils";
 import { format, differenceInMonths, addMonths, addDays, addYears, addWeeks, getDate } from "date-fns";
 import { addSale, updateSale, cancelSale, deleteSale } from "./methods/sales";
@@ -305,6 +307,7 @@ type Actions = {
   addSystemUser: (userData: any) => Promise<void>;
   updateSystemUser: (userData: any) => Promise<void>;
   deleteSystemUser: (uid: string) => Promise<void>;
+  sendUserPasswordReset: (email: string) => Promise<void>;
   addSupplier: (supplier: any) => Promise<void>;
   updateSupplier: (supplier: any) => Promise<void>;
   deleteSupplier: (supplierId: string) => Promise<void>;
@@ -1766,7 +1769,7 @@ const useStore = create<State & Actions>((set, get) => {
     deleteSale: (saleId) => deleteSale(get, set, saleId),
 
     addSystemUser: async (userData) => {
-      const { email, password, ...rest } = userData;
+      const { email, password, profile, permissions, ...rest } = userData;
 
       const q = query(collection(db, "users"), where("email", "==", email));
       const querySnapshot = await getDocs(q);
@@ -1775,17 +1778,21 @@ const useStore = create<State & Actions>((set, get) => {
       }
 
       try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+        // Cria no Auth via app secundário: NÃO troca a sessão do administrador.
+        const uid = await createAuthUserIsolated(email, password);
 
-        const dataToSave = {
+        const dataToSave: any = {
           name: rest.name,
           email: email,
-          permission: rest.permission,
-          status: rest.status,
+          profile: profile || "custom",
+          permissions: profile === "custom" ? permissions || [] : [],
+          permission: rest.permission || profile || "custom",
+          status: rest.status || "ativo",
+          createdAt: serverTimestamp(),
         };
 
-        await setDoc(doc(db, "users", user.uid), dataToSave);
+        await setDoc(doc(db, "users", uid), dataToSave);
+        await logAudit("user.create", { targetUid: uid, email, profile: dataToSave.profile });
         await get().fetchAllData();
       } catch (error: any) {
         if (error.code === "auth/email-already-in-use") {
@@ -1796,45 +1803,75 @@ const useStore = create<State & Actions>((set, get) => {
     },
 
     updateSystemUser: async (userData: any) => {
-      const { uid, password, ...rest } = userData;
+      const { uid, password, profile, permissions, ...rest } = userData;
       if (!uid) throw new Error("UID do usuário não encontrado.");
 
-      const userRef = doc(db, "users", uid);
-      await updateDoc(userRef, rest);
+      const state = get();
+      const target = state.systemUsers.find((u) => u.uid === uid);
 
-      if (password) {
-        try {
-          const response = await fetch("/api/update-user-password", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ uid, password }),
-          });
-          if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || "Falha ao atualizar a senha.");
-          }
-        } catch (error: any) {
-          console.error("Erro ao chamar a API de atualização de senha:", error);
-          throw new Error(error.message || "Não foi possível atualizar a senha.");
+      // Impede desativar o último administrador ativo.
+      if (target?.profile === "admin" && rest.status && rest.status !== "ativo") {
+        const activeAdmins = state.systemUsers.filter(
+          (u) => u.profile === "admin" && u.status === "ativo",
+        );
+        if (activeAdmins.length <= 1) {
+          throw new Error("Não é possível desativar o último administrador ativo.");
         }
       }
 
+      const dataToSave: any = { ...rest };
+      if (profile) {
+        dataToSave.profile = profile;
+        dataToSave.permission = profile;
+        dataToSave.permissions = profile === "custom" ? permissions || [] : [];
+      }
+
+      const userRef = doc(db, "users", uid);
+      await updateDoc(userRef, dataToSave);
+
+      const permsChanged = profile !== undefined || permissions !== undefined;
+      await logAudit(permsChanged ? "user.permissions" : "user.update", {
+        targetUid: uid,
+        changes: dataToSave,
+      });
+
       set((state) => ({
-        systemUsers: state.systemUsers.map((u) => (u.uid === uid ? { ...u, ...rest } : u)),
+        systemUsers: state.systemUsers.map((u) => (u.uid === uid ? { ...u, ...dataToSave } : u)),
       }));
     },
 
     deleteSystemUser: async (uid: string) => {
       if (!uid) throw new Error("UID do usuário não encontrado.");
-      console.warn(
-        "Excluir um usuário do Firebase Auth do cliente é arriscado e geralmente requer privilégios de administrador via Cloud Functions.",
-      );
+
+      const state = get();
+      // Impede excluir o próprio usuário.
+      if (auth.currentUser?.uid === uid) {
+        throw new Error("Você não pode excluir o seu próprio usuário.");
+      }
+      // Impede excluir o último administrador ativo.
+      const target = state.systemUsers.find((u) => u.uid === uid);
+      if (target?.profile === "admin") {
+        const activeAdmins = state.systemUsers.filter(
+          (u) => u.profile === "admin" && u.status === "ativo",
+        );
+        if (activeAdmins.length <= 1) {
+          throw new Error("Não é possível excluir o último administrador ativo.");
+        }
+      }
 
       await deleteDoc(doc(db, "users", uid));
+      await logAudit("user.delete", { targetUid: uid, email: target?.email });
       set((state) => ({
         systemUsers: state.systemUsers.filter((u) => u.uid !== uid),
       }));
     },
+
+    sendUserPasswordReset: async (email: string) => {
+      if (!email) throw new Error("E-mail não informado.");
+      await sendPasswordResetEmail(auth, email);
+      await logAudit("user.resetPassword", { email });
+    },
+
 
     addSupplier: async (supplier) => {
       centralValidateDocument(supplier.personType === "juridica" ? supplier.cnpj : supplier.cpf, "supplier", null);

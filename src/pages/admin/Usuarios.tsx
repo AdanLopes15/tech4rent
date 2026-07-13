@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import AddUserDialog from "@/components/admin/AddUserDialog";
+import { PROFILE_LABELS, type ProfileKey } from "@/lib/permissions";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -97,7 +98,8 @@ const Usuarios = () => {
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Permissão</TableHead>
+                <TableHead>Perfil</TableHead>
+                <TableHead>Último acesso</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead />
               </TableRow>
@@ -110,8 +112,17 @@ const Usuarios = () => {
                   <TableCell>{user.email}</TableCell>
 
                   <TableCell>
-                    <Badge variant="outline">{user.permission}</Badge>
+                    <Badge variant="outline">
+                      {PROFILE_LABELS[(user.profile as ProfileKey)] || user.permission || "—"}
+                    </Badge>
                   </TableCell>
+
+                  <TableCell className="text-sm text-muted-foreground">
+                    {user.lastAccess
+                      ? (user.lastAccess.toDate ? user.lastAccess.toDate() : new Date(user.lastAccess)).toLocaleString("pt-BR")
+                      : "Nunca acessou"}
+                  </TableCell>
+
 
                   <TableCell>
                     <Badge variant={user.status === "ativo" ? "default" : "secondary"}>{user.status}</Badge>
@@ -159,7 +170,7 @@ const Usuarios = () => {
 
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-6">
+                  <TableCell colSpan={6} className="text-center py-6">
                     Nenhum usuário encontrado.
                   </TableCell>
                 </TableRow>

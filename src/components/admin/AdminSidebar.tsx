@@ -30,58 +30,60 @@ import {
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Smartphone } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
-type MenuChild = { icon: React.ElementType; label: string; path: string };
+type MenuChild = { icon: React.ElementType; label: string; path: string; perm?: string };
 type MenuItem = {
   icon: React.ElementType;
   label: string;
   path?: string;
+  perm?: string;
   children?: (MenuChild | { icon: React.ElementType; label: string; children: MenuChild[] })[];
 };
 
 const menuItems: MenuItem[] = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
+  { icon: LayoutDashboard, label: "Dashboard", path: "/admin", perm: "dashboard.view" },
   {
     icon: ListCollapse,
     label: "Cadastros",
     children: [
-      { icon: Package, label: "Equipamentos", path: "/admin/equipamentos" },
-      { icon: Globe, label: "Catálogo do Site", path: "/admin/catalogo-site" },
-      { icon: Users, label: "Clientes", path: "/admin/clientes" },
-      { icon: Truck, label: "Fornecedores", path: "/admin/fornecedores" },
-      { icon: UserCheck, label: "Colaboradores", path: "/admin/colaboradores" },
+      { icon: Package, label: "Equipamentos", path: "/admin/equipamentos", perm: "equipamentos.view" },
+      { icon: Globe, label: "Catálogo do Site", path: "/admin/catalogo-site", perm: "equipamentos.view" },
+      { icon: Users, label: "Clientes", path: "/admin/clientes", perm: "clientes.view" },
+      { icon: Truck, label: "Fornecedores", path: "/admin/fornecedores", perm: "clientes.view" },
+      { icon: UserCheck, label: "Colaboradores", path: "/admin/colaboradores", perm: "clientes.view" },
     ],
   },
   {
     icon: ClipboardList,
     label: "Operacional",
     children: [
-      { icon: ClipboardList, label: "Orçamentos", path: "/admin/orcamentos" },
-      { icon: FileText, label: "Contratos", path: "/admin/contratos" },
-      { icon: ShoppingCart, label: "Vendas", path: "/admin/vendas" },
-      { icon: ShoppingCart, label: "Ordens de Compra", path: "/admin/ordens-compra" },
+      { icon: ClipboardList, label: "Orçamentos", path: "/admin/orcamentos", perm: "orcamentos.view" },
+      { icon: FileText, label: "Contratos", path: "/admin/contratos", perm: "contratos.view" },
+      { icon: ShoppingCart, label: "Vendas", path: "/admin/vendas", perm: "vendas.view" },
+      { icon: ShoppingCart, label: "Ordens de Compra", path: "/admin/ordens-compra", perm: "ordensCompra.view" },
     ],
   },
   {
     icon: DollarSign,
     label: "Financeiro",
     children: [
-      { icon: Eye, label: "Visão Geral", path: "/admin/financeiro" },
-      { icon: Receipt, label: "Contas a Receber", path: "/admin/financeiro/receber" },
-      { icon: CreditCard, label: "Contas a Pagar", path: "/admin/financeiro/pagar" },
-      { icon: FileText, label: "Boletos", path: "/admin/financeiro/boletos" },
-      { icon: BarChart3, label: "Fluxo de Caixa", path: "/admin/financeiro/fluxo-caixa" },
-      { icon: ArrowLeftRight, label: "Extrato", path: "/admin/financeiro/extrato" },
-      { icon: FileSpreadsheet, label: "DRE", path: "/admin/financeiro/dre" },
-      { icon: FileSpreadsheet, label: "Relatórios", path: "/admin/financeiro/relatorios" },
-      { icon: FileCheck, label: "NFe", path: "/admin/financeiro/nfe" },
+      { icon: Eye, label: "Visão Geral", path: "/admin/financeiro", perm: "financeiro.view" },
+      { icon: Receipt, label: "Contas a Receber", path: "/admin/financeiro/receber", perm: "financeiro.view" },
+      { icon: CreditCard, label: "Contas a Pagar", path: "/admin/financeiro/pagar", perm: "financeiro.view" },
+      { icon: FileText, label: "Boletos", path: "/admin/financeiro/boletos", perm: "financeiro.view" },
+      { icon: BarChart3, label: "Fluxo de Caixa", path: "/admin/financeiro/fluxo-caixa", perm: "financeiro.view" },
+      { icon: ArrowLeftRight, label: "Extrato", path: "/admin/financeiro/extrato", perm: "financeiro.view" },
+      { icon: FileSpreadsheet, label: "DRE", path: "/admin/financeiro/dre", perm: "financeiro.view" },
+      { icon: FileSpreadsheet, label: "Relatórios", path: "/admin/financeiro/relatorios", perm: "relatorios.view" },
+      { icon: FileCheck, label: "NFe", path: "/admin/financeiro/nfe", perm: "financeiro.view" },
       {
         icon: ListCollapse,
         label: "Cadastros",
         children: [
-          { icon: ClipboardList, label: "Plano de Contas", path: "/admin/financeiro/plano-contas" },
-          { icon: DollarSign, label: "Centro de Custo", path: "/admin/financeiro/centro-custo" },
-          { icon: CreditCard, label: "Bancos", path: "/admin/financeiro/bancos" },
+          { icon: ClipboardList, label: "Plano de Contas", path: "/admin/financeiro/plano-contas", perm: "financeiro.view" },
+          { icon: DollarSign, label: "Centro de Custo", path: "/admin/financeiro/centro-custo", perm: "financeiro.view" },
+          { icon: CreditCard, label: "Bancos", path: "/admin/financeiro/bancos", perm: "financeiro.view" },
         ],
       },
     ],
@@ -90,20 +92,20 @@ const menuItems: MenuItem[] = [
     icon: Globe,
     label: "Projetos",
     children: [
-      { icon: Eye, label: "Visão Geral", path: "/admin/projetos" },
-      { icon: Package, label: "Tech4Zap", path: "/admin/projetos/tech4zap" },
+      { icon: Eye, label: "Visão Geral", path: "/admin/projetos", perm: "dashboard.view" },
+      { icon: Package, label: "Tech4Zap", path: "/admin/projetos/tech4zap", perm: "dashboard.view" },
     ],
   },
   {
     icon: Settings,
     label: "Configurações",
     children: [
-      { icon: Globe, label: "Conteúdo da Home", path: "/admin/site-builder" },
-      { icon: Globe, label: "Conteúdo de Contato", path: "/admin/site-builder/contato" },
-      { icon: Globe, label: "Conteúdo de Sobre", path: "/admin/site-builder/sobre" },
-      { icon: Mail, label: "Contatos do Site", path: "/admin/contatos-site" },
-      { icon: Settings, label: "Painel de Configurações", path: "/admin/configuracoes" },
-      { icon: Users, label: "Usuários", path: "/admin/usuarios" },
+      { icon: Globe, label: "Conteúdo da Home", path: "/admin/site-builder", perm: "configuracoes.view" },
+      { icon: Globe, label: "Conteúdo de Contato", path: "/admin/site-builder/contato", perm: "configuracoes.view" },
+      { icon: Globe, label: "Conteúdo de Sobre", path: "/admin/site-builder/sobre", perm: "configuracoes.view" },
+      { icon: Mail, label: "Contatos do Site", path: "/admin/contatos-site", perm: "configuracoes.view" },
+      { icon: Settings, label: "Painel de Configurações", path: "/admin/configuracoes", perm: "configuracoes.view" },
+      { icon: Users, label: "Usuários", path: "/admin/usuarios", perm: "usuarios.view" },
     ],
   },
 ];
@@ -112,6 +114,30 @@ const AdminSidebar = ({ isDark }: { isDark?: boolean }) => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const [openSections, setOpenSections] = useState<string[]>([]);
+  const { can } = useAuth();
+
+  // Filtra a árvore do menu de acordo com as permissões do usuário.
+  const filterChildren = (children: MenuItem["children"]): MenuItem["children"] =>
+    (children || [])
+      .map((child) => {
+        if ("children" in child && !("path" in child)) {
+          const sub = filterChildren(child.children) as MenuChild[];
+          return sub.length ? { ...child, children: sub } : null;
+        }
+        const c = child as MenuChild;
+        return !c.perm || can(c.perm) ? c : null;
+      })
+      .filter(Boolean) as MenuItem["children"];
+
+  const visibleMenu = menuItems
+    .map((item) => {
+      if (item.children) {
+        const children = filterChildren(item.children);
+        return children && children.length ? { ...item, children } : null;
+      }
+      return !item.perm || can(item.perm) ? item : null;
+    })
+    .filter(Boolean) as MenuItem[];
 
   const toggleSection = (label: string) => {
     setOpenSections((prev) => (prev.includes(label) ? prev.filter((s) => s !== label) : [...prev, label]));
@@ -211,7 +237,7 @@ const AdminSidebar = ({ isDark }: { isDark?: boolean }) => {
       </div>
 
       <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
-        {menuItems.map((item) => {
+        {visibleMenu.map((item) => {
           if (item.children) {
             return renderSection(item.icon, item.label, item.children);
           }

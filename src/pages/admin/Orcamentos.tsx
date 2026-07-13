@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import { format } from "date-fns";
 import { useStore } from "@/store";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency, cn, formatAddress } from "@/lib/utils";
 import { formatPhoneBR } from "@/lib/contact";
@@ -76,6 +77,7 @@ const statusColors: Record<string, string> = {
 
 export default function Orcamentos() {
   const { quotes, equipments, clients, loading, fetchAllData, deleteQuote, updateQuote, convertQuoteToContract, addSale, companySettings } = useStore();
+  const { can } = useAuth();
 
   useEffect(() => {
     fetchAllData();
@@ -614,74 +616,84 @@ export default function Orcamentos() {
                         Ver Detalhes
                       </DropdownMenuItem>
 
-                      <DropdownMenuItem onClick={() => handleEdit(quote)}>
-                        <Pencil className="mr-2 h-4 w-4" />
-                        Editar
-                      </DropdownMenuItem>
+                      {can("orcamentos.edit") && (
+                        <DropdownMenuItem onClick={() => handleEdit(quote)}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Editar
+                        </DropdownMenuItem>
+                      )}
 
-                      <DropdownMenuItem onClick={() => handleDuplicate(quote)}>
-                        <Copy className="mr-2 h-4 w-4" />
-                        Duplicar
-                      </DropdownMenuItem>
+                      {can("orcamentos.duplicate") && (
+                        <DropdownMenuItem onClick={() => handleDuplicate(quote)}>
+                          <Copy className="mr-2 h-4 w-4" />
+                          Duplicar
+                        </DropdownMenuItem>
+                      )}
 
-                      <DropdownMenuItem onClick={() => handleDownloadPDF(quote)}>
-                        <FileDown className="mr-2 h-4 w-4" />
-                        Baixar PDF
-                      </DropdownMenuItem>
+                      {can("orcamentos.pdf") && (
+                        <DropdownMenuItem onClick={() => handleDownloadPDF(quote)}>
+                          <FileDown className="mr-2 h-4 w-4" />
+                          Baixar PDF
+                        </DropdownMenuItem>
+                      )}
 
-                      {type === "locacao" && displayStatus === "Pendente" && (
+                      {can("orcamentos.convert") && type === "locacao" && displayStatus === "Pendente" && (
                         <DropdownMenuItem onClick={() => handleConvertToContract(quote)}>
                           <FileCheck className="mr-2 h-4 w-4" />
                           Aprovar e Gerar Contrato
                         </DropdownMenuItem>
                       )}
 
-                      {type === "venda" && displayStatus === "Pendente" && (
+                      {can("orcamentos.convert") && type === "venda" && displayStatus === "Pendente" && (
                         <DropdownMenuItem onClick={() => handleConvertToSale(quote)}>
                           <ShoppingCart className="mr-2 h-4 w-4" />
                           Criar Venda a Partir do Orçamento
                         </DropdownMenuItem>
                       )}
 
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger>
-                          <RefreshCw className="mr-2 h-4 w-4" />
-                          Mudar Status
-                        </DropdownMenuSubTrigger>
+                      {can("orcamentos.approve") && (
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger>
+                            <RefreshCw className="mr-2 h-4 w-4" />
+                            Mudar Status
+                          </DropdownMenuSubTrigger>
 
-                        <DropdownMenuPortal>
-                          <DropdownMenuSubContent>
-                            {["Pendente", "Aprovado", "Reprovado", "Cancelado"].map((status) => (
-                              <DropdownMenuItem key={status} onClick={() => handleChangeStatus(quote.id, status)}>
-                                {status}
-                              </DropdownMenuItem>
-                            ))}
-                          </DropdownMenuSubContent>
-                        </DropdownMenuPortal>
-                      </DropdownMenuSub>
+                          <DropdownMenuPortal>
+                            <DropdownMenuSubContent>
+                              {["Pendente", "Aprovado", "Reprovado", "Cancelado"].map((status) => (
+                                <DropdownMenuItem key={status} onClick={() => handleChangeStatus(quote.id, status)}>
+                                  {status}
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuSubContent>
+                          </DropdownMenuPortal>
+                        </DropdownMenuSub>
+                      )}
 
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Excluir
-                          </DropdownMenuItem>
-                        </AlertDialogTrigger>
+                      {can("orcamentos.delete") && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Excluir
+                            </DropdownMenuItem>
+                          </AlertDialogTrigger>
 
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Essa ação não pode ser desfeita. Isso excluirá permanentemente o orçamento.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Essa ação não pode ser desfeita. Isso excluirá permanentemente o orçamento.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
 
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(quote.id)}>Continuar</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(quote.id)}>Continuar</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
@@ -785,12 +797,14 @@ export default function Orcamentos() {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
-        <Button variant="outline" onClick={handleAddNew}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Novo Orçamento Interno
-        </Button>
-      </div>
+      {can("orcamentos.create") && (
+        <div className="flex justify-end">
+          <Button variant="outline" onClick={handleAddNew}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Novo Orçamento Interno
+          </Button>
+        </div>
+      )}
 
       <Collapsible open={locacaoOpen} onOpenChange={setLocacaoOpen}>
         <Card>
