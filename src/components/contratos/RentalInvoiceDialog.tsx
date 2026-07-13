@@ -613,6 +613,7 @@ export function RentalInvoiceDialog({ open, onOpenChange, contract }: RentalInvo
             <p>Documento: {contract.client?.cnpj || contract.client?.cpf || "Não informado"}</p>
             <p>{[clientAddress.street || clientAddress.logradouro, clientAddress.number || clientAddress.numero].filter(Boolean).join(", ")}</p>
             <p>{[clientAddress.neighborhood || clientAddress.bairro, clientAddress.city || clientAddress.localidade, clientAddress.state || clientAddress.uf].filter(Boolean).join(", ")}</p>
+            {contract.unitOperation && <p>Unidade / Operação: {contract.unitOperation}</p>}
           </div>
         </section>
 
