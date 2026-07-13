@@ -7,6 +7,7 @@ import {
   User,
 } from "firebase/auth";
 import { doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { logAudit } from "@/lib/audit";
 import {
   resolvePermissions,
   resolveHomePath,
