@@ -26,10 +26,19 @@ async function assertAdmin(context) {
   }
   const snap = await db.collection("users").doc(context.auth.uid).get();
   const data = snap.data();
-  if (!snap.exists || data.profile !== "admin" || data.status !== "ativo") {
+  const status = normalizeStatus(data && data.status);
+  if (!snap.exists || !data || data.profile !== "admin" || status !== "ativo") {
     throw new functions.https.HttpsError("permission-denied", "Apenas administradores.");
   }
   return data;
+}
+
+// Normaliza status legado (active/inactive) para ativo/inativo.
+function normalizeStatus(s) {
+  const v = String(s || "ativo").toLowerCase();
+  if (v === "active") return "ativo";
+  if (v === "inactive") return "inativo";
+  return v;
 }
 
 async function logAudit(action, actor, details) {
