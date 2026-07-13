@@ -114,6 +114,30 @@ const AdminSidebar = ({ isDark }: { isDark?: boolean }) => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const [openSections, setOpenSections] = useState<string[]>([]);
+  const { can } = useAuth();
+
+  // Filtra a árvore do menu de acordo com as permissões do usuário.
+  const filterChildren = (children: MenuItem["children"]): MenuItem["children"] =>
+    (children || [])
+      .map((child) => {
+        if ("children" in child && !("path" in child)) {
+          const sub = filterChildren(child.children) as MenuChild[];
+          return sub.length ? { ...child, children: sub } : null;
+        }
+        const c = child as MenuChild;
+        return !c.perm || can(c.perm) ? c : null;
+      })
+      .filter(Boolean) as MenuItem["children"];
+
+  const visibleMenu = menuItems
+    .map((item) => {
+      if (item.children) {
+        const children = filterChildren(item.children);
+        return children && children.length ? { ...item, children } : null;
+      }
+      return !item.perm || can(item.perm) ? item : null;
+    })
+    .filter(Boolean) as MenuItem[];
 
   const toggleSection = (label: string) => {
     setOpenSections((prev) => (prev.includes(label) ? prev.filter((s) => s !== label) : [...prev, label]));
