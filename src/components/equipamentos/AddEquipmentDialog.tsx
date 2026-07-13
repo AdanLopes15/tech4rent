@@ -27,6 +27,8 @@ interface AddEquipmentDialogProps {
 export function AddEquipmentDialog({ open, onOpenChange, equipment }: AddEquipmentDialogProps) {
   const { addEquipment, updateEquipment } = useStore();
   const { toast } = useToast();
+  const { can } = useAuth();
+  const canViewCost = can("equipamentos.viewCost");
 
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
