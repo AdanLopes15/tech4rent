@@ -305,10 +305,12 @@ export function AddEquipmentDialog({ open, onOpenChange, equipment }: AddEquipme
               <Input id="vl-venda" type="text" inputMode="numeric" placeholder="R$ 0,00" value={salePrice} onChange={(e) => setSalePrice(maskCurrencyBR(e.target.value))} className="h-9" />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="vl-custo" className="text-xs font-medium">Preço de Custo (R$)</Label>
-              <Input id="vl-custo" type="text" inputMode="numeric" placeholder="R$ 0,00" value={costPrice} onChange={(e) => setCostPrice(maskCurrencyBR(e.target.value))} className="h-9" />
-            </div>
+            {canViewCost && (
+              <div className="space-y-1.5">
+                <Label htmlFor="vl-custo" className="text-xs font-medium">Preço de Custo (R$)</Label>
+                <Input id="vl-custo" type="text" inputMode="numeric" placeholder="R$ 0,00" value={costPrice} onChange={(e) => setCostPrice(maskCurrencyBR(e.target.value))} className="h-9" />
+              </div>
+            )}
           </div>
 
           {/* Descrição e Imagens */}
