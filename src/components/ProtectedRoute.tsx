@@ -2,6 +2,7 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import { logAudit } from "@/lib/audit";
 
 const ProtectedRoute = ({
   children,
@@ -17,6 +18,7 @@ const ProtectedRoute = ({
   useEffect(() => {
     if (denied) {
       toast.error("Você não tem permissão para acessar esta área.");
+      logAudit("access.denied", { permission: require });
     }
   }, [denied]);
 
