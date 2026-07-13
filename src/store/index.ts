@@ -307,6 +307,7 @@ type Actions = {
   addSystemUser: (userData: any) => Promise<void>;
   updateSystemUser: (userData: any) => Promise<void>;
   deleteSystemUser: (uid: string) => Promise<void>;
+  sendUserPasswordReset: (email: string) => Promise<void>;
   addSupplier: (supplier: any) => Promise<void>;
   updateSupplier: (supplier: any) => Promise<void>;
   deleteSupplier: (supplierId: string) => Promise<void>;
