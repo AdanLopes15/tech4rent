@@ -6,13 +6,16 @@ import { db, auth } from "@/lib/firebase";
 
 export type AuditAction =
   | "login"
+  | "access.denied"
   | "user.create"
   | "user.update"
   | "user.activate"
   | "user.deactivate"
   | "user.delete"
   | "user.permissions"
-  | "user.resetPassword";
+  | "user.resetPassword"
+  | "quote.create"
+  | "quote.update";
 
 export async function logAudit(action: AuditAction, details: Record<string, any> = {}) {
   try {
