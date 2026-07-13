@@ -226,6 +226,17 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
               </div>
             </div>
 
+            {/* Unit / Operation */}
+            <div className="space-y-2">
+              <Label className="font-semibold">Unidade / Operação</Label>
+              <Input
+                placeholder="Ex: Unidade Sumaré, CD Campinas, Operação Mercado Livre"
+                value={unitOperation}
+                onChange={(e) => setUnitOperation(e.target.value)}
+              />
+            </div>
+
+
             {/* Dates */}
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
