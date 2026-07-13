@@ -797,12 +797,14 @@ export default function Orcamentos() {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
-        <Button variant="outline" onClick={handleAddNew}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Novo Orçamento Interno
-        </Button>
-      </div>
+      {can("orcamentos.create") && (
+        <div className="flex justify-end">
+          <Button variant="outline" onClick={handleAddNew}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Novo Orçamento Interno
+          </Button>
+        </div>
+      )}
 
       <Collapsible open={locacaoOpen} onOpenChange={setLocacaoOpen}>
         <Card>
