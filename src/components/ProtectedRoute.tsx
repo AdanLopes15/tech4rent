@@ -1,8 +1,24 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { useEffect } from "react";
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
+const ProtectedRoute = ({
+  children,
+  require,
+}: {
+  children: React.ReactNode;
+  require?: string;
+}) => {
+  const { user, appUser, loading, can, homePath } = useAuth();
+
+  const denied = !!require && !!user && !!appUser && !can(require);
+
+  useEffect(() => {
+    if (denied) {
+      toast.error("Você não tem permissão para acessar esta área.");
+    }
+  }, [denied]);
 
   if (loading) {
     return (
@@ -14,6 +30,15 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Usuário autenticado mas sem documento/perfil válido: sem acesso.
+  if (!appUser) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (require && !can(require)) {
+    return <Navigate to={homePath} replace />;
   }
 
   return <>{children}</>;
