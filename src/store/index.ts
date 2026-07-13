@@ -1464,6 +1464,7 @@ const useStore = create<State & Actions>((set, get) => {
       set((state) => ({
         quotes: state.quotes.map((q) => (q.id === id ? { ...q, ...updatedQuote } : q)),
       }));
+      await logAudit("quote.update", { quoteId: id });
     },
 
     deleteQuote: async (quoteId) => {
