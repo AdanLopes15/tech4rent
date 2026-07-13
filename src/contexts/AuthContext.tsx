@@ -84,8 +84,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return;
         }
 
-        const profile: ProfileKey = data.profile || "custom";
-        const resolved = resolvePermissions(profile, data.permissions);
+        // Compatibilidade: documentos antigos usam apenas o campo "permission".
+        const legacy = String(data.permission || "").toLowerCase();
+        const legacyProfile: ProfileKey | undefined =
+          legacy === "admin" || legacy === "administrador"
+            ? "admin"
+            : legacy === "comercial_orcamentos"
+              ? "comercial_orcamentos"
+              : undefined;
+
+        const profile: ProfileKey = data.profile || legacyProfile || "custom";
+        // Perfis legados sem lista de permissões e sem perfil reconhecido
+        // recebem acesso amplo apenas se forem gestor/colaborador antigo.
+        const legacyCustom =
+          !data.profile && !legacyProfile && (legacy === "gestor" || legacy === "colaborador")
+            ? ["*"]
+            : undefined;
+        const resolved = legacyCustom || resolvePermissions(profile, data.permissions);
 
         setAppUser({
           uid: fbUser.uid,
