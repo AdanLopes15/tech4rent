@@ -1,8 +1,8 @@
 //src/lib/firebase.ts
 
-import { initializeApp, getApps, getApp } from "firebase/app";
+import { initializeApp, getApps, getApp, deleteApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
@@ -20,4 +20,22 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
 
+/**
+ * Cria um usuário no Firebase Auth usando um app SECUNDÁRIO, para não
+ * trocar/encerrar a sessão do administrador logado no app principal.
+ * Retorna o uid do usuário criado.
+ */
+export async function createAuthUserIsolated(email: string, password: string): Promise<string> {
+  const secondaryApp = initializeApp(firebaseConfig, `secondary-${Date.now()}`);
+  const secondaryAuth = getAuth(secondaryApp);
+  try {
+    const cred = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+    return cred.user.uid;
+  } finally {
+    await signOut(secondaryAuth).catch(() => {});
+    await deleteApp(secondaryApp).catch(() => {});
+  }
+}
+
 export { app, db, auth, storage };
+
