@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import AddUserDialog from "@/components/admin/AddUserDialog";
+import { PROFILE_LABELS, type ProfileKey } from "@/lib/permissions";
 import { toast } from "sonner";
 import {
   AlertDialog,
