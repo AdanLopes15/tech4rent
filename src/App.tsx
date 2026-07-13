@@ -101,36 +101,36 @@ const App = () => (
                 </ProtectedRoute>
               }
             >
-              <Route index element={<Dashboard />} />
-              <Route path="configuracoes" element={<Configuracoes />} />
+              <Route index element={<Guard require="dashboard.view"><Dashboard /></Guard>} />
+              <Route path="configuracoes" element={<Guard require="configuracoes.view"><Configuracoes /></Guard>} />
               <Route path="perfil" element={<MeuPerfil />} />
-              <Route path="equipamentos" element={<Equipamentos />} />
-              <Route path="catalogo-site" element={<CatalogoSite />} />
-              <Route path="site-builder" element={<SiteBuilder />} />
-              <Route path="site-builder/:slug" element={<SiteBuilder />} />
-              <Route path="clientes" element={<Clientes />} />
-              <Route path="fornecedores" element={<Fornecedores />} />
-              <Route path="colaboradores" element={<Colaboradores />} />
-              <Route path="orcamentos" element={<Orcamentos />} />
-              <Route path="contratos" element={<Contratos />} />
-              <Route path="vendas" element={<Vendas />} />
-              <Route path="ordens-compra" element={<OrdensCompra />} />
-              <Route path="financeiro" element={<Financeiro />} />
-              <Route path="financeiro/receber" element={<ContasReceber />} />
-              <Route path="financeiro/pagar" element={<ContasPagar />} />
-              <Route path="financeiro/boletos" element={<Boletos />} />
-              <Route path="financeiro/fluxo-caixa" element={<FluxoCaixa />} />
-              <Route path="financeiro/extrato" element={<Extrato />} />
-              <Route path="financeiro/dre" element={<DRE />} />
-              <Route path="financeiro/relatorios" element={<Relatorios />} />
-              <Route path="financeiro/nfe" element={<NFe />} />
-              <Route path="financeiro/plano-contas" element={<PlanoContas />} />
-              <Route path="financeiro/centro-custo" element={<CentroCusto />} />
-              <Route path="financeiro/bancos" element={<Bancos />} />
-              <Route path="usuarios" element={<Usuarios />} />
-              <Route path="contatos-site" element={<ContatosSite />} />
-              <Route path="projetos" element={<ProjetosVisaoGeral />} />
-              <Route path="projetos/tech4zap" element={<ProjetosTech4Zap />} />
+              <Route path="equipamentos" element={<Guard require="equipamentos.view"><Equipamentos /></Guard>} />
+              <Route path="catalogo-site" element={<Guard require="equipamentos.view"><CatalogoSite /></Guard>} />
+              <Route path="site-builder" element={<Guard require="configuracoes.view"><SiteBuilder /></Guard>} />
+              <Route path="site-builder/:slug" element={<Guard require="configuracoes.view"><SiteBuilder /></Guard>} />
+              <Route path="clientes" element={<Guard require="clientes.view"><Clientes /></Guard>} />
+              <Route path="fornecedores" element={<Guard require="clientes.view"><Fornecedores /></Guard>} />
+              <Route path="colaboradores" element={<Guard require="clientes.view"><Colaboradores /></Guard>} />
+              <Route path="orcamentos" element={<Guard require="orcamentos.view"><Orcamentos /></Guard>} />
+              <Route path="contratos" element={<Guard require="contratos.view"><Contratos /></Guard>} />
+              <Route path="vendas" element={<Guard require="vendas.view"><Vendas /></Guard>} />
+              <Route path="ordens-compra" element={<Guard require="ordensCompra.view"><OrdensCompra /></Guard>} />
+              <Route path="financeiro" element={<Guard require="financeiro.view"><Financeiro /></Guard>} />
+              <Route path="financeiro/receber" element={<Guard require="financeiro.view"><ContasReceber /></Guard>} />
+              <Route path="financeiro/pagar" element={<Guard require="financeiro.view"><ContasPagar /></Guard>} />
+              <Route path="financeiro/boletos" element={<Guard require="financeiro.view"><Boletos /></Guard>} />
+              <Route path="financeiro/fluxo-caixa" element={<Guard require="financeiro.view"><FluxoCaixa /></Guard>} />
+              <Route path="financeiro/extrato" element={<Guard require="financeiro.view"><Extrato /></Guard>} />
+              <Route path="financeiro/dre" element={<Guard require="financeiro.view"><DRE /></Guard>} />
+              <Route path="financeiro/relatorios" element={<Guard require="relatorios.view"><Relatorios /></Guard>} />
+              <Route path="financeiro/nfe" element={<Guard require="financeiro.view"><NFe /></Guard>} />
+              <Route path="financeiro/plano-contas" element={<Guard require="financeiro.view"><PlanoContas /></Guard>} />
+              <Route path="financeiro/centro-custo" element={<Guard require="financeiro.view"><CentroCusto /></Guard>} />
+              <Route path="financeiro/bancos" element={<Guard require="financeiro.view"><Bancos /></Guard>} />
+              <Route path="usuarios" element={<Guard require="usuarios.view"><Usuarios /></Guard>} />
+              <Route path="contatos-site" element={<Guard require="configuracoes.view"><ContatosSite /></Guard>} />
+              <Route path="projetos" element={<Guard require="dashboard.view"><ProjetosVisaoGeral /></Guard>} />
+              <Route path="projetos/tech4zap" element={<Guard require="dashboard.view"><ProjetosTech4Zap /></Guard>} />
             </Route>
 
             {/* Tech4Rent MDM Routes - Redirected to Projects Overview */}
