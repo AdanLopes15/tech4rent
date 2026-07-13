@@ -1851,10 +1851,8 @@ const useStore = create<State & Actions>((set, get) => {
       const target = state.systemUsers.find((u) => u.uid === uid);
 
       // Impede desativar o último administrador ativo.
-      if (target?.profile === "admin" && rest.status && rest.status !== "ativo") {
-        const activeAdmins = state.systemUsers.filter(
-          (u) => u.profile === "admin" && u.status === "ativo",
-        );
+      if (target?.profile === "admin" && rest.status && normalizeStatus(rest.status) !== "ativo") {
+        const activeAdmins = state.systemUsers.filter((u) => u.profile === "admin" && isAtivo(u));
         if (activeAdmins.length <= 1) {
           throw new Error("Não é possível desativar o último administrador ativo.");
         }
