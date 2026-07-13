@@ -237,7 +237,7 @@ const AdminSidebar = ({ isDark }: { isDark?: boolean }) => {
       </div>
 
       <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
-        {menuItems.map((item) => {
+        {visibleMenu.map((item) => {
           if (item.children) {
             return renderSection(item.icon, item.label, item.children);
           }
