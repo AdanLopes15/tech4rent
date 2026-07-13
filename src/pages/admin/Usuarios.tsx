@@ -170,7 +170,7 @@ const Usuarios = () => {
 
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-6">
+                  <TableCell colSpan={6} className="text-center py-6">
                     Nenhum usuário encontrado.
                   </TableCell>
                 </TableRow>
