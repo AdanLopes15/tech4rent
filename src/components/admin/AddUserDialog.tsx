@@ -115,7 +115,12 @@ const AddUserDialog = ({ open, onOpenChange, user }: Props) => {
 
       onOpenChange(false);
     } catch (err: any) {
-      toast.error(err.message || "Erro ao salvar usuário");
+      const raw = String(err?.message || err?.code || "").toLowerCase();
+      if (raw.includes("already") || raw.includes("exists") || raw.includes("duplicate") || raw.includes("in use")) {
+        toast.error("Este e-mail já está cadastrado.");
+      } else {
+        toast.error(err.message || "Erro ao salvar usuário");
+      }
     } finally {
       setSaving(false);
     }
