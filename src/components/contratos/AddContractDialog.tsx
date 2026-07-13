@@ -87,6 +87,7 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
 
   const resetForm = () => {
     setClientId("");
+    setUnitOperation("");
     setStartDate(undefined);
     setEndDate(undefined);
     setFirstInstallmentDate(undefined);
