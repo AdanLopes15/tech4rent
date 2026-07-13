@@ -66,6 +66,7 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
   const { toast } = useToast();
 
   const [selectedClientId, setSelectedClientId] = useState<string>("");
+  const [unitOperation, setUnitOperation] = useState<string>("");
   const [retiradaDate, setRetiradaDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [items, setItems] = useState<ContractItem[]>([]);
