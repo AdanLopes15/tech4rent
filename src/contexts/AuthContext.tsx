@@ -75,8 +75,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         const data = snap.data() as any;
 
+        // Normaliza status legado (active/inactive) para o padrão ativo/inativo.
+        const rawStatus = String(data.status || "ativo").toLowerCase();
+        const normalizedStatus =
+          rawStatus === "active"
+            ? "ativo"
+            : rawStatus === "inactive"
+              ? "inativo"
+              : rawStatus;
+
         // Regra: usuário inativo é desconectado.
-        if (data.status && data.status !== "ativo") {
+        if (normalizedStatus !== "ativo") {
           setAccessDenied("Seu usuário está inativo. Contate o administrador.");
           clearState();
           await firebaseSignOut(auth);
