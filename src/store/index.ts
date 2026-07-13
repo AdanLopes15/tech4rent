@@ -26,10 +26,12 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
+  sendPasswordResetEmail,
   type User,
 } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
-import { db, auth, storage } from "@/lib/firebase";
+import { db, auth, storage, createAuthUserIsolated } from "@/lib/firebase";
+import { logAudit } from "@/lib/audit";
 import { getNextId as getNextIdUtil, removeUndefined } from "./utils";
 import { format, differenceInMonths, addMonths, addDays, addYears, addWeeks, getDate } from "date-fns";
 import { addSale, updateSale, cancelSale, deleteSale } from "./methods/sales";
