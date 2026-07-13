@@ -66,6 +66,7 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
   const { toast } = useToast();
 
   const [selectedClientId, setSelectedClientId] = useState<string>("");
+  const [unitOperation, setUnitOperation] = useState<string>("");
   const [retiradaDate, setRetiradaDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [items, setItems] = useState<ContractItem[]>([]);
@@ -75,6 +76,7 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
 
   const resetForm = () => {
     setSelectedClientId("");
+    setUnitOperation("");
     setRetiradaDate(undefined);
     setEndDate(undefined);
     setItems([]);
@@ -84,6 +86,7 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
   useEffect(() => {
     if (open && contract) {
       setSelectedClientId(contract.clientId || "");
+      setUnitOperation(contract.unitOperation || "");
       setRetiradaDate(safeToDate(contract.startDate));
       setEndDate(safeToDate(contract.endDate));
       setItems(
@@ -180,6 +183,7 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
       await updateContract({
         id: contract.id,
         clientId: selectedClientId,
+        unitOperation: unitOperation.trim(),
         client: selectedClient || contract.client || null,
         startDate: retiradaDate,
         endDate: endDate,
@@ -230,6 +234,15 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="unit-operation">Unidade / Operação</Label>
+              <Input
+                id="unit-operation"
+                placeholder="Ex: Unidade Sumaré, CD Campinas, Operação Mercado Livre"
+                value={unitOperation}
+                onChange={(e) => setUnitOperation(e.target.value)}
+              />
             </div>
           </div>
 

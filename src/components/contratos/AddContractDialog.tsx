@@ -42,6 +42,7 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
   const { toast } = useToast();
 
   const [clientId, setClientId] = useState("");
+  const [unitOperation, setUnitOperation] = useState("");
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [firstInstallmentDate, setFirstInstallmentDate] = useState<Date | undefined>();
@@ -62,6 +63,7 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
   useEffect(() => {
     if (contract) {
       setClientId(contract.clientId || "");
+      setUnitOperation(contract.unitOperation || "");
       setStartDate(contract.startDate ? new Date(contract.startDate) : undefined);
       setEndDate(contract.endDate ? new Date(contract.endDate) : undefined);
       setFirstInstallmentDate(contract.firstInstallmentDate ? new Date(contract.firstInstallmentDate) : undefined);
@@ -85,6 +87,7 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
 
   const resetForm = () => {
     setClientId("");
+    setUnitOperation("");
     setStartDate(undefined);
     setEndDate(undefined);
     setFirstInstallmentDate(undefined);
@@ -148,6 +151,7 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
         await updateContract({
           id: contract.id,
           clientId,
+          unitOperation: unitOperation.trim(),
           client,
           startDate: startDate.toISOString(),
           endDate: endDate.toISOString(),
@@ -161,6 +165,7 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
       } else {
         await addContract({
           clientId,
+          unitOperation: unitOperation.trim(),
           client,
           startDate,
           endDate,
@@ -220,6 +225,17 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
                 </Button>
               </div>
             </div>
+
+            {/* Unit / Operation */}
+            <div className="space-y-2">
+              <Label className="font-semibold">Unidade / Operação</Label>
+              <Input
+                placeholder="Ex: Unidade Sumaré, CD Campinas, Operação Mercado Livre"
+                value={unitOperation}
+                onChange={(e) => setUnitOperation(e.target.value)}
+              />
+            </div>
+
 
             {/* Dates */}
             <div className="grid grid-cols-3 gap-4">

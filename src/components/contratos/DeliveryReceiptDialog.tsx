@@ -247,6 +247,12 @@ function ReceiptSheet({
               <div className="font-medium text-[#0D1B2A]">{clientPhone}</div>
             </div>
           )}
+          {contract.unitOperation && (
+            <div>
+              <span className="text-[11px] text-[#888] uppercase font-semibold">Unidade / Operação</span>
+              <div className="font-medium text-[#0D1B2A]">{contract.unitOperation}</div>
+            </div>
+          )}
         </div>
       </section>
 

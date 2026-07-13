@@ -225,6 +225,9 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
                 <p>
                   {`${contract.client?.address?.street || ""}, ${contract.client?.address?.number || ""} - ${contract.client?.address?.neighborhood || ""}, ${contract.client?.address?.city || ""} - ${contract.client?.address?.state || ""}`}
                 </p>
+                {contract.unitOperation && (
+                  <p>Unidade / Operação: {contract.unitOperation}</p>
+                )}
               </div>
             </div>
 
