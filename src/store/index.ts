@@ -1859,6 +1859,7 @@ const useStore = create<State & Actions>((set, get) => {
       }
 
       const dataToSave: any = { ...rest };
+      if (rest.status) dataToSave.status = normalizeStatus(rest.status);
       if (profile) {
         dataToSave.profile = profile;
         dataToSave.permission = profile;
