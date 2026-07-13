@@ -63,6 +63,7 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
   useEffect(() => {
     if (contract) {
       setClientId(contract.clientId || "");
+      setUnitOperation(contract.unitOperation || "");
       setStartDate(contract.startDate ? new Date(contract.startDate) : undefined);
       setEndDate(contract.endDate ? new Date(contract.endDate) : undefined);
       setFirstInstallmentDate(contract.firstInstallmentDate ? new Date(contract.firstInstallmentDate) : undefined);
