@@ -117,7 +117,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           email: data.email || fbUser.email || undefined,
           profile,
           permissions: data.permissions || [],
-          status: data.status,
+          status: normalizedStatus,
         });
         setPermissions(resolved);
         setAccessDenied(null);
