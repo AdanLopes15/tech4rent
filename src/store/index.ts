@@ -1074,6 +1074,21 @@ const useStore = create<State & Actions>((set, get) => {
           }));
         }
 
+        // Mescla custos da coleção privada para usuários autorizados.
+        // Usuários sem permissão recebem erro nas regras -> custo fica oculto.
+        try {
+          const privateSnap = await getDocs(collection(db, "equipamentosPrivate"));
+          const costMap = new Map<string, any>();
+          privateSnap.docs.forEach((d) => costMap.set(d.id, (d.data() as any).cost));
+          if (Array.isArray(newState.equipments)) {
+            newState.equipments = newState.equipments.map((eq: any) =>
+              costMap.has(eq.id) ? { ...eq, cost: costMap.get(eq.id) } : eq,
+            );
+          }
+        } catch {
+          // sem permissão de custo: mantém equipamentos sem o campo cost
+        }
+
         set(newState as State);
       } catch (error) {
         console.error("Error fetching data from Firestore:", error);
