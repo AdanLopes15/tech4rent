@@ -74,6 +74,7 @@ export function DeliveryReceiptDialog({ open, onOpenChange, contract }: Delivery
   const clientCity = client.city || client.cidade || "";
   const clientUf = client.uf || "";
   const clientPhone = client.telefone || client.phone || client.whatsapp || "";
+  const unitOperation = contract.unitOperation || "";
 
   const address = companySettings?.address;
   const companyAddress =
