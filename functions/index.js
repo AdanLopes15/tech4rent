@@ -105,9 +105,15 @@ exports.deleteUser = functions.https.onCall(async (data, context) => {
 exports.onUserStatusChange = functions.firestore
   .document("users/{uid}")
   .onUpdate(async (change, context) => {
-    const before = change.before.data();
-    const after = change.after.data();
-    if (before.status === "ativo" && after.status !== "ativo") {
+    const before = normalizeStatus(change.before.data().status);
+    const after = normalizeStatus(change.after.data().status);
+    if (before === "ativo" && after !== "ativo") {
       await admin.auth().revokeRefreshTokens(context.params.uid);
+      await db.collection("auditLogs").add({
+        action: "user.deactivate",
+        actorUid: null,
+        details: { targetUid: context.params.uid },
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
     }
   });
