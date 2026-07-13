@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import { format } from "date-fns";
 import { useStore } from "@/store";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency, cn, formatAddress } from "@/lib/utils";
 import { formatPhoneBR } from "@/lib/contact";
