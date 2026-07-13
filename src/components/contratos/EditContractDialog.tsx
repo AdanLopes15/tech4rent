@@ -76,6 +76,7 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
 
   const resetForm = () => {
     setSelectedClientId("");
+    setUnitOperation("");
     setRetiradaDate(undefined);
     setEndDate(undefined);
     setItems([]);
