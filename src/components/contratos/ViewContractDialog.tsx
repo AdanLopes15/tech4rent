@@ -109,14 +109,43 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
           <style>
             ${cssRulesText}
             @media print {
+              html,
               body {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                height: auto !important;
+                min-height: auto !important;
+                overflow: visible !important;
+                background-color: white !important;
+                color: black !important;
+              }
+
+              body > * {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+              }
+
+              /* Garante que o conteúdo capturado do printable-contract seja visível */
+              [id="printable-contract"], 
+              .p-6.bg-white.text-black {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                height: auto !important;
+                overflow: visible !important;
+              }
+
+              body {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
               }
             }
             body {
               margin: 0;
               padding: 0;
+              background-color: white;
             }
           </style>
         </head>
