@@ -100,19 +100,21 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
     const contentHtml = printableContent.outerHTML;
 
     const removeInheritedPrintRules = (doc: Document) => {
+      let removedCount = 0;
       const removeFromRuleList = (rules: CSSRuleList) => {
         for (let index = rules.length - 1; index >= 0; index--) {
           const rule = rules[index];
 
-          if (
-            rule instanceof CSSMediaRule &&
-            rule.media.mediaText
+          // Using duck typing instead of instanceof for cross-window compatibility
+          const isMediaPrint = rule.type === 4 && (rule as CSSMediaRule).media.mediaText
               .toLowerCase()
               .split(",")
-              .some((media) => media.trim() === "print")
-          ) {
+              .some((media) => media.trim() === "print");
+
+          if (isMediaPrint) {
             try {
               rule.parentStyleSheet?.deleteRule(index);
+              removedCount++;
             } catch (e) {
               console.warn("Could not delete rule", e);
             }
@@ -127,6 +129,8 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
           // Ignorar somente folhas externas que não permitam acesso às regras.
         }
       });
+      console.log(`REMOVED_PRINT_RULES_COUNT: ${removedCount}`);
+      return removedCount;
     };
 
     printWindow.document.open();
@@ -231,6 +235,36 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
 
       if (!printWindow.closed) {
         printWindow.focus();
+        
+        const printDoc = printWindow.document;
+        const contractElement = printDoc.getElementById("printable-contract");
+        const firstChild = contractElement?.firstElementChild;
+
+        console.log("PRINT DIAGNOSTIC", {
+          readyState: printDoc.readyState,
+          bodyHtmlLength: printDoc.body?.innerHTML.length,
+          contractExists: Boolean(contractElement),
+          contractHtmlLength: contractElement?.innerHTML.length,
+          bodyRect: printDoc.body?.getBoundingClientRect().toJSON(),
+          contractRect: contractElement?.getBoundingClientRect().toJSON(),
+          bodyStyle: printDoc.defaultView
+            ? JSON.parse(JSON.stringify(printDoc.defaultView.getComputedStyle(printDoc.body)))
+            : null,
+          contractStyle:
+            contractElement && printDoc.defaultView
+              ? JSON.parse(JSON.stringify(printDoc.defaultView.getComputedStyle(contractElement)))
+              : null,
+          firstChildStyle:
+            firstChild && printDoc.defaultView
+              ? JSON.parse(JSON.stringify(printDoc.defaultView.getComputedStyle(firstChild as HTMLElement)))
+              : null,
+          styleSheets: Array.from(printDoc.styleSheets).map((sheet) => ({
+            href: sheet.href,
+            disabled: sheet.disabled,
+            media: sheet.media?.mediaText,
+          })),
+        });
+
         printWindow.print();
       }
     };
