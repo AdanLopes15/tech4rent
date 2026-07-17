@@ -123,6 +123,7 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
 
               /* Força a visibilidade dos elementos raiz do contrato dentro do body */
               body > * {
+                display: block !important;
                 visibility: visible !important;
                 opacity: 1 !important;
                 height: auto !important;
