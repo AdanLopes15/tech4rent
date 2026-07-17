@@ -69,16 +69,6 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
       return;
     }
 
-    const printWindow = window.open("", "", "height=800,width=800");
-    if (!printWindow) {
-      toast({
-        title: "Pop-up bloqueado",
-        description: "Permita pop-ups para imprimir o contrato.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     const headLinksAndStyles = Array.from(document.querySelectorAll("link[rel='stylesheet'], style"))
       .map((node) => node.outerHTML)
       .join("\n");
@@ -98,56 +88,50 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
       .join("\n");
 
     const contentHtml = printableContent.innerHTML;
+    const contractNumber = contract.id || "N/A";
 
-    printWindow.document.open();
-    printWindow.document.write(`
-      <html>
+    const fullPrintHtml = `
+      <!DOCTYPE html>
+      <html lang="pt-BR">
         <head>
-          <title>Contrato ${contract.id}</title>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>Contrato ${contractNumber}</title>
           <base href="${window.location.origin}/" />
           ${headLinksAndStyles}
           <style>
             ${cssRulesText}
+            
+            @page {
+              size: A4;
+              margin: 12mm;
+            }
+
             @media print {
-              /* Reset de visibilidade global para garantir que nada oculte o contrato */
               html, body {
+                width: auto !important;
+                height: auto !important;
+                overflow: visible !important;
                 display: block !important;
                 visibility: visible !important;
                 opacity: 1 !important;
-                height: auto !important;
-                min-height: auto !important;
-                overflow: visible !important;
                 background-color: white !important;
                 color: black !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
               }
 
-              /* Força a visibilidade dos elementos raiz do contrato dentro do body */
               body > * {
                 display: block !important;
                 visibility: visible !important;
                 opacity: 1 !important;
-                height: auto !important;
-                overflow: visible !important;
               }
 
-              /* Caso algum seletor global esteja escondendo containers comuns */
-              #root, #print-root, .document-print-root {
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-              }
-
-              /* Mantém as propriedades de cor e impressão */
-              body {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-              }
-              
-              /* Oculta elementos que não devem sair na impressão mesmo no documento isolado */
-              .print\:hidden {
+              .print\\:hidden {
                 display: none !important;
               }
             }
+
             body {
               margin: 0;
               padding: 0;
@@ -159,59 +143,81 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
           ${contentHtml}
         </body>
       </html>
-    `);
-    printWindow.document.close();
+    `;
 
-    const waitForPrintContent = async (win: Window) => {
-      const doc = win.document;
+    const blob = new Blob([fullPrintHtml], {
+      type: 'text/html;charset=utf-8'
+    });
 
-      // Wait for fonts
-      if ((doc as any).fonts?.ready) {
+    const blobUrl = URL.createObjectURL(blob);
+    const printWindow = window.open(blobUrl, '_blank');
+
+    if (!printWindow) {
+      URL.revokeObjectURL(blobUrl);
+      toast({
+        title: "Pop-up bloqueado",
+        description: "Permita pop-ups para imprimir o contrato.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const handleLoadedPrintDocument = async () => {
+      const printDocument = printWindow.document;
+
+      // Aguardar fontes
+      if ((printDocument as any).fonts?.ready) {
         try {
-          await (doc as any).fonts.ready;
+          await (printDocument as any).fonts.ready;
         } catch (e) {
-          console.error("Erro ao carregar fontes para impressão", e);
+          console.error("Erro ao carregar fontes", e);
         }
       }
 
-      // Wait for images
-      const images = Array.from(doc.images);
+      // Aguardar imagens
+      const images = Array.from(printDocument.images);
       await Promise.all(
-        images.map((img) => {
-          if (img.complete) return Promise.resolve();
+        images.map((image) => {
+          if (image.complete) {
+            return Promise.resolve();
+          }
+
           return new Promise((resolve) => {
-            img.onload = resolve;
-            img.onerror = resolve;
+            image.addEventListener('load', resolve, { once: true });
+            image.addEventListener('error', resolve, { once: true });
           });
         })
       );
 
-      // Animation frames to ensure layout is ready
+      // Aguardar frames de animação para garantir o layout
       await new Promise((resolve) => {
-        win.requestAnimationFrame(() => {
-          win.requestAnimationFrame(resolve);
+        printWindow.requestAnimationFrame(() => {
+          printWindow.requestAnimationFrame(resolve);
         });
       });
 
-      // Additional small delay as requested
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    };
+      // Pequeno delay adicional de segurança
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
-    const triggerPrint = async () => {
-      await waitForPrintContent(printWindow);
       if (!printWindow.closed) {
         printWindow.focus();
         printWindow.print();
-        // Option to close or keep open - usually Chrome print preview is modal-like
-        // printWindow.close(); 
       }
     };
 
-    if (printWindow.document.readyState === 'complete') {
-      triggerPrint();
-    } else {
-      printWindow.addEventListener('load', triggerPrint, { once: true });
-    }
+    printWindow.addEventListener('load', handleLoadedPrintDocument, { once: true });
+
+    // Fallback: se o evento load não disparar em 5 segundos, tenta imprimir de qualquer forma
+    const fallbackTimeout = setTimeout(() => {
+      if (!printWindow.closed) {
+        handleLoadedPrintDocument();
+      }
+    }, 5000);
+
+    printWindow.addEventListener('beforeunload', () => {
+      clearTimeout(fallbackTimeout);
+      URL.revokeObjectURL(blobUrl);
+    }, { once: true });
   };
 
   if (!contract) return null;
