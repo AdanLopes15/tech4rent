@@ -273,148 +273,89 @@ export default function Orcamentos() {
     }
 
     const content = ref.current.innerHTML;
-    
-    const fullPrintHtml = `
-      <!DOCTYPE html>
-      <html lang="pt-BR">
-        <head>
-          <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>Tech4Rent - Documento</title>
-          <base href="${window.location.origin}/" />
-          <script src="https://cdn.tailwindcss.com"></script>
-          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-          <style>
-            body { 
-              font-family: 'Inter', sans-serif;
-              margin: 0;
-              padding: 0;
-              background-color: white !important;
-              color: #1a1a1a !important;
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-            }
+    const printWindow = window.open("", "_blank");
 
-            @page {
-              size: A4;
-              margin: 8mm;
-            }
-
-            @media print {
-              html, body {
-                width: auto !important;
-                height: auto !important;
-                overflow: visible !important;
-              }
-
-              .no-print { display: none !important; }
-              body { margin: 0; }
-              
-              * {
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Tech4Rent - Documento</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+            <style>
+              body { 
+                font-family: 'Inter', sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: white !important;
+                color: #1a1a1a !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
               }
 
-              .print-container > div,
-              .document-print-root {
-                min-height: 0 !important;
-                height: auto !important;
+              
+              @page {
+                size: A4;
+                margin: 8mm;
               }
-            }
 
-            * {
-              box-sizing: border-box;
-              overflow: visible !important;
-            }
-            
-            table {
-              width: 100% !important;
-              border-collapse: collapse !important;
-            }
-            
-            img {
-              max-width: 100%;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="print-container">
-            ${content}
-          </div>
-        </body>
-      </html>
-    `;
+              @media print {
+                .no-print { display: none !important; }
+                body { margin: 0; }
+                /* Garante que cores de fundo e bordas apareçam */
+                * {
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                }
+                /* Impede que o container force a altura total de uma página A4,
+                   evitando a geração de uma segunda página em branco */
+                .print-container > div,
+                .document-print-root {
+                  min-height: 0 !important;
+                  height: auto !important;
+                }
+              }
 
-    const blob = new Blob([fullPrintHtml], {
-      type: 'text/html;charset=utf-8'
-    });
-
-    const blobUrl = URL.createObjectURL(blob);
-    const printWindow = window.open(blobUrl, '_blank');
-
-    if (!printWindow) {
-      URL.revokeObjectURL(blobUrl);
+              /* Ajustes para evitar cortes de letras */
+              * {
+                box-sizing: border-box;
+                overflow: visible !important;
+              }
+              
+              table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+              }
+              
+              img {
+                max-width: 100%;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="print-container">
+              ${content}
+            </div>
+            <script>
+              window.onload = function() {
+                // Pequeno delay para garantir que imagens e fontes carreguem
+                setTimeout(() => {
+                  window.print();
+                  window.onafterprint = function() { window.close(); };
+                }, 800);
+              };
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    } else {
       toast({
         title: "Pop-up bloqueado",
-        description: "Permita pop-ups para imprimir o documento.",
+        description: "Por favor, permita pop-ups para este site para poder imprimir.",
         variant: "destructive",
       });
-      return;
     }
-
-    const handleLoadedPrintDocument = async () => {
-      const printDocument = printWindow.document;
-
-      if ((printDocument as any).fonts?.ready) {
-        try {
-          await (printDocument as any).fonts.ready;
-        } catch (e) {
-          console.error("Erro ao carregar fontes", e);
-        }
-      }
-
-      const images = Array.from(printDocument.images);
-      await Promise.all(
-        images.map((image) => {
-          if (image.complete) {
-            return Promise.resolve();
-          }
-
-          return new Promise((resolve) => {
-            image.addEventListener('load', resolve, { once: true });
-            image.addEventListener('error', resolve, { once: true });
-          });
-        })
-      );
-
-      await new Promise((resolve) => {
-        printWindow.requestAnimationFrame(() => {
-          printWindow.requestAnimationFrame(resolve);
-        });
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      if (!printWindow.closed) {
-        printWindow.focus();
-        printWindow.print();
-        // Não fechamos automaticamente para permitir que o usuário veja o diálogo de impressão
-      }
-    };
-
-    printWindow.addEventListener('load', handleLoadedPrintDocument, { once: true });
-
-    // Fallback se load não disparar
-    const fallbackTimeout = setTimeout(() => {
-      if (!printWindow.closed) {
-        handleLoadedPrintDocument();
-      }
-    }, 5000);
-
-    printWindow.addEventListener('beforeunload', () => {
-      clearTimeout(fallbackTimeout);
-      URL.revokeObjectURL(blobUrl);
-    }, { once: true });
   };
 
 
