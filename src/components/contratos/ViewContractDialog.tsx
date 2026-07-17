@@ -109,8 +109,8 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
           <style>
             ${cssRulesText}
             @media print {
-              html,
-              body {
+              /* Reset de visibilidade global para garantir que nada oculte o contrato */
+              html, body {
                 display: block !important;
                 visibility: visible !important;
                 opacity: 1 !important;
@@ -121,25 +121,30 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
                 color: black !important;
               }
 
+              /* Força a visibilidade dos elementos raiz do contrato dentro do body */
               body > * {
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-              }
-
-              /* Garante que o conteúdo capturado do printable-contract seja visível */
-              [id="printable-contract"], 
-              .p-6.bg-white.text-black {
-                display: block !important;
                 visibility: visible !important;
                 opacity: 1 !important;
                 height: auto !important;
                 overflow: visible !important;
               }
 
+              /* Caso algum seletor global esteja escondendo containers comuns */
+              #root, #print-root, .document-print-root {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+              }
+
+              /* Mantém as propriedades de cor e impressão */
               body {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+              }
+              
+              /* Oculta elementos que não devem sair na impressão mesmo no documento isolado */
+              .print\:hidden {
+                display: none !important;
               }
             }
             body {
