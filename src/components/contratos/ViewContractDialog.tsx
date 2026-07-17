@@ -99,6 +99,36 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
 
     const contentHtml = printableContent.outerHTML;
 
+    const removeInheritedPrintRules = (doc: Document) => {
+      const removeFromRuleList = (rules: CSSRuleList) => {
+        for (let index = rules.length - 1; index >= 0; index--) {
+          const rule = rules[index];
+
+          if (
+            rule instanceof CSSMediaRule &&
+            rule.media.mediaText
+              .toLowerCase()
+              .split(",")
+              .some((media) => media.trim() === "print")
+          ) {
+            try {
+              rule.parentStyleSheet?.deleteRule(index);
+            } catch (e) {
+              console.warn("Could not delete rule", e);
+            }
+          }
+        }
+      };
+
+      Array.from(doc.styleSheets).forEach((styleSheet) => {
+        try {
+          removeFromRuleList(styleSheet.cssRules);
+        } catch {
+          // Ignorar somente folhas externas que não permitam acesso às regras.
+        }
+      });
+    };
+
     printWindow.document.open();
     printWindow.document.write(`
       <html>
@@ -108,39 +138,6 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
           ${headLinksAndStyles}
           <style>
             ${cssRulesText}
-            @media print {
-              /* Reset de visibilidade global para garantir que nada oculte o contrato */
-              html, body {
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                height: auto !important;
-                min-height: auto !important;
-                overflow: visible !important;
-                background-color: white !important;
-                color: black !important;
-              }
-
-              /* Força a visibilidade dos elementos raiz do contrato dentro do body */
-              body > * {
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                height: auto !important;
-                overflow: visible !important;
-              }
-
-              /* Mantém as propriedades de cor e impressão */
-              body {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-              }
-              
-              /* Oculta elementos que não devem sair na impressão mesmo no documento isolado */
-              .print-hidden {
-                display: none !important;
-              }
-            }
             body {
               margin: 0;
               padding: 0;
@@ -192,11 +189,49 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
 
     const triggerPrint = async () => {
       await waitForPrintContent(printWindow);
+
+      removeInheritedPrintRules(printWindow.document);
+
+      const safePrintStyle = printWindow.document.createElement("style");
+      safePrintStyle.textContent = `
+        @page {
+          size: A4;
+          margin: 0;
+        }
+
+        @media print {
+          html,
+          body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+            overflow: visible !important;
+            height: auto !important;
+          }
+
+          #printable-contract {
+            visibility: visible !important;
+            opacity: 1 !important;
+            overflow: visible !important;
+            height: auto !important;
+          }
+
+          .print-hidden {
+            display: none !important;
+          }
+        }
+      `;
+      printWindow.document.head.appendChild(safePrintStyle);
+
+      await new Promise((resolve) => {
+        printWindow.requestAnimationFrame(() => {
+          printWindow.requestAnimationFrame(resolve);
+        });
+      });
+
       if (!printWindow.closed) {
         printWindow.focus();
         printWindow.print();
-        // Option to close or keep open - usually Chrome print preview is modal-like
-        // printWindow.close(); 
       }
     };
 
