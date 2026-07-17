@@ -69,7 +69,7 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
       return;
     }
 
-    const printWindow = window.open("", "", "height=800,width=800");
+    const printWindow = window.open("", "_blank");
     if (!printWindow) {
       toast({
         title: "Pop-up bloqueado",
@@ -79,67 +79,99 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
       return;
     }
 
-    const headLinksAndStyles = Array.from(document.querySelectorAll("link[rel='stylesheet'], style"))
+    // Capture current styles
+    const styles = Array.from(document.querySelectorAll("link[rel='stylesheet'], style"))
       .map((node) => node.outerHTML)
       .join("\n");
 
-    const cssRulesText = Array.from(document.styleSheets)
-      .map((styleSheet) => {
-        try {
-          // @ts-ignore
-          return Array.from(styleSheet.cssRules)
-            .map((rule: CSSRule) => rule.cssText)
-            .join("\n");
-        } catch {
-          return "";
-        }
-      })
-      .filter(Boolean)
-      .join("\n");
+    const contentHtml = printableContent.innerHTML;
 
     printWindow.document.open();
     printWindow.document.write(`
+      <!DOCTYPE html>
       <html>
         <head>
-          <title>Imprimir Contrato</title>
-          <base href="${window.location.origin}/" />
-          ${headLinksAndStyles}
+          <title>Contrato ${contract.id}</title>
+          <meta charset="utf-8">
+          ${styles}
           <style>
-            ${cssRulesText}
             @media print {
-              body {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+              @page {
+                size: A4;
+                margin: 15mm;
               }
+              body {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                background-color: white !important;
+                color: black !important;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                overflow: visible !important;
+                height: auto !important;
+              }
+              #print-root {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                position: static !important;
+                overflow: visible !important;
+                height: auto !important;
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+              }
+              /* Hide any browser injected headers/footers if possible */
+              header, footer { display: none !important; }
             }
             body {
               margin: 0;
-              padding: 0;
+              padding: 20px;
+              font-family: sans-serif;
+              background-color: white;
             }
           </style>
         </head>
         <body>
-          ${printableContent.innerHTML}
+          <div id="print-root">
+            ${contentHtml}
+          </div>
         </body>
       </html>
     `);
     printWindow.document.close();
 
-    const images = Array.from(printWindow.document.images);
-    await Promise.all(
-      images.map(
-        (img) =>
-          new Promise<void>((resolve) => {
-            if (img.complete) return resolve();
-            img.onload = () => resolve();
-            img.onerror = () => resolve();
-          }),
-      ),
-    );
+    // Function to wait for all images to load in the new window
+    const waitForImages = () => {
+      const images = Array.from(printWindow.document.images);
+      return Promise.all(
+        images.map((img) => {
+          if (img.complete) return Promise.resolve();
+          return new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve;
+          });
+        })
+      );
+    };
 
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
+    // Use a small timeout to ensure the DOM is parsed before waiting for images
+    setTimeout(async () => {
+      await waitForImages();
+      
+      // Double requestAnimationFrame to ensure layout reflow and rendering is complete
+      printWindow.requestAnimationFrame(() => {
+        printWindow.requestAnimationFrame(() => {
+          printWindow.focus();
+          printWindow.print();
+          // We don't close immediately to avoid blank previews in some browsers
+          printWindow.onafterprint = () => {
+            printWindow.close();
+          };
+        });
+      });
+    }, 500);
   };
 
   if (!contract) return null;
