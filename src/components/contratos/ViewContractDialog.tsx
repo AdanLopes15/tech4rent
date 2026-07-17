@@ -97,7 +97,7 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
       .filter(Boolean)
       .join("\n");
 
-    const contentHtml = printableContent.innerHTML;
+    const contentHtml = printableContent.outerHTML;
 
     printWindow.document.open();
     printWindow.document.write(`
@@ -128,13 +128,6 @@ export function ViewContractDialog({ open, onOpenChange, contract }: ViewContrac
                 opacity: 1 !important;
                 height: auto !important;
                 overflow: visible !important;
-              }
-
-              /* Caso algum seletor global esteja escondendo containers comuns */
-              #root, #print-root, .document-print-root {
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
               }
 
               /* Mantém as propriedades de cor e impressão */
