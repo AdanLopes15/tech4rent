@@ -60,8 +60,193 @@ export function DeliveryReceiptDialog({ open, onOpenChange, contract }: Delivery
     return format(date, "dd/MM/yyyy", { locale: ptBR });
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handlePrint = async () => {
+    const printableContent = document.getElementById("printable-delivery-receipt");
+    if (!printableContent) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível encontrar o conteúdo para impressão.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const printWindow = window.open("", "", "height=800,width=800");
+    if (!printWindow) {
+      toast({
+        title: "Pop-up bloqueado",
+        description: "Permita pop-ups para imprimir o recibo.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const headLinksAndStyles = Array.from(document.querySelectorAll("link[rel='stylesheet'], style"))
+      .map((node) => node.outerHTML)
+      .join("\n");
+
+    const cssRulesText = Array.from(document.styleSheets)
+      .map((styleSheet) => {
+        try {
+          // @ts-ignore
+          return Array.from(styleSheet.cssRules)
+            .map((rule: CSSRule) => rule.cssText)
+            .join("\n");
+        } catch {
+          return "";
+        }
+      })
+      .filter(Boolean)
+      .join("\n");
+
+    const contentHtml = printableContent.outerHTML;
+
+    const removeInheritedPrintRules = (doc: Document) => {
+      let removedCount = 0;
+      const removeFromRuleList = (rules: CSSRuleList) => {
+        for (let index = rules.length - 1; index >= 0; index--) {
+          const rule = rules[index];
+
+          // Using duck typing instead of instanceof for cross-window compatibility
+          const isMediaPrint = rule.type === 4 && (rule as CSSMediaRule).media.mediaText
+              .toLowerCase()
+              .split(",")
+              .some((media) => media.trim() === "print");
+
+          if (isMediaPrint) {
+            try {
+              rule.parentStyleSheet?.deleteRule(index);
+              removedCount++;
+            } catch (e) {
+              console.warn("Could not delete rule", e);
+            }
+          }
+        }
+      };
+
+      Array.from(doc.styleSheets).forEach((styleSheet) => {
+        try {
+          removeFromRuleList(styleSheet.cssRules);
+        } catch {
+          // Ignorar somente folhas externas que não permitam acesso às regras.
+        }
+      });
+      console.log(`REMOVED_PRINT_RULES_COUNT_RECEIPT: ${removedCount}`);
+      return removedCount;
+    };
+
+    printWindow.document.open();
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Recibo de Entrega - ${contract.id}</title>
+          <base href="${window.location.origin}/" />
+          ${headLinksAndStyles}
+          <style>
+            ${cssRulesText}
+            body {
+              margin: 0;
+              padding: 0;
+              background-color: white;
+            }
+          </style>
+        </head>
+        <body>
+          ${contentHtml}
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+
+    const waitForPrintContent = async (win: Window) => {
+      const doc = win.document;
+
+      // Wait for fonts
+      if ((doc as any).fonts?.ready) {
+        try {
+          await (doc as any).fonts.ready;
+        } catch (e) {
+          console.error("Erro ao carregar fontes para impressão", e);
+        }
+      }
+
+      // Wait for images
+      const images = Array.from(doc.images);
+      await Promise.all(
+        images.map((img) => {
+          if (img.complete) return Promise.resolve();
+          return new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve;
+          });
+        })
+      );
+
+      // Animation frames to ensure layout is ready
+      await new Promise((resolve) => {
+        win.requestAnimationFrame(() => {
+          win.requestAnimationFrame(resolve);
+        });
+      });
+
+      // Additional small delay as requested
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    };
+
+    const triggerPrint = async () => {
+      await waitForPrintContent(printWindow);
+
+      removeInheritedPrintRules(printWindow.document);
+
+      const safePrintStyle = printWindow.document.createElement("style");
+      safePrintStyle.textContent = `
+        @page {
+          size: A4;
+          margin: 0;
+        }
+
+        @media print {
+          html,
+          body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+            overflow: visible !important;
+            height: auto !important;
+          }
+
+          #printable-delivery-receipt {
+            visibility: visible !important;
+            opacity: 1 !important;
+            overflow: visible !important;
+            height: auto !important;
+            display: block !important;
+          }
+
+          .print-hidden {
+            display: none !important;
+          }
+        }
+      `;
+      printWindow.document.head.appendChild(safePrintStyle);
+
+      await new Promise((resolve) => {
+        printWindow.requestAnimationFrame(() => {
+          printWindow.requestAnimationFrame(resolve);
+        });
+      });
+
+      if (!printWindow.closed) {
+        printWindow.focus();
+        printWindow.print();
+      }
+    };
+
+    if (printWindow.document.readyState === 'complete') {
+      triggerPrint();
+    } else {
+      printWindow.addEventListener('load', triggerPrint, { once: true });
+    }
   };
 
   if (!contract) return null;
@@ -83,25 +268,27 @@ export function DeliveryReceiptDialog({ open, onOpenChange, contract }: Delivery
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl h-[90vh] flex flex-col print:hidden">
+      <DialogContent className="max-w-3xl h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Recibo de Entrega - {contract.id}</DialogTitle>
         </DialogHeader>
 
         <ScrollArea className="flex-grow bg-slate-100 rounded-md">
           <div className="py-6 flex justify-center">
-            <ReceiptSheet
-              contract={contract}
-              clientName={clientName}
-              clientDoc={clientDoc}
-              clientCity={clientCity}
-              clientUf={clientUf}
-              clientPhone={clientPhone}
-              companySettings={companySettings}
-              companyAddress={companyAddress}
-              formatDate={formatDate}
-              getEquipment={getEquipment}
-            />
+            <div id="printable-delivery-receipt">
+              <ReceiptSheet
+                contract={contract}
+                clientName={clientName}
+                clientDoc={clientDoc}
+                clientCity={clientCity}
+                clientUf={clientUf}
+                clientPhone={clientPhone}
+                companySettings={companySettings}
+                companyAddress={companyAddress}
+                formatDate={formatDate}
+                getEquipment={getEquipment}
+              />
+            </div>
           </div>
         </ScrollArea>
 
@@ -117,38 +304,6 @@ export function DeliveryReceiptDialog({ open, onOpenChange, contract }: Delivery
           </Button>
         </DialogFooter>
       </DialogContent>
-
-      {/* Versão exclusiva para impressão (fora do modal) */}
-      {open && (
-        <div className="hidden print:block print-receipt-root">
-          <ReceiptSheet
-            contract={contract}
-            clientName={clientName}
-            clientDoc={clientDoc}
-            clientCity={clientCity}
-            clientUf={clientUf}
-            clientPhone={clientPhone}
-            companySettings={companySettings}
-            companyAddress={companyAddress}
-            formatDate={formatDate}
-            getEquipment={getEquipment}
-          />
-        </div>
-      )}
-
-      <style>{`
-        @media print {
-          body * { visibility: hidden !important; }
-          .print-receipt-root, .print-receipt-root * { visibility: visible !important; }
-          .print-receipt-root {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-          }
-          @page { size: A4; margin: 12mm; }
-        }
-      `}</style>
     </Dialog>
   );
 }
