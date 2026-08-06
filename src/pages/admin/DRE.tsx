@@ -5,9 +5,12 @@ import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Search, Download, TrendingUp, TrendingDown, Equal, FileSpreadsheet } from "lucide-react";
+import { Search, Download, TrendingUp, TrendingDown, Equal, FileSpreadsheet, Upload, FileDown, Loader2 } from "lucide-react";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { toast } from "sonner";
+import { ImportPreviewModal } from "@/components/admin/financeiro/ImportPreviewModal";
+
 
 import { useStore } from "@/store";
 import { formatCurrency } from "@/lib/utils";
@@ -37,10 +40,27 @@ interface DreData {
 
 const DRE = () => {
   const navigate = useNavigate();
-  const { revenues, expenses, chartOfAccounts, fetchAllData } = useStore();
+  const { 
+    revenues, 
+    expenses, 
+    chartOfAccounts, 
+    bankAccounts, 
+    costCenters, 
+    clients, 
+    suppliers, 
+    collaborators,
+    fetchAllData,
+    addRevenue,
+    addExpense,
+  } = useStore();
 
   const [competence, setCompetence] = useState<string>(format(new Date(), "yyyy-MM"));
   const [dreData, setDreData] = useState<DreData | null>(null);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importData, setImportData] = useState<any[]>([]);
+  const [importFileName, setImportFileName] = useState("");
+  const [isImporting, setIsImporting] = useState(false);
+
 
   useEffect(() => {
     fetchAllData();
@@ -166,20 +186,23 @@ const DRE = () => {
     const worksheet = workbook.addWorksheet("DRE");
 
     // Title
-    worksheet.mergeCells("A1:B1");
+    const titleRange = hasCodes ? "A1:C1" : "A1:B1";
+    worksheet.mergeCells(titleRange);
     const titleCell = worksheet.getCell("A1");
     titleCell.value = "Demonstrativo de Resultado do Exercício (DRE)";
     titleCell.font = { size: 16, bold: true };
-    titleCell.alignment = { horizontal: "center" };
+    titleCell.alignment = { horizontal: "center", vertical: "middle" };
 
     // Competence
+    const competenceRange = hasCodes ? "A2:C2" : "A2:B2";
     const dateObj = parseISO(`${competence}-01`);
     const formattedDate = format(dateObj, "MMMM 'de' yyyy", { locale: ptBR });
-    worksheet.mergeCells("A2:B2");
+    worksheet.mergeCells(competenceRange);
     const competenceCell = worksheet.getCell("A2");
     competenceCell.value = `Mês de competência: ${formattedDate}`;
     competenceCell.font = { size: 12 };
-    competenceCell.alignment = { horizontal: "center" };
+    competenceCell.alignment = { horizontal: "center", vertical: "middle" };
+
 
     worksheet.addRow([]); // Blank row
 
@@ -281,6 +304,13 @@ const DRE = () => {
         bottom: { style: "medium" },
       };
     });
+
+    // Observation row
+    worksheet.addRow([]);
+    const obsRow = worksheet.addRow(["* Este é um relatório gerencial simplificado, utilizando o regime de caixa. As receitas e despesas são consideradas com base na data de liquidação (pagamento/recebimento) dentro do período selecionado."]);
+    obsRow.font = { size: 9, italic: true, color: { argb: "FF666666" } };
+    worksheet.mergeCells(`A${obsRow.number}:${hasCodes ? 'C' : 'B'}${obsRow.number}`);
+
 
     // Formatting all cells with light borders
     worksheet.eachRow((row, rowNumber) => {
@@ -403,10 +433,35 @@ const DRE = () => {
               </p>
             </div>
 
-            <Button variant="outline" size="sm" className="gap-2" onClick={handleExportExcel} disabled={!dreData}>
-              <FileSpreadsheet className="h-4 w-4" />
-              Exportar Excel
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" className="gap-2" onClick={handleDownloadTemplate}>
+                <FileDown className="h-4 w-4" />
+                Baixar Modelo
+              </Button>
+
+              <label htmlFor="import-excel">
+                <Button variant="outline" size="sm" className="gap-2" asChild>
+                  <span>
+                    <Upload className="h-4 w-4" />
+                    Importar Excel
+                    <input
+                      id="import-excel"
+                      type="file"
+                      className="hidden"
+                      accept=".xlsx, .xls"
+                      onChange={handleImportExcel}
+                      disabled={isImporting}
+                    />
+                  </span>
+                </Button>
+              </label>
+
+              <Button variant="outline" size="sm" className="gap-2" onClick={handleExportExcel} disabled={!dreData}>
+                <FileSpreadsheet className="h-4 w-4" />
+                Exportar Excel
+              </Button>
+            </div>
+
           </div>
         </CardHeader>
 
@@ -458,7 +513,16 @@ const DRE = () => {
           )}
         </CardContent>
       </Card>
+
+      <ImportPreviewModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        fileName={importFileName}
+        data={importData}
+        onConfirm={handleConfirmImport}
+      />
     </div>
+
   );
 };
 
