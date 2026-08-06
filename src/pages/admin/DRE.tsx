@@ -185,6 +185,11 @@ const DRE = () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("DRE");
 
+    // Check if there are any real codes
+    const hasCodes = [...dreData.receitas, ...dreData.despesas].some(
+      (line) => line.code && line.code.trim() !== ""
+    );
+
     // Title
     const titleRange = hasCodes ? "A1:C1" : "A1:B1";
     worksheet.mergeCells(titleRange);
@@ -202,6 +207,7 @@ const DRE = () => {
     competenceCell.value = `Mês de competência: ${formattedDate}`;
     competenceCell.font = { size: 12 };
     competenceCell.alignment = { horizontal: "center", vertical: "middle" };
+
 
 
     worksheet.addRow([]); // Blank row
