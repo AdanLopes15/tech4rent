@@ -8,6 +8,16 @@ import {
   DialogFooter,
   DialogDescription
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { 
   Table, 
@@ -17,6 +27,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+
 import { 
   Tabs, 
   TabsList, 
@@ -55,6 +66,8 @@ export const ImportPreviewModal = ({
 }: ImportPreviewModalProps) => {
   const [filter, setFilter] = useState("all");
   const [isSaving, setIsSaving] = useState(false);
+  const [showConfirmAlert, setShowConfirmAlert] = useState(false);
+
 
   const stats = {
     total: data.length,
@@ -101,7 +114,13 @@ export const ImportPreviewModal = ({
       return;
     }
 
+    setShowConfirmAlert(true);
+  };
+
+  const handleFinalConfirm = async () => {
+    const validItems = data.filter(item => item.status === "valid" || (item.status === "duplicate" && item.confirmed));
     setIsSaving(true);
+    setShowConfirmAlert(false);
     try {
       await onConfirm(validItems);
       onClose();
@@ -111,6 +130,7 @@ export const ImportPreviewModal = ({
       setIsSaving(false);
     }
   };
+
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !isSaving && !open && onClose()}>
@@ -275,6 +295,22 @@ export const ImportPreviewModal = ({
           </div>
         </DialogFooter>
       </DialogContent>
+
+      <AlertDialog open={showConfirmAlert} onOpenChange={setShowConfirmAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Importação</AlertDialogTitle>
+            <AlertDialogDescription>
+              Serão importadas {data.filter(i => (i.status === 'valid' || (i.status === 'duplicate' && i.confirmed)) && i.type === 'receita').length} receitas e {data.filter(i => (i.status === 'valid' || (i.status === 'duplicate' && i.confirmed)) && i.type === 'despesa').length} despesas. Linhas com erro ou ignoradas não serão importadas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleFinalConfirm}>Confirmar e Gravar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 };
+
