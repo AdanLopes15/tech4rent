@@ -212,10 +212,8 @@ const DRE = () => {
 
     worksheet.addRow([]); // Blank row
 
-    // Check if there are any real codes
-    const hasCodes = [...dreData.receitas, ...dreData.despesas].some(
-      (line) => line.code && line.code.trim() !== ""
-    );
+    worksheet.addRow([]); // Blank row
+
 
     // Headers
     const headerRow = hasCodes 
@@ -343,6 +341,409 @@ const DRE = () => {
     const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
     saveAs(blob, `DRE-${competence}.xlsx`);
   };
+
+  const handleDownloadTemplate = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Importação Financeira");
+
+    // Columns
+    worksheet.columns = [
+      { header: "Tipo", key: "tipo", width: 12 },
+      { header: "Descrição", key: "descricao", width: 30 },
+      { header: "Valor Bruto", key: "valorBruto", width: 15 },
+      { header: "Desconto", key: "desconto", width: 12 },
+      { header: "Juros", key: "juros", width: 12 },
+      { header: "Valor Total", key: "valorTotal", width: 15 },
+      { header: "Vencimento", key: "vencimento", width: 15 },
+      { header: "Competência", key: "competencia", width: 15 },
+      { header: "Pagamento", key: "pagamento", width: 15 },
+      { header: "Entidade", key: "entidade", width: 25 },
+      { header: "Tipo da Entidade", key: "tipoEntidade", width: 15 },
+      { header: "Plano de Contas", key: "planoContas", width: 25 },
+      { header: "Conta Bancária", key: "contaBancaria", width: 20 },
+      { header: "Centro de Custo", key: "centroCusto", width: 20 },
+      { header: "Status", key: "status", width: 12 },
+      { header: "Observação", key: "observacao", width: 30 },
+      { header: "Identificador Externo", key: "idExterno", width: 20 },
+    ];
+
+    // Examples
+    worksheet.addRow({
+      tipo: "Receita",
+      descricao: "Locação de equipamento",
+      valorBruto: 1500,
+      desconto: 0,
+      juros: 0,
+      valorTotal: 1500,
+      vencimento: "10/08/2026",
+      competencia: "01/08/2026",
+      pagamento: "10/08/2026",
+      entidade: "Cliente ABC",
+      tipoEntidade: "Cliente",
+      planoContas: "Receita de locação",
+      contaBancaria: "Itaú",
+      centroCusto: "Comercial",
+      status: "Recebido",
+      observacao: "Exemplo de receita",
+      idExterno: "REC-001",
+    });
+
+    worksheet.addRow({
+      tipo: "Despesa",
+      descricao: "Aluguel do escritório",
+      valorBruto: 2000,
+      desconto: 0,
+      juros: 0,
+      valorTotal: 2000,
+      vencimento: "05/08/2026",
+      competencia: "01/08/2026",
+      pagamento: "05/08/2026",
+      entidade: "Imobiliária X",
+      tipoEntidade: "Fornecedor",
+      planoContas: "Aluguel",
+      contaBancaria: "Santander",
+      centroCusto: "Administrativo",
+      status: "Pago",
+      observacao: "Exemplo de despesa",
+      idExterno: "DESP-001",
+    });
+
+    // Formatting
+    worksheet.getRow(1).font = { bold: true };
+    worksheet.getRow(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE0E0E0" } };
+
+    // Instructions sheet
+    const instructionsSheet = workbook.addWorksheet("Instruções");
+    instructionsSheet.columns = [{ header: "Campo", width: 20 }, { header: "Regra / Formato", width: 80 }];
+    instructionsSheet.addRows([
+      ["Tipo", "Obrigatório. Valores: Receita ou Despesa."],
+      ["Descrição", "Obrigatório. Nome do lançamento."],
+      ["Valor Bruto", "Obrigatório (ou Valor Total). Valor principal."],
+      ["Vencimento", "Obrigatório. Formatos: DD/MM/AAAA ou AAAA-MM-DD."],
+      ["Competência", "Obrigatório. Mês de referência (DD/MM/AAAA)."],
+      ["Status", "Obrigatório. Receitas: pendente, recebido, atrasado, cancelado. Despesas: pendente, pago, vencido, cancelado."],
+      ["Pagamento", "Obrigatório se status for 'Recebido' ou 'Pago'."],
+      ["Entidade", "Nome do Cliente, Fornecedor ou Colaborador (deve existir)."],
+      ["Tipo da Entidade", "Valores: Cliente, Fornecedor ou Colaborador."],
+      ["Plano de Contas", "Nome do plano de contas (deve existir)."],
+      ["Conta Bancária", "Nome da conta bancária (deve existir)."],
+      ["Centro de Custo", "Nome do centro de custo (deve existir)."],
+      ["Identificador Externo", "Chave para evitar duplicidades."],
+    ]);
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAs(new Blob([buffer]), "Modelo-Importacao-Financeira.xlsx");
+  };
+
+  const normalizeDate = (val: any) => {
+    if (!val) return null;
+    if (val instanceof Date) return val;
+    if (typeof val === 'number') {
+      // Excel serial date
+      return new Date(Math.round((val - 25569) * 864e5));
+    }
+    const s = String(val).trim();
+    if (!s) return null;
+    
+    // Try DD/MM/YYYY
+    const dmy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (dmy) return new Date(Number(dmy[3]), Number(dmy[2]) - 1, Number(dmy[1]));
+    
+    // Try YYYY-MM-DD
+    const ymd = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (ymd) return new Date(Number(ymd[1]), Number(ymd[2]) - 1, Number(ymd[3]));
+    
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  };
+
+  const handleImportExcel = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    setImportFileName(file.name);
+
+    try {
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(await file.arrayBuffer());
+      const worksheet = workbook.worksheets[0];
+      const data: any[] = [];
+
+      const rows: any[] = [];
+      worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber === 1) return; // Header
+        rows.push({ row, rowNumber });
+      });
+
+      const processedRows = await Promise.all(rows.map(async ({ row, rowNumber }) => {
+        const rowData: any = {};
+        worksheet.getRow(1).eachCell((cell, colNumber) => {
+          const header = String(cell.value);
+          rowData[header] = row.getCell(colNumber).value;
+        });
+
+        const type = String(rowData["Tipo"] || "").trim().toLowerCase();
+        const description = String(rowData["Descrição"] || "").trim();
+        const valorBruto = Number(String(rowData["Valor Bruto"] || "0").replace(/[^\d.,]/g, "").replace(",", "."));
+        const desconto = Number(String(rowData["Desconto"] || "0").replace(/[^\d.,]/g, "").replace(",", "."));
+        const juros = Number(String(rowData["Juros"] || "0").replace(/[^\d.,]/g, "").replace(",", "."));
+        let valorTotal = Number(String(rowData["Valor Total"] || "0").replace(/[^\d.,]/g, "").replace(",", "."));
+        
+        if (!valorTotal && valorBruto) {
+          valorTotal = valorBruto - (desconto || 0) + (juros || 0);
+        }
+
+        const dueDate = normalizeDate(rowData["Vencimento"]);
+        const competenceDate = normalizeDate(rowData["Competência"]);
+        const paymentDate = normalizeDate(rowData["Pagamento"]);
+        const status = String(rowData["Status"] || "").trim().toLowerCase();
+        const entityName = String(rowData["Entidade"] || "").trim();
+        const entityType = String(rowData["Tipo da Entidade"] || "").trim().toLowerCase();
+        const planoContasName = String(rowData["Plano de Contas"] || "").trim();
+        const contaBancariaName = String(rowData["Conta Bancária"] || "").trim();
+        const centroCustoName = String(rowData["Centro de Custo"] || "").trim();
+        const externalId = String(rowData["Identificador Externo"] || "").trim();
+
+        let validationMessage = "";
+        let validationStatus: "valid" | "error" | "duplicate" = "valid";
+
+        // Required fields
+        if (!type || (type !== "receita" && type !== "despesa")) {
+          validationMessage = "Tipo inválido (deve ser Receita ou Despesa). ";
+          validationStatus = "error";
+        }
+        if (!description) {
+          validationMessage += "Descrição obrigatória. ";
+          validationStatus = "error";
+        }
+        if (valorTotal <= 0) {
+          validationMessage += "Valor total deve ser maior que zero. ";
+          validationStatus = "error";
+        }
+        if (!dueDate) {
+          validationMessage += "Vencimento obrigatório ou formato inválido. ";
+          validationStatus = "error";
+        }
+        if (!competenceDate) {
+          validationMessage += "Competência obrigatória ou formato inválido. ";
+          validationStatus = "error";
+        }
+        if (!status) {
+          validationMessage += "Status obrigatório. ";
+          validationStatus = "error";
+        }
+
+        // Status validation
+        if (type === "receita") {
+          const validStatuses = ["pendente", "recebido", "atrasado", "cancelado"];
+          if (!validStatuses.includes(status)) {
+            validationMessage += `Status '${status}' inválido para Receita. `;
+            validationStatus = "error";
+          }
+          if (status === "recebido" && !paymentDate) {
+            validationMessage += "Receita 'recebido' exige data de pagamento. ";
+            validationStatus = "error";
+          }
+        } else if (type === "despesa") {
+          const validStatuses = ["pendente", "pago", "vencido", "cancelado"];
+          if (!validStatuses.includes(status)) {
+            validationMessage += `Status '${status}' inválido para Despesa. `;
+            validationStatus = "error";
+          }
+          if (status === "pago" && !paymentDate) {
+            validationMessage += "Despesa 'pago' exige data de pagamento. ";
+            validationStatus = "error";
+          }
+        }
+
+        // Entity resolution
+        let entityId = "";
+        if (entityName) {
+          const normalizeString = (s: string) => s.toLowerCase().trim();
+          let foundEntities: any[] = [];
+          
+          if (entityType === "cliente") {
+            foundEntities = clients.filter(c => normalizeString(c.razaoSocial || c.name || "") === normalizeString(entityName));
+          } else if (entityType === "fornecedor") {
+            foundEntities = suppliers.filter(s => normalizeString(s.razaoSocial || s.name || "") === normalizeString(entityName));
+          } else if (entityType === "colaborador") {
+            foundEntities = collaborators.filter(c => normalizeString(c.name || "") === normalizeString(entityName));
+          } else {
+            // Try all
+            const c = clients.filter(c => normalizeString(c.razaoSocial || c.name || "") === normalizeString(entityName));
+            const s = suppliers.filter(s => normalizeString(s.razaoSocial || s.name || "") === normalizeString(entityName));
+            const col = collaborators.filter(col => normalizeString(col.name || "") === normalizeString(entityName));
+            foundEntities = [...c, ...s, ...col];
+          }
+
+          if (foundEntities.length === 0) {
+            validationMessage += `Entidade '${entityName}' não encontrada. `;
+            validationStatus = "error";
+          } else if (foundEntities.length > 1) {
+            validationMessage += `Ambiguidade: Mais de uma entidade encontrada com o nome '${entityName}'. `;
+            validationStatus = "error";
+          } else {
+            entityId = foundEntities[0].id;
+          }
+        }
+
+        // Relationships resolution
+        let chartOfAccountId = "";
+        if (planoContasName) {
+          const found = chartOfAccounts.filter(a => a.name.toLowerCase().trim() === planoContasName.toLowerCase().trim());
+          if (found.length === 1) chartOfAccountId = found[0].id;
+          else if (found.length > 1) {
+            validationMessage += `Ambiguidade no Plano de Contas: '${planoContasName}'. `;
+            validationStatus = "error";
+          } else {
+            validationMessage += `Plano de Contas '${planoContasName}' não encontrado. `;
+            validationStatus = "error";
+          }
+        }
+
+        let bankAccountId = "";
+        if (contaBancariaName) {
+          const found = bankAccounts.filter(a => a.name.toLowerCase().trim() === contaBancariaName.toLowerCase().trim());
+          if (found.length === 1) bankAccountId = found[0].id;
+          else if (found.length > 1) {
+            validationMessage += `Ambiguidade na Conta Bancária: '${contaBancariaName}'. `;
+            validationStatus = "error";
+          } else {
+            validationMessage += `Conta Bancária '${contaBancariaName}' não encontrada. `;
+            validationStatus = "error";
+          }
+        }
+
+        let costCenterId = "";
+        if (centroCustoName) {
+          const found = costCenters.filter(c => c.name.toLowerCase().trim() === centroCustoName.toLowerCase().trim());
+          if (found.length === 1) costCenterId = found[0].id;
+          else if (found.length > 1) {
+            validationMessage += `Ambiguidade no Centro de Custo: '${centroCustoName}'. `;
+            validationStatus = "error";
+          } else {
+            validationMessage += `Centro de Custo '${centroCustoName}' não encontrado. `;
+            validationStatus = "error";
+          }
+        }
+
+        // Duplicate check
+        if (validationStatus === "valid") {
+          let isDuplicate = false;
+          if (externalId) {
+            const existing = (type === "receita" ? revenues : expenses).find(r => r.importExternalId === externalId || r.externalId === externalId);
+            if (existing) isDuplicate = true;
+          } else {
+            const existing = (type === "receita" ? revenues : expenses).find(r => 
+              (r.clientId === entityId || r.entityId === entityId) && 
+              r.description.toLowerCase().trim() === description.toLowerCase().trim() &&
+              Math.abs((r.valorTotal || 0) - valorTotal) < 0.01 &&
+              format(new Date(r.dueDate), "yyyy-MM-dd") === format(dueDate!, "yyyy-MM-dd")
+            );
+            if (existing) isDuplicate = true;
+          }
+
+          if (isDuplicate) {
+            validationStatus = "duplicate";
+            validationMessage = "Possível duplicidade detectada.";
+          }
+        }
+
+        return {
+          rowNumber,
+          type,
+          description,
+          entityName,
+          entityId,
+          valorTotal,
+          valorBruto,
+          desconto,
+          juros,
+          dueDate,
+          dueDateStr: dueDate ? format(dueDate, "dd/MM/yyyy") : String(rowData["Vencimento"] || ""),
+          competenceDate,
+          competenceStr: competenceDate ? format(competenceDate, "MM/yyyy") : String(rowData["Competência"] || ""),
+          paymentDate,
+          status,
+          chartOfAccountId,
+          bankAccountId,
+          costCenterId,
+          externalId,
+          message: validationMessage || "Linha válida",
+          status: validationStatus,
+          originalData: rowData,
+          confirmed: false
+        };
+      }));
+
+      setImportData(processedRows);
+      setIsImportModalOpen(true);
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao ler o arquivo Excel.");
+    } finally {
+      setIsImporting(false);
+      event.target.value = "";
+    }
+  };
+
+  const handleConfirmImport = async (validItems: any[]) => {
+    const importBatchId = `batch-${Date.now()}`;
+    const importedAt = new Date().toISOString();
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const item of validItems) {
+      try {
+        const payload: any = {
+          description: item.description,
+          valorBruto: item.valorBruto || item.valorTotal,
+          valorTotal: item.valorTotal,
+          desconto: item.desconto || 0,
+          juros: item.juros || 0,
+          dueDate: Timestamp.fromDate(item.dueDate),
+          competenceDate: Timestamp.fromDate(item.competenceDate),
+          status: item.status,
+          clientId: item.type === 'receita' ? item.entityId : undefined,
+          entityId: item.type === 'despesa' ? item.entityId : undefined,
+          chartOfAccountId: item.chartOfAccountId,
+          bankAccountId: item.bankAccountId,
+          costCenterId: item.costCenterId,
+          importExternalId: item.externalId,
+          importedFromExcel: true,
+          importedAt,
+          importBatchId,
+          importFileName
+        };
+
+        if (item.paymentDate) {
+          payload.paymentDate = Timestamp.fromDate(item.paymentDate);
+        }
+
+        if (item.type === "receita") {
+          await addRevenue(payload);
+        } else {
+          await addExpense(payload);
+        }
+        successCount++;
+      } catch (error) {
+        console.error(`Erro ao importar linha ${item.rowNumber}:`, error);
+        failCount++;
+      }
+    }
+
+    if (successCount > 0) {
+      toast.success(`${successCount} lançamentos importados com sucesso.`);
+      await fetchAllData();
+      handleGenerateDRE();
+    }
+    
+    if (failCount > 0) {
+      toast.error(`${failCount} lançamentos falharam na gravação.`);
+    }
+  };
+
 
   const renderAccordionSection = (
     title: string,
