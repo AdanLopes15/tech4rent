@@ -3,8 +3,11 @@
 import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { format } from "date-fns";
-import { Search, Download, TrendingUp, TrendingDown, Equal } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Search, Download, TrendingUp, TrendingDown, Equal, FileSpreadsheet } from "lucide-react";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 
 import { useStore } from "@/store";
 import { formatCurrency } from "@/lib/utils";
@@ -154,43 +157,155 @@ const DRE = () => {
     });
   };
 
-  const handleExport = () => {
+  const handleExportExcel = async () => {
     if (!dreData) {
       return;
     }
 
-    let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += ["Código", "Descrição", "Valor (R$)"].join(",") + "\r\n";
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("DRE");
 
-    const processLines = (lines: DreLine[]) => {
-      lines.forEach((line) => {
-        const row = [`'${line.code}`, `"${line.name}"`, line.value.toFixed(2)];
-        csvContent += row.join(",") + "\r\n";
+    // Title
+    worksheet.mergeCells("A1:B1");
+    const titleCell = worksheet.getCell("A1");
+    titleCell.value = "Demonstrativo de Resultado do Exercício (DRE)";
+    titleCell.font = { size: 16, bold: true };
+    titleCell.alignment = { horizontal: "center" };
 
-        if (line.subItems && line.subItems.length > 0) {
-          line.subItems.forEach((subItem) => {
-            const subRow = [`'${subItem.code}`, `"  ${subItem.name}"`, subItem.value.toFixed(2)];
-            csvContent += subRow.join(",") + "\r\n";
-          });
-        }
-      });
+    // Competence
+    const dateObj = parseISO(`${competence}-01`);
+    const formattedDate = format(dateObj, "MMMM 'de' yyyy", { locale: ptBR });
+    worksheet.mergeCells("A2:B2");
+    const competenceCell = worksheet.getCell("A2");
+    competenceCell.value = `Mês de competência: ${formattedDate}`;
+    competenceCell.font = { size: 12 };
+    competenceCell.alignment = { horizontal: "center" };
+
+    worksheet.addRow([]); // Blank row
+
+    // Check if there are any real codes
+    const hasCodes = [...dreData.receitas, ...dreData.despesas].some(
+      (line) => line.code && line.code.trim() !== ""
+    );
+
+    // Headers
+    const headerRow = hasCodes 
+      ? worksheet.addRow(["Código", "Descrição", "Valor (R$)"])
+      : worksheet.addRow(["Descrição", "Valor (R$)"]);
+    
+    headerRow.font = { bold: true };
+    headerRow.eachCell((cell) => {
+      cell.border = {
+        bottom: { style: "thin" },
+        top: { style: "thin" },
+        left: { style: "thin" },
+        right: { style: "thin" },
+      };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFE0E0E0" },
+      };
+    });
+
+    // Columns config
+    worksheet.columns = hasCodes 
+      ? [
+          { key: "code", width: 15 },
+          { key: "name", width: 45 },
+          { key: "value", width: 20, style: { numFmt: '"R$ " #,##0.00' } },
+        ]
+      : [
+          { key: "name", width: 60 },
+          { key: "value", width: 20, style: { numFmt: '"R$ " #,##0.00' } },
+        ];
+
+    const addDreRow = (line: DreLine, depth = 0) => {
+      const indentation = "  ".repeat(depth);
+      const rowData = hasCodes 
+        ? [line.code, indentation + line.name, line.value]
+        : [indentation + line.name, line.value];
+      
+      const row = worksheet.addRow(rowData);
+      
+      if (line.subItems && line.subItems.length > 0) {
+        line.subItems.forEach((sub) => addDreRow(sub, depth + 1));
+      }
+      return row;
     };
 
-    csvContent += `\r\n"RECEITA OPERACIONAL BRUTA","",""\r\n`;
-    processLines(dreData.receitas);
-    csvContent += `"TOTAL DE RECEITAS","","${dreData.totalReceitas.toFixed(2)}"\r\n`;
-    csvContent += `\r\n"DESPESAS OPERACIONAIS","",""\r\n`;
-    processLines(dreData.despesas);
-    csvContent += `"TOTAL DE DESPESAS","","${dreData.totalDespesas.toFixed(2)}"\r\n`;
-    csvContent += `\r\n"RESULTADO LÍQUIDO","","${dreData.resultadoLiquido.toFixed(2)}"\r\n`;
+    // Revenues Section
+    const revenueHeader = worksheet.addRow(hasCodes ? ["", "RECEITA OPERACIONAL BRUTA", ""] : ["RECEITA OPERACIONAL BRUTA", ""]);
+    revenueHeader.font = { bold: true, color: { argb: "FF008000" } };
+    
+    dreData.receitas.forEach((line) => addDreRow(line));
 
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `DRE_${competence}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const totalRevenueRow = worksheet.addRow(hasCodes 
+      ? ["", "TOTAL DE RECEITAS", dreData.totalReceitas]
+      : ["TOTAL DE RECEITAS", dreData.totalReceitas]
+    );
+    totalRevenueRow.font = { bold: true };
+    totalRevenueRow.getCell(hasCodes ? 3 : 2).font = { bold: true, color: { argb: "FF008000" } };
+
+    worksheet.addRow([]); // Blank row
+
+    // Expenses Section
+    const expenseHeader = worksheet.addRow(hasCodes ? ["", "DESPESAS OPERACIONAIS", ""] : ["DESPESAS OPERACIONAIS", ""]);
+    expenseHeader.font = { bold: true, color: { argb: "FFFF0000" } };
+
+    dreData.despesas.forEach((line) => addDreRow(line));
+
+    const totalExpenseRow = worksheet.addRow(hasCodes 
+      ? ["", "TOTAL DE DESPESAS", dreData.totalDespesas]
+      : ["TOTAL DE DESPESAS", dreData.totalDespesas]
+    );
+    totalExpenseRow.font = { bold: true };
+    totalExpenseRow.getCell(hasCodes ? 3 : 2).font = { bold: true, color: { argb: "FFFF0000" } };
+
+    worksheet.addRow([]); // Blank row
+
+    // Result
+    const resultRow = worksheet.addRow(hasCodes 
+      ? ["", "RESULTADO LÍQUIDO", dreData.resultadoLiquido]
+      : ["RESULTADO LÍQUIDO", dreData.resultadoLiquido]
+    );
+    resultRow.font = { bold: true, size: 12 };
+    const resultValueCell = resultRow.getCell(hasCodes ? 3 : 2);
+    resultValueCell.font = { 
+      bold: true, 
+      color: { argb: dreData.resultadoLiquido >= 0 ? "FF008000" : "FFFF0000" } 
+    };
+    resultRow.eachCell((cell) => {
+      cell.border = {
+        top: { style: "medium" },
+        bottom: { style: "medium" },
+      };
+    });
+
+    // Formatting all cells with light borders
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber > 4) { // Skip title and headers for general borders if needed, but requirements say light borders
+        row.eachCell((cell) => {
+          if (!cell.border) {
+            cell.border = {
+              top: { style: "thin" },
+              left: { style: "thin" },
+              bottom: { style: "thin" },
+              right: { style: "thin" },
+            };
+          }
+        });
+      }
+    });
+
+    // Freeze header
+    worksheet.views = [
+      { state: "frozen", xSplit: 0, ySplit: 4 }
+    ];
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    saveAs(blob, `DRE-${competence}.xlsx`);
   };
 
   const renderAccordionSection = (
@@ -288,9 +403,9 @@ const DRE = () => {
               </p>
             </div>
 
-            <Button variant="outline" size="sm" className="gap-2" onClick={handleExport} disabled={!dreData}>
-              <Download className="h-4 w-4" />
-              Exportar CSV
+            <Button variant="outline" size="sm" className="gap-2" onClick={handleExportExcel} disabled={!dreData}>
+              <FileSpreadsheet className="h-4 w-4" />
+              Exportar Excel
             </Button>
           </div>
         </CardHeader>
