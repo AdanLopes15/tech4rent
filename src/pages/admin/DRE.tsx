@@ -210,10 +210,6 @@ const DRE = () => {
     competenceCell.font = { size: 12 };
     competenceCell.alignment = { horizontal: "center", vertical: "middle" };
 
-
-
-    worksheet.addRow([]); // Blank row
-
     worksheet.addRow([]); // Blank row
 
 
