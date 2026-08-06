@@ -532,7 +532,7 @@ const DRE = () => {
           validationMessage += "Competência obrigatória ou formato inválido. ";
           validationStatus = "error";
         }
-        if (!status) {
+        if (!financialStatus) {
           validationMessage += "Status obrigatório. ";
           validationStatus = "error";
         }
@@ -540,25 +540,26 @@ const DRE = () => {
         // Status validation
         if (type === "receita") {
           const validStatuses = ["pendente", "recebido", "atrasado", "cancelado"];
-          if (!validStatuses.includes(status)) {
-            validationMessage += `Status '${status}' inválido para Receita. `;
+          if (!validStatuses.includes(financialStatus)) {
+            validationMessage += `Status '${financialStatus}' inválido para Receita. `;
             validationStatus = "error";
           }
-          if (status === "recebido" && !paymentDate) {
+          if (financialStatus === "recebido" && !paymentDate) {
             validationMessage += "Receita 'recebido' exige data de pagamento. ";
             validationStatus = "error";
           }
         } else if (type === "despesa") {
           const validStatuses = ["pendente", "pago", "vencido", "cancelado"];
-          if (!validStatuses.includes(status)) {
-            validationMessage += `Status '${status}' inválido para Despesa. `;
+          if (!validStatuses.includes(financialStatus)) {
+            validationMessage += `Status '${financialStatus}' inválido para Despesa. `;
             validationStatus = "error";
           }
-          if (status === "pago" && !paymentDate) {
+          if (financialStatus === "pago" && !paymentDate) {
             validationMessage += "Despesa 'pago' exige data de pagamento. ";
             validationStatus = "error";
           }
         }
+
 
         // Entity resolution
         let entityId = "";
