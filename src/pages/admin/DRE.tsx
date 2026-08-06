@@ -300,7 +300,7 @@ const DRE = () => {
 
     // Freeze header
     worksheet.views = [
-      { state: "frozen", xSplit: 0, ySplit: 4, activePane: "bottomRight" }
+      { state: "frozen", xSplit: 0, ySplit: 4 }
     ];
 
     const buffer = await workbook.xlsx.writeBuffer();
