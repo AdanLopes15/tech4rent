@@ -678,7 +678,8 @@ const DRE = () => {
           status: validationStatus,
 
           originalData: rowData,
-          confirmed: false
+          confirmed: false,
+          onToggleConfirm: handleToggleConfirmDuplicate
         };
       }));
 
@@ -689,9 +690,16 @@ const DRE = () => {
       toast.error("Erro ao ler o arquivo Excel.");
     } finally {
       setIsImporting(false);
-      event.target.value = "";
+      if (event.target) event.target.value = "";
     }
   };
+
+  const handleToggleConfirmDuplicate = (rowNumber: number) => {
+    setImportData(prev => prev.map(item => 
+      item.rowNumber === rowNumber ? { ...item, confirmed: !item.confirmed } : item
+    ));
+  };
+
 
   const handleConfirmImport = async (validItems: any[]) => {
     const importBatchId = `batch-${Date.now()}`;
