@@ -5,6 +5,8 @@ import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { Timestamp } from "firebase/firestore";
+
 import { Search, Download, TrendingUp, TrendingDown, Equal, FileSpreadsheet, Upload, FileDown, Loader2 } from "lucide-react";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
@@ -497,13 +499,14 @@ const DRE = () => {
         const dueDate = normalizeDate(rowData["Vencimento"]);
         const competenceDate = normalizeDate(rowData["Competência"]);
         const paymentDate = normalizeDate(rowData["Pagamento"]);
-        const status = String(rowData["Status"] || "").trim().toLowerCase();
+        const financialStatus = String(rowData["Status"] || "").trim().toLowerCase();
         const entityName = String(rowData["Entidade"] || "").trim();
         const entityType = String(rowData["Tipo da Entidade"] || "").trim().toLowerCase();
         const planoContasName = String(rowData["Plano de Contas"] || "").trim();
         const contaBancariaName = String(rowData["Conta Bancária"] || "").trim();
         const centroCustoName = String(rowData["Centro de Custo"] || "").trim();
         const externalId = String(rowData["Identificador Externo"] || "").trim();
+
 
         let validationMessage = "";
         let validationStatus: "valid" | "error" | "duplicate" = "valid";
@@ -665,13 +668,14 @@ const DRE = () => {
           competenceDate,
           competenceStr: competenceDate ? format(competenceDate, "MM/yyyy") : String(rowData["Competência"] || ""),
           paymentDate,
-          status,
+          financialStatus,
           chartOfAccountId,
           bankAccountId,
           costCenterId,
           externalId,
           message: validationMessage || "Linha válida",
           status: validationStatus,
+
           originalData: rowData,
           confirmed: false
         };
@@ -704,7 +708,8 @@ const DRE = () => {
           juros: item.juros || 0,
           dueDate: Timestamp.fromDate(item.dueDate),
           competenceDate: Timestamp.fromDate(item.competenceDate),
-          status: item.status,
+          status: item.financialStatus,
+
           clientId: item.type === 'receita' ? item.entityId : undefined,
           entityId: item.type === 'despesa' ? item.entityId : undefined,
           chartOfAccountId: item.chartOfAccountId,
