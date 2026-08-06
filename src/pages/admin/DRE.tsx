@@ -403,9 +403,9 @@ const DRE = () => {
               </p>
             </div>
 
-            <Button variant="outline" size="sm" className="gap-2" onClick={handleExport} disabled={!dreData}>
-              <Download className="h-4 w-4" />
-              Exportar CSV
+            <Button variant="outline" size="sm" className="gap-2" onClick={handleExportExcel} disabled={!dreData}>
+              <FileSpreadsheet className="h-4 w-4" />
+              Exportar Excel
             </Button>
           </div>
         </CardHeader>
