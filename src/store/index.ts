@@ -1666,10 +1666,14 @@ const useStore = create<State & Actions>((set, get) => {
       if (!contractToFinalize) throw new Error("Contrato não encontrado.");
 
       const batch = writeBatch(db);
-      const competence = format(new Date(), "MM/yyyy");
+      const now = new Date();
+      const competence = format(now, "MM/yyyy");
 
       const contractRef = doc(db, "contracts", contractId);
-      batch.update(contractRef, { status: "Finalizado" });
+      batch.update(contractRef, { 
+        status: "Finalizado",
+        finalizedAt: Timestamp.fromDate(now)
+      });
 
       const missingItemsForSale: any[] = [];
       for (const itemStatus of itemStatuses) {
@@ -1677,7 +1681,7 @@ const useStore = create<State & Actions>((set, get) => {
         if (!equipment) continue;
 
         if (itemStatus.quantityReturned > 0) {
-          const newStock = equipment.stock + itemStatus.quantityReturned;
+          const newStock = (equipment.stock || 0) + itemStatus.quantityReturned;
           const equipmentRef = doc(db, "equipments", itemStatus.equipmentId);
           batch.update(equipmentRef, { stock: newStock });
         }
@@ -1702,7 +1706,7 @@ const useStore = create<State & Actions>((set, get) => {
           items: missingItemsForSale,
           totalValue: totalSaleValue,
           status: "Concluída",
-          saleDate: Timestamp.fromDate(new Date()),
+          saleDate: Timestamp.fromDate(now),
           createdAt: serverTimestamp(),
           competence,
           description: `Venda de itens faltantes do contrato ${contractId}`,
@@ -1717,7 +1721,7 @@ const useStore = create<State & Actions>((set, get) => {
           description: `Fatura de itens faltantes do contrato ${contractId}`,
           valorTotal: totalSaleValue,
           valorBruto: totalSaleValue,
-          dueDate: Timestamp.fromDate(new Date()),
+          dueDate: Timestamp.fromDate(now),
           status: "Pendente",
           competence,
           createdAt: serverTimestamp(),
@@ -1732,7 +1736,7 @@ const useStore = create<State & Actions>((set, get) => {
           description: `Multa por rescisão do contrato ${contractId}`,
           valorTotal: fineAmount,
           valorBruto: fineAmount,
-          dueDate: Timestamp.fromDate(new Date()),
+          dueDate: Timestamp.fromDate(now),
           status: "Pendente",
           competence,
           createdAt: serverTimestamp(),
