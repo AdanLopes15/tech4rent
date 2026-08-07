@@ -1547,11 +1547,14 @@ const useStore = create<State & Actions>((set, get) => {
       const contractRef = doc(db, "contracts", contractId);
       batch.set(contractRef, dataToSave);
 
-      let totalMonths = differenceInMonths(finalDate, new Date(startDate));
-      if (getDate(finalDate) > getDate(new Date(startDate))) totalMonths++;
+      const startDateObj = new Date(startDate);
+      const firstInstallmentDateObj = new Date(firstInstallmentDate);
+
+      let totalMonths = differenceInMonths(finalDate, startDateObj);
+      if (getDate(finalDate) > getDate(startDateObj)) totalMonths++;
       if (totalMonths === 0) totalMonths = 1;
 
-      let currentDueDate = new Date(firstInstallmentDate);
+      let currentDueDate = new Date(firstInstallmentDateObj);
       for (let i = 0; i < totalMonths; i++) {
         const revenueData = {
           clientId: client.id,
@@ -1562,9 +1565,9 @@ const useStore = create<State & Actions>((set, get) => {
           dueDate: Timestamp.fromDate(currentDueDate),
           status: "Pendente",
           createdAt: serverTimestamp(),
-          costCenterId: rest.costCenterId,
-          chartOfAccountId: rest.chartOfAccountId,
-          bankAccountId: rest.bankAccountId,
+          costCenterId: rest.costCenterId || "",
+          chartOfAccountId: rest.chartOfAccountId || "",
+          bankAccountId: rest.bankAccountId || "",
         };
         const revenueRef = doc(collection(db, "revenues"));
         batch.set(revenueRef, revenueData);
@@ -1583,10 +1586,19 @@ const useStore = create<State & Actions>((set, get) => {
       if (!id) throw new Error("ID do contrato é obrigatório para atualização.");
 
       const contractRef = doc(db, "contracts", id);
+      
+      const safeTimestamp = (dateValue: any) => {
+        if (!dateValue) return null;
+        if (dateValue instanceof Timestamp) return dateValue;
+        const d = new Date(dateValue);
+        return !isNaN(d.getTime()) ? Timestamp.fromDate(d) : dateValue;
+      };
+
       const dataToUpdate = {
         ...data,
-        startDate: Timestamp.fromDate(new Date(data.startDate)),
-        endDate: Timestamp.fromDate(new Date(data.endDate)),
+        startDate: safeTimestamp(data.startDate),
+        endDate: safeTimestamp(data.endDate),
+        finalizedAt: data.finalizedAt ? safeTimestamp(data.finalizedAt) : null,
       };
 
       await updateDoc(contractRef, dataToUpdate);
@@ -1657,10 +1669,14 @@ const useStore = create<State & Actions>((set, get) => {
       if (!contractToFinalize) throw new Error("Contrato não encontrado.");
 
       const batch = writeBatch(db);
-      const competence = format(new Date(), "MM/yyyy");
+      const now = new Date();
+      const competence = format(now, "MM/yyyy");
 
       const contractRef = doc(db, "contracts", contractId);
-      batch.update(contractRef, { status: "Finalizado" });
+      batch.update(contractRef, { 
+        status: "Finalizado",
+        finalizedAt: Timestamp.fromDate(now)
+      });
 
       const missingItemsForSale: any[] = [];
       for (const itemStatus of itemStatuses) {
@@ -1668,7 +1684,7 @@ const useStore = create<State & Actions>((set, get) => {
         if (!equipment) continue;
 
         if (itemStatus.quantityReturned > 0) {
-          const newStock = equipment.stock + itemStatus.quantityReturned;
+          const newStock = (equipment.stock || 0) + itemStatus.quantityReturned;
           const equipmentRef = doc(db, "equipments", itemStatus.equipmentId);
           batch.update(equipmentRef, { stock: newStock });
         }
@@ -1693,7 +1709,7 @@ const useStore = create<State & Actions>((set, get) => {
           items: missingItemsForSale,
           totalValue: totalSaleValue,
           status: "Concluída",
-          saleDate: Timestamp.fromDate(new Date()),
+          saleDate: Timestamp.fromDate(now),
           createdAt: serverTimestamp(),
           competence,
           description: `Venda de itens faltantes do contrato ${contractId}`,
@@ -1708,7 +1724,7 @@ const useStore = create<State & Actions>((set, get) => {
           description: `Fatura de itens faltantes do contrato ${contractId}`,
           valorTotal: totalSaleValue,
           valorBruto: totalSaleValue,
-          dueDate: Timestamp.fromDate(new Date()),
+          dueDate: Timestamp.fromDate(now),
           status: "Pendente",
           competence,
           createdAt: serverTimestamp(),
@@ -1723,7 +1739,7 @@ const useStore = create<State & Actions>((set, get) => {
           description: `Multa por rescisão do contrato ${contractId}`,
           valorTotal: fineAmount,
           valorBruto: fineAmount,
-          dueDate: Timestamp.fromDate(new Date()),
+          dueDate: Timestamp.fromDate(now),
           status: "Pendente",
           competence,
           createdAt: serverTimestamp(),
