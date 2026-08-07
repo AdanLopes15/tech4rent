@@ -1548,7 +1548,6 @@ const useStore = create<State & Actions>((set, get) => {
       batch.set(contractRef, dataToSave);
 
       const startDateObj = new Date(startDate);
-      const finalDate = new Date(endDate);
       const firstInstallmentDateObj = new Date(firstInstallmentDate);
 
       let totalMonths = differenceInMonths(finalDate, startDateObj);
