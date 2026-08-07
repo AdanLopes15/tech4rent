@@ -1547,11 +1547,15 @@ const useStore = create<State & Actions>((set, get) => {
       const contractRef = doc(db, "contracts", contractId);
       batch.set(contractRef, dataToSave);
 
-      let totalMonths = differenceInMonths(finalDate, new Date(startDate));
-      if (getDate(finalDate) > getDate(new Date(startDate))) totalMonths++;
+      const startDateObj = new Date(startDate);
+      const finalDate = new Date(endDate);
+      const firstInstallmentDateObj = new Date(firstInstallmentDate);
+
+      let totalMonths = differenceInMonths(finalDate, startDateObj);
+      if (getDate(finalDate) > getDate(startDateObj)) totalMonths++;
       if (totalMonths === 0) totalMonths = 1;
 
-      let currentDueDate = new Date(firstInstallmentDate);
+      let currentDueDate = new Date(firstInstallmentDateObj);
       for (let i = 0; i < totalMonths; i++) {
         const revenueData = {
           clientId: client.id,
@@ -1562,9 +1566,9 @@ const useStore = create<State & Actions>((set, get) => {
           dueDate: Timestamp.fromDate(currentDueDate),
           status: "Pendente",
           createdAt: serverTimestamp(),
-          costCenterId: rest.costCenterId,
-          chartOfAccountId: rest.chartOfAccountId,
-          bankAccountId: rest.bankAccountId,
+          costCenterId: rest.costCenterId || "",
+          chartOfAccountId: rest.chartOfAccountId || "",
+          bankAccountId: rest.bankAccountId || "",
         };
         const revenueRef = doc(collection(db, "revenues"));
         batch.set(revenueRef, revenueData);
