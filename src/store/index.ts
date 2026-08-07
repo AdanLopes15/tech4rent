@@ -1583,10 +1583,14 @@ const useStore = create<State & Actions>((set, get) => {
       if (!id) throw new Error("ID do contrato é obrigatório para atualização.");
 
       const contractRef = doc(db, "contracts", id);
+      
+      const startDate = data.startDate ? new Date(data.startDate) : null;
+      const endDate = data.endDate ? new Date(data.endDate) : null;
+      
       const dataToUpdate = {
         ...data,
-        startDate: Timestamp.fromDate(new Date(data.startDate)),
-        endDate: Timestamp.fromDate(new Date(data.endDate)),
+        startDate: startDate && !isNaN(startDate.getTime()) ? Timestamp.fromDate(startDate) : (data.startDate || null),
+        endDate: endDate && !isNaN(endDate.getTime()) ? Timestamp.fromDate(endDate) : (data.endDate || null),
       };
 
       await updateDoc(contractRef, dataToUpdate);
