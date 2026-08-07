@@ -36,11 +36,16 @@ export function FinalizeContractDialog({ open, onOpenChange, contract }: Finaliz
     try {
       setLoading(true);
 
+      const now = new Date();
       await updateContract({
         id: contract.id,
         status: "Finalizado",
-        finalizedAt: new Date(),
-        observation,
+        finalizedAt: now.toISOString(),
+        observation: observation.trim(),
+        // Precisamos garantir que startDate e endDate sejam preservados/enviados corretamente
+        // se o updateContract no store exigir que eles sejam datas válidas.
+        startDate: contract.startDate,
+        endDate: contract.endDate,
       });
 
       toast({
@@ -50,9 +55,10 @@ export function FinalizeContractDialog({ open, onOpenChange, contract }: Finaliz
       onOpenChange(false);
       setObservation("");
     } catch (error: any) {
+      console.error("Erro ao finalizar contrato:", error);
       toast({
         title: "Erro ao finalizar contrato",
-        description: error.message,
+        description: error.message || "Erro interno ao processar datas",
         variant: "destructive",
       });
     } finally {
