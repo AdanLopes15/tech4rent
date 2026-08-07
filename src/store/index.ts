@@ -1584,13 +1584,18 @@ const useStore = create<State & Actions>((set, get) => {
 
       const contractRef = doc(db, "contracts", id);
       
-      const startDate = data.startDate ? new Date(data.startDate) : null;
-      const endDate = data.endDate ? new Date(data.endDate) : null;
-      
+      const safeTimestamp = (dateValue: any) => {
+        if (!dateValue) return null;
+        if (dateValue instanceof Timestamp) return dateValue;
+        const d = new Date(dateValue);
+        return !isNaN(d.getTime()) ? Timestamp.fromDate(d) : dateValue;
+      };
+
       const dataToUpdate = {
         ...data,
-        startDate: startDate && !isNaN(startDate.getTime()) ? Timestamp.fromDate(startDate) : (data.startDate || null),
-        endDate: endDate && !isNaN(endDate.getTime()) ? Timestamp.fromDate(endDate) : (data.endDate || null),
+        startDate: safeTimestamp(data.startDate),
+        endDate: safeTimestamp(data.endDate),
+        finalizedAt: data.finalizedAt ? safeTimestamp(data.finalizedAt) : null,
       };
 
       await updateDoc(contractRef, dataToUpdate);
