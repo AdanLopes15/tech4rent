@@ -66,7 +66,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log("[FIRESTORE DEBUG] [AUTH] Iniciando leitura de perfil", {
         operation: "get profile",
         uid: fbUser.uid,
-        authenticated: true
+        authenticated: true,
+        projectId: "st4r-f404e"
       });
 
       try {
