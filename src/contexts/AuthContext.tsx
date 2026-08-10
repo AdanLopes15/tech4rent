@@ -51,20 +51,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
+    console.log("[AUTH] useEffect: setting up onAuthStateChanged");
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+      console.log("[AUTH] onAuthStateChanged triggered:", fbUser ? `UID: ${fbUser.uid}` : "No user");
       setUser(fbUser);
 
       if (!fbUser) {
+        console.log("[AUTH] No Firebase user, clearing state and stopping loading");
         clearState();
         setLoading(false);
         return;
       }
+
+      console.log("[AUTH] Fetching user profile from Firestore for UID:", fbUser.uid);
 
       try {
         const snap = await getDoc(doc(db, "users", fbUser.uid));
 
         // Regra: usuário sem documento não pode acessar o sistema.
         if (!snap.exists()) {
+          console.warn("[AUTH] User document does not exist in Firestore for UID:", fbUser.uid);
           setAccessDenied(
             "Seu usuário não possui acesso ao sistema. Contate o administrador."
           );
@@ -87,6 +93,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // Regra: usuário inativo é desconectado.
         if (normalizedStatus !== "ativo") {
+          console.warn("[AUTH] User is inactive:", normalizedStatus);
           setAccessDenied("Seu usuário está inativo. Contate o administrador.");
           clearState();
           await firebaseSignOut(auth);
@@ -120,6 +127,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           permissions: data.permissions || [],
           status: normalizedStatus,
         });
+        console.log("[AUTH] Profile and permissions loaded successfully for:", profile);
         setPermissions(resolved);
         setAccessDenied(null);
 
@@ -129,8 +137,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }).catch(() => {});
         logAudit("login", { uid: fbUser.uid, profile });
       } catch (err) {
+        console.error("[AUTH] Error in AuthProvider lifecycle:", err);
         clearState();
       } finally {
+        console.log("[AUTH] Lifecycle finished, setting loading to false");
         setLoading(false);
       }
     });
@@ -138,9 +148,55 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [clearState]);
 
   const signIn = async (email: string, password: string) => {
+    console.log("[AUTH] Calling signInWithEmailAndPassword...");
     setAccessDenied(null);
-    const { user } = await signInWithEmailAndPassword(auth, email, password);
-    if (!user) throw new Error("Falha no login");
+    try {
+      const { user: fbUser } = await signInWithEmailAndPassword(auth, email, password);
+      if (!fbUser) {
+        console.error("[AUTH] signInWithEmailAndPassword returned no user");
+        throw new Error("Falha no login");
+      }
+      console.log("[AUTH] Firebase login successful for UID:", fbUser.uid);
+      
+      // Forces an immediate check of the Firestore profile
+      console.log("[AUTH] Manually fetching profile after login to expedite state sync");
+      const snap = await getDoc(doc(db, "users", fbUser.uid));
+      if (!snap.exists()) {
+        console.error("[AUTH] Profile not found for UID:", fbUser.uid);
+        throw new Error("Seu usuário não possui perfil configurado.");
+      }
+
+      const data = snap.data() as any;
+      const rawStatus = String(data.status || "ativo").toLowerCase();
+      const normalizedStatus = rawStatus === "active" ? "ativo" : rawStatus === "inactive" ? "inativo" : rawStatus;
+
+      if (normalizedStatus !== "ativo") {
+        await firebaseSignOut(auth);
+        throw new Error("Seu usuário está inativo. Contate o administrador.");
+      }
+
+      // Update local state immediately so AuthContext is ready before navigation
+      const profile = data.profile || "custom";
+      const resolved = resolvePermissions(profile, data.permissions);
+      
+      console.log("[AUTH] Updating local state manually for faster navigation");
+      setUser(fbUser);
+      setAppUser({
+        uid: fbUser.uid,
+        name: data.name,
+        email: data.email || fbUser.email || undefined,
+        profile,
+        permissions: data.permissions || [],
+        status: normalizedStatus,
+      });
+      setPermissions(resolved);
+      setLoading(false); // Stop loading since we have the data
+      
+      logAudit("login", { uid: fbUser.uid, profile });
+    } catch (error: any) {
+      console.error("[AUTH] Error during signIn process:", error);
+      throw error;
+    }
   };
 
   const signOut = async () => {

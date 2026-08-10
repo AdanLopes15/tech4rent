@@ -23,6 +23,7 @@ const ProtectedRoute = ({
   }, [denied]);
 
   if (loading) {
+    console.log("[ROUTE GUARD] Loading auth state...");
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-muted-foreground">Carregando...</div>
@@ -30,12 +31,21 @@ const ProtectedRoute = ({
     );
   }
 
+  console.log("[ROUTE GUARD] Auth check:", { 
+    hasUser: !!user, 
+    hasAppUser: !!appUser, 
+    path: window.location.pathname,
+    require 
+  });
+
   if (!user) {
+    console.log("[ROUTE GUARD] No Firebase user, redirecting to /login");
     return <Navigate to="/login" replace />;
   }
 
   // Usuário autenticado mas sem documento/perfil válido: sem acesso.
   if (!appUser) {
+    console.log("[ROUTE GUARD] No AppUser (Firestore profile), redirecting to /login");
     return <Navigate to="/login" replace />;
   }
 
