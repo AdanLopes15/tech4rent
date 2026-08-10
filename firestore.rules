@@ -140,7 +140,7 @@ service cloud.firestore {
     // Demais coleções administrativas: exigem usuário ativo.
     // (contratos, vendas, financeiro, etc.) — ajuste conforme necessário.
     match /{document=**} {
-      allow read, write: if isActiveUser();
+      allow read, write: if isSignedIn() && isActiveUser();
     }
   }
 }
