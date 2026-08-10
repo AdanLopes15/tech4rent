@@ -63,17 +63,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      console.log("[AUTH] Fetching user profile from Firestore for UID:", fbUser.uid);
+      console.log("[FIRESTORE DEBUG] [AUTH] Iniciando leitura de perfil", {
+        operation: "get profile",
+        uid: fbUser.uid,
+        authenticated: true
+      });
 
       try {
         const uid = fbUser.uid;
-        console.log("[PROFILE] Iniciando leitura para UID:", uid);
         
         // Tenta buscar na coleção 'users' primeiro
         const userRef = doc(db, "users", uid);
-        console.log("[PROFILE] Caminho: users/" + uid);
+        console.log("[FIRESTORE DEBUG] [AUTH] Caminho: users/" + uid);
         
-        let snap = await getDoc(userRef);
+        let snap;
+        try {
+          snap = await getDoc(userRef);
+        } catch (e: any) {
+          console.error("[FIRESTORE ERROR] [AUTH] Falha ao ler users/" + uid, {
+            code: e?.code,
+            message: e?.message
+          });
+          throw e;
+        }
         let data: any;
 
         if (!snap.exists()) {
@@ -153,7 +165,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         logAudit("login", { uid: fbUser.uid, profile });
       } catch (err: any) {
-        console.error("[AUTH] Error in AuthProvider lifecycle:", err);
+        console.error("[FIRESTORE ERROR] [AUTH] Lifecycle error:", {
+          code: err?.code,
+          message: err?.message,
+          stack: err?.stack
+        });
         if (err.code === "permission-denied") {
           console.error("[AUTH] Permission denied fetching profile. UID:", fbUser.uid);
           setAccessDenied("Erro de permissão ao acessar seu perfil. Contate o suporte.");

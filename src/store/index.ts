@@ -864,7 +864,11 @@ const useStore = create<State & Actions>((set, get) => {
     fetchAllData: async (publicOnly = false) => {
       set({ loading: true });
       try {
-        console.log(`[STORE] Fetching data (publicOnly: ${publicOnly})...`);
+        console.log(`[FIRESTORE DEBUG] [STORE] fetchAllData (publicOnly: ${publicOnly})`, {
+          uid: auth.currentUser?.uid,
+          authenticated: !!auth.currentUser
+        });
+        
         const publicQueries = [
           getDoc(doc(db, "settings", "company")),
           getDoc(doc(db, "settings", "smtp")),
