@@ -176,13 +176,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       // Forces an immediate check of the Firestore profile
       console.log("[AUTH] Manually fetching profile after login to expedite state sync");
-      const snap = await getDoc(doc(db, "users", fbUser.uid));
-      if (!snap.exists()) {
-        console.error("[AUTH] Profile not found for UID:", fbUser.uid);
-        throw new Error("Seu usuário não possui perfil configurado.");
-      }
+      let snap = await getDoc(doc(db, "users", fbUser.uid));
+      let data: any;
 
-      const data = snap.data() as any;
+      if (!snap.exists()) {
+        console.warn("[AUTH] Profile not found in 'users', trying 'profiles'");
+        snap = await getDoc(doc(db, "profiles", fbUser.uid));
+        if (!snap.exists()) {
+          console.error("[AUTH] Profile not found for UID in any collection:", fbUser.uid);
+          throw new Error("Seu usuário não possui perfil configurado no sistema.");
+        }
+      }
+      data = snap.data();
       const rawStatus = String(data.status || "ativo").toLowerCase();
       const normalizedStatus = rawStatus === "active" ? "ativo" : rawStatus === "inactive" ? "inativo" : rawStatus;
 
