@@ -25,9 +25,11 @@ service cloud.firestore {
 
     // Usuário válido = tem documento em users/{uid} e está ativo.
     function isActiveUser() {
+      let uid = request.auth.uid;
       return isSignedIn()
-        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && statusOf() == 'ativo';
+        && exists(/databases/$(database)/documents/users/$(uid))
+        && (get(/databases/$(database)/documents/users/$(uid)).data.status == 'active' 
+            || get(/databases/$(database)/documents/users/$(uid)).data.status == 'ativo');
     }
 
     function profileOf() {
