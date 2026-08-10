@@ -17,10 +17,12 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If we're already authenticated and loading finished, we should redirect.
-    // However, we rely more on the manual navigation after signIn to avoid race conditions.
-    if (!authLoading && user) {
-      console.log("[LOGIN] Authenticated user detected in useEffect, navigating...");
+    // Se já estivermos autenticados e o perfil foi carregado, redirecionamos.
+    // Se estivermos autenticados mas SEM perfil (appUser null), o loop seria causado aqui
+    // se redirecionássemos cegamente. Por isso, verificamos appUser.
+    const { appUser } = useAuth();
+    if (!authLoading && user && appUser) {
+      console.log("[LOGIN] Authenticated user with profile detected, navigating...");
       navigate("/selecionar-sistema", { replace: true });
     }
   }, [user, authLoading, navigate]);
