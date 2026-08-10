@@ -151,22 +151,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     console.log("[AUTH] Calling signInWithEmailAndPassword...");
     setAccessDenied(null);
     try {
-      const { user } = await signInWithEmailAndPassword(auth, email, password);
-      if (!user) {
+      const { user: fbUser } = await signInWithEmailAndPassword(auth, email, password);
+      if (!fbUser) {
         console.error("[AUTH] signInWithEmailAndPassword returned no user");
         throw new Error("Falha no login");
       }
-      console.log("[AUTH] Firebase login successful for UID:", user.uid);
+      console.log("[AUTH] Firebase login successful for UID:", fbUser.uid);
       
       // Forces an immediate check of the Firestore profile
-      console.log("[AUTH] Manually triggering profile fetch after login");
-      const snap = await getDoc(doc(db, "users", user.uid));
+      console.log("[AUTH] Manually fetching profile after login to expedite state sync");
+      const snap = await getDoc(doc(db, "users", fbUser.uid));
       if (!snap.exists()) {
-        console.error("[AUTH] Profile not found for UID:", user.uid);
+        console.error("[AUTH] Profile not found for UID:", fbUser.uid);
         throw new Error("Seu usuário não possui perfil configurado.");
       }
-      // The onAuthStateChanged listener will handle the rest, but 
-      // by fetching it here we ensure we're not just waiting on the listener.
+
+      const data = snap.data() as any;
+      const rawStatus = String(data.status || "ativo").toLowerCase();
+      const normalizedStatus = rawStatus === "active" ? "ativo" : rawStatus === "inactive" ? "inativo" : rawStatus;
+
+      if (normalizedStatus !== "ativo") {
+        await firebaseSignOut(auth);
+        throw new Error("Seu usuário está inativo. Contate o administrador.");
+      }
+
+      // Update local state immediately so AuthContext is ready before navigation
+      const profile = data.profile || "custom";
+      const resolved = resolvePermissions(profile, data.permissions);
+      
+      console.log("[AUTH] Updating local state manually for faster navigation");
+      setUser(fbUser);
+      setAppUser({
+        uid: fbUser.uid,
+        name: data.name,
+        email: data.email || fbUser.email || undefined,
+        profile,
+        permissions: data.permissions || [],
+        status: normalizedStatus,
+      });
+      setPermissions(resolved);
+      setLoading(false); // Stop loading since we have the data
+      
+      logAudit("login", { uid: fbUser.uid, profile });
     } catch (error: any) {
       console.error("[AUTH] Error during signIn process:", error);
       throw error;
