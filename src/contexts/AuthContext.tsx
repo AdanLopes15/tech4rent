@@ -102,7 +102,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             });
             throw e;
           }
-          snap = await getDoc(profileRef);
           
           if (!snap.exists()) {
             console.error("[PROFILE] Erro: Perfil não encontrado em nenhuma coleção para o UID:", uid);
