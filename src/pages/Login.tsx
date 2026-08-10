@@ -13,19 +13,18 @@ import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { toast } from "sonner";
 
 const Login = () => {
-  const { user, loading: authLoading, signIn } = useAuth();
+  const { user, appUser, loading: authLoading, signIn } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     // Se já estivermos autenticados e o perfil foi carregado, redirecionamos.
     // Se estivermos autenticados mas SEM perfil (appUser null), o loop seria causado aqui
     // se redirecionássemos cegamente. Por isso, verificamos appUser.
-    const { appUser } = useAuth();
     if (!authLoading && user && appUser) {
       console.log("[LOGIN] Authenticated user with profile detected, navigating...");
       navigate("/selecionar-sistema", { replace: true });
     }
-  }, [user, authLoading, navigate]);
+  }, [user, appUser, authLoading, navigate]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
