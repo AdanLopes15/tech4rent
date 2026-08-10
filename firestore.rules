@@ -13,23 +13,34 @@ service cloud.firestore {
     }
 
     function userDoc() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      // Tenta buscar o perfil do usuário na coleção users ou profiles
+      let uid = request.auth.uid;
+      let pathUsers = /databases/$(database)/documents/users/$(uid);
+      let pathProfiles = /databases/$(database)/documents/profiles/$(uid);
+      return exists(pathUsers) ? get(pathUsers).data : get(pathProfiles).data;
     }
 
     // Normaliza status legado (active/inactive) para ativo/inativo.
     function statusOf() {
-      return userDoc().status == 'active' ? 'ativo'
-           : userDoc().status == 'inactive' ? 'inativo'
-           : userDoc().status;
+      let data = userDoc();
+      return data.status == 'active' ? 'ativo'
+           : data.status == 'inactive' ? 'inativo'
+           : data.status;
     }
 
-    // Usuário válido = tem documento em users/{uid} e está ativo.
+    // Usuário válido = tem documento em users/{uid} ou profiles/{uid} e está ativo.
     function isActiveUser() {
       let uid = request.auth.uid;
-      return isSignedIn()
-        && exists(/databases/$(database)/documents/users/$(uid))
-        && (get(/databases/$(database)/documents/users/$(uid)).data.status == 'active' 
-            || get(/databases/$(database)/documents/users/$(uid)).data.status == 'ativo');
+      let pathUsers = /databases/$(database)/documents/users/$(uid);
+      let pathProfiles = /databases/$(database)/documents/profiles/$(uid);
+      
+      let hasDoc = exists(pathUsers) || exists(pathProfiles);
+      if (!isSignedIn() || !hasDoc) {
+        return false;
+      }
+
+      let data = hasDoc && exists(pathUsers) ? get(pathUsers).data : get(pathProfiles).data;
+      return data.status == 'active' || data.status == 'ativo';
     }
 
     function profileOf() {
@@ -67,6 +78,12 @@ service cloud.firestore {
 
     // ---------- Usuários ----------
     match /users/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Regras para a coleção legacy 'profiles'
+    match /profiles/{uid} {
       allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
       allow create, update, delete: if isAdmin();
     }
