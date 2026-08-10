@@ -66,18 +66,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log("[AUTH] Fetching user profile from Firestore for UID:", fbUser.uid);
 
       try {
+        // Tenta buscar na coleção 'users' primeiro
         console.log("[AUTH] getDoc attempt for users/", fbUser.uid);
         const userRef = doc(db, "users", fbUser.uid);
-        const snap = await getDoc(userRef);
+        let snap = await getDoc(userRef);
+        let data: any;
 
-        // Regra: usuário sem documento não pode acessar o sistema.
         if (!snap.exists()) {
-          console.warn("[AUTH] User document does not exist in Firestore for UID:", fbUser.uid);
-          // Tenta buscar na coleção 'profiles' caso seja um usuário antigo ou em migração
+          console.warn("[AUTH] User document does not exist in 'users' for UID:", fbUser.uid);
+          // Fallback para 'profiles'
           console.log("[AUTH] Trying fallback to 'profiles' collection...");
-          const profileSnap = await getDoc(doc(db, "profiles", fbUser.uid));
+          const profileRef = doc(db, "profiles", fbUser.uid);
+          snap = await getDoc(profileRef);
           
-          if (!profileSnap.exists()) {
+          if (!snap.exists()) {
+            console.error("[AUTH] Profile not found in either 'users' or 'profiles' for UID:", fbUser.uid);
             setAccessDenied(
               "Seu usuário não possui acesso ao sistema (perfil não encontrado). Contate o administrador."
             );
@@ -86,11 +89,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setLoading(false);
             return;
           }
-          // Se encontrou no profiles, usamos os dados de lá
-          var data = profileSnap.data() as any;
-        } else {
-          var data = snap.data() as any;
         }
+        
+        data = snap.data();
+        console.log("[AUTH] Profile found in collection:", snap.ref.parent.id);
 
         // Normaliza status legado (active/inactive) para o padrão ativo/inativo.
         const rawStatus = String(data.status || "ativo").toLowerCase();
@@ -121,8 +123,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               : undefined;
 
         const profile: ProfileKey = data.profile || legacyProfile || "custom";
-        // Perfis legados sem lista de permissões e sem perfil reconhecido
-        // recebem acesso amplo apenas se forem gestor/colaborador antigo.
         const legacyCustom =
           !data.profile && !legacyProfile && (legacy === "gestor" || legacy === "colaborador")
             ? ["*"]
@@ -142,16 +142,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setAccessDenied(null);
 
         // Auditoria: registra último acesso e login (fire-and-forget).
-        updateDoc(doc(db, "users", fbUser.uid), {
+        // Tenta atualizar no local onde foi encontrado
+        updateDoc(snap.ref, {
           lastAccess: serverTimestamp(),
-        }).catch(() => {});
+        }).catch((e) => console.warn("[AUTH] Failed to update lastAccess:", e.message));
+        
         logAudit("login", { uid: fbUser.uid, profile });
       } catch (err: any) {
         console.error("[AUTH] Error in AuthProvider lifecycle:", err);
-        // Se for erro de permissão ao buscar o perfil, não deslogamos imediatamente para evitar loops,
-        // mas marcamos o estado de erro para o ProtectedRoute tratar.
         if (err.code === "permission-denied") {
-          console.error("[AUTH] Permission denied fetching profile. UID might not exist in /users.");
+          console.error("[AUTH] Permission denied fetching profile. UID:", fbUser.uid);
           setAccessDenied("Erro de permissão ao acessar seu perfil. Contate o suporte.");
         }
         clearState();
