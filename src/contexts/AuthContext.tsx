@@ -66,21 +66,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log("[AUTH] Fetching user profile from Firestore for UID:", fbUser.uid);
 
       try {
-        const snap = await getDoc(doc(db, "users", fbUser.uid));
+        console.log("[AUTH] getDoc attempt for users/", fbUser.uid);
+        const userRef = doc(db, "users", fbUser.uid);
+        const snap = await getDoc(userRef);
 
         // Regra: usuário sem documento não pode acessar o sistema.
         if (!snap.exists()) {
           console.warn("[AUTH] User document does not exist in Firestore for UID:", fbUser.uid);
-          setAccessDenied(
-            "Seu usuário não possui acesso ao sistema. Contate o administrador."
-          );
-          clearState();
-          await firebaseSignOut(auth);
-          setLoading(false);
-          return;
+          // Tenta buscar na coleção 'profiles' caso seja um usuário antigo ou em migração
+          console.log("[AUTH] Trying fallback to 'profiles' collection...");
+          const profileSnap = await getDoc(doc(db, "profiles", fbUser.uid));
+          
+          if (!profileSnap.exists()) {
+            setAccessDenied(
+              "Seu usuário não possui acesso ao sistema (perfil não encontrado). Contate o administrador."
+            );
+            clearState();
+            await firebaseSignOut(auth);
+            setLoading(false);
+            return;
+          }
+          // Se encontrou no profiles, usamos os dados de lá
+          var data = profileSnap.data() as any;
+        } else {
+          var data = snap.data() as any;
         }
-
-        const data = snap.data() as any;
 
         // Normaliza status legado (active/inactive) para o padrão ativo/inativo.
         const rawStatus = String(data.status || "ativo").toLowerCase();
