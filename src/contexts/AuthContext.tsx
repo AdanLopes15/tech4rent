@@ -136,8 +136,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           lastAccess: serverTimestamp(),
         }).catch(() => {});
         logAudit("login", { uid: fbUser.uid, profile });
-      } catch (err) {
+      } catch (err: any) {
         console.error("[AUTH] Error in AuthProvider lifecycle:", err);
+        // Se for erro de permissão ao buscar o perfil, não deslogamos imediatamente para evitar loops,
+        // mas marcamos o estado de erro para o ProtectedRoute tratar.
+        if (err.code === "permission-denied") {
+          console.error("[AUTH] Permission denied fetching profile. UID might not exist in /users.");
+          setAccessDenied("Erro de permissão ao acessar seu perfil. Contate o suporte.");
+        }
         clearState();
       } finally {
         console.log("[AUTH] Lifecycle finished, setting loading to false");
