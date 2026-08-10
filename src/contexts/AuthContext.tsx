@@ -91,8 +91,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (!snap.exists()) {
           console.warn("[AUTH] User document does not exist in 'users' for UID:", uid);
           // Fallback para 'profiles'
-          console.log("[PROFILE] Tentando fallback para 'profiles/" + uid + "'");
+          console.log("[FIRESTORE DEBUG] [AUTH] Tentando fallback para 'profiles/" + uid + "'");
           const profileRef = doc(db, "profiles", uid);
+          try {
+            snap = await getDoc(profileRef);
+          } catch (e: any) {
+            console.error("[FIRESTORE ERROR] [AUTH] Falha ao ler profiles/" + uid, {
+              code: e?.code,
+              message: e?.message
+            });
+            throw e;
+          }
           snap = await getDoc(profileRef);
           
           if (!snap.exists()) {
@@ -171,7 +180,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           stack: err?.stack
         });
         if (err.code === "permission-denied") {
-          console.error("[AUTH] Permission denied fetching profile. UID:", fbUser.uid);
+          console.error("[FIRESTORE ERROR] [AUTH] Permission denied fetching profile. UID:", fbUser.uid);
           setAccessDenied("Erro de permissão ao acessar seu perfil. Contate o suporte.");
         }
         clearState();
