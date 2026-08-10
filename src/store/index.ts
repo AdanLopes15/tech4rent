@@ -864,8 +864,8 @@ const useStore = create<State & Actions>((set, get) => {
     fetchAllData: async (publicOnly = false) => {
       set({ loading: true });
       try {
-        console.log("Fetching all data from Firestore...");
-        const baseSnaps = (await Promise.all([
+        console.log(`[STORE] Fetching data (publicOnly: ${publicOnly})...`);
+        const publicQueries = [
           getDoc(doc(db, "settings", "company")),
           getDoc(doc(db, "settings", "smtp")),
           getDoc(doc(db, "settings", "clauses")),
@@ -874,7 +874,9 @@ const useStore = create<State & Actions>((set, get) => {
           getDoc(doc(db, "settings", "homePage")),
           getDoc(doc(db, "settings", "page_sobre")),
           getDoc(doc(db, "settings", "page_contato")),
-        ])) as [
+        ];
+
+        const baseSnaps = (await Promise.all(publicQueries)) as [
           DocumentSnapshot<DocumentData>,
           DocumentSnapshot<DocumentData>,
           DocumentSnapshot<DocumentData>,
@@ -987,7 +989,8 @@ const useStore = create<State & Actions>((set, get) => {
           },
         };
 
-        if (!publicOnly) {
+        if (!publicOnly && auth.currentUser) {
+          console.log("[STORE] Fetching private data for authenticated user:", auth.currentUser.uid);
           const otherSnaps = (await Promise.all([
             getDocs(collection(db, "clients")),
             getDocs(collection(db, "contracts")),
@@ -1083,6 +1086,8 @@ const useStore = create<State & Actions>((set, get) => {
             id: d.id,
             ...d.data(),
           }));
+        } else if (!publicOnly && !auth.currentUser) {
+          console.warn("[STORE] fetchAllData(false) called but no user is authenticated. Skipping private data.");
         }
 
         // Mescla custos da coleção privada para usuários autorizados.

@@ -66,21 +66,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log("[AUTH] Fetching user profile from Firestore for UID:", fbUser.uid);
 
       try {
+        const uid = fbUser.uid;
+        console.log("[PROFILE] Iniciando leitura para UID:", uid);
+        
         // Tenta buscar na coleção 'users' primeiro
-        console.log("[AUTH] getDoc attempt for users/", fbUser.uid);
-        const userRef = doc(db, "users", fbUser.uid);
+        const userRef = doc(db, "users", uid);
+        console.log("[PROFILE] Caminho: users/" + uid);
+        
         let snap = await getDoc(userRef);
         let data: any;
 
         if (!snap.exists()) {
-          console.warn("[AUTH] User document does not exist in 'users' for UID:", fbUser.uid);
+          console.warn("[AUTH] User document does not exist in 'users' for UID:", uid);
           // Fallback para 'profiles'
-          console.log("[AUTH] Trying fallback to 'profiles' collection...");
-          const profileRef = doc(db, "profiles", fbUser.uid);
+          console.log("[PROFILE] Tentando fallback para 'profiles/" + uid + "'");
+          const profileRef = doc(db, "profiles", uid);
           snap = await getDoc(profileRef);
           
           if (!snap.exists()) {
-            console.error("[AUTH] Profile not found in either 'users' or 'profiles' for UID:", fbUser.uid);
+            console.error("[PROFILE] Erro: Perfil não encontrado em nenhuma coleção para o UID:", uid);
             setAccessDenied(
               "Seu usuário não possui acesso ao sistema (perfil não encontrado). Contate o administrador."
             );
@@ -92,7 +96,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
         
         data = snap.data();
-        console.log("[AUTH] Profile found in collection:", snap.ref.parent.id);
+        console.log("[PROFILE] Perfil carregado com sucesso da coleção:", snap.ref.parent.id);
 
         // Normaliza status legado (active/inactive) para o padrão ativo/inativo.
         const rawStatus = String(data.status || "ativo").toLowerCase();
