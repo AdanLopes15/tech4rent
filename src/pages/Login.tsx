@@ -41,11 +41,14 @@ const Login = () => {
       setLoading(true);
       console.log("[AUTH] Attempting login for:", email);
       await signIn(email, password);
-      console.log("[AUTH] signIn promise resolved");
+      console.log("[AUTH] signIn promise resolved successfully");
       toast.success("Login realizado com sucesso!");
-      // The useEffect in Login.tsx should handle the navigation when user state updates
-      // but we'll keep this as a backup if for some reason state sync is delayed.
-      navigate("/selecionar-sistema", { replace: true });
+      
+      // Small delay to ensure AuthContext state is fully synchronized before navigating
+      setTimeout(() => {
+        console.log("[AUTH] Navigating to /selecionar-sistema after delay");
+        navigate("/selecionar-sistema", { replace: true });
+      }, 500);
     } catch (err: any) {
       toast.error(err.message === "Invalid login credentials"
         ? "Email ou senha inválidos."

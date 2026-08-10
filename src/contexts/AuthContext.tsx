@@ -148,9 +148,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [clearState]);
 
   const signIn = async (email: string, password: string) => {
+    console.log("[AUTH] Calling signInWithEmailAndPassword...");
     setAccessDenied(null);
-    const { user } = await signInWithEmailAndPassword(auth, email, password);
-    if (!user) throw new Error("Falha no login");
+    try {
+      const { user } = await signInWithEmailAndPassword(auth, email, password);
+      if (!user) {
+        console.error("[AUTH] signInWithEmailAndPassword returned no user");
+        throw new Error("Falha no login");
+      }
+      console.log("[AUTH] Firebase login successful for UID:", user.uid);
+      
+      // Forces an immediate check of the Firestore profile
+      console.log("[AUTH] Manually triggering profile fetch after login");
+      const snap = await getDoc(doc(db, "users", user.uid));
+      if (!snap.exists()) {
+        console.error("[AUTH] Profile not found for UID:", user.uid);
+        throw new Error("Seu usuário não possui perfil configurado.");
+      }
+      // The onAuthStateChanged listener will handle the rest, but 
+      // by fetching it here we ensure we're not just waiting on the listener.
+    } catch (error: any) {
+      console.error("[AUTH] Error during signIn process:", error);
+      throw error;
+    }
   };
 
   const signOut = async () => {
