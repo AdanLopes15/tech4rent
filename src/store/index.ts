@@ -989,7 +989,8 @@ const useStore = create<State & Actions>((set, get) => {
           },
         };
 
-        if (!publicOnly) {
+        if (!publicOnly && auth.currentUser) {
+          console.log("[STORE] Fetching private data for authenticated user:", auth.currentUser.uid);
           const otherSnaps = (await Promise.all([
             getDocs(collection(db, "clients")),
             getDocs(collection(db, "contracts")),
