@@ -78,14 +78,14 @@ service cloud.firestore {
 
     // ---------- Usuários ----------
     match /users/{uid} {
-      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
-      allow create, update, delete: if isAdmin();
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow read, create, update, delete: if isSignedIn() && isAdmin();
     }
 
     // Regras para a coleção legacy 'profiles'
     match /profiles/{uid} {
-      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
-      allow create, update, delete: if isAdmin();
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow read, create, update, delete: if isSignedIn() && isAdmin();
     }
 
     // ---------- Auditoria ----------
