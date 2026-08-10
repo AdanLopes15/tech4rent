@@ -1086,6 +1086,8 @@ const useStore = create<State & Actions>((set, get) => {
             id: d.id,
             ...d.data(),
           }));
+        } else if (!publicOnly && !auth.currentUser) {
+          console.warn("[STORE] fetchAllData(false) called but no user is authenticated. Skipping private data.");
         }
 
         // Mescla custos da coleção privada para usuários autorizados.
