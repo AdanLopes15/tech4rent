@@ -51,20 +51,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
+    console.log("[AUTH] useEffect: setting up onAuthStateChanged");
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+      console.log("[AUTH] onAuthStateChanged triggered:", fbUser ? `UID: ${fbUser.uid}` : "No user");
       setUser(fbUser);
 
       if (!fbUser) {
+        console.log("[AUTH] No Firebase user, clearing state and stopping loading");
         clearState();
         setLoading(false);
         return;
       }
+
+      console.log("[AUTH] Fetching user profile from Firestore for UID:", fbUser.uid);
 
       try {
         const snap = await getDoc(doc(db, "users", fbUser.uid));
 
         // Regra: usuário sem documento não pode acessar o sistema.
         if (!snap.exists()) {
+          console.warn("[AUTH] User document does not exist in Firestore for UID:", fbUser.uid);
           setAccessDenied(
             "Seu usuário não possui acesso ao sistema. Contate o administrador."
           );
@@ -87,6 +93,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // Regra: usuário inativo é desconectado.
         if (normalizedStatus !== "ativo") {
+          console.warn("[AUTH] User is inactive:", normalizedStatus);
           setAccessDenied("Seu usuário está inativo. Contate o administrador.");
           clearState();
           await firebaseSignOut(auth);
@@ -120,6 +127,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           permissions: data.permissions || [],
           status: normalizedStatus,
         });
+        console.log("[AUTH] Profile and permissions loaded successfully for:", profile);
         setPermissions(resolved);
         setAccessDenied(null);
 
@@ -129,8 +137,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }).catch(() => {});
         logAudit("login", { uid: fbUser.uid, profile });
       } catch (err) {
+        console.error("[AUTH] Error in AuthProvider lifecycle:", err);
         clearState();
       } finally {
+        console.log("[AUTH] Lifecycle finished, setting loading to false");
         setLoading(false);
       }
     });

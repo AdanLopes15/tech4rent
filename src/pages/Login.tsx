@@ -39,9 +39,13 @@ const Login = () => {
 
     try {
       setLoading(true);
+      console.log("[AUTH] Attempting login for:", email);
       await signIn(email, password);
+      console.log("[AUTH] signIn promise resolved");
       toast.success("Login realizado com sucesso!");
-      navigate("/selecionar-sistema");
+      // The useEffect in Login.tsx should handle the navigation when user state updates
+      // but we'll keep this as a backup if for some reason state sync is delayed.
+      navigate("/selecionar-sistema", { replace: true });
     } catch (err: any) {
       toast.error(err.message === "Invalid login credentials"
         ? "Email ou senha inválidos."
