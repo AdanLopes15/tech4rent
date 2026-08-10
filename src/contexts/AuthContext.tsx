@@ -51,73 +51,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    console.log("[AUTH] useEffect: setting up onAuthStateChanged");
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-      console.log("[AUTH] onAuthStateChanged triggered:", fbUser ? `UID: ${fbUser.uid}` : "No user");
       setUser(fbUser);
 
       if (!fbUser) {
-        console.log("[AUTH] No Firebase user, clearing state and stopping loading");
         clearState();
         setLoading(false);
         return;
       }
 
-      console.log("[FIRESTORE DEBUG] [AUTH] Iniciando leitura de perfil", {
-        operation: "get profile",
-        uid: fbUser.uid,
-        authenticated: true,
-        projectId: "st4r-f404e"
-      });
-
       try {
-        const uid = fbUser.uid;
-        
-        // Tenta buscar na coleção 'users' primeiro
-        const userRef = doc(db, "users", uid);
-        console.log("[FIRESTORE DEBUG] [AUTH] Caminho: users/" + uid);
-        
-        let snap;
-        try {
-          snap = await getDoc(userRef);
-        } catch (e: any) {
-          console.error("[FIRESTORE ERROR] [AUTH] Falha ao ler users/" + uid, {
-            code: e?.code,
-            message: e?.message
-          });
-          throw e;
-        }
-        let data: any;
+        const snap = await getDoc(doc(db, "users", fbUser.uid));
 
+        // Regra: usuário sem documento não pode acessar o sistema.
         if (!snap.exists()) {
-          console.warn("[AUTH] User document does not exist in 'users' for UID:", uid);
-          // Fallback para 'profiles'
-          console.log("[FIRESTORE DEBUG] [AUTH] Tentando fallback para 'profiles/" + uid + "'");
-          const profileRef = doc(db, "profiles", uid);
-          try {
-            snap = await getDoc(profileRef);
-          } catch (e: any) {
-            console.error("[FIRESTORE ERROR] [AUTH] Falha ao ler profiles/" + uid, {
-              code: e?.code,
-              message: e?.message
-            });
-            throw e;
-          }
-          
-          if (!snap.exists()) {
-            console.error("[PROFILE] Erro: Perfil não encontrado em nenhuma coleção para o UID:", uid);
-            setAccessDenied(
-              "Seu usuário não possui acesso ao sistema (perfil não encontrado). Contate o administrador."
-            );
-            clearState();
-            await firebaseSignOut(auth);
-            setLoading(false);
-            return;
-          }
+          setAccessDenied(
+            "Seu usuário não possui acesso ao sistema. Contate o administrador."
+          );
+          clearState();
+          await firebaseSignOut(auth);
+          setLoading(false);
+          return;
         }
-        
-        data = snap.data();
-        console.log("[PROFILE] Perfil carregado com sucesso da coleção:", snap.ref.parent.id);
+
+        const data = snap.data() as any;
 
         // Normaliza status legado (active/inactive) para o padrão ativo/inativo.
         const rawStatus = String(data.status || "ativo").toLowerCase();
@@ -130,7 +87,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // Regra: usuário inativo é desconectado.
         if (normalizedStatus !== "ativo") {
-          console.warn("[AUTH] User is inactive:", normalizedStatus);
           setAccessDenied("Seu usuário está inativo. Contate o administrador.");
           clearState();
           await firebaseSignOut(auth);
@@ -148,6 +104,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               : undefined;
 
         const profile: ProfileKey = data.profile || legacyProfile || "custom";
+        // Perfis legados sem lista de permissões e sem perfil reconhecido
+        // recebem acesso amplo apenas se forem gestor/colaborador antigo.
         const legacyCustom =
           !data.profile && !legacyProfile && (legacy === "gestor" || legacy === "colaborador")
             ? ["*"]
@@ -162,30 +120,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           permissions: data.permissions || [],
           status: normalizedStatus,
         });
-        console.log("[AUTH] Profile and permissions loaded successfully for:", profile);
         setPermissions(resolved);
         setAccessDenied(null);
 
         // Auditoria: registra último acesso e login (fire-and-forget).
-        // Tenta atualizar no local onde foi encontrado
-        updateDoc(snap.ref, {
+        updateDoc(doc(db, "users", fbUser.uid), {
           lastAccess: serverTimestamp(),
-        }).catch((e) => console.warn("[AUTH] Failed to update lastAccess:", e.message));
-        
+        }).catch(() => {});
         logAudit("login", { uid: fbUser.uid, profile });
-      } catch (err: any) {
-        console.error("[FIRESTORE ERROR] [AUTH] Lifecycle error:", {
-          code: err?.code,
-          message: err?.message,
-          stack: err?.stack
-        });
-        if (err.code === "permission-denied") {
-          console.error("[FIRESTORE ERROR] [AUTH] Permission denied fetching profile. UID:", fbUser.uid);
-          setAccessDenied("Erro de permissão ao acessar seu perfil. Contate o suporte.");
-        }
+      } catch (err) {
         clearState();
       } finally {
-        console.log("[AUTH] Lifecycle finished, setting loading to false");
         setLoading(false);
       }
     });
@@ -193,60 +138,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [clearState]);
 
   const signIn = async (email: string, password: string) => {
-    console.log("[AUTH] Calling signInWithEmailAndPassword...");
     setAccessDenied(null);
-    try {
-      const { user: fbUser } = await signInWithEmailAndPassword(auth, email, password);
-      if (!fbUser) {
-        console.error("[AUTH] signInWithEmailAndPassword returned no user");
-        throw new Error("Falha no login");
-      }
-      console.log("[AUTH] Firebase login successful for UID:", fbUser.uid);
-      
-      // Forces an immediate check of the Firestore profile
-      console.log("[AUTH] Manually fetching profile after login to expedite state sync");
-      let snap = await getDoc(doc(db, "users", fbUser.uid));
-      let data: any;
-
-      if (!snap.exists()) {
-        console.warn("[AUTH] Profile not found in 'users', trying 'profiles'");
-        snap = await getDoc(doc(db, "profiles", fbUser.uid));
-        if (!snap.exists()) {
-          console.error("[AUTH] Profile not found for UID in any collection:", fbUser.uid);
-          throw new Error("Seu usuário não possui perfil configurado no sistema.");
-        }
-      }
-      data = snap.data();
-      const rawStatus = String(data.status || "ativo").toLowerCase();
-      const normalizedStatus = rawStatus === "active" ? "ativo" : rawStatus === "inactive" ? "inativo" : rawStatus;
-
-      if (normalizedStatus !== "ativo") {
-        await firebaseSignOut(auth);
-        throw new Error("Seu usuário está inativo. Contate o administrador.");
-      }
-
-      // Update local state immediately so AuthContext is ready before navigation
-      const profile = data.profile || "custom";
-      const resolved = resolvePermissions(profile, data.permissions);
-      
-      console.log("[AUTH] Updating local state manually for faster navigation");
-      setUser(fbUser);
-      setAppUser({
-        uid: fbUser.uid,
-        name: data.name,
-        email: data.email || fbUser.email || undefined,
-        profile,
-        permissions: data.permissions || [],
-        status: normalizedStatus,
-      });
-      setPermissions(resolved);
-      setLoading(false); // Stop loading since we have the data
-      
-      logAudit("login", { uid: fbUser.uid, profile });
-    } catch (error: any) {
-      console.error("[AUTH] Error during signIn process:", error);
-      throw error;
-    }
+    const { user } = await signInWithEmailAndPassword(auth, email, password);
+    if (!user) throw new Error("Falha no login");
   };
 
   const signOut = async () => {

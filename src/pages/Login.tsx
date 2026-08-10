@@ -13,18 +13,14 @@ import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { toast } from "sonner";
 
 const Login = () => {
-  const { user, appUser, loading: authLoading, signIn } = useAuth();
+  const { user, loading: authLoading, signIn } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Se já estivermos autenticados e o perfil foi carregado, redirecionamos.
-    // Se estivermos autenticados mas SEM perfil (appUser null), o loop seria causado aqui
-    // se redirecionássemos cegamente. Por isso, verificamos appUser.
-    if (!authLoading && user && appUser) {
-      console.log("[LOGIN] Authenticated user with profile detected, navigating...");
+    if (!authLoading && user) {
       navigate("/selecionar-sistema", { replace: true });
     }
-  }, [user, appUser, authLoading, navigate]);
+  }, [user, authLoading, navigate]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,14 +39,9 @@ const Login = () => {
 
     try {
       setLoading(true);
-      console.log("[AUTH] Attempting login for:", email);
       await signIn(email, password);
-      console.log("[AUTH] signIn promise resolved successfully");
       toast.success("Login realizado com sucesso!");
-      
-      // Navigate immediately as we've already synced the AuthContext state manually in signIn
-      console.log("[AUTH] Navigating to /selecionar-sistema");
-      navigate("/selecionar-sistema", { replace: true });
+      navigate("/selecionar-sistema");
     } catch (err: any) {
       toast.error(err.message === "Invalid login credentials"
         ? "Email ou senha inválidos."

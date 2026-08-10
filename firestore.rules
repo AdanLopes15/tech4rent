@@ -12,38 +12,22 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isOwner(uid) {
-      return isSignedIn() && request.auth.uid == uid;
-    }
-
     function userDoc() {
-      let uid = request.auth.uid;
-      let pathUsers = /databases/$(database)/documents/users/$(uid);
-      let pathProfiles = /databases/$(database)/documents/profiles/$(uid);
-      // exists() e get() aqui causam dependência circular se chamados dentro da regra de leitura do próprio /users/{uid}
-      return exists(pathUsers) ? get(pathUsers).data : get(pathProfiles).data;
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
 
+    // Normaliza status legado (active/inactive) para ativo/inativo.
     function statusOf() {
-      let data = userDoc();
-      return data.status == 'active' ? 'ativo'
-           : data.status == 'inactive' ? 'inativo'
-           : data.status;
+      return userDoc().status == 'active' ? 'ativo'
+           : userDoc().status == 'inactive' ? 'inativo'
+           : userDoc().status;
     }
 
-    // Usuário válido = tem documento em users/{uid} ou profiles/{uid} e está ativo.
+    // Usuário válido = tem documento em users/{uid} e está ativo.
     function isActiveUser() {
-      let uid = request.auth.uid;
-      let pathUsers = /databases/$(database)/documents/users/$(uid);
-      let pathProfiles = /databases/$(database)/documents/profiles/$(uid);
-      
-      let hasDoc = exists(pathUsers) || exists(pathProfiles);
-      if (!isSignedIn() || !hasDoc) {
-        return false;
-      }
-
-      let data = hasDoc && exists(pathUsers) ? get(pathUsers).data : get(pathProfiles).data;
-      return data.status == 'active' || data.status == 'ativo';
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && statusOf() == 'ativo';
     }
 
     function profileOf() {
@@ -81,14 +65,8 @@ service cloud.firestore {
 
     // ---------- Usuários ----------
     match /users/{uid} {
-      allow read: if isOwner(uid);
-      allow read, create, update, delete: if isSignedIn() && isAdmin();
-    }
-
-    // Regras para a coleção legacy 'profiles'
-    match /profiles/{uid} {
-      allow read: if isOwner(uid);
-      allow read, create, update, delete: if isSignedIn() && isAdmin();
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow create, update, delete: if isAdmin();
     }
 
     // ---------- Auditoria ----------
@@ -143,7 +121,7 @@ service cloud.firestore {
     // Demais coleções administrativas: exigem usuário ativo.
     // (contratos, vendas, financeiro, etc.) — ajuste conforme necessário.
     match /{document=**} {
-      allow read, write: if isSignedIn() && isActiveUser();
+      allow read, write: if isActiveUser();
     }
   }
 }

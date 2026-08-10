@@ -57,21 +57,12 @@ const AdminHeader = ({ isDark, onToggleTheme }: AdminHeaderProps) => {
     const systemUser = systemUsers.find((u: any) => u.uid === user.uid || u.email === user.email);
     if (systemUser?.name) setDisplayName(systemUser.name);
 
-    console.log("[FIRESTORE DEBUG] [AdminHeader] Buscando perfil do usuário logado", {
-      uid: user.uid,
-      path: "profiles/" + user.uid
-    });
     getDoc(doc(db, "profiles", user.uid)).then((snap) => {
       if (snap.exists()) {
         const data = snap.data();
         if (data.nome) setDisplayName(data.nome);
         if (data.photoUrl) setAvatarUrl(data.photoUrl);
       }
-    }).catch(e => {
-      console.error("[FIRESTORE ERROR] [AdminHeader] Falha ao ler profiles/" + user.uid, {
-        code: e?.code,
-        message: e?.message
-      });
     });
   }, [user, systemUsers]);
 
