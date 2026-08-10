@@ -17,7 +17,10 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // If we're already authenticated and loading finished, we should redirect.
+    // However, we rely more on the manual navigation after signIn to avoid race conditions.
     if (!authLoading && user) {
+      console.log("[LOGIN] Authenticated user detected in useEffect, navigating...");
       navigate("/selecionar-sistema", { replace: true });
     }
   }, [user, authLoading, navigate]);
@@ -44,11 +47,9 @@ const Login = () => {
       console.log("[AUTH] signIn promise resolved successfully");
       toast.success("Login realizado com sucesso!");
       
-      // Small delay to ensure AuthContext state is fully synchronized before navigating
-      setTimeout(() => {
-        console.log("[AUTH] Navigating to /selecionar-sistema after delay");
-        navigate("/selecionar-sistema", { replace: true });
-      }, 500);
+      // Navigate immediately as we've already synced the AuthContext state manually in signIn
+      console.log("[AUTH] Navigating to /selecionar-sistema");
+      navigate("/selecionar-sistema", { replace: true });
     } catch (err: any) {
       toast.error(err.message === "Invalid login credentials"
         ? "Email ou senha inválidos."
