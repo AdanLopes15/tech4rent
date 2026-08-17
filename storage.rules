@@ -1,0 +1,207 @@
+rules_version = '2';
+
+// ============================================================================
+// Regras do Firebase Storage · projeto st4r-f404e
+// ============================================================================
+//
+// PROBLEMA QUE ESTA REGRA RESOLVE
+// Antes destas regras o bucket permitia, sem qualquer credencial: listar todos
+// os objetos, ler os metadados de cada um (inclusive o downloadToken) e, com
+// esse token, baixar o arquivo — incluindo os PDFs em contracts/.
+//
+// DOIS SISTEMAS COMPARTILHAM ESTE BUCKET
+//   - App Vite (este repositório)
+//   - App Next.js legado (st4r-f404e.web.app), que também usa o Web SDK no
+//     browser. Portanto estas regras valem para os dois.
+//
+// CAMINHOS COBERTOS (união verificada dos dois sistemas)
+//   Vite + Next.js : equipments/ · company/ · site/ · contracts/ · boletos/
+//                    · receipts/expenses/
+//   Somente Vite   : catalogItems/ · profiles/ · site-builder/
+//   Nenhum prefixo exclusivo do Next.js ficou de fora.
+//
+// BASE DE USUÁRIOS REAL (6 documentos em users/)
+//   5 × admin legado : permission: "admin"   — SEM campo profile
+//   1 × comercial    : permission/profile: "comercial_orcamentos", status "ativo"
+//
+// ============================================================================
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ------------------------------------------------------------------
+    // Acesso ao documento do usuário no Firestore
+    //
+    // IMPORTANTE: todo campo opcional é lido com .get(chave, padrão).
+    // Acessar um campo inexistente com a notação de ponto gera ERRO de
+    // avaliação, o que NEGA o acesso. Como os 5 admins legados não têm o
+    // campo `profile`, usar userDoc().profile os bloquearia — inclusive
+    // quando fossem admins.
+    // ------------------------------------------------------------------
+
+    function userPath() {
+      return /databases/(default)/documents/users/$(request.auth.uid);
+    }
+
+    function hasUserDoc() {
+      return request.auth != null && firestore.exists(userPath());
+    }
+
+    function userDoc() {
+      return firestore.get(userPath()).data;
+    }
+
+    // Status ausente vale como "ativo", espelhando normalizeStatus() do app
+    // (store/index.ts:38 e AuthContext.tsx:80), onde String(s || "ativo").
+    // Sem isso, documentos legados sem `status` seriam negados.
+    function statusOf() {
+      return userDoc().get('status', 'ativo') == 'active'  ? 'ativo'
+           : userDoc().get('status', 'ativo') == 'inactive' ? 'inativo'
+           : userDoc().get('status', 'ativo');
+    }
+
+    function isActiveUser() {
+      return hasUserDoc() && statusOf() == 'ativo';
+    }
+
+    // Administrador = profile "admin" (novo) OU permission "admin" (legado).
+    function isAdmin() {
+      return isActiveUser() && (
+           userDoc().get('profile', '')    == 'admin'
+        || userDoc().get('permission', '') == 'admin'
+      );
+    }
+
+    // Permissão granular: admin passa em tudo; demais dependem do array
+    // `permissions`. Aceita coringas "*" e "modulo.*", como can() em
+    // lib/permissions.ts:88.
+    function hasPerm(perm) {
+      return isAdmin() || (
+        isActiveUser()
+        && userDoc().get('permissions', []) is list
+        && userDoc().get('permissions', []).hasAny([perm, '*'])
+      );
+    }
+
+    // ------------------------------------------------------------------
+    // Validação de conteúdo
+    //
+    // request.resource é NULO em delete. Por isso tipo e tamanho são
+    // verificados apenas em create/update, e delete tem regra própria.
+    // ------------------------------------------------------------------
+
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    function isVideo() {
+      return request.resource.contentType.matches('video/.*');
+    }
+
+    function isPdf() {
+      return request.resource.contentType == 'application/pdf';
+    }
+
+    function under(mb) {
+      return request.resource.size < mb * 1024 * 1024;
+    }
+
+    // ==================================================================
+    // PREFIXOS PÚBLICOS
+    //
+    // `get` liberado: a landing e o catálogo carregam estas imagens sem
+    // login. `list` exige usuário ativo — é a enumeração anônima do bucket
+    // que constitui a falha atual, e nenhum dos dois apps usa listAll().
+    // ==================================================================
+
+    match /equipments/{allPaths=**} {
+      allow get:  if true;
+      allow list: if isActiveUser();
+      allow create, update: if hasPerm('equipamentos.edit') && isImage() && under(10);
+      allow delete:         if hasPerm('equipamentos.edit');
+    }
+
+    match /catalogItems/{allPaths=**} {
+      allow get:  if true;
+      allow list: if isActiveUser();
+      allow create, update: if hasPerm('equipamentos.edit') && (isImage() || isVideo()) && under(50);
+      allow delete:         if hasPerm('equipamentos.edit');
+    }
+
+    match /company/{allPaths=**} {
+      allow get:  if true;
+      allow list: if isActiveUser();
+      allow create, update: if hasPerm('configuracoes.edit') && isImage() && under(10);
+      allow delete:         if hasPerm('configuracoes.edit');
+    }
+
+    match /site/{allPaths=**} {
+      allow get:  if true;
+      allow list: if isActiveUser();
+      allow create, update: if hasPerm('configuracoes.edit') && (isImage() || isVideo()) && under(50);
+      allow delete:         if hasPerm('configuracoes.edit');
+    }
+
+    match /site-builder/{allPaths=**} {
+      allow get:  if true;
+      allow list: if isActiveUser();
+      allow create, update: if hasPerm('configuracoes.edit') && (isImage() || isVideo()) && under(50);
+      allow delete:         if hasPerm('configuracoes.edit');
+    }
+
+    // ==================================================================
+    // AVATARES — protegido. Só dentro do sistema.
+    // Cada usuário escreve apenas na própria pasta.
+    // ==================================================================
+
+    match /profiles/{uid}/{allPaths=**} {
+      allow get, list: if isActiveUser();
+      allow create, update: if isActiveUser()
+                            && request.auth.uid == uid
+                            && isImage()
+                            && under(5);
+      allow delete: if isActiveUser() && (request.auth.uid == uid || isAdmin());
+    }
+
+    // ==================================================================
+    // DOCUMENTOS PRIVADOS — nunca públicos.
+    // Contêm dados pessoais de clientes: CPF/CNPJ, endereço, assinatura.
+    // ==================================================================
+
+    match /contracts/{allPaths=**} {
+      allow get, list:      if hasPerm('contratos.view');
+      allow create, update: if hasPerm('contratos.edit') && (isPdf() || isImage()) && under(25);
+      allow delete:         if hasPerm('contratos.delete');
+    }
+
+    match /boletos/{allPaths=**} {
+      allow get, list:      if hasPerm('financeiro.view');
+      allow create, update: if hasPerm('financeiro.edit') && (isPdf() || isImage()) && under(25);
+      allow delete:         if hasPerm('financeiro.delete');
+    }
+
+    // Cobre receipts/expenses/{expenseId}/{arquivo} (store/index.ts:2217)
+    // e qualquer subpasta futura de comprovantes.
+    match /receipts/{allPaths=**} {
+      allow get, list:      if hasPerm('financeiro.view');
+      allow create, update: if hasPerm('financeiro.edit') && (isPdf() || isImage()) && under(25);
+      allow delete:         if hasPerm('financeiro.delete');
+    }
+
+    // ==================================================================
+    // NEGAÇÃO PADRÃO
+    //
+    // Qualquer caminho não declarado acima já é NEGADO — no Storage a
+    // ausência de um `allow` correspondente é a própria negação.
+    //
+    // O bloco abaixo é DOCUMENTAÇÃO, não mecanismo: as regras se combinam
+    // por OU, então um `allow ... : if false` jamais revoga permissão
+    // concedida em outro match. Está aqui para tornar a intenção explícita
+    // na revisão; removê-lo não muda comportamento algum.
+    // ==================================================================
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

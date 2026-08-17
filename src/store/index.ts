@@ -31,6 +31,7 @@ import {
 } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { db, auth, storage, createAuthUserIsolated } from "@/lib/firebase";
+import { requireDocumentContentType } from "@/lib/upload-metadata";
 import { logAudit } from "@/lib/audit";
 import { getNextId as getNextIdUtil, removeUndefined } from "./utils";
 import { format, differenceInMonths, addMonths, addDays, addYears, addWeeks, getDate } from "date-fns";
@@ -1790,8 +1791,11 @@ const useStore = create<State & Actions>((set, get) => {
     attachSignedContract: async (contractId, file) => {
       if (!file) throw new Error("Nenhum arquivo selecionado.");
 
+      // contentType explícito: sem isso o SDK depende de file.type, que pode
+      // vir vazio e subir como application/octet-stream (negado pelas regras).
+      const contentType = requireDocumentContentType(file);
       const storageRef = ref(storage, `contracts/${contractId}/${file.name}`);
-      const snapshot = await uploadBytes(storageRef, file);
+      const snapshot = await uploadBytes(storageRef, file, { contentType });
       const downloadURL = await getDownloadURL(snapshot.ref);
 
       const contractRef = doc(db, "contracts", contractId);
@@ -2112,8 +2116,9 @@ const useStore = create<State & Actions>((set, get) => {
       const revenue = get().revenues.find((r) => r.id === revenueId);
       if (!revenue) throw new Error("Parcela não encontrada.");
 
+      const contentType = requireDocumentContentType(file);
       const storageRef = ref(storage, `boletos/${revenue.contractId}/${revenueId}-${file.name}`);
-      const snapshot = await uploadBytes(storageRef, file);
+      const snapshot = await uploadBytes(storageRef, file, { contentType });
       const downloadURL = await getDownloadURL(snapshot.ref);
 
       const revenueRef = doc(db, "revenues", revenueId);
@@ -2214,8 +2219,9 @@ const useStore = create<State & Actions>((set, get) => {
 
     attachReceiptToExpense: async (expenseId: string, file: File) => {
       if (!file) throw new Error("Nenhum arquivo selecionado.");
+      const contentType = requireDocumentContentType(file);
       const storageRef = ref(storage, `receipts/expenses/${expenseId}/${file.name}`);
-      const snapshot = await uploadBytes(storageRef, file);
+      const snapshot = await uploadBytes(storageRef, file, { contentType });
       const downloadURL = await getDownloadURL(snapshot.ref);
 
       const expenseRef = doc(db, "expenses", expenseId);

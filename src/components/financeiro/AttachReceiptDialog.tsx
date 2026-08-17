@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useStore } from "@/store";
 import { Loader2, Paperclip } from "lucide-react";
+import { resolveDocumentContentType } from "@/lib/upload-metadata";
 import { toast } from "sonner";
 
 interface AttachReceiptDialogProps {
@@ -33,7 +34,11 @@ export const AttachReceiptDialog = ({ open, onOpenChange, expense }: AttachRecei
     const selectedFile = e.target.files[0];
     const allowedTypes = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
 
-    if (allowedTypes.includes(selectedFile.type)) {
+    // Resolve por tipo declarado E por extensão: file.type vem vazio em
+    // alguns sistemas, o que rejeitava arquivos válidos aqui.
+    const resolvedType = resolveDocumentContentType(selectedFile);
+
+    if (resolvedType && allowedTypes.includes(resolvedType)) {
       setFile(selectedFile);
     } else {
       toast.error("Selecione um PDF ou imagem (JPG, PNG, WebP).");

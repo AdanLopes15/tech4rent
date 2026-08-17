@@ -17,6 +17,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -57,6 +68,7 @@ import { AddExpenseDialog } from "@/components/financeiro/AddExpenseDialog";
 import { TransferDialog } from "@/components/financeiro/TransferDialog";
 import { AttachReceiptDialog } from "@/components/financeiro/AttachReceiptDialog";
 import { toast } from "sonner";
+import { openPrivateFile } from "@/lib/private-file";
 
 type SortableKeys = "dueDate" | "description" | "valorTotal" | "currentStatus";
 
@@ -631,18 +643,39 @@ const ContasPagar = () => {
 
                           {expense.receiptUrl ? (
                             <>
-                              <DropdownMenuItem onClick={() => window.open(expense.receiptUrl, "_blank")}>
+                              <DropdownMenuItem onClick={() => openPrivateFile(expense.receiptUrl)}>
                                 <LinkIcon className="h-4 w-4 mr-2" />
                                 Visualizar Comprovante
                               </DropdownMenuItem>
 
-                              <DropdownMenuItem
-                                className="text-destructive"
-                                onClick={() => handleDeleteReceipt(expense.id)}
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Excluir Comprovante
-                              </DropdownMenuItem>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <DropdownMenuItem
+                                    onSelect={(e) => e.preventDefault()}
+                                    className="text-destructive"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Excluir Comprovante
+                                  </DropdownMenuItem>
+                                </AlertDialogTrigger>
+
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Excluir comprovante?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Tem certeza que deseja excluir este comprovante? Esta ação não poderá ser
+                                      desfeita.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDeleteReceipt(expense.id)}>
+                                      Excluir comprovante
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                             </>
                           ) : (
                             <DropdownMenuItem onClick={() => handleAttachReceipt(expense)}>

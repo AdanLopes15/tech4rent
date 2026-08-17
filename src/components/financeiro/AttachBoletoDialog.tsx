@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, Paperclip } from "lucide-react";
 import { format } from "date-fns";
 import { formatCurrency } from "@/lib/utils";
+import { resolveDocumentContentType } from "@/lib/upload-metadata";
 import { toast } from "sonner";
 
 interface AttachBoletoDialogProps {
@@ -66,7 +67,9 @@ export const AttachBoletoDialog = ({ open, onOpenChange, revenue }: AttachBoleto
 
     const selectedFile = e.target.files[0];
 
-    if (selectedFile.type === "application/pdf") {
+    // Resolve por tipo declarado E por extensão: file.type vem vazio em
+    // alguns sistemas, o que rejeitava PDFs válidos aqui.
+    if (resolveDocumentContentType(selectedFile) === "application/pdf") {
       setFile(selectedFile);
     } else {
       toast.error("Selecione um arquivo PDF.");

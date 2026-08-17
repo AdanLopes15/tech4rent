@@ -27,6 +27,7 @@ import { Plus, MoreHorizontal, FileCheck, FileX, Download, Trash2, Paperclip } f
 import { formatCurrency } from "@/lib/utils";
 import { format } from "date-fns";
 import { AttachBoletoDialog } from "@/components/financeiro/AttachBoletoDialog";
+import { openPrivateFile } from "@/lib/private-file";
 
 const Boletos = () => {
   const { revenues, fetchAllData, deleteBoletoFromRevenue } = useStore();
@@ -135,7 +136,7 @@ const Boletos = () => {
                             </DropdownMenuItem>
                           ) : (
                             <>
-                              <DropdownMenuItem onClick={() => window.open(revenue.boletoUrl, "_blank")}>
+                              <DropdownMenuItem onClick={() => openPrivateFile(revenue.boletoUrl)}>
                                 <Download className="h-4 w-4 mr-2" />
                                 Baixar Boleto
                               </DropdownMenuItem>

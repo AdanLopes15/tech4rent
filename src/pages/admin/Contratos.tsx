@@ -8,6 +8,7 @@ import type { DateRange } from "react-day-picker";
 import { useStore } from "@/store";
 import { CompanyLogo } from "@/components/admin/CompanyLogo";
 import { useToast } from "@/hooks/use-toast";
+import { openPrivateFile } from "@/lib/private-file";
 import { cn, formatCurrency } from "@/lib/utils";
 import { DocumentItemRow } from "@/components/admin/operacional/documents";
 
@@ -778,18 +779,39 @@ export default function Contratos() {
 
                                 {contract.signedContractUrl && (
                                   <>
-                                    <DropdownMenuItem onClick={() => window.open(contract.signedContractUrl, "_blank")}>
+                                    <DropdownMenuItem onClick={() => openPrivateFile(contract.signedContractUrl)}>
                                       <LinkIcon className="mr-2 h-4 w-4" />
                                       Ver Contrato Assinado
                                     </DropdownMenuItem>
 
-                                    <DropdownMenuItem
-                                      className="text-destructive"
-                                      onClick={() => handleDeleteSigned(contract.id)}
-                                    >
-                                      <Trash2 className="mr-2 h-4 w-4" />
-                                      Excluir Anexo
-                                    </DropdownMenuItem>
+                                    <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                        <DropdownMenuItem
+                                          onSelect={(e) => e.preventDefault()}
+                                          className="text-destructive"
+                                        >
+                                          <Trash2 className="mr-2 h-4 w-4" />
+                                          Excluir Anexo
+                                        </DropdownMenuItem>
+                                      </AlertDialogTrigger>
+
+                                      <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                          <AlertDialogTitle>Excluir anexo?</AlertDialogTitle>
+                                          <AlertDialogDescription>
+                                            Tem certeza que deseja excluir este anexo? Esta ação não poderá ser
+                                            desfeita.
+                                          </AlertDialogDescription>
+                                        </AlertDialogHeader>
+
+                                        <AlertDialogFooter>
+                                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                          <AlertDialogAction onClick={() => handleDeleteSigned(contract.id)}>
+                                            Excluir anexo
+                                          </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
                                   </>
                                 )}
 

@@ -23,7 +23,7 @@ interface AttachSignedContractDialogProps {
 }
 
 export function AttachSignedContractDialog({ open, onOpenChange, contract }: AttachSignedContractDialogProps) {
-  const { updateContract } = useStore();
+  const { attachSignedContract } = useStore();
   const { toast } = useToast();
 
   const [file, setFile] = useState<File | null>(null);
@@ -41,14 +41,9 @@ export function AttachSignedContractDialog({ open, onOpenChange, contract }: Att
     try {
       setLoading(true);
 
-      // 🔥 SIMPLES (SEM STORAGE AINDA)
-      // aqui você pode depois integrar com Firebase Storage
-      const fakeUrl = URL.createObjectURL(file);
-
-      await updateContract({
-        id: contract.id,
-        signedContractUrl: fakeUrl,
-      });
+      // Envia para o Firebase Storage em contracts/{contractId}/{arquivo}
+      // e grava a referência no contrato.
+      await attachSignedContract(contract.id, file);
 
       toast({
         title: "Contrato anexado com sucesso!",
