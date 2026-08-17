@@ -1,0 +1,22 @@
+# SPA fallback para React Router (BrowserRouter) em Apache / Hostinger.
+#
+# Sem isso, um F5 em rotas internas como /admin/contratos faz o Apache
+# procurar um arquivo nesse caminho, não encontrar e devolver o 404 do
+# servidor. O React Router nunca chega a ser carregado.
+#
+# A regra abaixo serve arquivos e diretórios reais normalmente (assets do
+# build, imagens, robots.txt, as páginas .html estáticas) e entrega o
+# index.html para qualquer outro caminho, deixando o roteamento com o React.
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # 1) Arquivo ou diretório existe no disco: serve como está.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # 2) Qualquer outro caminho: entrega o index.html (HTTP 200, não redirect).
+  RewriteRule . /index.html [L]
+</IfModule>
