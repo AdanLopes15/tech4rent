@@ -18,6 +18,32 @@ import { toast } from "sonner";
 const LEGACY_BLOB_MESSAGE =
   "Este anexo foi salvo em um formato antigo e não está mais disponível. Reenvie o arquivo.";
 
+/** Extrai o `code` de um StorageError sem recorrer a `any`. */
+function storageErrorCode(error: unknown): string {
+  if (typeof error === "object" && error !== null && "code" in error) {
+    return String((error as { code: unknown }).code ?? "");
+  }
+  return "";
+}
+
+/** Mensagem amigável para o usuário a partir de um erro desconhecido. */
+function describeError(error: unknown): string {
+  switch (storageErrorCode(error)) {
+    case "storage/unauthorized":
+      return "Você não tem permissão para acessar este arquivo.";
+    case "storage/object-not-found":
+      return "Arquivo não encontrado. Ele pode ter sido removido.";
+    case "storage/invalid-argument":
+    case "storage/invalid-url":
+      return LEGACY_BLOB_MESSAGE;
+    default:
+      break;
+  }
+
+  if (error instanceof Error && error.message) return error.message;
+  return "Não foi possível abrir o arquivo.";
+}
+
 /**
  * Abre um arquivo privado do Storage em nova aba.
  * Aceita tanto a URL completa quanto o caminho (`contracts/CTR-001/x.pdf`),
@@ -58,18 +84,8 @@ export async function openPrivateFile(urlOrPath?: string | null): Promise<void> 
     document.body.appendChild(anchor);
     anchor.click();
     anchor.remove();
-  } catch (error: any) {
+  } catch (error: unknown) {
     win?.close();
-
-    const code = String(error?.code || "");
-    if (code === "storage/unauthorized") {
-      toast.error("Você não tem permissão para acessar este arquivo.");
-    } else if (code === "storage/object-not-found") {
-      toast.error("Arquivo não encontrado. Ele pode ter sido removido.");
-    } else if (code === "storage/invalid-argument" || code === "storage/invalid-url") {
-      toast.error(LEGACY_BLOB_MESSAGE);
-    } else {
-      toast.error(error?.message || "Não foi possível abrir o arquivo.");
-    }
+    toast.error(describeError(error));
   }
 }

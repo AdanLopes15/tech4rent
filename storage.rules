@@ -4,6 +4,16 @@ rules_version = '2';
 // Regras do Firebase Storage · projeto st4r-f404e
 // ============================================================================
 //
+// PRÉ-REQUISITO DE INFRAESTRUTURA
+// Estas regras usam firestore.get()/firestore.exists() (leitura cross-service).
+// Isso exige que a integração esteja habilitada no projeto: o service agent
+// service-{PROJECT_NUMBER}@gcp-sa-firebasestorage.iam.gserviceaccount.com
+// precisa do papel "Firebase Rules Firestore Service Agent"
+// (roles/firebaserules.firestoreServiceAgent).
+// Sem essa concessão as regras compilam e publicam normalmente, mas TODA
+// avaliação que consulta o Firestore falha em runtime com storage/unauthorized.
+// O deploy pelo CLI não avisa; só o Console solicita a habilitação.
+//
 // PROBLEMA QUE ESTA REGRA RESOLVE
 // Antes destas regras o bucket permitia, sem qualquer credencial: listar todos
 // os objetos, ler os metadados de cada um (inclusive o downloadToken) e, com
@@ -73,13 +83,18 @@ service firebase.storage {
     }
 
     // Permissão granular: admin passa em tudo; demais dependem do array
-    // `permissions`. Aceita coringas "*" e "modulo.*", como can() em
+    // `permissions`. Aceita a permissão exata, o coringa total "*" e o
+    // coringa por módulo "modulo.*" — mesma semântica de can() em
     // lib/permissions.ts:88.
     function hasPerm(perm) {
       return isAdmin() || (
         isActiveUser()
         && userDoc().get('permissions', []) is list
-        && userDoc().get('permissions', []).hasAny([perm, '*'])
+        && userDoc().get('permissions', []).hasAny([
+             perm,
+             '*',
+             perm.split('\\.')[0] + '.*'
+           ])
       );
     }
 

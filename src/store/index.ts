@@ -1815,8 +1815,12 @@ const useStore = create<State & Actions>((set, get) => {
         throw new Error("Nenhum contrato assinado encontrado para este ID.");
       }
 
-      const fileRef = ref(storage, contract.signedContractUrl);
-      await deleteObject(fileRef);
+      // Anexos legados foram gravados como URL.createObjectURL() e nunca
+      // chegaram ao Storage: não há objeto para excluir, só o campo a limpar.
+      if (!String(contract.signedContractUrl).startsWith("blob:")) {
+        const fileRef = ref(storage, contract.signedContractUrl);
+        await deleteObject(fileRef);
+      }
 
       const contractRef = doc(db, "contracts", contractId);
       await updateDoc(contractRef, { signedContractUrl: "" });
