@@ -1,6 +1,6 @@
 //src/pages/admin/Extrato.tsx
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useStore } from "@/store";
 import { cn, formatCurrency } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -47,7 +47,7 @@ type StatementTransaction = {
 
 const Extrato = () => {
   const navigate = useNavigate();
-  const { revenues, expenses, bankAccounts, loading, fetchAllData } = useStore();
+  const { revenues, expenses, bankAccounts, loading } = useStore();
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: startOfMonth(new Date()),
@@ -55,10 +55,6 @@ const Extrato = () => {
   });
   const [selectedAccountId, setSelectedAccountId] = useState<string>("all");
   const [showTransfer, setShowTransfer] = useState(false);
-
-  useEffect(() => {
-    fetchAllData();
-  }, [fetchAllData]);
 
   const tabItems = [
     { value: "visao-geral", label: "Visão Geral", path: "/admin/financeiro" },

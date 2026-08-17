@@ -1,6 +1,6 @@
 //src/pages/admin/DRE.tsx
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, parseISO } from "date-fns";
@@ -63,10 +63,6 @@ const DRE = () => {
   const [importFileName, setImportFileName] = useState("");
   const [isImporting, setIsImporting] = useState(false);
 
-
-  useEffect(() => {
-    fetchAllData();
-  }, [fetchAllData]);
 
   const tabItems = [
     { value: "visao-geral", label: "Visão Geral", path: "/admin/financeiro" },

@@ -1,6 +1,6 @@
 //src/pages/admin/Relatorios.tsx
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useStore } from "@/store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -33,7 +33,7 @@ type ReportEntry = {
 
 const Relatorios = () => {
   const navigate = useNavigate();
-  const { revenues, expenses, clients, suppliers, loading, fetchAllData } = useStore();
+  const { revenues, expenses, clients, suppliers, loading } = useStore();
   const now = new Date();
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -43,10 +43,6 @@ const Relatorios = () => {
   const [tipoLancamento, setTipoLancamento] = useState<TipoLancamento>("todos");
   const [statusFilter, setStatusFilter] = useState<StatusFiltro>("todos");
   const [generated, setGenerated] = useState(false);
-
-  useEffect(() => {
-    fetchAllData();
-  }, [fetchAllData]);
 
   const tabItems = [
     { value: "visao-geral", label: "Visão Geral", path: "/admin/financeiro" },

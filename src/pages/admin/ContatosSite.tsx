@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { useStore } from "@/store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -55,10 +55,6 @@ const ContatosSite = () => {
   const [selectedContact, setSelectedContact] = useState<any>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
-
-  useEffect(() => {
-    fetchAllData();
-  }, [fetchAllData]);
 
   const filteredContacts = useMemo(() => {
     return (siteContacts || [])

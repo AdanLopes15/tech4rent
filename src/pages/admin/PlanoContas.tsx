@@ -1,6 +1,6 @@
 //src/pages/admin/PlanoContas.tsx
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { PlusCircle, Pencil, Trash2, MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 
@@ -30,14 +30,10 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const PlanoContas = () => {
-  const { chartOfAccounts, deleteChartOfAccount, fetchAllData } = useStore();
+  const { chartOfAccounts, deleteChartOfAccount } = useStore();
 
   const [isAddAccountDialogOpen, setIsAddAccountDialogOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<any>(null);
-
-  useEffect(() => {
-    fetchAllData?.();
-  }, [fetchAllData]);
 
   const handleEdit = (account: any) => {
     setEditingAccount(account);

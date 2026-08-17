@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { CheckCircle2, Eye, EyeOff, Pencil, Plus, RefreshCw, Search, Sparkles, Trash2, Home } from "lucide-react";
 import * as Icons from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -29,10 +29,6 @@ const CatalogoSite = () => {
   const [editingItem, setEditingItem] = useState<any | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerSearch, setPickerSearch] = useState("");
-
-  useEffect(() => {
-    fetchAllData?.();
-  }, [fetchAllData]);
 
   // Map: equipmentId -> catalogItem
   const catalogByEquipmentId = useMemo(() => {

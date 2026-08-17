@@ -1,6 +1,6 @@
 //src/pages/admin/ContasReceber.tsx
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useStore } from "@/store";
 import { cn, formatCurrency } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -76,7 +76,6 @@ const ContasReceber = () => {
     contracts,
     bankAccounts,
     loading,
-    fetchAllData,
     markRevenueAsReceived,
     markRevenueAsPending,
     deleteRevenue,
@@ -106,10 +105,6 @@ const ContasReceber = () => {
     key: SortableKeys;
     direction: "ascending" | "descending";
   } | null>({ key: "dueDate", direction: "ascending" });
-
-  useEffect(() => {
-    fetchAllData();
-  }, [fetchAllData]);
 
   const toggleGroup = (key: string) => {
     setExpandedGroups((prev) => {

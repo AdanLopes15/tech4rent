@@ -1,6 +1,6 @@
 //src/pages/admin/ContasPagar.tsx
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useStore } from "@/store";
 import { cn, formatCurrency } from "@/lib/utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -79,7 +79,6 @@ const ContasPagar = () => {
     expenses,
     bankAccounts,
     loading,
-    fetchAllData,
     markExpenseAsPaid,
     unmarkExpenseAsPaid,
     deleteExpense,
@@ -110,10 +109,6 @@ const ContasPagar = () => {
     key: SortableKeys;
     direction: "ascending" | "descending";
   } | null>({ key: "dueDate", direction: "ascending" });
-
-  useEffect(() => {
-    fetchAllData();
-  }, [fetchAllData]);
 
   const handleSort = (key: SortableKeys) => {
     let direction: "ascending" | "descending" = "ascending";

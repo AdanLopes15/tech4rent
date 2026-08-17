@@ -1,6 +1,6 @@
 //src/pages/admin/Boletos.tsx
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useStore } from "@/store";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,14 +30,10 @@ import { AttachBoletoDialog } from "@/components/financeiro/AttachBoletoDialog";
 import { openPrivateFile } from "@/lib/private-file";
 
 const Boletos = () => {
-  const { revenues, fetchAllData, deleteBoletoFromRevenue } = useStore();
+  const { revenues, deleteBoletoFromRevenue } = useStore();
 
   const [showAttachDialog, setShowAttachDialog] = useState(false);
   const [selectedRevenue, setSelectedRevenue] = useState<any>(null);
-
-  useEffect(() => {
-    fetchAllData();
-  }, [fetchAllData]);
 
   const contractRevenues = useMemo(() => {
     return revenues

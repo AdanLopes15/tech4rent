@@ -1,6 +1,6 @@
 //src/pages/admin/FluxoCaixa.tsx
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useStore } from "@/store";
 import { cn, formatCurrency } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -49,7 +49,7 @@ type DailyFlowRow = {
 
 const FluxoCaixa = () => {
   const navigate = useNavigate();
-  const { revenues, expenses, bankAccounts, loading, fetchAllData } = useStore();
+  const { revenues, expenses, bankAccounts, loading } = useStore();
 
   const now = new Date();
 
@@ -59,10 +59,6 @@ const FluxoCaixa = () => {
   });
 
   const [selectedAccountId, setSelectedAccountId] = useState("all");
-
-  useEffect(() => {
-    fetchAllData();
-  }, [fetchAllData]);
 
   const tabItems = [
     { value: "visao-geral", label: "Visão Geral", path: "/admin/financeiro" },

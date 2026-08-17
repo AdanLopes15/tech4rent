@@ -203,7 +203,6 @@ const SiteBuilder = () => {
   const pageDef = PAGE_DEFINITIONS.find((p) => p.slug === slugParam) || PAGE_DEFINITIONS[0];
   const slug = pageDef.slug;
 
-  const fetchAllData = useStore((s) => s.fetchAllData);
   const sitePages = useStore((s) => s.sitePages);
   const companySettings = useStore((s) => s.companySettings);
   const savePageDraft = useStore((s) => s.savePageDraft);
@@ -224,10 +223,6 @@ const SiteBuilder = () => {
   const [savingSeo, setSavingSeo] = useState(false);
 
   useUndoRedoShortcut(undo, redo);
-
-  useEffect(() => {
-    fetchAllData(false);
-  }, [fetchAllData]);
 
   // Carrega blocos ao trocar de página/dados
   useEffect(() => {

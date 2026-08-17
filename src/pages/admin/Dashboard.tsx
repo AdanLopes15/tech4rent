@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { TrendingUp, TrendingDown, FileText, Package, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,11 +8,7 @@ import { formatCurrency } from "@/lib/utils";
 import { format, isSameMonth, subMonths } from "date-fns";
 
 const Dashboard = () => {
-  const { equipments, contracts, sales, revenues, expenses, loading, fetchAllData } = useStore();
-
-  useEffect(() => {
-    fetchAllData();
-  }, [fetchAllData]);
+  const { equipments, contracts, sales, revenues, expenses, loading } = useStore();
 
   const currentMonth = new Date();
   const previousMonth = subMonths(currentMonth, 1);
