@@ -22,3 +22,14 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Segredos e credenciais
+# Obs.: o .env atual ja e rastreado no repositorio e NAO e ignorado aqui de
+# proposito — sera tratado junto com a migracao de hospedagem.
+.env.local
+.env.*.local
+scripts/serviceAccount.json
+serviceAccount.json
+*firebase-adminsdk*.json
+*.pem
+*.key
