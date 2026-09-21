@@ -152,6 +152,26 @@ service cloud.firestore {
         && compatHasPerm('contratos.restore');
     }
 
+    // ---------- Contratos: número e contador ----------
+    // O ID do documento é o número do contrato, na forma canônica CTR-XXX
+    // (mínimo 3 dígitos, sem zeros extras, 1..999999) — igual a
+    // CANONICAL_CONTRACT_ID em src/lib/contract-number.ts.
+    function contractNumberOf(contractId) {
+      return int(contractId.split('-')[1]);
+    }
+
+    function contractIdOf(n) {
+      return n < 10 ? 'CTR-00' + string(n) : n < 100 ? 'CTR-0' + string(n) : 'CTR-' + string(n);
+    }
+
+    // Após a escrita, o contador precisa cobrir o número usado: um número
+    // maior que o contador só é aceito se a mesma transação avançar o contador.
+    function counterCovers(contractId) {
+      let counter = /databases/$(database)/documents/counters/contracts;
+      return existsAfter(counter)
+        && getAfter(counter).data.get('currentNumber', 0) >= contractNumberOf(contractId);
+    }
+
     match /contracts/{contractId} {
       // Leitura continua liberada a qualquer usuário ativo. NÃO restringir por
       // contratos.view (nem esconder da leitura os contratos na Lixeira):
@@ -162,7 +182,13 @@ service cloud.firestore {
       // dados negada, quebrando Dashboard, Financeiro e o restante do sistema.
       // O acesso à Lixeira é restrito na interface (rota com contratos.restore).
       allow read: if compatActive();
+      // Criar exige contratos.create. Escolher/editar o número não concede
+      // nenhuma permissão extra: vale a mesma regra. Número já existente
+      // (inclusive na Lixeira) cai em "update" e é negado.
       allow create: if compatHasPerm('contratos.create')
+        && contractId.matches('^CTR-(00[1-9]|0[1-9][0-9]|[1-9][0-9]{2,5})$')
+        && request.resource.data.get('id', '') == contractId
+        && counterCovers(contractId)
         && !request.resource.data.keys().hasAny(['deletedAt', 'deletedBy', 'deletionReason', 'stockReturned',
                                                  'restoredAt', 'restoredBy', 'lastDeletion']);
       // Cada operação exige a sua permissão; uma não concede a outra.
@@ -173,6 +199,34 @@ service cloud.firestore {
       // sistema legado). Exclusão definitiva só por scripts/purge-contract.cjs,
       // que usa o Admin SDK e não passa por estas regras.
       allow delete: if false;
+    }
+
+    // ---------- Contadores ----------
+    // O contador de contratos nunca diminui e só pode ser alterado por quem
+    // cria contratos. Pode avançar 1 (getNextId de versões anteriores do app)
+    // ou saltar para o número de um contrato criado na mesma transação
+    // (número manual maior que o sugerido). Não pode ser apagado.
+    //
+    // Regravar o MESMO valor é aceito de propósito: é inofensivo e é o que
+    // uma transação concorrente com leitura desatualizada envia (dois
+    // getNextId leem 119 e gravam 120). Negar aqui daria PERMISSION_DENIED,
+    // que o SDK não repete; aceitando, a pré-condição da transação falha e o
+    // SDK a repete com o valor novo, como antes destas regras.
+    function isValidContractCounterWrite() {
+      let before = resource == null ? 0 : resource.data.get('currentNumber', 0);
+      let after = request.resource.data.get('currentNumber', null);
+      return compatHasPerm('contratos.create')
+        && after is int
+        && after >= before
+        && after <= 999999
+        && (after <= before + 1
+            || existsAfter(/databases/$(database)/documents/contracts/$(contractIdOf(after))));
+    }
+
+    match /counters/{counterId} {
+      allow read: if isActiveUser();
+      allow create, update: if counterId == 'contracts' ? isValidContractCounterWrite() : isActiveUser();
+      allow delete: if counterId != 'contracts' && isActiveUser();
     }
 
     // ---------- Parcelas (revenues) ----------
@@ -253,10 +307,11 @@ service cloud.firestore {
     // tudo ANULA qualquer restrição declarada acima — foi o que permitiu a
     // exclusão física de contratos. Por isso contratos, parcelas e auditoria
     // ficam fora do curinga e são governados apenas pelas regras próprias.
+    // Os contadores também (o de contratos tem regra própria acima).
     // As demais coleções mantêm o comportamento anterior (qualquer usuário ativo).
     match /{collectionName}/{document=**} {
       allow read, write: if isActiveUser()
-        && !(collectionName in ['contracts', 'revenues', 'auditLogs']);
+        && !(collectionName in ['contracts', 'revenues', 'auditLogs', 'counters']);
     }
   }
 }

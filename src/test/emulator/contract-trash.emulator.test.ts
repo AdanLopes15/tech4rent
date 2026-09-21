@@ -26,6 +26,7 @@ import {
 } from "firebase/firestore";
 
 import { partitionContracts, partitionRevenues, type TrashActor } from "@/lib/contract-trash";
+import { createContract } from "@/store/methods/contractCreate";
 import {
   ContractRestoreConflictError,
   moveContractToTrash,
@@ -306,8 +307,23 @@ describe("restaurar da Lixeira (transação)", () => {
 });
 
 describe("permissões por ação em contratos", () => {
-  const newContract = (id: string) => ({ id, clientId: "CLI-057", status: "Em Andamento", items: [] });
-  const create = (uid: string, id: string) => setDoc(doc(dbAs(uid), "contracts", id), newContract(id));
+  // Criação pelo fluxo real (número manual, contador avança na mesma transação).
+  const create = (uid: string, id: string) =>
+    createContract(dbAs(uid), {
+      contractNumber: id,
+      suggestedId: null,
+      actor: actor(uid),
+      draft: {
+        clientId: "CLI-057",
+        client: null,
+        startDate: new Date(2026, 9, 1),
+        endDate: new Date(2026, 10, 1),
+        firstInstallmentDate: new Date(2026, 10, 1),
+        items: [{ equipmentId: "EQP-001", quantity: 1, unitPrice: 10 }],
+        totalValue: 10,
+        status: "Em Andamento",
+      },
+    });
   const edit = (uid: string, id = "CTR-117") => updateDoc(doc(dbAs(uid), "contracts", id), { unitOperation: `por ${uid}` });
   const trash = (uid: string, id = "CTR-117") =>
     moveContractToTrash(dbAs(uid), { contractId: id, reason: REASON, actor: actor(uid) });
@@ -423,7 +439,10 @@ describe("proteção contra exclusão física e regras gerais", () => {
 
   it("fluxos existentes continuam funcionando em contrato ativo", async () => {
     const db = dbAs("legacyAdmin");
-    await assertSucceeds(setDoc(doc(db, "contracts/CTR-120"), { clientId: "CLI-057", status: "Em Andamento", items: [] }));
+    // Criação como a versão anterior do app fazia: getNextId (+1) e depois o contrato.
+    await adminWrite("counters/contracts", { currentNumber: 119 });
+    await assertSucceeds(setDoc(doc(db, "counters/contracts"), { currentNumber: 120 }));
+    await assertSucceeds(setDoc(doc(db, "contracts/CTR-120"), { id: "CTR-120", clientId: "CLI-057", status: "Em Andamento", items: [] }));
     await assertSucceeds(updateDoc(doc(db, "contracts/CTR-117"), { status: "Finalizado", finalizedAt: serverTimestamp() }));
     await assertSucceeds(updateDoc(doc(db, "revenues/rev-pending"), { status: "Cancelado" }));
     await assertSucceeds(addDoc(collection(db, "revenues"), { contractId: "CTR-117", status: "Pendente" }));

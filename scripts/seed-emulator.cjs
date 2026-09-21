@@ -102,6 +102,22 @@ async function main() {
   set("counters/contracts", { currentNumber: 3 });
   set("counters/clients", { currentNumber: 2 });
   set("counters/equipments", { currentNumber: 9 });
+  set("counters/quotes", { currentNumber: 1 });
+
+  // ---------- Orçamentos ----------
+  set("quotes/ORC-001", {
+    id: "ORC-001",
+    clientId: "CLI-001",
+    clientName: "Cliente Demonstração Ltda",
+    budgetType: "locacao",
+    status: "Pendente",
+    items: [{ equipmentId: "EQP-001", quantity: 1, unitPrice: 150, billingType: "Mensal" }],
+    paymentMethods: [{ paymentMethod: "boleto", installments: 1 }],
+    startDate: day(1),
+    endDate: day(91),
+    totalValue: 150,
+    createdAt: day(-1),
+  });
 
   // ---------- Contratos ----------
   const contract = (id, clientId, clientName, status, items) => ({

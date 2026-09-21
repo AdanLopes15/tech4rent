@@ -66,6 +66,7 @@ import {
 } from "lucide-react";
 
 import { AddQuoteDialog } from "@/components/orcamentos/AddQuoteDialog";
+import { ContractNumberField, useContractNumber } from "@/components/contratos/ContractNumberField";
 
 const statusColors: Record<string, string> = {
   Pendente: "bg-amber-400 hover:bg-amber-500 text-white",
@@ -90,6 +91,10 @@ export default function Orcamentos() {
   const [quoteForDownload, setQuoteForDownload] = useState<any>(null);
   const [quoteForApproval, setQuoteForApproval] = useState<any>(null);
   const [isContractGenerated, setIsContractGenerated] = useState(false);
+  const [generatedContractId, setGeneratedContractId] = useState<string | null>(null);
+  const [isConverting, setIsConverting] = useState(false);
+  // Número do contrato: sugerido ao abrir a aprovação e editável até a conversão.
+  const contractNumber = useContractNumber(!!quoteForApproval && !isContractGenerated);
 
   useEffect(() => {
     const active = viewingQuote || quoteForDownload || quoteForApproval;
@@ -510,20 +515,43 @@ export default function Orcamentos() {
 
   const handleConvertToContract = (quote: any) => {
     setIsContractGenerated(false);
+    setGeneratedContractId(null);
     setQuoteForApproval(quote);
   };
 
   const confirmConvertToContract = async (quoteId: string) => {
+    if (!contractNumber.isValid) {
+      toast({
+        title: "Número do contrato inválido",
+        description: contractNumber.error || "Aguarde a sugestão do número ou informe um número válido.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsConverting(true);
     try {
-      await convertQuoteToContract(quoteId);
+      const created = await convertQuoteToContract(quoteId, {
+        contractNumber: contractNumber.value,
+        suggestedId: contractNumber.suggestedId,
+      });
+      setGeneratedContractId(created.id);
       setIsContractGenerated(true);
-      toast({ title: "Contrato gerado com sucesso!" });
+      toast({ title: `Contrato ${created.id} gerado com sucesso!` });
     } catch (error: any) {
+      if (error?.name === "ContractNumberTakenError") {
+        const wasSuggested = contractNumber.parsed.id === contractNumber.suggestedId;
+        const next = wasSuggested ? await contractNumber.reloadSuggestion() : null;
+        contractNumber.setServerError(
+          next ? `${error.message} O próximo número disponível, ${next}, foi sugerido.` : error.message,
+        );
+      }
       toast({
         title: "Erro ao gerar contrato",
         description: error?.message || "Não foi possível converter o orçamento.",
         variant: "destructive",
       });
+    } finally {
+      setIsConverting(false);
     }
   };
 
@@ -1094,11 +1122,11 @@ export default function Orcamentos() {
               </AlertDialogDescription>
             </AlertDialogHeader>
 
-            <div ref={contractPrintRef} className="max-h-[70vh] overflow-y-auto bg-[#333333] p-4 md:p-12">
+            <div ref={contractPrintRef} className={cn(isContractGenerated ? "max-h-[70vh]" : "max-h-[52vh]", "overflow-y-auto bg-[#333333] p-4 md:p-12")}>
               <DocumentContainer>
                 <DocumentHeader 
                   title="Contrato de Locação" 
-                  documentNumber={quoteForApproval.id.replace('ORC-', 'CTR-')} 
+                  documentNumber={generatedContractId || contractNumber.parsed.id || contractNumber.value || "CTR-"}
                   date={formatDate(new Date())}
                   subtitle={`Gerado em ${format(new Date(), "dd/MM/yyyy")} às ${format(new Date(), "HH:mm")}. Válido mediante assinatura.`}
                 />
@@ -1242,6 +1270,14 @@ export default function Orcamentos() {
               </DocumentContainer>
             </div>
 
+            {!isContractGenerated && (
+              <div className="bg-white px-4 pt-4 border-t border-[#e5e5e5]">
+                <div className="max-w-md">
+                  <ContractNumberField state={contractNumber} disabled={isConverting} />
+                </div>
+              </div>
+            )}
+
             <AlertDialogFooter className="bg-[#f5f5f5] p-4 flex flex-row gap-3 justify-end sm:justify-end border-t border-[#e5e5e5]">
               {isContractGenerated ? (
                 <>
@@ -1281,10 +1317,11 @@ export default function Orcamentos() {
                   <Button 
                     type="button"
                     className="h-11 px-8 font-semibold bg-[#22c55e] hover:bg-[#16a34a] text-white flex items-center gap-2" 
+                    disabled={isConverting || contractNumber.loadingSuggestion}
                     onClick={() => confirmConvertToContract(quoteForApproval.id)}
                   >
                     <FileCheck className="h-5 w-5" />
-                    Confirmar Aprovação e Gerar Contrato
+                    {isConverting ? "Gerando..." : "Confirmar Aprovação e Gerar Contrato"}
                   </Button>
                 </>
               )}

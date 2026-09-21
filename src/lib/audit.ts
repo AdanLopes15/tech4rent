@@ -16,8 +16,9 @@ export type AuditAction =
   | "user.resetPassword"
   | "quote.create"
   | "quote.update"
-  // Gravadas na mesma transação da operação (store/methods/contractTrash.ts)
-  // e, no caso de purge, pelo script administrativo.
+  // Gravadas na mesma transação da operação (store/methods/contractCreate.ts e
+  // contractTrash.ts) e, no caso de purge, pelo script administrativo.
+  | "contract.create"
   | "contract.delete"
   | "contract.restore"
   | "contract.purge";

@@ -38,6 +38,11 @@ import { format, differenceInMonths, addMonths, addDays, addYears, addWeeks, get
 import { addSale, updateSale, cancelSale, deleteSale } from "./methods/sales";
 import { moveContractToTrash, restoreContractFromTrash } from "./methods/contractTrash";
 import {
+  convertQuoteToContract as convertQuoteToContractTx,
+  createContract as createContractTx,
+  getSuggestedContractNumber,
+} from "./methods/contractCreate";
+import {
   isContractDeleted,
   partitionContracts,
   partitionRevenues,
@@ -294,6 +299,9 @@ type State = {
   isQuoteDialogOpen: boolean;
 };
 
+// Número escolhido no formulário e o número que foi sugerido ao abri-lo.
+export type ContractNumbering = { contractNumber: string; suggestedId: string | null };
+
 type Actions = {
   fetchAllData: (publicOnly?: boolean) => Promise<void>;
   getNextId: (collectionName: string) => Promise<string>;
@@ -314,8 +322,9 @@ type Actions = {
   addQuote: (quoteData: any) => Promise<any>;
   updateQuote: (quoteData: any) => Promise<void>;
   deleteQuote: (quoteId: string) => Promise<void>;
-  convertQuoteToContract: (quoteId: string) => Promise<any>;
-  addContract: (contractData: any) => Promise<any>;
+  getSuggestedContractNumber: () => Promise<string>;
+  convertQuoteToContract: (quoteId: string, numbering: ContractNumbering) => Promise<any>;
+  addContract: (contractData: any, numbering: ContractNumbering) => Promise<any>;
   updateContract: (contractData: any) => Promise<void>;
   recalculateContractInstallments: (contractId: string) => Promise<void>;
   finalizeContract: (contractId: string, fineAmount: number, itemStatuses: any[]) => Promise<void>;
@@ -1520,111 +1529,39 @@ const useStore = create<State & Actions>((set, get) => {
       }));
     },
 
-    convertQuoteToContract: async (quoteId) => {
-      const { clients } = get();
-      const quoteDoc = await getDoc(doc(db, "quotes", quoteId));
-      if (!quoteDoc.exists()) throw new Error("Orçamento não encontrado.");
+    getSuggestedContractNumber: async () => getSuggestedContractNumber(db),
 
-      const quote = { id: quoteDoc.id, ...quoteDoc.data() } as any;
-
-      if (quote.status !== "Pendente") throw new Error("Apenas orçamentos pendentes podem ser convertidos.");
-      if (quote.budgetType !== "locacao") throw new Error("Este orçamento não é de locação.");
-
-      const client = clients.find((c) => c.id === quote.clientId);
-
-      const startDate = quote.startDate?.toDate ? quote.startDate.toDate() : new Date(quote.startDate);
-      const endDate = quote.endDate?.toDate ? quote.endDate.toDate() : new Date(quote.endDate);
-
-      const contractData = {
-        clientId: quote.clientId,
-        client: client || null,
-        startDate,
-        endDate,
-        items: quote.items,
-        totalValue: quote.totalValue,
-        status: "Em Andamento",
-        quoteId: quote.id,
-        costCenterId: quote.costCenterId || "",
-        chartOfAccountId: quote.chartOfAccountId || "",
-        bankAccountId: quote.bankAccountId || "",
-        firstInstallmentDate: addMonths(startDate, 1),
-      };
-
-      const newContract = await get().addContract(contractData);
-
-      const quoteRef = doc(db, "quotes", quoteId);
-      await updateDoc(quoteRef, { status: "Aprovado" });
-
+    // Número, contrato, parcelas, estoque, orçamento, contador e auditoria em
+    // uma única transação (store/methods/contractCreate.ts).
+    convertQuoteToContract: async (quoteId, numbering) => {
+      const quote = get().quotes.find((q: any) => q.id === quoteId);
+      const client = get().clients.find((c: any) => c.id === quote?.clientId) || null;
+      const result = await convertQuoteToContractTx(db, {
+        quoteId,
+        client,
+        contractNumber: numbering.contractNumber,
+        suggestedId: numbering.suggestedId,
+        actor: currentTrashActor(),
+      });
       await get().fetchAllData();
-      return newContract;
+      return { ...result.contract, createdAt: new Date().toISOString() };
     },
 
-    addContract: async (contractData) => {
-      const { equipments } = get();
-      const { client, items, startDate, endDate, firstInstallmentDate, ...rest } = contractData;
-
-      const contractId = await get().getNextId("contracts");
-      const batch = writeBatch(db);
-
-      for (const item of items) {
-        const equipment = equipments.find((e) => e.id === item.equipmentId);
-        if (!equipment || equipment.stock < item.quantity) {
-          throw new Error(`Estoque insuficiente para ${equipment?.name || "equipamento"}.`);
-        }
-        const newStock = equipment.stock - item.quantity;
-        const equipmentRef = doc(db, "equipments", item.equipmentId);
-        batch.update(equipmentRef, { stock: newStock });
-      }
-
-      const finalDate = new Date(endDate);
-      const monthlyValue = items.reduce((acc: number, item: any) => acc + item.quantity * item.unitPrice, 0);
-
-      const dataToSave = {
-        ...rest,
-        id: contractId,
-        client,
-        items,
-        startDate,
-        endDate,
-        totalValue: contractData.totalValue,
-        createdAt: serverTimestamp(),
-      };
-
-      const contractRef = doc(db, "contracts", contractId);
-      batch.set(contractRef, dataToSave);
-
-      const startDateObj = new Date(startDate);
-      const firstInstallmentDateObj = new Date(firstInstallmentDate);
-
-      let totalMonths = differenceInMonths(finalDate, startDateObj);
-      if (getDate(finalDate) > getDate(startDateObj)) totalMonths++;
-      if (totalMonths === 0) totalMonths = 1;
-
-      let currentDueDate = new Date(firstInstallmentDateObj);
-      for (let i = 0; i < totalMonths; i++) {
-        const revenueData = {
-          clientId: client.id,
-          contractId: contractId,
-          description: `Parcela ${i + 1}/${totalMonths} do contrato ${contractId}`,
-          valorTotal: monthlyValue,
-          valorBruto: monthlyValue,
-          dueDate: Timestamp.fromDate(currentDueDate),
-          status: "Pendente",
-          createdAt: serverTimestamp(),
-          costCenterId: rest.costCenterId || "",
-          chartOfAccountId: rest.chartOfAccountId || "",
-          bankAccountId: rest.bankAccountId || "",
-        };
-        const revenueRef = doc(collection(db, "revenues"));
-        batch.set(revenueRef, revenueData);
-
-        currentDueDate = addMonths(currentDueDate, 1);
-      }
-
-      await batch.commit();
+    addContract: async (contractData, numbering) => {
+      const { startDate, endDate, firstInstallmentDate, ...rest } = contractData;
+      const result = await createContractTx(db, {
+        draft: {
+          ...rest,
+          startDate: new Date(startDate),
+          endDate: new Date(endDate),
+          firstInstallmentDate: new Date(firstInstallmentDate),
+        },
+        contractNumber: numbering.contractNumber,
+        suggestedId: numbering.suggestedId,
+        actor: currentTrashActor(),
+      });
       await get().fetchAllData();
-
-      return { ...dataToSave, createdAt: new Date().toISOString() };
+      return { ...result.contract, createdAt: new Date().toISOString() };
     },
 
     updateContract: async (contractData) => {

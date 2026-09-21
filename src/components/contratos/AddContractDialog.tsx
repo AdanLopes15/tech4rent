@@ -23,6 +23,7 @@ import { CalendarIcon, PlusCircle, Trash2 } from "lucide-react";
 import { format, addMonths, addYears } from "date-fns";
 import { cn } from "@/lib/utils";
 import { AddClientDialog } from "@/components/clientes/AddClientDialog";
+import { ContractNumberField, useContractNumber } from "@/components/contratos/ContractNumberField";
 
 interface ContractItem {
   equipmentId: string;
@@ -59,6 +60,8 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
   const [firstInstallmentOpen, setFirstInstallmentOpen] = useState(false);
 
   const isEditing = !!contract;
+  // O número só é escolhido na criação; o ID de um contrato existente nunca muda.
+  const contractNumber = useContractNumber(open && !isEditing);
 
   useEffect(() => {
     if (contract) {
@@ -143,6 +146,15 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
       return;
     }
 
+    if (!isEditing && !contractNumber.isValid) {
+      toast({
+        title: "Número do contrato inválido",
+        description: contractNumber.error || "Aguarde a sugestão do número ou informe um número válido.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const client = clients.find((c: any) => c.id === clientId);
@@ -163,7 +175,7 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
         });
         toast({ title: "Contrato atualizado!" });
       } else {
-        await addContract({
+        const created = await addContract({
           clientId,
           unitOperation: unitOperation.trim(),
           client,
@@ -176,11 +188,18 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
           costCenterId,
           chartOfAccountId,
           bankAccountId,
-        });
-        toast({ title: "Contrato gerado com sucesso!" });
+        }, { contractNumber: contractNumber.value, suggestedId: contractNumber.suggestedId });
+        toast({ title: `Contrato ${created.id} gerado com sucesso!` });
       }
       onOpenChange(false);
     } catch (err: any) {
+      if (err?.name === "ContractNumberTakenError") {
+        // Nada foi gravado. Se era o número sugerido, outro usuário o usou antes:
+        // sugere o próximo livre, mas mantém a mensagem até o usuário agir.
+        const wasSuggested = contractNumber.parsed.id === contractNumber.suggestedId;
+        const next = wasSuggested ? await contractNumber.reloadSuggestion() : null;
+        contractNumber.setServerError(next ? `${err.message} O próximo número disponível, ${next}, foi sugerido.` : err.message);
+      }
       toast({ title: err.message || "Erro ao salvar", variant: "destructive" });
     } finally {
       setLoading(false);
@@ -194,7 +213,7 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
           <DialogHeader>
             <DialogTitle>
               {isEditing ? "Editar Contrato" : "Criar Novo Contrato de Locação"}{" "}
-              {!isEditing && <span className="text-muted-foreground font-normal">- A ser gerado</span>}
+              {isEditing && <span className="text-muted-foreground font-normal">- {contract.id}</span>}
             </DialogTitle>
             <DialogDescription>
               {isEditing
@@ -204,6 +223,8 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
           </DialogHeader>
 
           <div className="space-y-6">
+            {!isEditing && <ContractNumberField state={contractNumber} disabled={loading} />}
+
             {/* Client */}
             <div className="space-y-2">
               <Label className="font-semibold">Nome do Cliente</Label>
@@ -465,7 +486,7 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
             <Button variant="ghost" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleSubmit} disabled={loading}>
+            <Button onClick={handleSubmit} disabled={loading || (!isEditing && contractNumber.loadingSuggestion)}>
               {loading ? "Salvando..." : isEditing ? "Salvar Alterações" : "Gerar Contrato"}
             </Button>
           </DialogFooter>
