@@ -631,7 +631,8 @@ export default function Orcamentos() {
                         </DropdownMenuItem>
                       )}
 
-                      {can("orcamentos.convert") && type === "locacao" && displayStatus === "Pendente" && (
+                      {/* Gerar contrato também exige contratos.create (firestore.rules). */}
+                      {can("orcamentos.convert") && can("contratos.create") && type === "locacao" && displayStatus === "Pendente" && (
                         <DropdownMenuItem onClick={() => handleConvertToContract(quote)}>
                           <FileCheck className="mr-2 h-4 w-4" />
                           Aprovar e Gerar Contrato

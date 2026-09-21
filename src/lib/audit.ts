@@ -15,7 +15,12 @@ export type AuditAction =
   | "user.permissions"
   | "user.resetPassword"
   | "quote.create"
-  | "quote.update";
+  | "quote.update"
+  // Gravadas na mesma transação da operação (store/methods/contractTrash.ts)
+  // e, no caso de purge, pelo script administrativo.
+  | "contract.delete"
+  | "contract.restore"
+  | "contract.purge";
 
 export async function logAudit(action: AuditAction, details: Record<string, any> = {}) {
   try {

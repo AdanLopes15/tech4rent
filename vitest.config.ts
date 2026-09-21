@@ -9,6 +9,8 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    // Exigem o Firestore Emulator: rodar com `npm run test:emulator`.
+    exclude: ["**/node_modules/**", "src/**/*.emulator.test.ts"],
   },
   resolve: {
     alias: { "@": path.resolve(__dirname, "./src") },

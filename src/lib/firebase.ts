@@ -1,24 +1,46 @@
 //src/lib/firebase.ts
 
 import { initializeApp, getApps, getApp, deleteApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getAuth, createUserWithEmailAndPassword, signOut } from "firebase/auth";
-import { getStorage } from "firebase/storage";
+import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
+import { connectAuthEmulator, getAuth, createUserWithEmailAndPassword, signOut, type Auth } from "firebase/auth";
+import { connectStorageEmulator, getStorage } from "firebase/storage";
+import {
+  EMULATOR_HOST,
+  EMULATOR_PORTS,
+  EMULATOR_PROJECT_ID,
+  resolveFirebaseTarget,
+} from "@/lib/firebase-env";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCx0jeGZe7I0gcD0wiYhRopY__jxaav6QY",
-  authDomain: "st4r-f404e.firebaseapp.com",
-  projectId: "st4r-f404e",
-  storageBucket: "st4r-f404e.firebasestorage.app",
-  messagingSenderId: "746879100055",
-  appId: "1:746879100055:web:811b4ec4532bd33cc935d2",
-};
+// Produção por padrão; Emulator apenas com `npm run dev:emulator` (ver firebase-env.ts).
+// Campos passados individualmente: passar import.meta.env inteiro faria o Vite
+// embutir TODAS as variáveis VITE_* no bundle de produção.
+const target = resolveFirebaseTarget(
+  { VITE_USE_EMULATORS: import.meta.env.VITE_USE_EMULATORS, PROD: import.meta.env.PROD },
+  window.location.hostname,
+);
+export const USE_EMULATORS = target.mode === "emulator";
+
+const firebaseConfig = target.config;
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
+
+const connectAuth = (instance: Auth) =>
+  connectAuthEmulator(instance, `http://${EMULATOR_HOST}:${EMULATOR_PORTS.auth}`, { disableWarnings: true });
+
+if (USE_EMULATORS) {
+  // Trava final: o app inicializado precisa ser o projeto fictício.
+  if (app.options.projectId !== EMULATOR_PROJECT_ID) {
+    throw new Error(`Modo Emulator recusou o projeto "${app.options.projectId}".`);
+  }
+  connectFirestoreEmulator(db, EMULATOR_HOST, EMULATOR_PORTS.firestore);
+  connectAuth(auth);
+  connectStorageEmulator(storage, EMULATOR_HOST, EMULATOR_PORTS.storage);
+  console.warn(`[Firebase] MODO EMULATOR — projeto fictício ${EMULATOR_PROJECT_ID}; produção inacessível.`);
+}
 
 /**
  * Cria um usuário no Firebase Auth usando um app SECUNDÁRIO, para não
@@ -28,6 +50,7 @@ const storage = getStorage(app);
 export async function createAuthUserIsolated(email: string, password: string): Promise<string> {
   const secondaryApp = initializeApp(firebaseConfig, `secondary-${Date.now()}`);
   const secondaryAuth = getAuth(secondaryApp);
+  if (USE_EMULATORS) connectAuth(secondaryAuth);
   try {
     const cred = await createUserWithEmailAndPassword(secondaryAuth, email, password);
     return cred.user.uid;
@@ -38,4 +61,3 @@ export async function createAuthUserIsolated(email: string, password: string): P
 }
 
 export { app, db, auth, storage };
-

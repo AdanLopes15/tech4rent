@@ -7,6 +7,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { USE_EMULATORS } from "@/lib/firebase";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Sobre from "./pages/Sobre";
@@ -31,6 +32,7 @@ import Fornecedores from "./pages/admin/Fornecedores";
 import Colaboradores from "./pages/admin/Colaboradores";
 import Orcamentos from "./pages/admin/Orcamentos";
 import Contratos from "./pages/admin/Contratos";
+import ContratosLixeira from "./pages/admin/ContratosLixeira";
 import Vendas from "./pages/admin/Vendas";
 import OrdensCompra from "./pages/admin/OrdensCompra";
 import Financeiro from "./pages/admin/Financeiro";
@@ -75,6 +77,14 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        {USE_EMULATORS && (
+          <div
+            data-testid="emulator-banner"
+            className="pointer-events-none fixed bottom-2 left-2 z-[200] rounded bg-amber-400 px-2 py-1 text-xs font-bold text-black shadow"
+          >
+            EMULATOR · dados fictícios (demo-tech4rent)
+          </div>
+        )}
         <BrowserRouter>
           <ScrollToTop />
           <Routes>
@@ -117,6 +127,7 @@ const App = () => (
               <Route path="colaboradores" element={<Guard require="clientes.view"><Colaboradores /></Guard>} />
               <Route path="orcamentos" element={<Guard require="orcamentos.view"><Orcamentos /></Guard>} />
               <Route path="contratos" element={<Guard require="contratos.view"><Contratos /></Guard>} />
+              <Route path="contratos/lixeira" element={<Guard require="contratos.restore"><ContratosLixeira /></Guard>} />
               <Route path="vendas" element={<Guard require="vendas.view"><Vendas /></Guard>} />
               <Route path="ordens-compra" element={<Guard require="ordensCompra.view"><OrdensCompra /></Guard>} />
               <Route path="financeiro" element={<Guard require="financeiro.view"><Financeiro /></Guard>} />

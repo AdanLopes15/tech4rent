@@ -5,7 +5,9 @@ import { format, compareAsc } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { DateRange } from "react-day-picker";
 
+import { Link } from "react-router-dom";
 import { useStore } from "@/store";
+import { useAuth } from "@/contexts/AuthContext";
 import { CompanyLogo } from "@/components/admin/CompanyLogo";
 import { useToast } from "@/hooks/use-toast";
 import { openPrivateFile } from "@/lib/private-file";
@@ -65,6 +67,7 @@ import { DeliveryReceiptDialog } from "@/components/contratos/DeliveryReceiptDia
 import { FinalizeContractDialog } from "@/components/contratos/FinalizeContractDialog";
 import { RentalInvoiceDialog } from "@/components/contratos/RentalInvoiceDialog";
 import { AttachSignedContractDialog } from "@/components/contratos/AttachSignedContractDialog";
+import { DeleteContractDialog } from "@/components/contratos/DeleteContractDialog";
 
 const statusColors: Record<string, string> = {
   "Em Andamento": "bg-blue-600 hover:bg-blue-700 text-white",
@@ -290,7 +293,7 @@ export default function Contratos() {
     contracts,
     clients,
     revenues,
-    deleteContract,
+    deletedContracts,
     deleteSignedContract,
     recalculateContractInstallments,
     companySettings,
@@ -298,6 +301,8 @@ export default function Contratos() {
   } = useStore();
 
   const { toast } = useToast();
+  const { can } = useAuth();
+  const canEdit = can("contratos.edit");
 
   const [date, setDate] = useState<DateRange | undefined>();
   const [clientFilter, setClientFilter] = useState("todos");
@@ -312,6 +317,7 @@ export default function Contratos() {
   const [isFinalizeDialogOpen, setIsFinalizeDialogOpen] = useState(false);
   const [isInvoiceDialogOpen, setIsInvoiceDialogOpen] = useState(false);
   const [isAttachDialogOpen, setIsAttachDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const [selectedContract, setSelectedContract] = useState<any>(null);
   const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({});
@@ -368,26 +374,12 @@ export default function Contratos() {
     setter(true);
   };
 
-  const handleDeleteContract = async (contractId: string) => {
-    try {
-      await deleteContract(contractId);
-
-      toast({
-        title: "Contrato excluído com sucesso!",
-      });
-
-      setSelectedIds((prev) => {
-        const next = { ...prev };
-        delete next[contractId];
-        return next;
-      });
-    } catch (error: any) {
-      toast({
-        title: "Erro ao excluir",
-        description: error?.message || "Não foi possível excluir o contrato.",
-        variant: "destructive",
-      });
-    }
+  const handleContractTrashed = (contractId: string) => {
+    setSelectedIds((prev) => {
+      const next = { ...prev };
+      delete next[contractId];
+      return next;
+    });
   };
 
   const handleDeleteSigned = async (contractId: string) => {
@@ -576,16 +568,27 @@ export default function Contratos() {
           <CardTitle>Filtros de Contratos</CardTitle>
 
           <div className="flex gap-2">
+            {can("contratos.restore") && (
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/admin/contratos/lixeira">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Lixeira{deletedContracts.length > 0 ? ` • ${deletedContracts.length}` : ""}
+                </Link>
+              </Button>
+            )}
+
             <Button variant="outline" size="sm" disabled={selectedCount === 0} onClick={handlePrintBulk}>
               <Printer className="mr-2 h-4 w-4" />
               Gerar faturas (PDF)
               {selectedCount > 0 ? ` • ${selectedCount}` : ""}
             </Button>
 
-            <Button size="sm" onClick={() => setIsNewContractDialogOpen(true)}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Novo Contrato
-            </Button>
+            {can("contratos.create") && (
+              <Button size="sm" onClick={() => setIsNewContractDialogOpen(true)}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Novo Contrato
+              </Button>
+            )}
           </div>
         </CardHeader>
 
@@ -753,17 +756,21 @@ export default function Contratos() {
                                   Fatura de Locação
                                 </DropdownMenuItem>
 
-                                <DropdownMenuItem
-                                  onClick={() => handleOpenDialog(setIsEditContractDialogOpen, contract)}
-                                >
-                                  <Pencil className="mr-2 h-4 w-4" />
-                                  Editar
-                                </DropdownMenuItem>
+                                {canEdit && (
+                                  <DropdownMenuItem
+                                    onClick={() => handleOpenDialog(setIsEditContractDialogOpen, contract)}
+                                  >
+                                    <Pencil className="mr-2 h-4 w-4" />
+                                    Editar
+                                  </DropdownMenuItem>
+                                )}
 
-                                <DropdownMenuItem onClick={() => handleRecalculateInstallments(contract.id)}>
-                                  <RefreshCw className="mr-2 h-4 w-4" />
-                                  Recalcular Parcelas
-                                </DropdownMenuItem>
+                                {canEdit && (
+                                  <DropdownMenuItem onClick={() => handleRecalculateInstallments(contract.id)}>
+                                    <RefreshCw className="mr-2 h-4 w-4" />
+                                    Recalcular Parcelas
+                                  </DropdownMenuItem>
+                                )}
 
                                 <DropdownMenuItem onClick={() => handleOpenDialog(setIsReceiptDialogOpen, contract)}>
                                   <Truck className="mr-2 h-4 w-4" />
@@ -772,10 +779,12 @@ export default function Contratos() {
 
                                 <DropdownMenuSeparator />
 
-                                <DropdownMenuItem onClick={() => handleOpenDialog(setIsAttachDialogOpen, contract)}>
-                                  <Upload className="mr-2 h-4 w-4" />
-                                  Anexar Contrato
-                                </DropdownMenuItem>
+                                {canEdit && (
+                                  <DropdownMenuItem onClick={() => handleOpenDialog(setIsAttachDialogOpen, contract)}>
+                                    <Upload className="mr-2 h-4 w-4" />
+                                    Anexar Contrato
+                                  </DropdownMenuItem>
+                                )}
 
                                 {contract.signedContractUrl && (
                                   <>
@@ -784,6 +793,8 @@ export default function Contratos() {
                                       Ver Contrato Assinado
                                     </DropdownMenuItem>
 
+                                    {/* Firestore exige contratos.edit; Storage (storage.rules) exige contratos.delete. */}
+                                    {canEdit && can("contratos.delete") && (
                                     <AlertDialog>
                                       <AlertDialogTrigger asChild>
                                         <DropdownMenuItem
@@ -812,43 +823,28 @@ export default function Contratos() {
                                         </AlertDialogFooter>
                                       </AlertDialogContent>
                                     </AlertDialog>
+                                    )}
                                   </>
                                 )}
 
                                 <DropdownMenuSeparator />
 
-                                {contract.status === "Em Andamento" && (
+                                {canEdit && contract.status === "Em Andamento" && (
                                   <DropdownMenuItem onClick={() => handleOpenDialog(setIsFinalizeDialogOpen, contract)}>
                                     <FileCheck className="mr-2 h-4 w-4" />
                                     Finalizar Contrato
                                   </DropdownMenuItem>
                                 )}
 
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
-                                      <Trash2 className="mr-2 h-4 w-4" />
-                                      Excluir
-                                    </DropdownMenuItem>
-                                  </AlertDialogTrigger>
-
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Você realmente deseja excluir?</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Essa ação não pode ser desfeita. Isso excluirá permanentemente o contrato e
-                                        todas as suas faturas associadas.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => handleDeleteContract(contract.id)}>
-                                        Confirmar Exclusão
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
+                                {can("contratos.delete") && (
+                                  <DropdownMenuItem
+                                    onClick={() => handleOpenDialog(setIsDeleteDialogOpen, contract)}
+                                    className="text-destructive"
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Mover para a Lixeira
+                                  </DropdownMenuItem>
+                                )}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </TableCell>
@@ -907,6 +903,14 @@ export default function Contratos() {
             open={isAttachDialogOpen}
             onOpenChange={setIsAttachDialogOpen}
             contract={selectedContract}
+          />
+
+          <DeleteContractDialog
+            open={isDeleteDialogOpen}
+            onOpenChange={setIsDeleteDialogOpen}
+            contract={selectedContract}
+            clientName={getClientName(selectedContract.clientId)}
+            onDeleted={handleContractTrashed}
           />
         </>
       )}

@@ -10,7 +10,12 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:emulator": "firebase emulators:exec --only firestore --project demo-tech4rent \"vitest run -c vitest.emulator.config.ts\"",
+    "emulators": "firebase emulators:start --only firestore,auth,storage --project demo-tech4rent",
+    "emulators:seed": "node scripts/seed-emulator.cjs",
+    "dev:emulator": "vite --mode emulator",
+    "test:e2e:emulator": "firebase emulators:exec --only firestore,auth,storage --project demo-tech4rent \"playwright test -c playwright.emulator.config.ts\""
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -79,6 +84,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
+    "@firebase/rules-unit-testing": "^5.0.2",
     "@playwright/test": "^1.57.0",
     "@tailwindcss/typography": "^0.5.16",
     "@testing-library/jest-dom": "^6.6.0",
@@ -92,6 +98,7 @@
     "eslint": "^9.32.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
+    "firebase-admin": "^13.10.0",
     "globals": "^15.15.0",
     "jsdom": "^20.0.3",
     "lovable-tagger": "^1.1.13",

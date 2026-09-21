@@ -63,6 +63,135 @@ service cloud.firestore {
       );
     }
 
+    // ---------- Helpers compatíveis com documentos legados ----------
+    // Os 5 administradores antigos têm apenas `permission: "admin"`, sem o
+    // campo `profile`. Ler userDoc().profile gera ERRO nas regras, o que NEGA
+    // o acesso — por isso as regras de contratos/parcelas/auditoria usam estas
+    // versões com .get(chave, padrão), espelhando AuthContext.tsx e storage.rules.
+    function compatUser() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function compatStatus() {
+      let s = compatUser().get('status', 'ativo');
+      return s == 'active' ? 'ativo' : s == 'inactive' ? 'inativo' : s;
+    }
+
+    function compatActive() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && compatStatus() == 'ativo';
+    }
+
+    function compatLegacy() {
+      return string(compatUser().get('permission', '')).lower();
+    }
+
+    function compatAdmin() {
+      return compatActive() && (
+        compatUser().get('profile', '') == 'admin'
+        || compatLegacy() in ['admin', 'administrador']
+      );
+    }
+
+    // Mesma semântica de can() em lib/permissions.ts: "*", "modulo.*" e a
+    // permissão exata; perfis legados gestor/colaborador sem profile = acesso total.
+    function compatHasPerm(perm) {
+      return compatAdmin() || (
+        compatActive() && (
+          (compatUser().get('profile', '') == '' && compatLegacy() in ['gestor', 'colaborador'])
+          || (compatUser().get('permissions', []) is list
+              && compatUser().get('permissions', []).hasAny([perm, '*', perm.split('\\.')[0] + '.*']))
+        )
+      );
+    }
+
+    // ---------- Contratos: Lixeira (exclusão lógica) ----------
+    // Campos de exclusão só podem ser alterados pelos fluxos de exclusão e
+    // restauração (store/methods/contractTrash.ts).
+    function isLive(data) {
+      return data.get('deletedAt', null) == null;
+    }
+
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    // Edição comum (editar, finalizar, anexar contrato assinado): exige
+    // contratos.edit — no app a ação "update" chama-se "edit" (lib/permissions.ts).
+    // Não pode tocar nos campos da Lixeira nem no registro da última restauração.
+    function isNormalContractEdit() {
+      return isLive(resource.data)
+        && !changedKeys().hasAny(['deletedAt', 'deletedBy', 'deletionReason', 'stockReturned',
+                                  'restoredAt', 'restoredBy', 'lastDeletion'])
+        && compatHasPerm('contratos.edit');
+    }
+
+    function isSoftDelete() {
+      let d = request.resource.data;
+      return isLive(resource.data)
+        && changedKeys().hasOnly(['deletedAt', 'deletedBy', 'deletionReason', 'stockReturned'])
+        && d.get('deletedAt', null) == request.time
+        && d.get('deletedBy', null) is map
+        && d.deletedBy.get('uid', null) == request.auth.uid
+        && d.get('deletionReason', null) is string
+        && d.deletionReason.trim().size() >= 10
+        && d.get('stockReturned', null) is list
+        && compatHasPerm('contratos.delete');
+    }
+
+    function isRestore() {
+      let d = request.resource.data;
+      return !isLive(resource.data)
+        && changedKeys().hasOnly(['deletedAt', 'deletedBy', 'deletionReason', 'stockReturned',
+                                  'restoredAt', 'restoredBy', 'lastDeletion'])
+        && !('deletedAt' in d)
+        && d.get('restoredAt', null) == request.time
+        && d.get('restoredBy', null) is map
+        && d.restoredBy.get('uid', null) == request.auth.uid
+        && compatHasPerm('contratos.restore');
+    }
+
+    match /contracts/{contractId} {
+      // Leitura continua liberada a qualquer usuário ativo. NÃO restringir por
+      // contratos.view (nem esconder da leitura os contratos na Lixeira):
+      // regras do Firestore não filtram resultados — uma consulta que possa
+      // retornar um documento proibido é negada INTEIRA. fetchAllData
+      // (store/index.ts) lê a coleção completa dentro de um Promise.all; um
+      // usuário sem contratos.view (ex.: perfil comercial) teria TODA a carga de
+      // dados negada, quebrando Dashboard, Financeiro e o restante do sistema.
+      // O acesso à Lixeira é restrito na interface (rota com contratos.restore).
+      allow read: if compatActive();
+      allow create: if compatHasPerm('contratos.create')
+        && !request.resource.data.keys().hasAny(['deletedAt', 'deletedBy', 'deletionReason', 'stockReturned',
+                                                 'restoredAt', 'restoredBy', 'lastDeletion']);
+      // Cada operação exige a sua permissão; uma não concede a outra.
+      // Contrato na Lixeira não pode ser editado, finalizado nem ter anexo
+      // alterado — só restaurado.
+      allow update: if compatActive() && (isNormalContractEdit() || isSoftDelete() || isRestore());
+      // Exclusão física PROIBIDA para qualquer cliente (inclusive admin e o
+      // sistema legado). Exclusão definitiva só por scripts/purge-contract.cjs,
+      // que usa o Admin SDK e não passa por estas regras.
+      allow delete: if false;
+    }
+
+    // ---------- Parcelas (revenues) ----------
+    // Parcelas de contrato na Lixeira ficam congeladas: não podem ser criadas,
+    // alteradas nem apagadas até o contrato ser restaurado.
+    function contractIsLive(data) {
+      return !(data.get('contractId', null) is string)
+        || data.contractId == ''
+        || !exists(/databases/$(database)/documents/contracts/$(data.contractId))
+        || isLive(get(/databases/$(database)/documents/contracts/$(data.contractId)).data);
+    }
+
+    match /revenues/{revenueId} {
+      allow read: if compatActive();
+      allow create: if compatActive() && contractIsLive(request.resource.data);
+      allow update: if compatActive() && contractIsLive(resource.data) && contractIsLive(request.resource.data);
+      allow delete: if compatActive() && contractIsLive(resource.data);
+    }
+
     // ---------- Usuários ----------
     match /users/{uid} {
       allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
@@ -71,8 +200,8 @@ service cloud.firestore {
 
     // ---------- Auditoria ----------
     match /auditLogs/{logId} {
-      allow read: if isAdmin();
-      allow create: if isActiveUser();
+      allow read: if compatAdmin();
+      allow create: if compatActive();
       allow update, delete: if false;
     }
 
@@ -119,9 +248,15 @@ service cloud.firestore {
     }
 
     // Demais coleções administrativas: exigem usuário ativo.
-    // (contratos, vendas, financeiro, etc.) — ajuste conforme necessário.
-    match /{document=**} {
-      allow read, write: if isActiveUser();
+    //
+    // ATENÇÃO: regras do Firestore se combinam por OU. Um curinga que case com
+    // tudo ANULA qualquer restrição declarada acima — foi o que permitiu a
+    // exclusão física de contratos. Por isso contratos, parcelas e auditoria
+    // ficam fora do curinga e são governados apenas pelas regras próprias.
+    // As demais coleções mantêm o comportamento anterior (qualquer usuário ativo).
+    match /{collectionName}/{document=**} {
+      allow read, write: if isActiveUser()
+        && !(collectionName in ['contracts', 'revenues', 'auditLogs']);
     }
   }
 }

@@ -36,6 +36,14 @@ import { logAudit } from "@/lib/audit";
 import { getNextId as getNextIdUtil, removeUndefined } from "./utils";
 import { format, differenceInMonths, addMonths, addDays, addYears, addWeeks, getDate } from "date-fns";
 import { addSale, updateSale, cancelSale, deleteSale } from "./methods/sales";
+import { moveContractToTrash, restoreContractFromTrash } from "./methods/contractTrash";
+import {
+  isContractDeleted,
+  partitionContracts,
+  partitionRevenues,
+  stripTrashFields,
+  type TrashActor,
+} from "@/lib/contract-trash";
 
 // Normaliza status legado (active/inactive) para o padrão ativo/inativo.
 const normalizeStatus = (s: any): string => {
@@ -259,7 +267,8 @@ type State = {
   clients: any[];
   equipments: any[];
   catalogItems: any[];
-  contracts: any[];
+  contracts: any[]; // somente contratos ativos (fora da Lixeira)
+  deletedContracts: any[]; // contratos na Lixeira
   sales: any[];
   quotes: any[];
   suppliers: any[];
@@ -267,7 +276,8 @@ type State = {
   bankAccounts: any[];
   costCenters: any[];
   chartOfAccounts: any[];
-  revenues: any[];
+  revenues: any[]; // exclui parcelas de contratos na Lixeira
+  trashedRevenues: any[]; // parcelas preservadas de contratos na Lixeira
   expenses: any[];
   collaborators: any[];
   systemUsers: any[];
@@ -309,7 +319,8 @@ type Actions = {
   updateContract: (contractData: any) => Promise<void>;
   recalculateContractInstallments: (contractId: string) => Promise<void>;
   finalizeContract: (contractId: string, fineAmount: number, itemStatuses: any[]) => Promise<void>;
-  deleteContract: (contractId: string) => Promise<void>;
+  deleteContract: (contractId: string, reason: string) => Promise<void>;
+  restoreContract: (contractId: string) => Promise<void>;
   attachSignedContract: (contractId: string, file: File) => Promise<void>;
   deleteSignedContract: (contractId: string) => Promise<void>;
   addSale: (saleData: any) => Promise<any>;
@@ -833,12 +844,33 @@ const useStore = create<State & Actions>((set, get) => {
     };
   };
 
+  // Bloqueia operações sobre contratos que estão na Lixeira. As regras do
+  // Firestore aplicam o mesmo bloqueio no servidor.
+  const assertContractNotInTrash = (contractId: string) => {
+    const trashed = get().deletedContracts.find((c: any) => c.id === contractId);
+    if (trashed || isContractDeleted(get().contracts.find((c: any) => c.id === contractId))) {
+      throw new Error(`O contrato ${contractId} está na Lixeira. Restaure-o antes de alterá-lo.`);
+    }
+  };
+
+  const currentTrashActor = (): TrashActor => {
+    const current = auth.currentUser;
+    if (!current) throw new Error("Sessão expirada. Faça login novamente.");
+    const systemUser = get().systemUsers.find((u: any) => u.uid === current.uid);
+    return {
+      uid: current.uid,
+      email: current.email || systemUser?.email || null,
+      name: systemUser?.name || current.displayName || null,
+    };
+  };
+
   return {
     user: null,
     clients: [],
     equipments: [],
     catalogItems: [],
     contracts: [],
+    deletedContracts: [],
     sales: [],
     quotes: [],
     suppliers: [],
@@ -847,6 +879,7 @@ const useStore = create<State & Actions>((set, get) => {
     costCenters: [],
     chartOfAccounts: [],
     revenues: [],
+    trashedRevenues: [],
     expenses: [],
     collaborators: [],
     systemUsers: [],
@@ -1045,9 +1078,15 @@ const useStore = create<State & Actions>((set, get) => {
           ] = otherSnaps;
 
           newState.clients = clientsSnap.docs.map((d) => normalizeClientData(mapDoc(d)));
-          newState.contracts = contractsSnap.docs.map((d) =>
-            convertTimestampToISO(mapDoc(d), ["startDate", "endDate", "createdAt"]),
+          // Contratos na Lixeira (deletedAt preenchido) ficam fora de `contracts`
+          // e suas parcelas fora de `revenues`, para que listagens, dashboards,
+          // relatórios e contagens os ignorem sem filtros espalhados pelas telas.
+          const allContracts = contractsSnap.docs.map((d) =>
+            convertTimestampToISO(mapDoc(d), ["startDate", "endDate", "createdAt", "deletedAt", "restoredAt"]),
           );
+          const { active: activeContracts, deleted: deletedContracts } = partitionContracts(allContracts);
+          newState.contracts = activeContracts;
+          newState.deletedContracts = deletedContracts;
           newState.sales = salesSnap.docs.map((d) =>
             convertTimestampToISO(mapDoc(d), ["saleDate", "createdAt", "downPaymentDate"]),
           );
@@ -1061,9 +1100,15 @@ const useStore = create<State & Actions>((set, get) => {
           newState.bankAccounts = bankAccountsSnap.docs.map(mapDoc);
           newState.costCenters = costCentersSnap.docs.map(mapDoc);
           newState.chartOfAccounts = chartOfAccountsSnap.docs.map(mapDoc);
-          newState.revenues = revenuesSnap.docs.map((d) =>
+          const allRevenues = revenuesSnap.docs.map((d) =>
             convertTimestampToISO(mapDoc(d), ["dueDate", "createdAt", "paymentDate", "competenceDate"]),
           );
+          const { active: activeRevenues, trashed: trashedRevenues } = partitionRevenues(
+            allRevenues,
+            new Set(deletedContracts.map((c: any) => c.id)),
+          );
+          newState.revenues = activeRevenues;
+          newState.trashedRevenues = trashedRevenues;
           newState.expenses = expensesSnap.docs.map((d) =>
             convertTimestampToISO(mapDoc(d), ["dueDate", "createdAt", "paymentDate", "competenceDate"]),
           );
@@ -1583,8 +1628,11 @@ const useStore = create<State & Actions>((set, get) => {
     },
 
     updateContract: async (contractData) => {
-      const { id, ...data } = contractData;
+      const { id, ...rawData } = contractData;
       if (!id) throw new Error("ID do contrato é obrigatório para atualização.");
+      assertContractNotInTrash(id);
+      // Uma edição comum nunca grava os campos de exclusão/restauração.
+      const data = stripTrashFields(rawData);
 
       const contractRef = doc(db, "contracts", id);
       
@@ -1607,6 +1655,7 @@ const useStore = create<State & Actions>((set, get) => {
     },
 
     recalculateContractInstallments: async (contractId: string) => {
+      assertContractNotInTrash(contractId);
       const { contracts, revenues } = get();
       const contract = contracts.find((c) => c.id === contractId);
       if (!contract) throw new Error("Contrato não encontrado.");
@@ -1665,6 +1714,7 @@ const useStore = create<State & Actions>((set, get) => {
     },
 
     finalizeContract: async (contractId, fineAmount, itemStatuses) => {
+      assertContractNotInTrash(contractId);
       const { contracts, equipments, revenues } = get();
       const contractToFinalize = contracts.find((c) => c.id === contractId);
       if (!contractToFinalize) throw new Error("Contrato não encontrado.");
@@ -1757,39 +1807,26 @@ const useStore = create<State & Actions>((set, get) => {
       await get().fetchAllData();
     },
 
-    deleteContract: async (contractId) => {
-      const { contracts, revenues, equipments } = get();
-      const batch = writeBatch(db);
+    // Exclusão LÓGICA: move o contrato para a Lixeira. Nada é apagado —
+    // contrato, parcelas, anexos e histórico permanecem no banco. Contratos em
+    // andamento devolvem os equipamentos ao estoque, na mesma transação.
+    // Exclusão definitiva só via scripts/purge-contract.cjs (Admin SDK).
+    deleteContract: async (contractId, reason) => {
+      await moveContractToTrash(db, { contractId, reason, actor: currentTrashActor() });
+      await get().fetchAllData();
+    },
 
-      const contractToDelete = contracts.find((c) => c.id === contractId);
-      if (!contractToDelete) {
-        throw new Error("Contrato não encontrado para exclusão.");
-      }
-
-      for (const item of contractToDelete.items) {
-        const equipment = equipments.find((e) => e.id === item.equipmentId);
-        if (equipment) {
-          const newStock = equipment.stock + item.quantity;
-          const equipmentRef = doc(db, "equipments", item.equipmentId);
-          batch.update(equipmentRef, { stock: newStock });
-        }
-      }
-
-      const revenuesToDelete = revenues.filter((r) => r.contractId === contractId);
-      revenuesToDelete.forEach((revenue) => {
-        const revenueRef = doc(db, "revenues", revenue.id);
-        batch.delete(revenueRef);
-      });
-
-      const contractRef = doc(db, "contracts", contractId);
-      batch.delete(contractRef);
-
-      await batch.commit();
+    // Restaura da Lixeira somente se todo o estoque devolvido na exclusão
+    // ainda estiver disponível; caso contrário lança ContractRestoreConflictError
+    // sem alterar nenhum dado.
+    restoreContract: async (contractId) => {
+      await restoreContractFromTrash(db, { contractId, actor: currentTrashActor() });
       await get().fetchAllData();
     },
 
     attachSignedContract: async (contractId, file) => {
       if (!file) throw new Error("Nenhum arquivo selecionado.");
+      assertContractNotInTrash(contractId);
 
       // contentType explícito: sem isso o SDK depende de file.type, que pode
       // vir vazio e subir como application/octet-stream (negado pelas regras).
@@ -1809,6 +1846,7 @@ const useStore = create<State & Actions>((set, get) => {
     },
 
     deleteSignedContract: async (contractId: string) => {
+      assertContractNotInTrash(contractId);
       const { contracts } = get();
       const contract = contracts.find((c) => c.id === contractId);
       if (!contract || !contract.signedContractUrl) {

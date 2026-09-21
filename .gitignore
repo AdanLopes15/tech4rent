@@ -9,6 +9,11 @@ lerna-debug.log*
 
 node_modules
 dist
+# Artefatos do Playwright e do Firebase Emulator
+test-results
+playwright-report
+firebase-debug.log
+firestore-debug.log
 dist-ssr
 *.local
 
@@ -29,6 +34,8 @@ dist-ssr
 .env.local
 .env.*.local
 scripts/serviceAccount.json
+# Exportações de scripts administrativos (contêm dados pessoais de clientes)
+scripts/exports/
 serviceAccount.json
 *firebase-adminsdk*.json
 *.pem

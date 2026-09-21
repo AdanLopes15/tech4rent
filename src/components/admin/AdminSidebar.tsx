@@ -26,6 +26,7 @@ import {
   ArrowLeftRight,
   FileCheck,
   Globe,
+  Trash2,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -60,6 +61,7 @@ const menuItems: MenuItem[] = [
     children: [
       { icon: ClipboardList, label: "Orçamentos", path: "/admin/orcamentos", perm: "orcamentos.view" },
       { icon: FileText, label: "Contratos", path: "/admin/contratos", perm: "contratos.view" },
+      { icon: Trash2, label: "Lixeira de Contratos", path: "/admin/contratos/lixeira", perm: "contratos.restore" },
       { icon: ShoppingCart, label: "Vendas", path: "/admin/vendas", perm: "vendas.view" },
       { icon: ShoppingCart, label: "Ordens de Compra", path: "/admin/ordens-compra", perm: "ordensCompra.view" },
     ],
