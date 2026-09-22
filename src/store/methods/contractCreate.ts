@@ -19,6 +19,7 @@ import {
   type Transaction,
 } from "firebase/firestore";
 import { addMonths, differenceInMonths, getDate } from "date-fns";
+import { billingMismatchMessage, normalizeItemsBillingType } from "@/lib/contract-billing";
 import { aggregateItems, type TrashActor } from "@/lib/contract-trash";
 import {
   duplicateContractMessage,
@@ -170,7 +171,12 @@ async function prepareContractWrite(
     choice.suggestedId && choice.suggestedId === contractId ? "automatico" : "manual";
 
   const write = (extraAudit: Record<string, any> = {}) => {
-    const { client, items, startDate, endDate, firstInstallmentDate, ...rest } = draft;
+    const { client, items: draftItems, startDate, endDate, firstInstallmentDate, ...rest } = draft;
+    // Fronteira de persistência: qualquer origem (criação direta, duplicação ou
+    // conversão de orçamento) grava o tipo de cobrança canônico. Só esse campo
+    // muda — quantidade, preço e equipamento seguem intactos, então estoque,
+    // parcelas, contador, auditoria e número não são afetados.
+    const items = normalizeItemsBillingType(draftItems);
     const monthlyValue = items.reduce((acc: number, i: any) => acc + Number(i.quantity) * Number(i.unitPrice || 0), 0);
 
     for (const entry of entries) {
@@ -309,6 +315,15 @@ export async function convertQuoteToContract(
     const quote: any = quoteSnap.data();
     if (quote.status !== "Pendente") throw new Error("Apenas orçamentos pendentes podem ser convertidos.");
     if (quote.budgetType !== "locacao") throw new Error("Este orçamento não é de locação.");
+
+    // Camada autoritativa: o tipo do orçamento não basta — cada item precisa ter
+    // um tipo de cobrança de LOCAÇÃO. "venda" e valores desconhecidos entram por
+    // orçamentos antigos ou por chamadas que não passam pelo AddQuoteDialog, e
+    // virariam contrato com cobrança que nenhuma tela de contrato reconhece.
+    // A recusa acontece ANTES de qualquer escrita: nada de contrato, estoque,
+    // parcelas, contador, orçamento ou auditoria é tocado.
+    const itemsInvalidos = billingMismatchMessage("locacao", quote.items);
+    if (itemsInvalidos) throw new Error(itemsInvalidos);
 
     const toDate = (v: any) => (v?.toDate ? v.toDate() : new Date(v));
     const startDate = toDate(quote.startDate);

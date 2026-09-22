@@ -24,6 +24,7 @@ import { format, addMonths, addYears } from "date-fns";
 import { cn } from "@/lib/utils";
 import { AddClientDialog } from "@/components/clientes/AddClientDialog";
 import { ContractNumberField, useContractNumber } from "@/components/contratos/ContractNumberField";
+import { BILLING_TYPES, normalizeBillingType, normalizeItemsBillingType } from "@/lib/contract-billing";
 import {
   duplicableContractValues,
   duplicatingContractMessage,
@@ -103,7 +104,8 @@ export function AddContractDialog({ open, onOpenChange, contract, duplicateFrom 
           ? contract.items.map((i) => ({
               equipmentId: i.equipmentId || "",
               quantity: i.quantity || 1,
-              billingType: i.billingType || "Mensal",
+              // Contratos antigos gravaram "mensal": o select só exibe a canônica.
+              billingType: normalizeBillingType(i.billingType) || i.billingType || "Mensal",
               unitPrice: i.unitPrice || 0,
             }))
           : [{ equipmentId: "", quantity: 1, billingType: "Mensal", unitPrice: 0 }],
@@ -188,6 +190,9 @@ export function AddContractDialog({ open, onOpenChange, contract, duplicateFrom 
     setLoading(true);
     try {
       const client = clients.find((c: any) => c.id === clientId);
+      // O que for gravado daqui em diante sai no padrão canônico do select.
+      // Só o tipo de cobrança muda; quantidade, preço e equipamento seguem iguais.
+      const itemsToSave = normalizeItemsBillingType(items);
 
       if (isEditing) {
         await updateContract({
@@ -197,7 +202,7 @@ export function AddContractDialog({ open, onOpenChange, contract, duplicateFrom 
           client,
           startDate: startDate.toISOString(),
           endDate: endDate.toISOString(),
-          items,
+          items: itemsToSave,
           totalValue,
           costCenterId,
           chartOfAccountId,
@@ -212,7 +217,7 @@ export function AddContractDialog({ open, onOpenChange, contract, duplicateFrom 
           startDate,
           endDate,
           firstInstallmentDate: firstInstallmentDate || addMonths(startDate, 1),
-          items,
+          items: itemsToSave,
           totalValue,
           status: "Em Andamento",
           costCenterId,
@@ -426,9 +431,12 @@ export function AddContractDialog({ open, onOpenChange, contract, duplicateFrom 
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Mensal">Mensal</SelectItem>
-                        <SelectItem value="Semanal">Semanal</SelectItem>
-                        <SelectItem value="Diário">Diário</SelectItem>
+                        {/* Mesma lista que a normalização usa (lib/contract-billing.ts). */}
+                        {BILLING_TYPES.map((tipo) => (
+                          <SelectItem key={tipo} value={tipo}>
+                            {tipo}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <Input

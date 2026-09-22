@@ -24,6 +24,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { toInternalBillingType } from "@/lib/contract-billing";
 
 interface EditContractDialogProps {
   open: boolean;
@@ -35,7 +36,12 @@ interface ContractItem {
   id: number;
   equipmentId: string;
   quantity: number;
-  billingType: "diaria" | "semanal" | "mensal";
+  /**
+   * Vocabulário INTERNO desta tela ("diaria" | "semanal" | "mensal"), que é o
+   * que o switch de tarifa usa. É string porque um contrato legado pode trazer
+   * um valor fora da lista, e esse valor é preservado até a gravação.
+   */
+  billingType: string;
   unitPrice: number;
 }
 
@@ -95,7 +101,10 @@ export function EditContractDialog({ open, onOpenChange, contract }: EditContrac
               id: item.id ?? index + 1,
               equipmentId: item.equipmentId || "",
               quantity: item.quantity || 1,
-              billingType: item.billingType || "mensal",
+              // O banco guarda a forma canônica ("Mensal"); aqui dentro o tipo
+              // segue em minúsculas porque é ele que escolhe a tarifa abaixo.
+              // A volta para a forma canônica acontece só ao gravar (store).
+              billingType: toInternalBillingType(item.billingType) || "mensal",
               unitPrice: item.unitPrice || 0,
             }))
           : [],

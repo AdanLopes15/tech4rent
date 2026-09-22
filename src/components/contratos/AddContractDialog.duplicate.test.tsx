@@ -294,6 +294,94 @@ describe("a duplicação não vaza para a criação normal seguinte", () => {
   });
 });
 
+describe("normalização do tipo de cobrança (contratos antigos com 'mensal')", () => {
+  // Como o CTR-004 de produção: o item gravou "mensal" em minúsculas.
+  const ANTIGO = {
+    ...ORIGINAL,
+    id: "CTR-004",
+    items: [{ equipmentId: "EQP-001", quantity: 30, billingType: "mensal", unitPrice: 235 }],
+  };
+
+  const cobrancaSelecionada = () =>
+    screen.getAllByRole("combobox").map((c) => c.textContent).find((t) => /Mensal|Semanal|Diário/.test(t || ""));
+
+  it("duplicar um contrato com 'mensal' exibe Mensal no select", async () => {
+    render(<AddContractDialog open onOpenChange={vi.fn()} duplicateFrom={ANTIGO} />);
+    await waitFor(() => expect(numberInput().value).toBe("CTR-120"));
+
+    expect(screen.getByTestId("duplicating-contract-banner")).toHaveTextContent("CTR-004");
+    expect(cobrancaSelecionada()).toBe("Mensal");
+    // Quantidade e preço do item seguem iguais.
+    expect(screen.getByDisplayValue("30")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("R$ 235,0000")).toBeInTheDocument();
+  });
+
+  it("editar um contrato com 'mensal' também exibe Mensal", async () => {
+    render(<AddContractDialog open onOpenChange={vi.fn()} contract={ANTIGO} />);
+    await waitFor(() => expect(screen.getByDisplayValue("30")).toBeInTheDocument());
+
+    expect(screen.getByRole("heading", { name: /Editar Contrato/ })).toBeInTheDocument();
+    expect(cobrancaSelecionada()).toBe("Mensal");
+  });
+
+  it("salvar a duplicação grava o tipo canônico, não o 'mensal' do original", async () => {
+    render(<AddContractDialog open onOpenChange={vi.fn()} duplicateFrom={ANTIGO} />);
+    await waitFor(() => expect(numberInput().value).toBe("CTR-120"));
+
+    fireEvent.click(screen.getByRole("button", { name: "Gerar Contrato" }));
+
+    await waitFor(() => expect(addContract).toHaveBeenCalledTimes(1));
+    expect(addContract.mock.calls[0][0].items).toEqual([
+      { equipmentId: "EQP-001", quantity: 30, billingType: "Mensal", unitPrice: 235 },
+    ]);
+    // A rastreabilidade e o número continuam como antes.
+    expect(addContract.mock.calls[0][1]).toMatchObject({
+      contractNumber: "CTR-120",
+      duplicatedFromContractId: "CTR-004",
+    });
+  });
+
+  it("salvar uma edição grava o tipo canônico", async () => {
+    render(<AddContractDialog open onOpenChange={vi.fn()} contract={ANTIGO} />);
+    await waitFor(() => expect(screen.getByDisplayValue("30")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: "Salvar Alterações" }));
+
+    await waitFor(() => expect(updateContract).toHaveBeenCalledTimes(1));
+    expect(updateContract.mock.calls[0][0].items).toEqual([
+      { equipmentId: "EQP-001", quantity: 30, billingType: "Mensal", unitPrice: 235 },
+    ]);
+    expect(updateContract.mock.calls[0][0].id).toBe("CTR-004");
+  });
+
+  it("cancelar a duplicação de um contrato antigo não grava nada", async () => {
+    const onOpenChange = vi.fn();
+    render(<AddContractDialog open onOpenChange={onOpenChange} duplicateFrom={ANTIGO} />);
+    await waitFor(() => expect(numberInput().value).toBe("CTR-120"));
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+    expect(addContract).not.toHaveBeenCalled();
+    expect(updateContract).not.toHaveBeenCalled();
+  });
+
+  it("um tipo desconhecido não é convertido em Mensal ao salvar", async () => {
+    const estranho = { ...ANTIGO, items: [{ equipmentId: "EQP-001", quantity: 2, billingType: "quinzenal", unitPrice: 10 }] };
+    render(<AddContractDialog open onOpenChange={vi.fn()} duplicateFrom={estranho} />);
+    await waitFor(() => expect(numberInput().value).toBe("CTR-120"));
+
+    // Controle negativo: um tipo fora da lista deixa o select em branco — é
+    // exatamente isso que o helper detecta nos testes acima.
+    expect(cobrancaSelecionada()).toBeUndefined();
+
+    fireEvent.click(screen.getByRole("button", { name: "Gerar Contrato" }));
+
+    await waitFor(() => expect(addContract).toHaveBeenCalledTimes(1));
+    expect(addContract.mock.calls[0][0].items[0].billingType).toBe("quinzenal");
+  });
+});
+
 describe("o modo de edição antigo continua como era", () => {
   it("edição preenche pelo contrato, sem campo de número e sem aviso de duplicação", async () => {
     render(<AddContractDialog open onOpenChange={vi.fn()} contract={ORIGINAL} />);

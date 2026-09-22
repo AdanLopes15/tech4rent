@@ -10,6 +10,7 @@
 // adicione ao contrato no futuro sem perceber. Aqui, campo novo só é copiado
 // se for escrito nesta lista.
 
+import { normalizeBillingType } from "@/lib/contract-billing";
 import { parseContractNumber } from "@/lib/contract-number";
 
 /** Um item como o formulário o edita. */
@@ -111,7 +112,8 @@ function duplicableItem(item: unknown): DuplicableContractItem {
   return {
     equipmentId: text(i.equipmentId),
     quantity: toPositiveInt(i.quantity),
-    billingType: text(i.billingType) || "Mensal",
+    // Contratos antigos gravaram "mensal": o select só exibe a forma canônica.
+    billingType: normalizeBillingType(i.billingType) || "Mensal",
     unitPrice: toMoney(i.unitPrice),
   };
 }

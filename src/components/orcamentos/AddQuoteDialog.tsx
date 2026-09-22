@@ -29,6 +29,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { AddClientDialog } from "@/components/clientes/AddClientDialog";
 import { buildObservationsWithPaymentCondition } from "@/store/utils";
+import { billingMismatchMessage } from "@/lib/contract-billing";
 
 type BudgetType = "locacao" | "venda";
 type BillingType = "diaria" | "semanal" | "mensal" | "venda";
@@ -379,6 +380,20 @@ export function AddQuoteDialog({ open, onOpenChange, quote, onCreated }: AddQuot
       toast({
         title: "Período obrigatório",
         description: "Preencha a data de início e a data final da locação.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Trocar o tipo de um orçamento já existente NÃO reescreve os itens (para
+    // não mexer em preços sem o usuário pedir). Então, antes de salvar, os itens
+    // precisam bater com o tipo escolhido: um item de venda não pode ficar num
+    // orçamento de locação — ele viraria contrato com cobrança inválida.
+    const tiposIncompativeis = billingMismatchMessage(budgetType, items);
+    if (tiposIncompativeis) {
+      toast({
+        title: "Itens incompatíveis com o tipo de orçamento",
+        description: tiposIncompativeis,
         variant: "destructive",
       });
       return;

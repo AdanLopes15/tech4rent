@@ -42,6 +42,7 @@ import {
   createContract as createContractTx,
   getSuggestedContractNumber,
 } from "./methods/contractCreate";
+import { normalizeItemsBillingType } from "@/lib/contract-billing";
 import {
   isContractDeleted,
   partitionContracts,
@@ -1592,6 +1593,11 @@ const useStore = create<State & Actions>((set, get) => {
         startDate: safeTimestamp(data.startDate),
         endDate: safeTimestamp(data.endDate),
         finalizedAt: data.finalizedAt ? safeTimestamp(data.finalizedAt) : null,
+        // Fronteira de persistência: seja qual for a tela de origem, o contrato
+        // é gravado com o tipo de cobrança canônico. As telas podem manter o
+        // vocabulário interno de que precisam (ex.: EditContractDialog usa
+        // "mensal"/"semanal"/"diaria" para escolher a tarifa).
+        ...(data.items ? { items: normalizeItemsBillingType(data.items) } : {}),
       };
 
       await updateDoc(contractRef, dataToUpdate);

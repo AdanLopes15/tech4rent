@@ -527,6 +527,58 @@ describe("2. permissões: duplicar exige contratos.create", () => {
   });
 });
 
+describe("tipo de cobrança: contratos antigos gravaram 'mensal'", () => {
+  it("a cópia de um contrato com 'mensal' é gravada com o tipo canônico", async () => {
+    // Como o CTR-004 de produção.
+    await adminWrite("contracts/CTR-060", {
+      ...ORIGINAL,
+      id: "CTR-060",
+      items: [{ equipmentId: "EQP-001", quantity: 2, billingType: "mensal", unitPrice: 100 }],
+    });
+    const antigoAntes = JSON.stringify(await adminRead("contracts/CTR-060"));
+
+    const legado = await adminRead("contracts/CTR-060");
+    await createContract(dbAs("newAdmin"), {
+      draft: duplicateDraft(legado),
+      contractNumber: "CTR-120",
+      suggestedId: "CTR-120",
+      duplicatedFromContractId: "CTR-060",
+      actor: actor("newAdmin"),
+    });
+
+    expect((await adminRead("contracts/CTR-120"))?.items).toEqual([
+      { equipmentId: "EQP-001", quantity: 2, billingType: "Mensal", unitPrice: 100 },
+    ]);
+    // O contrato antigo continua com o valor dele: nada foi migrado.
+    expect(JSON.stringify(await adminRead("contracts/CTR-060"))).toBe(antigoAntes);
+    expect((await adminRead("contracts/CTR-060"))?.items?.[0]?.billingType).toBe("mensal");
+  });
+
+  it("estoque, parcelas, contador e auditoria não mudam por causa da normalização", async () => {
+    await adminWrite("contracts/CTR-060", {
+      ...ORIGINAL,
+      id: "CTR-060",
+      items: [{ equipmentId: "EQP-001", quantity: 2, billingType: "mensal", unitPrice: 100 }],
+    });
+    const legado = await adminRead("contracts/CTR-060");
+
+    const result = await createContract(dbAs("newAdmin"), {
+      draft: duplicateDraft(legado),
+      contractNumber: "CTR-120",
+      suggestedId: "CTR-120",
+      duplicatedFromContractId: "CTR-060",
+      actor: actor("newAdmin"),
+    });
+
+    expect(result).toMatchObject({ contractId: "CTR-120", numberSource: "automatico", counterAfter: 120 });
+    expect(await counter()).toBe(120);
+    expect(await stock("EQP-001")).toBe(8);
+    expect((await adminList("revenues")).filter((r) => r.contractId === "CTR-120")).toHaveLength(3);
+    const [audit] = (await adminList<AuditDoc>("auditLogs")).filter((a) => a.details.contractId === "CTR-120");
+    expect(audit.details).toMatchObject({ origin: "duplicacao", duplicatedFromContractId: "CTR-060" });
+  });
+});
+
 describe("15. contratos antigos, sem os campos novos", () => {
   it("duplicar um contrato legado (sem unitOperation, sem numbering) funciona", async () => {
     await adminWrite("contracts/CTR-003", {

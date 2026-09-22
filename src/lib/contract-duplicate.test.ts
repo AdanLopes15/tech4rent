@@ -69,6 +69,39 @@ describe("duplicableContractValues: campos copiados", () => {
     });
   });
 
+  it("normaliza o tipo de cobrança de contratos antigos ('mensal' → 'Mensal')", () => {
+    const values = duplicableContractValues({
+      ...fullContract,
+      items: [
+        { equipmentId: "EQP-001", quantity: 30, billingType: "mensal", unitPrice: 235 },
+        { equipmentId: "EQP-009", quantity: 1, billingType: "DIÁRIA", unitPrice: 50 },
+      ],
+    });
+
+    expect(values.items).toEqual([
+      { equipmentId: "EQP-001", quantity: 30, billingType: "Mensal", unitPrice: 235 },
+      { equipmentId: "EQP-009", quantity: 1, billingType: "Diário", unitPrice: 50 },
+    ]);
+  });
+
+  it("um tipo de cobrança desconhecido é preservado, não vira Mensal", () => {
+    const values = duplicableContractValues({
+      ...fullContract,
+      items: [{ equipmentId: "EQP-001", quantity: 1, billingType: "quinzenal", unitPrice: 10 }],
+    });
+
+    expect(values.items[0].billingType).toBe("quinzenal");
+  });
+
+  it("item sem tipo de cobrança continua caindo no padrão Mensal", () => {
+    const values = duplicableContractValues({
+      ...fullContract,
+      items: [{ equipmentId: "EQP-001", quantity: 1, unitPrice: 10 }],
+    });
+
+    expect(values.items[0].billingType).toBe("Mensal");
+  });
+
   it("aceita datas em Timestamp do Firestore", () => {
     const values = duplicableContractValues({
       ...fullContract,
