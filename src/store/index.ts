@@ -300,7 +300,13 @@ type State = {
 };
 
 // Número escolhido no formulário e o número que foi sugerido ao abri-lo.
-export type ContractNumbering = { contractNumber: string; suggestedId: string | null };
+// duplicatedFromContractId só é preenchido quando o formulário foi aberto em
+// modo duplicação: é rastreabilidade, não muda como o número é escolhido.
+export type ContractNumbering = {
+  contractNumber: string;
+  suggestedId: string | null;
+  duplicatedFromContractId?: string | null;
+};
 
 type Actions = {
   fetchAllData: (publicOnly?: boolean) => Promise<void>;
@@ -1558,6 +1564,7 @@ const useStore = create<State & Actions>((set, get) => {
         },
         contractNumber: numbering.contractNumber,
         suggestedId: numbering.suggestedId,
+        duplicatedFromContractId: numbering.duplicatedFromContractId || null,
         actor: currentTrashActor(),
       });
       await get().fetchAllData();

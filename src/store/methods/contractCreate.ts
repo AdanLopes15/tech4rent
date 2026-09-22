@@ -59,6 +59,13 @@ type NumberChoice = {
   actor: TrashActor;
 };
 
+/**
+ * Contrato que originou a duplicação, quando houver. É só rastreabilidade: o
+ * contrato de origem não é lido nem escrito pela transação — o novo contrato
+ * nasce exclusivamente dos dados revisados no formulário.
+ */
+type DuplicationSource = { duplicatedFromContractId?: string | null };
+
 export type CreateContractResult = {
   contractId: string;
   numberSource: ContractNumberSource;
@@ -130,6 +137,7 @@ async function prepareContractWrite(
   draft: ContractDraft,
   choice: NumberChoice,
   origin: ContractCreationOrigin,
+  duplicatedFromContractId: string | null = null,
 ) {
   const parsed = requireContractNumber(choice.contractNumber);
   const contractId = parsed.id;
@@ -183,6 +191,9 @@ async function prepareContractWrite(
       createdAt: serverTimestamp(),
       createdBy: choice.actor,
       numbering: { source: numberSource, suggestedId: choice.suggestedId || null, origin },
+      // Campo opcional: só existe em contratos criados por duplicação. Contratos
+      // antigos continuam sem ele.
+      ...(duplicatedFromContractId ? { duplicatedFromContractId } : {}),
     };
     tx.set(contractRef, contract);
 
@@ -221,6 +232,7 @@ async function prepareContractWrite(
         counterAfter,
         installments: dueDates.length,
         actorName: choice.actor.name,
+        ...(duplicatedFromContractId ? { duplicatedFromContractId } : {}),
         ...extraAudit,
       },
       createdAt: serverTimestamp(),
@@ -257,14 +269,25 @@ async function explainConflict<T>(db: Firestore, contractNumber: string, run: ()
   }
 }
 
-/** Criação direta pela tela de Contratos. */
+/**
+ * Criação direta pela tela de Contratos.
+ *
+ * Duplicar um contrato usa ESTE mesmo fluxo: a duplicação acontece toda no
+ * formulário (que é preenchido com os dados comerciais do original) e chega
+ * aqui como uma criação normal. A única diferença é a rastreabilidade
+ * (duplicatedFromContractId e origin "duplicacao"); número, estoque, parcelas,
+ * contador e auditoria seguem exatamente as mesmas regras. O contrato de
+ * origem não é lido nem gravado.
+ */
 export async function createContract(
   db: Firestore,
-  { draft, ...choice }: NumberChoice & { draft: ContractDraft },
+  { draft, duplicatedFromContractId = null, ...choice }: NumberChoice & DuplicationSource & { draft: ContractDraft },
 ): Promise<CreateContractResult> {
+  const source = duplicatedFromContractId || null;
+  const origin: ContractCreationOrigin = source ? "duplicacao" : "contrato_direto";
   return explainConflict(db, choice.contractNumber, () =>
     runTransaction(db, async (tx) => {
-      const { write } = await prepareContractWrite(tx, db, draft, choice, "contrato_direto");
+      const { write } = await prepareContractWrite(tx, db, draft, choice, origin, source);
       return write();
     }),
   );

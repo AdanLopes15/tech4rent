@@ -15,7 +15,7 @@ export const MAX_CONTRACT_NUMBER = 999999;
 export const CANONICAL_CONTRACT_ID = /^CTR-(00[1-9]|0[1-9][0-9]|[1-9][0-9]{2,5})$/;
 
 export type ContractNumberSource = "automatico" | "manual";
-export type ContractCreationOrigin = "contrato_direto" | "conversao_orcamento";
+export type ContractCreationOrigin = "contrato_direto" | "conversao_orcamento" | "duplicacao";
 
 export const formatContractId = (n: number): string => `${CONTRACT_PREFIX}-${String(n).padStart(3, "0")}`;
 

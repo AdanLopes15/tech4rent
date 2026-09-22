@@ -44,6 +44,7 @@ import {
 
 import {
   CalendarIcon,
+  Copy,
   PlusCircle,
   MoreHorizontal,
   RefreshCw,
@@ -61,6 +62,7 @@ import {
 } from "lucide-react";
 
 import { AddContractDialog } from "@/components/contratos/AddContractDialog";
+import type { ContractLike } from "@/lib/contract-duplicate";
 import { ViewContractDialog } from "@/components/contratos/ViewContractDialog";
 import { EditContractDialog } from "@/components/contratos/EditContractDialog";
 import { DeliveryReceiptDialog } from "@/components/contratos/DeliveryReceiptDialog";
@@ -303,6 +305,7 @@ export default function Contratos() {
   const { toast } = useToast();
   const { can } = useAuth();
   const canEdit = can("contratos.edit");
+  const canCreate = can("contratos.create");
 
   const [date, setDate] = useState<DateRange | undefined>();
   const [clientFilter, setClientFilter] = useState("todos");
@@ -320,6 +323,9 @@ export default function Contratos() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const [selectedContract, setSelectedContract] = useState<any>(null);
+  // Contrato de origem da duplicação. Só alimenta o formulário: nada é gravado
+  // enquanto o usuário não salvar, e o original nunca é alterado.
+  const [duplicateSource, setDuplicateSource] = useState<ContractLike | null>(null);
   const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({});
 
   const bulkPrintableRef = useRef<HTMLDivElement | null>(null);
@@ -372,6 +378,11 @@ export default function Contratos() {
   const handleOpenDialog = (setter: React.Dispatch<React.SetStateAction<boolean>>, contract: any) => {
     setSelectedContract(contract);
     setter(true);
+  };
+
+  // Só abre o formulário de criação preenchido. Nenhuma gravação acontece aqui.
+  const handleDuplicateContract = (contract: ContractLike) => {
+    setDuplicateSource(contract);
   };
 
   const handleContractTrashed = (contractId: string) => {
@@ -765,6 +776,14 @@ export default function Contratos() {
                                   </DropdownMenuItem>
                                 )}
 
+                                {/* Duplicar é criar: exige a MESMA permissão de criar contrato. */}
+                                {canCreate && (
+                                  <DropdownMenuItem onClick={() => handleDuplicateContract(contract)}>
+                                    <Copy className="mr-2 h-4 w-4" />
+                                    Duplicar Contrato
+                                  </DropdownMenuItem>
+                                )}
+
                                 {canEdit && (
                                   <DropdownMenuItem onClick={() => handleRecalculateInstallments(contract.id)}>
                                     <RefreshCw className="mr-2 h-4 w-4" />
@@ -866,6 +885,15 @@ export default function Contratos() {
       </Collapsible>
 
       <AddContractDialog open={isNewContractDialogOpen} onOpenChange={setIsNewContractDialogOpen} />
+
+      {/* Duplicação: mesmo formulário de criação, preenchido com o contrato de origem. */}
+      {duplicateSource && (
+        <AddContractDialog
+          open
+          onOpenChange={(open) => !open && setDuplicateSource(null)}
+          duplicateFrom={duplicateSource}
+        />
+      )}
 
       {selectedContract && (
         <>

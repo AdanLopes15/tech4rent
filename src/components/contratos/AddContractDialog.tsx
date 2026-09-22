@@ -19,26 +19,33 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, PlusCircle, Trash2 } from "lucide-react";
+import { CalendarIcon, Copy, PlusCircle, Trash2 } from "lucide-react";
 import { format, addMonths, addYears } from "date-fns";
 import { cn } from "@/lib/utils";
 import { AddClientDialog } from "@/components/clientes/AddClientDialog";
 import { ContractNumberField, useContractNumber } from "@/components/contratos/ContractNumberField";
-
-interface ContractItem {
-  equipmentId: string;
-  quantity: number;
-  billingType: string;
-  unitPrice: number;
-}
+import {
+  duplicableContractValues,
+  duplicatingContractMessage,
+  sourceContractId,
+  type ContractDateValue,
+  type ContractLike,
+  type DuplicableContractItem as ContractItem,
+} from "@/lib/contract-duplicate";
 
 interface AddContractDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  contract?: any;
+  contract?: ContractLike;
+  /**
+   * Contrato que está sendo duplicado. O formulário abre preenchido com os
+   * dados comerciais dele, mas o número vem da sugestão sequencial normal e
+   * nada é gravado até o usuário salvar.
+   */
+  duplicateFrom?: ContractLike;
 }
 
-export function AddContractDialog({ open, onOpenChange, contract }: AddContractDialogProps) {
+export function AddContractDialog({ open, onOpenChange, contract, duplicateFrom }: AddContractDialogProps) {
   const { clients, equipments, costCenters, chartOfAccounts, bankAccounts, addContract, updateContract } = useStore();
   const { toast } = useToast();
 
@@ -60,19 +67,40 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
   const [firstInstallmentOpen, setFirstInstallmentOpen] = useState(false);
 
   const isEditing = !!contract;
+  // Duplicar é uma CRIAÇÃO: o número continua sendo escolhido/sugerido normalmente.
+  const duplicatedFromContractId = !isEditing && duplicateFrom ? sourceContractId(duplicateFrom) : null;
+  const isDuplicating = !isEditing && !!duplicateFrom;
   // O número só é escolhido na criação; o ID de um contrato existente nunca muda.
   const contractNumber = useContractNumber(open && !isEditing);
+
+  // Só a DUPLICAÇÃO usa o mapeamento reduzido (lib/contract-duplicate.ts), que
+  // copia campo a campo apenas o que o formulário edita. A edição continua
+  // lendo o contrato direto, exatamente como antes.
+  const applyDuplicatedValues = (source: unknown) => {
+    const values = duplicableContractValues(source);
+    setClientId(values.clientId);
+    setUnitOperation(values.unitOperation);
+    setStartDate(values.startDate);
+    setEndDate(values.endDate);
+    setFirstInstallmentDate(values.firstInstallmentDate);
+    setItems(values.items);
+    setCostCenterId(values.costCenterId);
+    setChartOfAccountId(values.chartOfAccountId);
+    setBankAccountId(values.bankAccountId);
+  };
 
   useEffect(() => {
     if (contract) {
       setClientId(contract.clientId || "");
       setUnitOperation(contract.unitOperation || "");
-      setStartDate(contract.startDate ? new Date(contract.startDate) : undefined);
-      setEndDate(contract.endDate ? new Date(contract.endDate) : undefined);
-      setFirstInstallmentDate(contract.firstInstallmentDate ? new Date(contract.firstInstallmentDate) : undefined);
+      // Mesma conversão de antes (o cast não muda o comportamento em execução).
+      const asDateInput = (v: ContractDateValue) => new Date(v as string | number | Date);
+      setStartDate(contract.startDate ? asDateInput(contract.startDate) : undefined);
+      setEndDate(contract.endDate ? asDateInput(contract.endDate) : undefined);
+      setFirstInstallmentDate(contract.firstInstallmentDate ? asDateInput(contract.firstInstallmentDate) : undefined);
       setItems(
         contract.items?.length
-          ? contract.items.map((i: any) => ({
+          ? contract.items.map((i) => ({
               equipmentId: i.equipmentId || "",
               quantity: i.quantity || 1,
               billingType: i.billingType || "Mensal",
@@ -83,10 +111,12 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
       setCostCenterId(contract.costCenterId || "");
       setChartOfAccountId(contract.chartOfAccountId || "");
       setBankAccountId(contract.bankAccountId || "");
+    } else if (duplicateFrom) {
+      applyDuplicatedValues(duplicateFrom);
     } else {
       resetForm();
     }
-  }, [contract, open]);
+  }, [contract, duplicateFrom, open]);
 
   const resetForm = () => {
     setClientId("");
@@ -188,7 +218,11 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
           costCenterId,
           chartOfAccountId,
           bankAccountId,
-        }, { contractNumber: contractNumber.value, suggestedId: contractNumber.suggestedId });
+        }, {
+          contractNumber: contractNumber.value,
+          suggestedId: contractNumber.suggestedId,
+          duplicatedFromContractId,
+        });
         toast({ title: `Contrato ${created.id} gerado com sucesso!` });
       }
       onOpenChange(false);
@@ -212,17 +246,32 @@ export function AddContractDialog({ open, onOpenChange, contract }: AddContractD
         <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {isEditing ? "Editar Contrato" : "Criar Novo Contrato de Locação"}{" "}
+              {isEditing ? "Editar Contrato" : isDuplicating ? "Duplicar Contrato" : "Criar Novo Contrato de Locação"}{" "}
               {isEditing && <span className="text-muted-foreground font-normal">- {contract.id}</span>}
             </DialogTitle>
             <DialogDescription>
               {isEditing
                 ? "Edite os dados do contrato."
-                : "Preencha os dados abaixo para gerar um novo contrato. O valor será calculado automaticamente e lançado no financeiro."}
+                : isDuplicating
+                  ? "Os dados comerciais foram copiados do contrato original. Nada é gravado até você salvar."
+                  : "Preencha os dados abaixo para gerar um novo contrato. O valor será calculado automaticamente e lançado no financeiro."}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-6">
+            {isDuplicating && (
+              <div
+                role="status"
+                data-testid="duplicating-contract-banner"
+                className="flex items-start gap-2 rounded-lg border border-primary/20 bg-primary/10 p-3 text-sm"
+              >
+                <Copy className="mt-0.5 h-4 w-4 shrink-0" />
+                <span className="font-medium">
+                  {duplicatingContractMessage(duplicatedFromContractId || duplicateFrom?.id || "")}
+                </span>
+              </div>
+            )}
+
             {!isEditing && <ContractNumberField state={contractNumber} disabled={loading} />}
 
             {/* Client */}
